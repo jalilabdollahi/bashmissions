@@ -1,0 +1,32 @@
+id: 75
+module: 4
+module_name: conditionals
+module_display: Conditionals
+title: Ternary-Style One-Liner
+difficulty: beginner
+xp: 50
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 75: Ternary-Style One-Liner
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 75: Ternary-Style One-Liner | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 75: Ternary-Style One-Liner | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`[[ cond ]] && true || false`'
+scaffold: true

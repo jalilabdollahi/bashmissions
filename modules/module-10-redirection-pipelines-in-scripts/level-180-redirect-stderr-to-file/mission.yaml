@@ -1,0 +1,32 @@
+id: 180
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Redirection & Pipelines in Scripts
+title: Redirect stderr to File
+difficulty: intermediate
+xp: 125
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 180: Redirect stderr to
+  File | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 180: Redirect stderr to File | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 180: Redirect stderr to File | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`2>`'
+scaffold: true

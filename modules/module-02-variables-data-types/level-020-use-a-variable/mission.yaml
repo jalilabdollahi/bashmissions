@@ -1,0 +1,32 @@
+id: 20
+module: 2
+module_name: variables-data-types
+module_display: Variables & Data Types
+title: Use a Variable
+difficulty: beginner
+xp: 50
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 20: Use a Variable | <arg1>
+  | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 20: Use a Variable | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 20: Use a Variable | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`$var` and `${var}`'
+scaffold: true

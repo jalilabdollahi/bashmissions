@@ -1,0 +1,33 @@
+id: 72
+module: 4
+module_name: conditionals
+module_display: Conditionals
+title: Compare File Ages
+difficulty: beginner
+xp: 70
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 72: Compare File Ages
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 72: Compare File Ages | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 72: Compare File Ages | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`-nt`'
+- '`-ot`'
+scaffold: true

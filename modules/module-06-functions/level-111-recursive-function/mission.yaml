@@ -1,0 +1,32 @@
+id: 111
+module: 6
+module_name: functions
+module_display: Functions
+title: Recursive Function
+difficulty: intermediate
+xp: 135
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 111: Recursive Function
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 111: Recursive Function | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 111: Recursive Function | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- factorial
+scaffold: true

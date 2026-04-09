@@ -1,0 +1,32 @@
+id: 162
+module: 9
+module_name: arrays
+module_display: Arrays
+title: Remove Element
+difficulty: intermediate
+xp: 145
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 162: Remove Element |
+  <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 162: Remove Element | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 162: Remove Element | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`unset arr[i]`'
+scaffold: true

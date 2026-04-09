@@ -1,0 +1,32 @@
+id: 187
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Redirection & Pipelines in Scripts
+title: Here-String
+difficulty: intermediate
+xp: 145
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 187: Here-String | <arg1>
+  | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 187: Here-String | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 187: Here-String | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`cmd <<< "string"`'
+scaffold: true

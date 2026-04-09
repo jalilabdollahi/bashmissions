@@ -1,0 +1,38 @@
+id: 479
+module: 26
+module_name: war-games-mega-scripts
+module_display: 'War Games: Mega Scripts'
+title: The Distributed Lock
+difficulty: expert
+xp: 415
+objective: 'Write `solution.sh` for the mission `The Distributed Lock`.
+
+  When passed an existing input file, print `the-distributed-lock:479:expert:<mode>`
+  where `<mode>` is `ok` by default or the second argument.
+
+  If the input file does not exist, print nothing and exit 1.
+
+  For expert levels, treat the fixture data as the script''s working input.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: the-distributed-lock:479:expert:ok
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - audit
+  expected_stdout: the-distributed-lock:479:expert:audit
+  expected_exit: 0
+  comparison: exact
+- args:
+  - missing.txt
+  expected_stdout: ''
+  expected_exit: 1
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- flock across shared filesystem
+scaffold: false

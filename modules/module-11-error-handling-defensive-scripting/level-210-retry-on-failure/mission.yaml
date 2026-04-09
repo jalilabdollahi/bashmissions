@@ -1,0 +1,32 @@
+id: 210
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Error Handling & Defensive Scripting
+title: Retry on Failure
+difficulty: intermediate
+xp: 125
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 210: Retry on Failure
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 210: Retry on Failure | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 210: Retry on Failure | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- loop with counter
+scaffold: true

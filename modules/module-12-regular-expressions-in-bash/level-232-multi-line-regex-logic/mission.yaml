@@ -1,0 +1,32 @@
+id: 232
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Regular Expressions in Bash
+title: Multi-line Regex Logic
+difficulty: intermediate
+xp: 145
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 232: Multi-line Regex
+  Logic | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 232: Multi-line Regex Logic | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 232: Multi-line Regex Logic | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- line-by-line state machine
+scaffold: true

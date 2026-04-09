@@ -1,0 +1,1 @@
+Start with a bash shebang and read the mission carefully. This level focuses on Framework: register + run + report test cases.

@@ -1,0 +1,32 @@
+id: 329
+module: 18
+module_name: advanced-functions-patterns
+module_display: Advanced Functions & Patterns
+title: Function Exists Check
+difficulty: advanced
+xp: 265
+objective: 'Write `solution.sh` to inspect the input path given as the first argument.
+
+  If the file exists, print `function-exists-check:329:processed:3`.
+
+  If a second argument is provided and equals `verbose`, append `:verbose`.
+
+  If the file is missing, print nothing and exit 1.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: function-exists-check:329:processed:3
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - verbose
+  expected_stdout: function-exists-check:329:processed:3:verbose
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`declare -F func`'
+scaffold: false

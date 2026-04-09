@@ -1,0 +1,32 @@
+id: 221
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Regular Expressions in Bash
+title: Match a Date
+difficulty: intermediate
+xp: 135
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 221: Match a Date | <arg1>
+  | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 221: Match a Date | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 221: Match a Date | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- YYYY-MM-DD regex
+scaffold: true

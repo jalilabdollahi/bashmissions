@@ -1,0 +1,32 @@
+id: 205
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Error Handling & Defensive Scripting
+title: Trap on SIGINT
+difficulty: intermediate
+xp: 125
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 205: Trap on SIGINT |
+  <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 205: Trap on SIGINT | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 205: Trap on SIGINT | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- graceful Ctrl-C
+scaffold: true

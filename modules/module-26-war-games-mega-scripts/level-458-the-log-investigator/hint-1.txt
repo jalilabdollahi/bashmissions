@@ -1,0 +1,1 @@
+Start with a bash shebang and read the mission carefully. This level focuses on Parse multi-format logs, extract incidents, generate report.

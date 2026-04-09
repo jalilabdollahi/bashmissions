@@ -1,0 +1,32 @@
+id: 128
+module: 7
+module_name: string-manipulation
+module_display: String Manipulation
+title: Replace First Match
+difficulty: intermediate
+xp: 155
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 128: Replace First Match
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 128: Replace First Match | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 128: Replace First Match | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`${str/old/new}`'
+scaffold: true

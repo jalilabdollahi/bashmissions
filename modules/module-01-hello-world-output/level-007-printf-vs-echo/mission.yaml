@@ -1,0 +1,32 @@
+id: 7
+module: 1
+module_name: hello-world-output
+module_display: Hello World & Output
+title: printf vs echo
+difficulty: beginner
+xp: 70
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 7: printf vs echo | <arg1>
+  | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 7: printf vs echo | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 7: printf vs echo | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- choosing the right output tool
+scaffold: true

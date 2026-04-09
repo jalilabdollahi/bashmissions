@@ -1,0 +1,38 @@
+id: 441
+module: 25
+module_name: system-automation-scripts
+module_display: System Automation Scripts
+title: User Deprovisioning Script
+difficulty: expert
+xp: 385
+objective: 'Write `solution.sh` for the mission `User Deprovisioning Script`.
+
+  When passed an existing input file, print `user-deprovisioning-script:441:expert:<mode>`
+  where `<mode>` is `ok` by default or the second argument.
+
+  If the input file does not exist, print nothing and exit 1.
+
+  For expert levels, treat the fixture data as the script''s working input.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: user-deprovisioning-script:441:expert:ok
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - audit
+  expected_stdout: user-deprovisioning-script:441:expert:audit
+  expected_exit: 0
+  comparison: exact
+- args:
+  - missing.txt
+  expected_stdout: ''
+  expected_exit: 1
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- lock + archive home
+scaffold: false

@@ -1,0 +1,32 @@
+id: 267
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing in Scripts
+title: sed In-Place Edit
+difficulty: advanced
+xp: 245
+objective: 'Write `solution.sh` to inspect the input path given as the first argument.
+
+  If the file exists, print `sed-in-place-edit:267:processed:3`.
+
+  If a second argument is provided and equals `verbose`, append `:verbose`.
+
+  If the file is missing, print nothing and exit 1.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: sed-in-place-edit:267:processed:3
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - verbose
+  expected_stdout: sed-in-place-edit:267:processed:3:verbose
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`sed -i`'
+scaffold: false

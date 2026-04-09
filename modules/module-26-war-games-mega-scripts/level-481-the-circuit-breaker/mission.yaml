@@ -1,0 +1,38 @@
+id: 481
+module: 26
+module_name: war-games-mega-scripts
+module_display: 'War Games: Mega Scripts'
+title: The Circuit Breaker
+difficulty: expert
+xp: 385
+objective: 'Write `solution.sh` for the mission `The Circuit Breaker`.
+
+  When passed an existing input file, print `the-circuit-breaker:481:expert:<mode>`
+  where `<mode>` is `ok` by default or the second argument.
+
+  If the input file does not exist, print nothing and exit 1.
+
+  For expert levels, treat the fixture data as the script''s working input.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: the-circuit-breaker:481:expert:ok
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - audit
+  expected_stdout: the-circuit-breaker:481:expert:audit
+  expected_exit: 0
+  comparison: exact
+- args:
+  - missing.txt
+  expected_stdout: ''
+  expected_exit: 1
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- State machine for API calls
+scaffold: false

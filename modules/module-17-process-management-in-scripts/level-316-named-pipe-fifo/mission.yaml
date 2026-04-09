@@ -1,0 +1,32 @@
+id: 316
+module: 17
+module_name: process-management-in-scripts
+module_display: Process Management in Scripts
+title: Named Pipe (FIFO)
+difficulty: advanced
+xp: 235
+objective: 'Write `solution.sh` to inspect the input path given as the first argument.
+
+  If the file exists, print `named-pipe-fifo:316:processed:3`.
+
+  If a second argument is provided and equals `verbose`, append `:verbose`.
+
+  If the file is missing, print nothing and exit 1.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: named-pipe-fifo:316:processed:3
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - verbose
+  expected_stdout: named-pipe-fifo:316:processed:3:verbose
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`mkfifo`'
+scaffold: false

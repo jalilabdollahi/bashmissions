@@ -1,0 +1,32 @@
+id: 107
+module: 6
+module_name: functions
+module_display: Functions
+title: Local Variables
+difficulty: intermediate
+xp: 145
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 107: Local Variables |
+  <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 107: Local Variables | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 107: Local Variables | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`local var=value`'
+scaffold: true

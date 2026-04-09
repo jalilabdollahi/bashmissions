@@ -1,0 +1,32 @@
+id: 191
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Redirection & Pipelines in Scripts
+title: Process Substitution Output
+difficulty: intermediate
+xp: 135
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 191: Process Substitution
+  Output | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 191: Process Substitution Output | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 191: Process Substitution Output | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`cmd >(other_cmd)`'
+scaffold: true

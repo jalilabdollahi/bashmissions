@@ -1,0 +1,32 @@
+id: 56
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Getopts with Required Option
+difficulty: beginner
+xp: 60
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 56: Getopts with Required
+  Option | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 56: Getopts with Required Option | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 56: Getopts with Required Option | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- error on missing optarg
+scaffold: true

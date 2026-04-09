@@ -1,0 +1,32 @@
+id: 435
+module: 24
+module_name: data-processing-scripts
+module_display: Data Processing Scripts
+title: Merge Files by Key
+difficulty: advanced
+xp: 225
+objective: 'Write `solution.sh` to inspect the input path given as the first argument.
+
+  If the file exists, print `merge-files-by-key:435:processed:3`.
+
+  If a second argument is provided and equals `verbose`, append `:verbose`.
+
+  If the file is missing, print nothing and exit 1.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: merge-files-by-key:435:processed:3
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - verbose
+  expected_stdout: merge-files-by-key:435:processed:3:verbose
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- multi-file join
+scaffold: false

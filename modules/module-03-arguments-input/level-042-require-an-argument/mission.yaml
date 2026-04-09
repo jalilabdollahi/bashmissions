@@ -1,0 +1,33 @@
+id: 42
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Require an Argument
+difficulty: beginner
+xp: 70
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 42: Require an Argument
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 42: Require an Argument | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 42: Require an Argument | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- check `$#`
+- exit if missing
+scaffold: true

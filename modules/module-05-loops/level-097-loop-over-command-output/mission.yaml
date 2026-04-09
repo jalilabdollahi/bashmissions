@@ -1,0 +1,32 @@
+id: 97
+module: 5
+module_name: loops
+module_display: Loops
+title: Loop over Command Output
+difficulty: intermediate
+xp: 145
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 97: Loop over Command
+  Output | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 97: Loop over Command Output | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 97: Loop over Command Output | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`while IFS= read -r line < <(cmd)`'
+scaffold: true

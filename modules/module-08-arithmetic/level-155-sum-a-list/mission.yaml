@@ -1,0 +1,32 @@
+id: 155
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Sum a List
+difficulty: intermediate
+xp: 125
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 155: Sum a List | <arg1>
+  | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 155: Sum a List | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 155: Sum a List | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- loop accumulator
+scaffold: true

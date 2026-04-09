@@ -1,0 +1,32 @@
+id: 81
+module: 5
+module_name: loops
+module_display: Loops
+title: C-Style for Loop
+difficulty: beginner
+xp: 60
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 81: C-Style for Loop |
+  <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 81: C-Style for Loop | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 81: C-Style for Loop | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`for ((i=0;i<10;i++))`'
+scaffold: true

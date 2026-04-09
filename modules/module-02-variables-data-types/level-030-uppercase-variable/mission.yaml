@@ -1,0 +1,32 @@
+id: 30
+module: 2
+module_name: variables-data-types
+module_display: Variables & Data Types
+title: Uppercase Variable
+difficulty: beginner
+xp: 50
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 30: Uppercase Variable
+  | <arg1> | <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 30: Uppercase Variable | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 30: Uppercase Variable | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- '`${var^^}`'
+scaffold: true

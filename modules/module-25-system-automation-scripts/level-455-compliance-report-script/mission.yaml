@@ -1,0 +1,39 @@
+id: 455
+module: 25
+module_name: system-automation-scripts
+module_display: System Automation Scripts
+title: Compliance Report Script
+difficulty: expert
+xp: 375
+objective: 'Write `solution.sh` for the mission `Compliance Report Script`.
+
+  When passed an existing input file, print `compliance-report-script:455:expert:<mode>`
+  where `<mode>` is `ok` by default or the second argument.
+
+  If the input file does not exist, print nothing and exit 1.
+
+  For expert levels, treat the fixture data as the script''s working input.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - fixtures/data.txt
+  expected_stdout: compliance-report-script:455:expert:ok
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/data.txt
+  - audit
+  expected_stdout: compliance-report-script:455:expert:audit
+  expected_exit: 0
+  comparison: exact
+- args:
+  - missing.txt
+  expected_stdout: ''
+  expected_exit: 1
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- gather evidence
+- write report
+scaffold: false

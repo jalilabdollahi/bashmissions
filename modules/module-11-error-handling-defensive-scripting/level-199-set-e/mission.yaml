@@ -1,0 +1,32 @@
+id: 199
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Error Handling & Defensive Scripting
+title: set -e
+difficulty: intermediate
+xp: 165
+objective: 'Write `solution.sh` so it prints exactly `LEVEL 199: set -e | <arg1> |
+  <arg2>`.
+
+  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
+
+  Exit with status 0 on success.'
+expected_script_name: solution.sh
+test_cases:
+- args:
+  - alpha
+  - beta
+  expected_stdout: 'LEVEL 199: set -e | alpha | beta'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - spaces allowed
+  - '42'
+  expected_stdout: 'LEVEL 199: set -e | spaces allowed | 42'
+  expected_exit: 0
+  comparison: exact
+fixtures:
+- data.txt
+concepts:
+- abort on error
+scaffold: true
