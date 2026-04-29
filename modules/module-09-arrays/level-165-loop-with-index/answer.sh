@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 165: Loop with Index | %s | %s\n' "$1" "$2"
+colors=(red green blue)
+for i in "${!colors[@]}"; do
+  echo "$i:${colors[$i]}"
+done

@@ -5,24 +5,12 @@ module_display: Functions
 title: Function as Callback
 difficulty: intermediate
 xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 113: Function as Callback
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Pass a function name as a callback to another function. Use it to print
+  `HELLO`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 113: Function as Callback | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 113: Function as Callback | spaces allowed | 42'
+- args: []
+  expected_stdout: HELLO
   expected_exit: 0
   comparison: exact
 fixtures:

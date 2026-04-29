@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+read -r -s password < "$1"
+printf 'Password length: %s
+' "${#password}"

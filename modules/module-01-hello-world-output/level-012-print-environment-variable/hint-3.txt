@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+One `echo` call is enough: `echo "HOME=$HOME USER=$USER"`. The output will look like `HOME=/home/jalil USER=jalil`.

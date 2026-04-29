@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on return/exit from loop.
+Early exit means leaving the script or loop as soon as a condition is met.

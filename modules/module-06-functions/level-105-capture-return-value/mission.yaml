@@ -5,24 +5,11 @@ module_display: Functions
 title: Capture Return Value
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 105: Capture Return Value
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Call a function that returns exit code 7, capture `$?`, and print `code=7`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 105: Capture Return Value | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 105: Capture Return Value | spaces allowed | 42'
+- args: []
+  expected_stdout: code=7
   expected_exit: 0
   comparison: exact
 fixtures:

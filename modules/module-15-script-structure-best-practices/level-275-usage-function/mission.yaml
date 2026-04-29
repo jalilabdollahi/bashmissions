@@ -4,29 +4,21 @@ module_name: script-structure-best-practices
 module_display: Script Structure & Best Practices
 title: Usage Function
 difficulty: advanced
-xp: 225
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `usage-function:275:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 195
+objective: 'Create a `print_usage` function and call it for `--help` or missing input.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: usage-function:275:processed:3
+  expected_stdout: 'Usage: solution.sh <file>'
   expected_exit: 0
   comparison: exact
 - args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: usage-function:275:processed:3:verbose
+  - 'notes.txt'
+  expected_stdout: 'file=notes.txt'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- print_usage() with exit
-scaffold: false
+- 'print_usage() with exit'
+scaffold: true

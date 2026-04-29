@@ -1,20 +1,18 @@
 # Your First Script
 
-This level practices **`#!/bin/bash`, `echo`**.
+Great start. You created a minimal Bash script that prints an exact greeting.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+What this level reinforces:
 
-Focus on three things:
+- Shebang + executable script structure.
+- Safe shell defaults with `set -euo pipefail`.
+- Exact output matching, which is critical for automation tasks.
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+Example run:
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 1: Your First Script | alpha | beta
+./solution.sh
+# Hello, BashMissions!
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+This tiny pattern is the base for every later level.

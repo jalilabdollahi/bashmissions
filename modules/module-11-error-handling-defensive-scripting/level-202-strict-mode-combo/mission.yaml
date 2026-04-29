@@ -4,29 +4,17 @@ module_name: error-handling-defensive-scripting
 module_display: Error Handling & Defensive Scripting
 title: Strict Mode Combo
 difficulty: intermediate
-xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 202: Strict Mode Combo
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Enable strict mode and complete a guarded pipeline successfully.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 202: Strict Mode Combo | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 202: Strict Mode Combo | spaces allowed | 42'
+  - 'safe'
+  expected_stdout: 'strict=ok'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`set -euo pipefail`'
 scaffold: true

@@ -1,19 +1,26 @@
 # Guide for Print a Banner
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Use `printf` with a left-aligned, minimum-width field for the title.
+3. Surround it with `== ` and ` ==`, end with `\n`.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '17' 'Print a Banner' "$1" "$2"
+printf '== %-10s ==\n' "$1"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh hi          # == hi         ==
+./solution.sh banner      # == banner     ==
+./solution.sh BashMission # == BashMission ==   (overflows; spaces shrink to none)
+```
+
+Try `%10s` (no minus) to see right-aligned padding. Use `answer` if stuck.

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+text="$1"
+echo "${text^^}"

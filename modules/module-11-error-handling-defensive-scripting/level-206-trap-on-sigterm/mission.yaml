@@ -4,29 +4,16 @@ module_name: error-handling-defensive-scripting
 module_display: Error Handling & Defensive Scripting
 title: Trap on SIGTERM
 difficulty: intermediate
-xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 206: Trap on SIGTERM |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 165
+objective: 'Install a SIGTERM trap and trigger it in a subshell to print a graceful message.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 206: Trap on SIGTERM | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 206: Trap on SIGTERM | spaces allowed | 42'
+  expected_stdout: 'sigterm=handled'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- handle kill signal
+- 'handle kill signal'
 scaffold: true

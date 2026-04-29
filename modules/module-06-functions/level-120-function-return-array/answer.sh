@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 120: Function Return Array | %s | %s\n' "$1" "$2"
+make_values() {
+  printf '%s\n' alpha beta gamma
+}
+
+mapfile -t values < <(make_values)
+joined=$(IFS=,; echo "${values[*]}")
+echo "values=$joined"

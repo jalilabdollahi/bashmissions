@@ -1,13 +1,11 @@
 # Common Mistakes for Integer Variables
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 23: Integer Variables | alpha | beta`.
+- Assigning a non-numeric string to a `-i` variable: `n="hello"` silently sets `n=0` because `hello` is treated as an unset name in arithmetic. No error.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Forgetting the attribute is sticky. Once `declare -i n` is run, *every* later `n=...` is arithmetic — even one that's supposed to be a string assignment.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using `declare -i` in a function and expecting it to apply globally. Inside a function, `declare` defaults to **local** scope. Use `declare -gi` for global.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Assuming `declare -i` enables arithmetic on the right side of `=` for *all* variables. It only affects the variable being declared. `m="$n + 1"` (with `m` not `-i`) stores the literal string.
+
+- Spaces around the operator: `n += 10` is **not** assignment — it's a command call. The form is `n+=10` (no spaces).

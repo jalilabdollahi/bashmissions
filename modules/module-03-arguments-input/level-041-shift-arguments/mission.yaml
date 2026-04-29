@@ -5,24 +5,20 @@ module_display: Arguments & Input
 title: Shift Arguments
 difficulty: beginner
 xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 41: Shift Arguments |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use `shift` once to discard the first argument, then print the new `$1`
+  as `next: <arg>`. This shows how arguments move left after shifting.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 41: Shift Arguments | alpha | beta'
+  - skip
+  - keep
+  expected_stdout: 'next: keep'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 41: Shift Arguments | spaces allowed | 42'
+  - discard me
+  - spaces stay
+  expected_stdout: 'next: spaces stay'
   expected_exit: 0
   comparison: exact
 fixtures:

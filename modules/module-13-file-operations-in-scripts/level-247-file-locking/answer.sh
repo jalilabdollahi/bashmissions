@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='file-locking:247:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
+exec 9> job.lock
+if flock -n 9; then
+  echo "locked" > protected.txt
+  echo "lock=acquired"
+  cat protected.txt
 fi
-
-printf '%s\n' "$output"

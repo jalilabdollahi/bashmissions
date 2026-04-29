@@ -4,29 +4,22 @@ module_name: arrays
 module_display: Arrays
 title: Search in Array
 difficulty: intermediate
-xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 168: Search in Array |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 135
+objective: 'Search a small array for the argument and print found when it is present, otherwise missing.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 168: Search in Array | alpha | beta'
+  - 'beta'
+  expected_stdout: 'found'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 168: Search in Array | spaces allowed | 42'
+  - 'delta'
+  expected_stdout: 'missing'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- loop + grep
+- 'loop + grep'
 scaffold: true

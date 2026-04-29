@@ -5,24 +5,22 @@ module_display: Conditionals
 title: Test Non-Empty String
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 63: Test Non-Empty String
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use `-n` to test whether the first argument is non-empty. Print `present`
+  when it has text, otherwise print `missing`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 63: Test Non-Empty String | alpha | beta'
+  - hello
+  expected_stdout: present
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 63: Test Non-Empty String | spaces allowed | 42'
+  - ''
+  expected_stdout: missing
+  expected_exit: 0
+  comparison: exact
+- args: []
+  expected_stdout: missing
   expected_exit: 0
   comparison: exact
 fixtures:

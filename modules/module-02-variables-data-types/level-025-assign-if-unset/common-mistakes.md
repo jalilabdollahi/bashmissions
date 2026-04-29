@@ -1,13 +1,13 @@
 # Common Mistakes for Assign If Unset
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 25: Assign If Unset | alpha | beta`.
+- Trying `${1:=foo}` on a positional parameter. Bash rejects it. Always copy to a named variable first.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Confusing `:=` with `:-`. They look similar; one assigns, one doesn't.
+  - `${var:-x}` — temporary substitution; var unchanged.
+  - `${var:=x}` — substitution **and** permanent assignment.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting the leading `:` in `: "${name:=guest}"`. Without it, the expansion runs as the first word of a command, and Bash tries to execute the resulting string as a command name.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Using it on a `readonly` variable. The expansion fails because `:=` performs an assignment.
+
+- Assuming `${var:=x}` evaluates `x` lazily. The default expression is evaluated only when needed, but it's still a normal Bash expression — beware of side effects in there.

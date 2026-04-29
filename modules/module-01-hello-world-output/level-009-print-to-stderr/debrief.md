@@ -1,20 +1,19 @@
 # Print to Stderr
 
-This level practices **`echo >&2`**.
+This level teaches redirecting output to stderr using `>&2`.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+In shell scripts, stdout (fd 1) is for normal output and stderr (fd 2) is for errors and diagnostics. Tools that pipe your script's output only read stdout — stderr goes elsewhere.
 
-Focus on three things:
+Key points:
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
+- `echo "msg" >&2` — sends to stderr, nothing appears on stdout.
+- The validator checks that stdout is empty and exit code is 0.
 
-A tiny working example looks like this:
+Example run:
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 9: Print to Stderr | alpha | beta
+./solution.sh "disk full"
+# (stdout is empty; stderr shows: Error: disk full)
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Using stderr for errors is a Unix convention that makes scripts composable with pipes.

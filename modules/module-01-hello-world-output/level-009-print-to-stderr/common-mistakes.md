@@ -1,13 +1,13 @@
 # Common Mistakes for Print to Stderr
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 9: Print to Stderr | alpha | beta`.
+- Printing to stdout instead of stderr.
+  `echo "Error: $1"` without `>&2` will fail — the validator expects empty stdout.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Forgetting `>&2` after the echo command.
+  The redirection must come at the end: `echo "Error: $1" >&2`.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using `2>&1` instead of `>&2`.
+  `2>&1` redirects stderr TO stdout (the opposite direction).
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Getting the prefix wrong.
+  The required format is `Error: <arg1>` — include the colon and space.

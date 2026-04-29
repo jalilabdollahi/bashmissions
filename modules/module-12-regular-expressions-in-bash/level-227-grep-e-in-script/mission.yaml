@@ -5,28 +5,16 @@ module_display: Regular Expressions in Bash
 title: grep -E in Script
 difficulty: intermediate
 xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 227: grep -E in Script
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use `grep -E` to print only log lines that are ERROR or WARN.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 227: grep -E in Script | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 227: grep -E in Script | spaces allowed | 42'
+  expected_stdout: 'WARN: disk
+ERROR: network'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- extended regex in scripts
+- 'extended regex in scripts'
 scaffold: true

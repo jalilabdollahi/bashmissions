@@ -1,19 +1,26 @@
 # Guide for Colorized Output
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Use `printf` so backslash escapes get interpreted.
+3. Emit `\033[32m` (green on), then `OK`, then `\033[0m` (reset), then `\n`.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '16' 'Colorized Output' "$1" "$2"
+printf '\033[32mOK\033[0m\n'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh        # OK in green if your terminal supports color
+./solution.sh | cat -v
+# ^[[32mOK^[[0m       # raw escapes when piped
+```
+
+Try also `printf '\033[1;31m%s\033[0m\n' 'BOLD RED'` to see attributes combined. Use `answer` if stuck.

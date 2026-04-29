@@ -1,13 +1,11 @@
 # Common Mistakes for Script Exit Code
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 11: Script Exit Code | alpha | beta`.
+- Forgetting `exit "$1"` — without it the script ends with the status of the last command (typically 0), so the failure tests fail silently.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Hard-coding the exit value: `exit 1` always returns 1 and won't pass the test that runs with `7`.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Calling `exit` *before* the `echo` line. Anything after `exit` never runs, so stdout will be empty.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Treating `$1` as a string in arithmetic: `exit "$1"` is fine, but `exit $(($1))` will fail when the value isn't strictly numeric.
+
+- Confusing exit code with stdout. Exit code is read from `$?`, not parsed from output. The runner checks both independently.

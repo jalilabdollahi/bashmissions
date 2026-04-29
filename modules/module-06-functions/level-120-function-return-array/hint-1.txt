@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on returning multiple values.
+Functions can return multiple values by printing multiple lines.

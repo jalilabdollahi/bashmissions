@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${1:-default}`.
+The expansion ${1:-guest} means use $1 unless it is missing or empty.

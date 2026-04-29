@@ -5,28 +5,16 @@ module_display: Hello World & Output
 title: Print Current Date
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 13: Print Current Date
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print `today is YYYY-MM-DD` using the current date. Use command substitution with `date +%Y-%m-%d` — do not hard-code a date.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 13: Print Current Date | alpha | beta'
+- args: []
+  expected_stdout: 'today is \d{4}-\d{2}-\d{2}'
   expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 13: Print Current Date | spaces allowed | 42'
-  expected_exit: 0
-  comparison: exact
+  comparison: regex
 fixtures:
 - data.txt
 concepts:
-- '`$(date)` command substitution'
+- '`$(...)` command substitution'
+- '`date` with format strings'
 scaffold: true

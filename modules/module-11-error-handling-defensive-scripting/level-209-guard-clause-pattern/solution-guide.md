@@ -1,19 +1,17 @@
-# Guide for Guard Clause Pattern
+# Solution Guide: Guard Clause Pattern
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on early return on bad input.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '209' 'Guard Clause Pattern' "$1" "$2"
+value=${1:-}
+if [[ -z $value ]]; then
+  echo "missing=value"
+  exit 0
+fi
+echo "value=$value"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the failure-handling pattern while keeping the checker output deterministic.

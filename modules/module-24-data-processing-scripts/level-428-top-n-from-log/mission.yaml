@@ -4,29 +4,17 @@ module_name: data-processing-scripts
 module_display: Data Processing Scripts
 title: Top N from Log
 difficulty: advanced
-xp: 255
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `top-n-from-log:428:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 240
+objective: 'Print the top two records from a count file.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: top-n-from-log:428:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: top-n-from-log:428:processed:3:verbose
+  expected_stdout: '9 api
+7 db'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+- counts.txt
 concepts:
-- sort + head
-scaffold: false
+- 'sort + head'
+scaffold: true

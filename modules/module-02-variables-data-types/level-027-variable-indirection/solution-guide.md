@@ -1,19 +1,29 @@
 # Guide for Variable Indirection
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Define `COLOR_RED="red"` and `COLOR_BLUE="blue"`.
+3. Read the lookup key from `$1`.
+4. Use `${!key}` to dereference and `echo` it.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '27' 'Variable Indirection' "$1" "$2"
+COLOR_RED="red"
+COLOR_BLUE="blue"
+key="$1"
+echo "${!key}"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh COLOR_RED    # red
+./solution.sh COLOR_BLUE   # blue
+```
+
+Try `./solution.sh COLOR_GREEN` and watch `set -u` abort because `${!key}` resolves to an unset variable. Use `answer` if stuck.

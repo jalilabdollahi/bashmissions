@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 108: Default Argument in Function | %s | %s\n' "$1" "$2"
+greet() {
+  local name="${1:-guest}"
+  echo "Hello, $name"
+}
+
+greet "${1:-}"

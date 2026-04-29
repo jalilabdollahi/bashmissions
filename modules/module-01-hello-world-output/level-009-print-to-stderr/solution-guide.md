@@ -3,9 +3,9 @@
 Try building the script in this order:
 
 1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+2. Read the first argument from `$1`.
+3. Print `Error: <arg1>` redirected to stderr with `>&2`.
+4. Let stdout remain empty — nothing should be printed there.
 
 A working shape looks like this:
 
@@ -13,7 +13,9 @@ A working shape looks like this:
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '9' 'Print to Stderr' "$1" "$2"
+echo "Error: $1" >&2
 ```
+
+The `>&2` redirects the echo output from stdout (fd 1) to stderr (fd 2).
 
 Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

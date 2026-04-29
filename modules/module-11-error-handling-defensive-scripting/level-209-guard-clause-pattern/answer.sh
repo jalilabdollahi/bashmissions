@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 209: Guard Clause Pattern | %s | %s\n' "$1" "$2"
+value=${1:-}
+if [[ -z $value ]]; then
+  echo "missing=value"
+  exit 0
+fi
+echo "value=$value"

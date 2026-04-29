@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+for file in fixtures/*.txt; do
+  basename "$file"
+done

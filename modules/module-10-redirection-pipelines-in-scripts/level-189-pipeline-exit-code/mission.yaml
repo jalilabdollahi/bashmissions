@@ -4,29 +4,16 @@ module_name: redirection-pipelines-in-scripts
 module_display: Redirection & Pipelines in Scripts
 title: Pipeline Exit Code
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 189: Pipeline Exit Code
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Run a pipeline and print the exit status of each command with PIPESTATUS.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 189: Pipeline Exit Code | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 189: Pipeline Exit Code | spaces allowed | 42'
+  expected_stdout: 'statuses=1 0'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`${PIPESTATUS[@]}`'
 scaffold: true

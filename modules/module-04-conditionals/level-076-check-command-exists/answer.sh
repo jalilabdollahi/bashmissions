@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 76: Check Command Exists | %s | %s\n' "$1" "$2"
+if command -v "$1" >/dev/null 2>&1; then
+  echo "found"
+else
+  echo "missing"
+fi

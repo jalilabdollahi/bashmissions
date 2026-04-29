@@ -1,26 +1,16 @@
-# Guide for Per-User Config
+# Solution Guide: Per-User Config
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `per-user-config:346:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `~/.config/app/config`.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='per-user-config:346:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+HOME=$PWD/home
+config_dir="$HOME/.config/app"
+mkdir -p "$config_dir"
+echo "theme=dark" > "$config_dir/config"
+cat "$config_dir/config"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the pattern in a small, deterministic way suitable for the mission runner.

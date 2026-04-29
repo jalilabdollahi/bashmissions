@@ -5,30 +5,27 @@ module_display: Variables & Data Types
 title: Lowercase Variable
 difficulty: beginner
 xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 31: Lowercase Variable
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: "Read `$1` and print it fully lowercased using `${var,,}`. Parameter expansion only \u2014 no `tr`."
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 31: Lowercase Variable | alpha | beta'
+  - HELLO
+  expected_stdout: hello
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 31: Lowercase Variable | spaces allowed | 42'
+  - MiXeD CaSe
+  expected_stdout: mixed case
+  expected_exit: 0
+  comparison: exact
+- args:
+  - BASH-4
+  expected_stdout: bash-4
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`${var'
-- ''
-- '}`'
+- '`${var,,}`'
+- case conversion
 scaffold: true

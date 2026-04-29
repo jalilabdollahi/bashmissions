@@ -1,13 +1,13 @@
 # Common Mistakes for Remove Suffix
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 35: Remove Suffix | alpha | beta`.
+- Mixing up `%` (suffix) and `#` (prefix). Mnemonic: `#` is at the start of `#!/bin/bash`, `%` looks like the end of a sentence (sort of — it's a stretch; just memorise it).
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Confusing single `%` (shortest) with double `%%` (longest). For `archive.tar.gz`:
+  - `${file%.*}` → `archive.tar` (drop only `.gz`)
+  - `${file%%.*}` → `archive` (drop everything from the first dot)
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Treating the pattern as regex. `${var%.tar.gz}` matches the **literal** suffix `.tar.gz`, not "tar followed by gz".
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Using `${var%/*}` and being surprised when it doesn't strip *everything* after the last slash on a string with no slash. The pattern doesn't match, so the value is unchanged — that's the documented behaviour.
+
+- Forgetting these patterns are **anchored**: there's no implicit `*` at the start or end. `${var%.bak}` matches only when the value literally ends with `.bak`.

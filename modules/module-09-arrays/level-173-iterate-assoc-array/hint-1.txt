@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `for k in "${!map[@]}"`.
+Use the array concept from the curriculum for this level: `for k in "${!map[@]}"`.

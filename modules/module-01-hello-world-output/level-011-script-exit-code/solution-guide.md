@@ -1,19 +1,27 @@
 # Guide for Script Exit Code
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Print `exit code: $1` to stdout — `echo "exit code: $1"` works.
+3. Call `exit "$1"` so the script ends with the status the user passed in.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '11' 'Script Exit Code' "$1" "$2"
+echo "exit code: $1"
+exit "$1"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Verify by hand:
+
+```bash
+./solution.sh 0; echo "got $?"   # got 0
+./solution.sh 1; echo "got $?"   # got 1
+./solution.sh 7; echo "got $?"   # got 7
+```
+
+Try writing it yourself first. If you are still stuck, run `answer` to see the reference solution.

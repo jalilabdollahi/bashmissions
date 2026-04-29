@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 168: Search in Array | %s | %s\n' "$1" "$2"
+needle=${1:-}
+items=(alpha beta gamma)
+result=missing
+for item in "${items[@]}"; do
+  if printf '%s\n' "$item" | grep -qx -- "$needle"; then
+    result=found
+    break
+  fi
+done
+echo "$result"

@@ -1,19 +1,18 @@
-# Guide for Trap on ERR
+# Solution Guide: Trap on ERR
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on log which command failed.
 
 ```bash
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL %s: %s | %s | %s\n' '204' 'Trap on ERR' "$1" "$2"
+cat > err-child.sh <<'CHILD'
+#!/usr/bin/env bash
+set -Ee
+trap 'echo "err=handled"' ERR
+false
+CHILD
+bash err-child.sh || true
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The child script enables `set -Ee`, installs an `ERR` trap, and then runs a failing command. The parent uses `|| true` so the mission can show the trap output without failing the whole checker run.

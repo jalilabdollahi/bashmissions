@@ -1,19 +1,20 @@
 # Guide for Replace First Match
 
-Try building the script in this order:
+Goal: Replace only the first `-` in the first argument with `_` using `${str/-/_}`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Store the input string in a variable.
+2. Apply the string operation from this concept: `${str/old/new}`.
+3. Quote input assignments so spaces remain part of the string.
+4. Print exactly the transformed value or classification requested by the mission.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '128' 'Replace First Match' "$1" "$2"
+str="$1"
+echo "${str/-/_}"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

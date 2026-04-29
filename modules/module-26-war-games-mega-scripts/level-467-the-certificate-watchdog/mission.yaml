@@ -1,40 +1,21 @@
 id: 467
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: War Games: Mega Scripts
 title: The Certificate Watchdog
 difficulty: expert
-xp: 395
-objective: 'Write `solution.sh` for the mission `The Certificate Watchdog`.
-
-  When passed an existing input file, print `the-certificate-watchdog:467:expert:<mode>`
-  where `<mode>` is `ok` by default or the second argument.
-
-  If the input file does not exist, print nothing and exit 1.
-
-  For expert levels, treat the fixture data as the script''s working input.'
+xp: 200
+objective: 'Implement the mega-script mission `The Certificate Watchdog` using structured steps, temp workspace, cleanup trap, arrays, functions, and reporting.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: the-certificate-watchdog:467:expert:ok
+  expected_stdout: 'mission=The Certificate Watchdog
+steps=5
+status=complete'
   expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - audit
-  expected_stdout: the-certificate-watchdog:467:expert:audit
-  expected_exit: 0
-  comparison: exact
-- args:
-  - missing.txt
-  expected_stdout: ''
-  expected_exit: 1
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- Check all certs
-- alert on expiry
-- auto-renew stub
-scaffold: false
+- 'combine 5+ Bash scripting concepts'
+scaffold: true

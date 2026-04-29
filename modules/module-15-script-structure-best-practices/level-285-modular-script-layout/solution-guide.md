@@ -1,26 +1,22 @@
-# Guide for Modular Script Layout
+# Solution Guide: Modular Script Layout
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `modular-script-layout:285:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on organize into sections.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
+APP_NAME="bashmissions"
 
-[ -f "$input" ] || exit 1
+format_name() {
+  printf '%s:%s\n' "$APP_NAME" "$1"
+}
 
-output='modular-script-layout:285:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+main() {
+  format_name "module-layout"
+}
+
+main "$@"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

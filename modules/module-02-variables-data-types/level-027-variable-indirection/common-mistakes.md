@@ -1,13 +1,11 @@
 # Common Mistakes for Variable Indirection
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 27: Variable Indirection | alpha | beta`.
+- Confusing `${!name}` with `$!`. `$!` is the PID of the most recent background process — completely unrelated.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Putting the `!` outside: `!${name}` is parsed as history expansion in interactive shells and a syntax error in scripts. The `!` must be **inside** the braces.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Trying to use it on the left side of an assignment: `${!name}=value` doesn't work. Use `declare -n alias=target; alias=value` instead.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Believing `${!name}` walks the chain forever. It performs **one** dereference: name of variable → value (which is taken as another name) → final value. It doesn't recurse further.
+
+- Quoting confusion: `echo "${!key}"` is fine. `echo '${!key}'` (single quotes) prints the literal `${!key}`.

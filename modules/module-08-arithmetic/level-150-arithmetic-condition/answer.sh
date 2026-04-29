@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 150: Arithmetic Condition | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+if (( a > b )); then
+  echo "greater"
+else
+  echo "not greater"
+fi

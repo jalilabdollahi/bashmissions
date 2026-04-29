@@ -1,26 +1,16 @@
-# Guide for Pivot Table in Bash
+# Solution Guide: Pivot Table in Bash
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `pivot-table-in-bash:430:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on assoc array aggregation.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='pivot-table-in-bash:430:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+declare -A sum
+while IFS=, read -r region value; do
+  [[ $region == region ]] && continue
+  sum[$region]=$(( ${sum[$region]:-0} + value ))
+done < fixtures/data.csv
+for key in "${!sum[@]}"; do echo "$key=${sum[$key]}"; done | sort
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script uses a small fixture so the data operation is visible and deterministic.

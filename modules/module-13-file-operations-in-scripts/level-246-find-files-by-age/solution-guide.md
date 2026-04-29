@@ -1,26 +1,14 @@
-# Guide for Find Files by Age
+# Solution Guide: Find Files by Age
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `find-files-by-age:246:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `find -mtime`.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='find-files-by-age:246:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+touch new.log
+touch -d '3 days ago' old.log
+find . -maxdepth 1 -type f -name '*.log' -mtime +1 -printf '%f\n' | sort
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script performs the file or text operation directly, then prints deterministic output for the checker.

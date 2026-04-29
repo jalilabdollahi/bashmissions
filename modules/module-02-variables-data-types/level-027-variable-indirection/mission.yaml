@@ -4,29 +4,23 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Variable Indirection
 difficulty: beginner
-xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 27: Variable Indirection
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 80
+objective: Define two variables `COLOR_RED=red` and `COLOR_BLUE=blue` in the script. Take a variable *name* in `$1` and print the value it points to using `${!key}` indirection.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 27: Variable Indirection | alpha | beta'
+  - COLOR_RED
+  expected_stdout: red
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 27: Variable Indirection | spaces allowed | 42'
+  - COLOR_BLUE
+  expected_stdout: blue
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`${!varname}`'
+- '`${!var}`'
+- indirect reference
 scaffold: true

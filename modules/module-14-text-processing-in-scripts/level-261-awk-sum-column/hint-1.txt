@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `awk '{sum+=$1} END{print sum}'`.
+Use the curriculum concept for this level: `awk '{sum+=$1} END{print sum}'`.

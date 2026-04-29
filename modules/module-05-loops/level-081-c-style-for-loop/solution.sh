@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+for ((i = 0; i < 3; i++)); do
+  echo "index=$i"
+done

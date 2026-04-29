@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+`{1..5}` expands before the loop starts.

@@ -4,29 +4,28 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Replace in String
 difficulty: beginner
-xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 36: Replace in String
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 70
+objective: Take `$1` and print it with **every** space replaced by a `-` using `${text// /-}`. Single-slash form (`${var/old/new}`) only replaces the first occurrence.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 36: Replace in String | alpha | beta'
+  - hello world
+  expected_stdout: hello-world
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 36: Replace in String | spaces allowed | 42'
+  - a b c d
+  expected_stdout: a-b-c-d
+  expected_exit: 0
+  comparison: exact
+- args:
+  - nospaces
+  expected_stdout: nospaces
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`${var//old/new}`'
+- string replacement
 scaffold: true

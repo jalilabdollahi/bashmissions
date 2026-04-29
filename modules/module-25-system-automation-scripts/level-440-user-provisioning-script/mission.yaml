@@ -4,35 +4,16 @@ module_name: system-automation-scripts
 module_display: System Automation Scripts
 title: User Provisioning Script
 difficulty: expert
-xp: 375
-objective: 'Write `solution.sh` for the mission `User Provisioning Script`.
-
-  When passed an existing input file, print `user-provisioning-script:440:expert:<mode>`
-  where `<mode>` is `ok` by default or the second argument.
-
-  If the input file does not exist, print nothing and exit 1.
-
-  For expert levels, treat the fixture data as the script''s working input.'
+xp: 230
+objective: 'Simulate user provisioning script safely in the workspace.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: user-provisioning-script:440:expert:ok
+  expected_stdout: 'user_provisioning_script=ok'
   expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - audit
-  expected_stdout: user-provisioning-script:440:expert:audit
-  expected_exit: 0
-  comparison: exact
-- args:
-  - missing.txt
-  expected_stdout: ''
-  expected_exit: 1
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- create users from CSV
-scaffold: false
+- 'create users from CSV'
+scaffold: true

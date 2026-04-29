@@ -5,24 +5,16 @@ module_display: Loops
 title: Parallel Loop Jobs
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 100: Parallel Loop Jobs
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Start three background jobs in a loop with `&`, wait for them with `wait`,
+  then print `job 1 done`, `job 2 done`, and `job 3 done` in order.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 100: Parallel Loop Jobs | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 100: Parallel Loop Jobs | spaces allowed | 42'
+- args: []
+  expected_stdout: 'job 1 done
+
+    job 2 done
+
+    job 3 done'
   expected_exit: 0
   comparison: exact
 fixtures:

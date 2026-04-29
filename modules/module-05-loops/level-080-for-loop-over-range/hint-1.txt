@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `for i in {1..10}`.
+Brace expansion can generate a fixed numeric range.

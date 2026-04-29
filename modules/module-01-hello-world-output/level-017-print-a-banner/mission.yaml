@@ -5,28 +5,24 @@ module_display: Hello World & Output
 title: Print a Banner
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 17: Print a Banner | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print a banner with the title from `$1`, padded to 10 columns. Format: `== <title>      ==` — left-aligned title in a 10-wide field, surrounded by `== ` and ` ==`. Use `printf` width specifiers, not manual spaces.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 17: Print a Banner | alpha | beta'
+- args: ['hi']
+  expected_stdout: '== hi         =='
   expected_exit: 0
   comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 17: Print a Banner | spaces allowed | 42'
+- args: ['banner']
+  expected_stdout: '== banner     =='
+  expected_exit: 0
+  comparison: exact
+- args: ['BashMission']
+  expected_stdout: '== BashMission =='
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- printf with padding
+- '`printf` width specifiers'
+- left/right alignment with `%-Ns` and `%Ns`
 scaffold: true

@@ -5,28 +5,28 @@ module_display: Conditionals
 title: File is Not Empty
 difficulty: beginner
 xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 71: File is Not Empty
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use `-s` to test whether the path in `$1` exists and has a size greater
+  than zero. Print `not empty` or `empty`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 71: File is Not Empty | alpha | beta'
+  - fixtures/data.txt
+  expected_stdout: not empty
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 71: File is Not Empty | spaces allowed | 42'
+  - fixtures/empty.txt
+  expected_stdout: empty
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/missing.txt
+  expected_stdout: empty
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
+- empty.txt
 concepts:
 - '`-s`'
 scaffold: true

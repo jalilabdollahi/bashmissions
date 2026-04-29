@@ -5,24 +5,12 @@ module_display: Functions
 title: Define a Function
 difficulty: intermediate
 xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 101: Define a Function
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Define a function named `greet` that prints `hello from function`, then
+  call it once.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 101: Define a Function | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 101: Define a Function | spaces allowed | 42'
+- args: []
+  expected_stdout: hello from function
   expected_exit: 0
   comparison: exact
 fixtures:

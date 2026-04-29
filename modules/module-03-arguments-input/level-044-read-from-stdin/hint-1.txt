@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `read var`.
+read -r value < "$1" reads one line without treating backslashes specially.

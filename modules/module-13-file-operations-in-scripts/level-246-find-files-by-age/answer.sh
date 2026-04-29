@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='find-files-by-age:246:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
-fi
-
-printf '%s\n' "$output"
+touch new.log
+touch -d '3 days ago' old.log
+find . -maxdepth 1 -type f -name '*.log' -mtime +1 -printf '%f\n' | sort

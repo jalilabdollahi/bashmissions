@@ -5,24 +5,18 @@ module_display: Conditionals
 title: Ternary-Style One-Liner
 difficulty: beginner
 xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 75: Ternary-Style One-Liner
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use a conditional one-liner with `[[ ... ]] && ... || ...`. Print `pass`
+  when the first argument is `ok`; otherwise print `fail`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 75: Ternary-Style One-Liner | alpha | beta'
+  - ok
+  expected_stdout: pass
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 75: Ternary-Style One-Liner | spaces allowed | 42'
+  - bad
+  expected_stdout: fail
   expected_exit: 0
   comparison: exact
 fixtures:

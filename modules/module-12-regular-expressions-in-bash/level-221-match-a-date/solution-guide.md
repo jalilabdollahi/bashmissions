@@ -1,19 +1,17 @@
-# Guide for Match a Date
+# Solution Guide: Match a Date
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on YYYY-MM-DD regex.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '221' 'Match a Date' "$1" "$2"
+date=${1:-}
+if [[ $date =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+  echo "date=valid"
+else
+  echo "date=invalid"
+fi
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script keeps the regex focused and prints only the deterministic result expected by the checker.

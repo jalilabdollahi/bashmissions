@@ -1,13 +1,6 @@
 # Common Mistakes for Trim Both Ends
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 135: Trim Both Ends | alpha | beta`.
-
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
-
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
-
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Forgetting that Bash substring offsets are zero-based.
+- Mixing up shortest and longest prefix/suffix removal (`#` vs `##`, `%` vs `%%`).
+- Quoting glob patterns inside `[[ ]]` when pattern matching is intended.
+- Using external commands when Bash parameter expansion can do the string operation directly.

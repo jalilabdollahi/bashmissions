@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `$@` vs `$*`.
+Use for arg in "$@" to preserve each argument exactly, even when it contains spaces.

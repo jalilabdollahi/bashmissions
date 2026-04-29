@@ -1,26 +1,16 @@
-# Guide for GNU Parallel Basics
+# Solution Guide: GNU Parallel Basics
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `gnu-parallel-basics:321:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `parallel` tool.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='gnu-parallel-basics:321:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+if command -v parallel >/dev/null 2>&1; then
+  printf '%s\n' a b | parallel 'echo item={}' | sort
+else
+  printf '%s\n' a b | xargs -n1 -I{} echo item={} | sort
+fi
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the pattern in a small, deterministic way suitable for the mission runner.

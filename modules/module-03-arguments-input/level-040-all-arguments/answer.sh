@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 40: All Arguments | %s | %s\n' "$1" "$2"
+index=1
+for arg in "$@"; do
+  printf '%s: %s
+' "$index" "$arg"
+  ((index += 1))
+done

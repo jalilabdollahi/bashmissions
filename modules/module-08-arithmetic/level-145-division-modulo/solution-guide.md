@@ -1,19 +1,21 @@
 # Guide for Division & Modulo
 
-Try building the script in this order:
+Goal: Use integer division and modulo on the first two arguments. Print `quotient=<a/b> remainder=<a%b>`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Read the numeric input from the argument list.
+2. Use the arithmetic feature from this concept: `$(( a / b ))`, `$(( a % b ))`.
+3. Keep integer arithmetic inside `$(( ))` or `(( ))`; use `bc` only for the floating-point level.
+4. Print the exact requested label and value.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '145' 'Division & Modulo' "$1" "$2"
+a="$1"
+b="$2"
+printf 'quotient=%s remainder=%s\n' "$((a / b))" "$((a % b))"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

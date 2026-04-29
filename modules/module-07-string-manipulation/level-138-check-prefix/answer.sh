@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 138: Check Prefix | %s | %s\n' "$1" "$2"
+str="$1"
+if [[ $str == pre* ]]; then
+  echo "yes"
+else
+  echo "no"
+fi

@@ -1,19 +1,24 @@
 # Guide for All Arguments
 
-Try building the script in this order:
+Goal: Loop over all positional arguments safely with `"$@"` and print each one on its own numbered line as `N: <arg>`. Inputs containing spaces must stay one argument.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
+2. Read the input using the curriculum concept for this level: `$@` vs `$*`.
+3. Print only the required output, with quoted variable expansions.
+4. Run the mission tests, including the failure or empty-input case when one is listed.
+
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '40' 'All Arguments' "$1" "$2"
+index=1
+for arg in "$@"; do
+  printf '%s: %s
+' "$index" "$arg"
+  ((index += 1))
+done
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

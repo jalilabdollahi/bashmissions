@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 22: Unset a Variable | %s | %s\n' "$1" "$2"
+v="$1"
+echo "before: $v"
+unset v
+echo "after: ${v:-empty}"

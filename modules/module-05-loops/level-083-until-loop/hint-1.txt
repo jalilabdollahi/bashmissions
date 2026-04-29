@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `until [ condition ]`.
+An `until` loop repeats until its test becomes true.

@@ -1,26 +1,23 @@
-# Guide for Semaphore Pattern
+# Solution Guide: Semaphore Pattern
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `semaphore-pattern:322:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on limit concurrent jobs.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='semaphore-pattern:322:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+fifo=sem.fifo
+mkfifo "$fifo"
+exec 3<>"$fifo"
+rm -f "$fifo"
+printf '.%.0s' {1..2} >&3
+for item in a b c; do
+  read -r -n1 _ <&3
+  { echo "$item" > "$item.out"; printf . >&3; } &
+done
+wait
+exec 3>&-
+cat ./*.out | sort
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the pattern in a small, deterministic way suitable for the mission runner.

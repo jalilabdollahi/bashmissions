@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 177: Return Array from Function | %s | %s\n' "$1" "$2"
+make_items() {
+  printf '%s\n' alpha beta gamma
+}
+
+mapfile -t items < <(make_items)
+echo "items=${items[*]}"

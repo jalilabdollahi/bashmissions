@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s extglob
 
-printf 'LEVEL 135: Trim Both Ends | %s | %s\n' "$1" "$2"
+str="$1"
+str="${str##+([[:space:]])}"
+str="${str%%+([[:space:]])}"
+echo "$str"

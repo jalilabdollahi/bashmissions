@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='delete-safely:242:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
+target="scratch.tmp"
+echo "temporary" > "$target"
+if [[ -f $target && $target == *.tmp ]]; then
+  rm -- "$target"
 fi
-
-printf '%s\n' "$output"
+echo "deleted=$([[ ! -e $target ]] && echo yes || echo no)"

@@ -5,24 +5,17 @@ module_display: String Manipulation
 title: Strip Shortest Suffix
 difficulty: intermediate
 xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 126: Strip Shortest Suffix
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Remove the shortest suffix from the final `.` onward using `${str%.*}`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 126: Strip Shortest Suffix | alpha | beta'
+  - archive.tar.gz
+  expected_stdout: archive.tar
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 126: Strip Shortest Suffix | spaces allowed | 42'
+  - notes.txt
+  expected_stdout: notes
   expected_exit: 0
   comparison: exact
 fixtures:

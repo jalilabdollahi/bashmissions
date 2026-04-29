@@ -1,26 +1,15 @@
-# Guide for Download File Safely
+# Solution Guide: Download File Safely
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `download-file-safely:381:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on verify checksum.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='download-file-safely:381:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+echo 'artifact' > artifact.txt
+expected=$(sha256sum artifact.txt | awk '{print $1}')
+curl -s "file://$PWD/artifact.txt" -o downloaded.txt
+actual=$(sha256sum downloaded.txt | awk '{print $1}')
+[[ $actual == "$expected" ]] && echo 'checksum=ok'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the concept safely inside the mission workspace.

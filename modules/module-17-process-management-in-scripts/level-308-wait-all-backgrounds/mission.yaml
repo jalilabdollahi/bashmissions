@@ -4,29 +4,17 @@ module_name: process-management-in-scripts
 module_display: Process Management in Scripts
 title: Wait All Backgrounds
 difficulty: advanced
-xp: 255
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `wait-all-backgrounds:308:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 205
+objective: 'Start two background jobs, wait for all of them, and print their outputs in sorted order.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: wait-all-backgrounds:308:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: wait-all-backgrounds:308:processed:3:verbose
+  expected_stdout: 'one
+two'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`wait`'
-scaffold: false
+scaffold: true

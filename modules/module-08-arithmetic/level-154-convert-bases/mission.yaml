@@ -5,24 +5,18 @@ module_display: Arithmetic
 title: Convert Bases
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 154: Convert Bases | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Convert the first decimal integer argument to lowercase hexadecimal with
+  `printf` and print `hex=<value>`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 154: Convert Bases | alpha | beta'
+  - '255'
+  expected_stdout: hex=ff
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 154: Convert Bases | spaces allowed | 42'
+  - '16'
+  expected_stdout: hex=10
   expected_exit: 0
   comparison: exact
 fixtures:

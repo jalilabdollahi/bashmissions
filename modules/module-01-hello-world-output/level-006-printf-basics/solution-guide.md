@@ -1,5 +1,17 @@
 # Guide for printf Basics
 
+To format output, use printf with placeholders:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+printf 'Name=%s; Score=%s\n' "$1" "$2"
+```
+
+- %s is a placeholder for a string.
+- Always quote your variables.
+
 Try building the script in this order:
 
 1. Start the script with a bash shebang.
@@ -15,5 +27,3 @@ set -euo pipefail
 
 printf 'LEVEL %s: %s | %s | %s\n' '6' 'printf Basics' "$1" "$2"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

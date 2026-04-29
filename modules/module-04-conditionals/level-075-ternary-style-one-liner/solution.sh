@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+[[ ${1:-} == "ok" ]] && echo "pass" || echo "fail"

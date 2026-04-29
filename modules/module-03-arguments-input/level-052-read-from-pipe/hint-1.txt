@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on detecting piped input.
+[ -p /dev/stdin ] is true when stdin is connected to a pipe.

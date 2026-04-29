@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on tail + grep + notify.
+Use this curriculum concept: tail grep notify.

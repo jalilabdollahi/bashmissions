@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 219: Match an Email | %s | %s\n' "$1" "$2"
+email=${1:-}
+regex='^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+if [[ $email =~ $regex ]]; then
+  echo "email=valid"
+else
+  echo "email=invalid"
+fi

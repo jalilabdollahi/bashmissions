@@ -5,24 +5,20 @@ module_display: Functions
 title: Function Arguments
 difficulty: intermediate
 xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 103: Function Arguments
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Define a function that reads its own `$1` and `$2`, then call it with the
+  first two script arguments. Print `<first> -> <second>`.
 expected_script_name: solution.sh
 test_cases:
 - args:
   - alpha
   - beta
-  expected_stdout: 'LEVEL 103: Function Arguments | alpha | beta'
+  expected_stdout: alpha -> beta
   expected_exit: 0
   comparison: exact
 - args:
   - spaces allowed
   - '42'
-  expected_stdout: 'LEVEL 103: Function Arguments | spaces allowed | 42'
+  expected_stdout: spaces allowed -> 42
   expected_exit: 0
   comparison: exact
 fixtures:

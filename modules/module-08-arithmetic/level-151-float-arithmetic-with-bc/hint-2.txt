@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+`scale=2` keeps two digits after the decimal point.

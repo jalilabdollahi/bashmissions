@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on lock + archive home.
+Use this curriculum concept: lock + archive home.

@@ -1,26 +1,20 @@
-# Guide for Usage Function
+# Solution Guide: Usage Function
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `usage-function:275:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on print_usage() with exit.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
+print_usage() {
+  printf 'Usage: %s <file>\n' "${0##*/}"
+}
 
-[ -f "$input" ] || exit 1
-
-output='usage-function:275:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+if [[ ${1:-} == "--help" || $# -eq 0 ]]; then
+  print_usage
+  exit 0
+fi
+printf 'file=%s\n' "$1"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

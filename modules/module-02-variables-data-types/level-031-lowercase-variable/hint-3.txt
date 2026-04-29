@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Both require Bash 4.0+. macOS ships 3.2 by default; `brew install bash` gives you a modern one.

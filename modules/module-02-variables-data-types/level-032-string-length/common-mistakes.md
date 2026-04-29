@@ -1,13 +1,11 @@
 # Common Mistakes for String Length
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 32: String Length | alpha | beta`.
+- Using `expr length "$x"` or `echo "$x" | wc -c`. The first is slow (subprocess); the second adds 1 for the newline that `echo` emits. `${#x}` is correct, fast, and exact.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Forgetting the `#` is **inside** the braces: `${#name}` is right, `#${name}` is wrong (and parsed as a comment).
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Confusing `${#arr[@]}` (number of array elements) with `${#arr[0]}` (length of first element). Same operator, different meaning depending on what comes after.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Counting bytes when you wanted characters (or vice versa). Bash's `${#x}` counts characters per the current locale. To count bytes, set `LC_ALL=C` for that one command: `LC_ALL=C; echo ${#text}`.
+
+- Trying it on an unset variable with `set -u` enabled: `${#missing}` aborts the script. Provide a fallback: `${#missing-}` (empty default) → length 0.

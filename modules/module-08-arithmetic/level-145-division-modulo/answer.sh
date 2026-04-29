@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 145: Division & Modulo | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+printf 'quotient=%s remainder=%s\n' "$((a / b))" "$((a % b))"

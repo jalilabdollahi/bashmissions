@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 149: let Command | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+let "result = a * b"
+echo "result=$result"

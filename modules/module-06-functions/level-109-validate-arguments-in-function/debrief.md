@@ -1,20 +1,7 @@
 # Validate Arguments in Function
 
-This level practices **guard clause pattern**.
+This mission practices guard clause pattern from Module 6 of the curriculum.
 
-This pattern shows up in everyday automation work, where scripts need to turn files and arguments into predictable output.
+Functions make Bash scripts easier to structure, reuse, and test. The important habits are keeping function inputs explicit, using `return` only for status codes, printing string data when it needs to be captured, and keeping variable scope under control with `local`.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 109: Validate Arguments in Function | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The reference solution keeps the function pattern visible so the level's focus stays clear.

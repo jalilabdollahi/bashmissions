@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on catch pipe failures.
+Use the defensive scripting concept from the curriculum: catch pipe failures.

@@ -1,19 +1,26 @@
 # Guide for Export a Variable
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. `export GREETING="$1"` — the export and assignment in one line.
+3. Spawn a child shell with `bash -c 'echo "$GREETING"'`. **Single quotes** around the inner command keep the parent from expanding `$GREETING` first.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '29' 'Export a Variable' "$1" "$2"
+export GREETING="$1"
+bash -c 'echo "$GREETING"'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh hello       # hello
+./solution.sh "hi there"  # hi there
+```
+
+Drop the `export` and watch the child print an empty line. Use `answer` if stuck.

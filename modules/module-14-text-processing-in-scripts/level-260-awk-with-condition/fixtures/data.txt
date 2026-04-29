@@ -1,3 +1,3 @@
-alpha
-beta
-gamma
+api east 150
+web west 80
+worker east 200

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `while read` from pipe.
+A command before a pipe can feed lines into a `while read` loop.

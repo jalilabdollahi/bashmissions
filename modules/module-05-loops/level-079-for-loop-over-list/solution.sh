@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+for item in alpha beta gamma; do
+  echo "$item"
+done

@@ -5,24 +5,26 @@ module_display: Arithmetic
 title: Arithmetic Condition
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 150: Arithmetic Condition
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use an arithmetic condition to compare the first two integer arguments.
+  Print `greater` if the first is greater, otherwise `not greater`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 150: Arithmetic Condition | alpha | beta'
+  - '9'
+  - '4'
+  expected_stdout: greater
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 150: Arithmetic Condition | spaces allowed | 42'
+  - '3'
+  - '7'
+  expected_stdout: not greater
+  expected_exit: 0
+  comparison: exact
+- args:
+  - '5'
+  - '5'
+  expected_stdout: not greater
   expected_exit: 0
   comparison: exact
 fixtures:

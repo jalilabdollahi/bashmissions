@@ -4,29 +4,17 @@ module_name: configuration-environment
 module_display: Configuration & Environment
 title: Load dotenv File
 difficulty: advanced
-xp: 235
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `load-dotenv-file:341:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 175
+objective: 'Load simple KEY=VALUE pairs from a dotenv file and print selected values.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: load-dotenv-file:341:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: load-dotenv-file:341:processed:3:verbose
+  expected_stdout: 'host=localhost
+port=8080'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+- app.env
 concepts:
-- parse `KEY=VALUE` into env
-scaffold: false
+- 'parse `KEY=VALUE` into env'
+scaffold: true

@@ -1,13 +1,13 @@
 # Common Mistakes for printf vs echo
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 7: printf vs echo | alpha | beta`.
+- Using `echo "$1"` instead of `printf '%s\n' "$1"`.
+  On some systems `echo` interprets `\n` as a newline, producing wrong output for inputs like `a\nb`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Using `printf "%s\n" "$1"` with a double-quoted format string.
+  The format string itself should use single quotes to avoid variable expansion there.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting the `raw: ` prefix.
+  The expected output starts with `raw: ` before the argument value.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Printing `*` and seeing it glob-expanded.
+  Always quote `"$1"` to prevent word splitting and glob expansion.

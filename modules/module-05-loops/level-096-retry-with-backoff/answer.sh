@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 96: Retry with Backoff | %s | %s\n' "$1" "$2"
+wait_time=1
+for attempt in 1 2 3; do
+  echo "attempt=$attempt wait=$wait_time"
+  ((wait_time *= 2))
+done

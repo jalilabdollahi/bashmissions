@@ -1,13 +1,11 @@
 # Common Mistakes for Assign a Variable
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 19: Assign a Variable | alpha | beta`.
+- `name = "value"` (spaces around `=`). Bash reads this as a command call and fails with `name: command not found`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Forgetting to quote the value. `name=$1` works for simple inputs but breaks when `$1` contains whitespace — Bash splits the assignment at the space.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using `$name` on the **left** side of `=`. The left side is just the variable name; only the right side gets expanded.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Trying to declare a type: `int x=5` doesn't exist. Use `declare -i x=5` if you need integer behaviour (covered in level 23).
+
+- Confusing assignment with comparison. `[[ $a = "x" ]]` (with spaces) is comparison; `a="x"` (no spaces) is assignment.

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on choosing the right output tool.
+The goal is to print the argument exactly as-is — no escape sequences interpreted, no glob expansion.

@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Redirect its output away; the mission only wants `found` or `missing`.

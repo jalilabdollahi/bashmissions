@@ -5,24 +5,18 @@ module_display: String Manipulation
 title: Substring
 difficulty: intermediate
 xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 122: Substring | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Print five characters from the first argument starting at offset 2 using
+  `${str:2:5}`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 122: Substring | alpha | beta'
+  - alphabet
+  expected_stdout: phabe
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 122: Substring | spaces allowed | 42'
+  - 0123456789
+  expected_stdout: '23456'
   expected_exit: 0
   comparison: exact
 fixtures:

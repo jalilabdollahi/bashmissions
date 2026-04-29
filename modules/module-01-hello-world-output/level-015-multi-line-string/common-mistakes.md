@@ -1,13 +1,11 @@
 # Common Mistakes for Multi-line String
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 15: Multi-line String | alpha | beta`.
+- Indenting the closing `EOF` with spaces. The delimiter must start at column 1, or the heredoc never ends and Bash will "hang" reading the rest of the file.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Putting anything (even a space) after the closing `EOF`. `EOF ` will not match.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using three `echo` statements when the level asks for a heredoc. Both produce the same output, but you miss the lesson — and `echo` doesn't scale to a 50-line config block.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Forgetting that `$VAR` expands inside an unquoted heredoc. If you want literal `$VAR` text, use `<<'EOF'` (quote the delimiter).
+
+- Trailing-newline anxiety. A heredoc always ends with a newline before `EOF`, and `cat` preserves it. The runner strips one trailing newline before comparing, so the `\n` after `line three` is fine.

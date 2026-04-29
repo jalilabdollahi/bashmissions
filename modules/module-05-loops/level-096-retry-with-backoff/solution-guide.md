@@ -1,19 +1,23 @@
 # Guide for Retry with Backoff
 
-Try building the script in this order:
+Goal: Simulate three retry attempts with exponential backoff values. Print `attempt=1 wait=1`, `attempt=2 wait=2`, and `attempt=3 wait=4`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify what the loop should iterate over.
+2. Use the loop pattern from this level: exponential wait in loop.
+3. Keep the loop body small and print only the required output.
+4. Make sure the loop stops; infinite loops must have an obvious `break` or exit path.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '96' 'Retry with Backoff' "$1" "$2"
+wait_time=1
+for attempt in 1 2 3; do
+  echo "attempt=$attempt wait=$wait_time"
+  ((wait_time *= 2))
+done
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

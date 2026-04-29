@@ -1,19 +1,21 @@
 # Guide for Power
 
-Try building the script in this order:
+Goal: Raise the first integer argument to the power of the second using `**`. Print `power=<result>`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Read the numeric input from the argument list.
+2. Use the arithmetic feature from this concept: `$(( base ** exp ))`.
+3. Keep integer arithmetic inside `$(( ))` or `(( ))`; use `bc` only for the floating-point level.
+4. Print the exact requested label and value.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '146' 'Power' "$1" "$2"
+base="$1"
+exp="$2"
+echo "power=$((base ** exp))"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

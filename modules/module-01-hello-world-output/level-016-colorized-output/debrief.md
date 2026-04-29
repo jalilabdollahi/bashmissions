@@ -1,20 +1,25 @@
 # Colorized Output
 
-This level practices **ANSI escape codes**.
+Most terminals interpret a small set of byte sequences starting with the **ESC** character (`0x1B`, written `\033` in octal or `\e` in some contexts). These are called **ANSI escape codes** or **CSI sequences**.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+The form is `ESC [` then a code then a single letter:
 
-Focus on three things:
+| Sequence    | Effect                       |
+|-------------|------------------------------|
+| `\033[0m`   | reset all attributes         |
+| `\033[1m`   | bold                         |
+| `\033[31m`  | red foreground               |
+| `\033[32m`  | green foreground             |
+| `\033[33m`  | yellow foreground            |
+| `\033[34m`  | blue foreground              |
+| `\033[41m`  | red background               |
+| `\033[2J`   | clear screen                 |
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+The pattern is always: turn an attribute **on**, write your text, turn it back **off** with `\033[0m` so the next line isn't tainted.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 16: Colorized Output | alpha | beta
+printf '\033[32mOK\033[0m\n'   # green OK
+printf '\033[31mFAIL\033[0m\n' # red FAIL
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+When stdout is not a terminal (piping into a file, for instance), check `[ -t 1 ]` first and skip colors so logs don't end up full of `\033[32m` noise.

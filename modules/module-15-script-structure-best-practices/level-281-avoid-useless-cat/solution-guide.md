@@ -1,26 +1,13 @@
-# Guide for Avoid Useless Cat
+# Solution Guide: Avoid Useless Cat
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `avoid-useless-cat:281:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `< file` not `cat file |`.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='avoid-useless-cat:281:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+lines=$(wc -l < fixtures/data.txt)
+printf 'lines=%s\n' "$lines"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

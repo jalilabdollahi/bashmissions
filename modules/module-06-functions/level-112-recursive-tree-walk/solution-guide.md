@@ -1,19 +1,34 @@
 # Guide for Recursive Tree Walk
 
-Try building the script in this order:
+Goal: Recursively walk `fixtures/tree` and print each file path relative to that directory in sorted traversal order.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Define the function needed for the level.
+2. Use the function pattern from this concept: directory traversal.
+3. Call the function with quoted arguments when values may contain spaces.
+4. Match stdout and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '112' 'Recursive Tree Walk' "$1" "$2"
-```
+walk() {
+  local dir="$1"
+  local base="$2"
+  local item rel
+  for item in "$dir"/*; do
+    [ -e "$item" ] || continue
+    rel="${item#$base/}"
+    if [ -d "$item" ]; then
+      walk "$item" "$base"
+    else
+      echo "$rel"
+    fi
+  done
+}
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+walk fixtures/tree fixtures/tree
+```

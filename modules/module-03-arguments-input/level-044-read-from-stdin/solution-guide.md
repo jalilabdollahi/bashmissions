@@ -1,19 +1,20 @@
 # Guide for Read from Stdin
 
-Try building the script in this order:
+Goal: Read one line from the file path in `$1` using `read -r value < "$1"`, then print `You said: <value>`. This practices the same `read` pattern used for stdin while keeping tests non-interactive.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
+2. Read the input using the curriculum concept for this level: `read var`.
+3. Print only the required output, with quoted variable expansions.
+4. Run the mission tests, including the failure or empty-input case when one is listed.
+
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '44' 'Read from Stdin' "$1" "$2"
+read -r value < "$1"
+echo "You said: $value"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

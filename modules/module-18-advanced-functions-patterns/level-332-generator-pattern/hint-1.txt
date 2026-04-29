@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on function + global state.
+Use this curriculum concept: function + global state.

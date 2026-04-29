@@ -1,20 +1,29 @@
 # Unset a Variable
 
-This level practices **`unset`**.
+`unset` removes a variable from the shell's symbol table. It's the inverse of assignment.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+| Operation     | After it, the variable is...           |
+|---------------|----------------------------------------|
+| `name=value`  | set, with the given value              |
+| `name=`       | set, with empty string                 |
+| `unset name`  | not set — completely gone              |
 
-Focus on three things:
+The difference matters once you start using parameter expansions like `${var-default}` and `${var:-default}`:
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
+| Expansion         | Triggers when var is...   |
+|-------------------|---------------------------|
+| `${var-default}`  | unset only                |
+| `${var:-default}` | unset **or** empty string |
+| `${var=default}`  | unset (and assigns)       |
+| `${var:=default}` | unset or empty (assigns)  |
 
-A tiny working example looks like this:
+`unset` also takes flags: `-v` (variable, default), `-f` (function), `-n` (the name reference, not the target).
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 22: Unset a Variable | alpha | beta
+v="hello"
+echo "before: $v"   # hello
+unset v
+echo "after: ${v:-empty}"   # empty
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Useful in cleanup paths, in `trap` handlers, and when a function wants to scrub temporary state before returning.

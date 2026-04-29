@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 213: Validate File Argument | %s | %s\n' "$1" "$2"
+file=${1:-}
+if [[ ! -r $file ]]; then
+  echo "file=invalid"
+  exit 1
+fi
+echo "lines=$(wc -l < "$file")"

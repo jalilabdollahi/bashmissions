@@ -4,29 +4,16 @@ module_name: configuration-environment
 module_display: Configuration & Environment
 title: Masked Output
 difficulty: advanced
-xp: 225
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `masked-output:350:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 215
+objective: 'Mask a secret before printing a log line.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: masked-output:350:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: masked-output:350:processed:3:verbose
+  expected_stdout: 'token=****** status=ok'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- replace secret in logs
-scaffold: false
+- 'replace secret in logs'
+scaffold: true

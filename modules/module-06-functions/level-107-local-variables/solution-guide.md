@@ -1,19 +1,27 @@
 # Guide for Local Variables
 
-Try building the script in this order:
+Goal: Use `local` inside a function so changing `name` inside the function does not change the global `name`. Print `inside=local` and `outside=global`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Define the function needed for the level.
+2. Use the function pattern from this concept: `local var=value`.
+3. Call the function with quoted arguments when values may contain spaces.
+4. Match stdout and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '107' 'Local Variables' "$1" "$2"
-```
+name="global"
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+show_scope() {
+  local name="local"
+  echo "inside=$name"
+}
+
+show_scope
+echo "outside=$name"
+```

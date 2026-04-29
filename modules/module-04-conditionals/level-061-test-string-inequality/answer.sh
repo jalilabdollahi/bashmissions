@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 61: Test String Inequality | %s | %s\n' "$1" "$2"
+if [ "$1" != "$2" ]; then
+  echo "different"
+else
+  echo "same"
+fi

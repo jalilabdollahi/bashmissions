@@ -1,26 +1,15 @@
-# Guide for Metrics Collector
+# Solution Guide: Metrics Collector
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `metrics-collector:395:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on stats to file.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='metrics-collector:395:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+cat > output.txt <<'OUT'
+cpu=1
+mem=2
+OUT
+cat output.txt
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the concept safely inside the mission workspace.

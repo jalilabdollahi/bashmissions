@@ -1,13 +1,11 @@
 # Common Mistakes for Print Current Date
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 13: Print Current Date | alpha | beta`.
+- Hard-coding a date string. The point of the level is to call `date` at runtime — typing `today is 2026-04-29` will pass the regex, but defeats the lesson and breaks every other day.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Calling `date` without a format string. Plain `date` outputs `Wed Apr 29 14:07:33 UTC 2026` — way too long, and the regex won't match.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using the wrong format token. `%y` is a 2-digit year, `%Y` is 4-digit. The expected format is `%Y-%m-%d` (or its alias `%F`).
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Forgetting `$(...)` and writing `echo "today is date"` — this prints the literal word `date` instead of running it.
+
+- Mixing dashes and slashes (`%Y/%m/%d`). The regex requires dashes.

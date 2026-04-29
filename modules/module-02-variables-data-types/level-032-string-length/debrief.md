@@ -1,20 +1,31 @@
 # String Length
 
-This level practices **`${#var}`**.
-
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+`${#name}` is the **string length** parameter expansion. It returns an integer count of characters in the value.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 32: String Length | alpha | beta
+text="hello"
+echo "${#text}"   # 5
+
+empty=""
+echo "${#empty}"  # 0
+
+echo "${#1}"      # length of the first positional parameter
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Works on positional parameters and on regular variables. For arrays, `${#arr[@]}` and `${#arr[*]}` return the number of *elements*, not characters.
+
+Counting subtleties:
+
+- Counts characters, not bytes — in a UTF-8 locale `${#café}` is `4`, not `5`.
+- Counts every character including spaces and special characters.
+- Newlines, if present, count too: `${#$'a
+b'}` is `3`.
+
+Use it instead of `echo "$x" | wc -c` (which adds 1 for the trailing newline) or `expr length "$x"` (slow, external).
+
+Common patterns:
+
+```bash
+[[ ${#input} -lt 8 ]] && echo "too short, must be at least 8 characters"
+[[ -z "$x" ]] && [[ ${#x} -eq 0 ]]   # equivalent emptiness checks
+```

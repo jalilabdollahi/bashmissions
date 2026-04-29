@@ -4,29 +4,28 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Remove Prefix
 difficulty: beginner
-xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 34: Remove Prefix | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 70
+objective: Take a filename in `$1` and print it with everything up to and including the first `.` removed. Use `${var#*.}` (single hash = shortest match).
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 34: Remove Prefix | alpha | beta'
+  - file.tar.gz
+  expected_stdout: tar.gz
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 34: Remove Prefix | spaces allowed | 42'
+  - report.pdf
+  expected_stdout: pdf
+  expected_exit: 0
+  comparison: exact
+- args:
+  - a.b.c.d
+  expected_stdout: b.c.d
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`${var#pattern}`'
+- prefix removal
 scaffold: true

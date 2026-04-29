@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+For arrays, `${#arr[@]}` returns the number of elements (covered in module 9), and `${#arr[i]}` returns the length of element `i`.

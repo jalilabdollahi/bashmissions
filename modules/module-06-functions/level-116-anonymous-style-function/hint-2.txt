@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+A subshell keeps the short-lived helper scoped away from the rest of the script.

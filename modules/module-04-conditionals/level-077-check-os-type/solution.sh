@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+os=$(uname -s)
+
+if [ "$os" = "Linux" ]; then
+  echo "Linux"
+elif [ "$os" = "Darwin" ]; then
+  echo "macOS"
+else
+  echo "Other"
+fi

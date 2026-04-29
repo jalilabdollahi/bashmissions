@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on multiple echo statements.
+Use echo to print each line. Each call to echo prints a new line. Start with a bash shebang.

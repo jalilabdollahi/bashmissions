@@ -4,29 +4,17 @@ module_name: arrays
 module_display: Arrays
 title: 2D Array Simulation
 difficulty: intermediate
-xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 178: 2D Array Simulation
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 135
+objective: 'Simulate a 2D array with associative-array keys like row,column and print a two-row grid.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 178: 2D Array Simulation | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 178: 2D Array Simulation | spaces allowed | 42'
+  expected_stdout: 'AB
+CD'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- key encoding trick
+- 'key encoding trick'
 scaffold: true

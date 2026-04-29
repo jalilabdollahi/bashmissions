@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+echo -n "LEVEL 8: Suppress Newline | $1 | $2"

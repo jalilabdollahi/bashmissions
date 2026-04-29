@@ -4,29 +4,22 @@ module_name: arrays
 module_display: Arrays
 title: Check Key Exists
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 174: Check Key Exists
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 145
+objective: 'Check whether the requested color key exists in an associative array and print exists or missing.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 174: Check Key Exists | alpha | beta'
+  - 'red'
+  expected_stdout: 'exists'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 174: Check Key Exists | spaces allowed | 42'
+  - 'green'
+  expected_stdout: 'missing'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`[[ -v map[key] ]]`'
 scaffold: true

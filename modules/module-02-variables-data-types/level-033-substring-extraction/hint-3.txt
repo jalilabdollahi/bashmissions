@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Out-of-range slices return whatever fits — `${var:0:1000}` on a 5-char string just gives the whole string.

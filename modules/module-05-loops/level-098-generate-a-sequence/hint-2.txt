@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Command substitution can provide the list for a `for` loop.

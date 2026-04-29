@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Missing arguments need `${1:-}` and `${2:-}` with `set -u`.

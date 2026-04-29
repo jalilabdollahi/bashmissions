@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `command -v` guard.
+Use the defensive scripting concept from the curriculum: `command -v` guard.

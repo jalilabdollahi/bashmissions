@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 77: Check OS Type | %s | %s\n' "$1" "$2"
+os=$(uname -s)
+
+if [ "$os" = "Linux" ]; then
+  echo "Linux"
+elif [ "$os" = "Darwin" ]; then
+  echo "macOS"
+else
+  echo "Other"
+fi

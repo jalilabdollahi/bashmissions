@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on exponential wait in loop.
+Backoff usually doubles the wait after each failed attempt.

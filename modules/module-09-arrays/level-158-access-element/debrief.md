@@ -1,20 +1,3 @@
-# Access Element
+# Debrief
 
-This level practices **`${arr[0]}`**.
-
-This pattern shows up in everyday automation work, where scripts need to turn files and arguments into predictable output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 158: Access Element | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+You practiced `Access Element` with the Bash array pattern ``${arr[0]}``. This is a building block for scripts that keep lists, lookup tables, and structured command output in memory.

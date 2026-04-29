@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+v="$1"
+echo "before: $v"
+unset v
+echo "after: ${v:-empty}"

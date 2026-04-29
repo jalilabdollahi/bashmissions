@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+read -r -p "Name: " name < "$1"
+echo "Name is: $name"

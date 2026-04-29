@@ -4,29 +4,17 @@ module_name: arrays
 module_display: Arrays
 title: Add Key-Value
 difficulty: intermediate
-xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 172: Add Key-Value | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Add two key-value pairs to an associative array and print both stored values.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 172: Add Key-Value | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 172: Add Key-Value | spaces allowed | 42'
+  expected_stdout: 'alice=10
+bob=20'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`map[key]=value`'
 scaffold: true

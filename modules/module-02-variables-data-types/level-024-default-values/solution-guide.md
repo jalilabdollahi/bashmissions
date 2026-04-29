@@ -1,19 +1,26 @@
 # Guide for Default Values
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Read `$1` with a fallback: `name="${1:-anonymous}"`.
+3. Print `Hello, $name`.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '24' 'Default Values' "$1" "$2"
+name="${1:-anonymous}"
+echo "Hello, $name"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh Jalil   # Hello, Jalil
+./solution.sh         # Hello, anonymous
+```
+
+Try `${1-anonymous}` (no colon) — same in both cases here, but pass an empty string and you'll see the difference. Use `answer` if stuck.

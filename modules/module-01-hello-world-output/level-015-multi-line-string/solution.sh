@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+cat <<EOF
+line one
+line two
+line three
+EOF

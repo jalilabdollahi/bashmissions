@@ -4,29 +4,28 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Substring Extraction
 difficulty: beginner
-xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 33: Substring Extraction
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 70
+objective: Print 4 characters starting at offset 1 of `$1` using `${text:1:4}`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 33: Substring Extraction | alpha | beta'
+  - BashMissions
+  expected_stdout: ashM
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 33: Substring Extraction | spaces allowed | 42'
+  - hello
+  expected_stdout: ello
+  expected_exit: 0
+  comparison: exact
+- args:
+  - abcdef
+  expected_stdout: bcde
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`${var:offset:length}`'
+- substring slicing
 scaffold: true

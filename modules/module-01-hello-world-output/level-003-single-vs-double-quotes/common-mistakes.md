@@ -1,13 +1,13 @@
 # Common Mistakes for Single vs Double Quotes
 
 - Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 3: Single vs Double Quotes | alpha | beta`.
+  The validator compares against two exact lines.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Using double quotes for both lines.
+  You must keep the first line literal with single quotes.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using single quotes for both lines.
+  Then `$name` never expands in the second line.
 
 - Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+  Read the mission and verify the exact line order and punctuation.

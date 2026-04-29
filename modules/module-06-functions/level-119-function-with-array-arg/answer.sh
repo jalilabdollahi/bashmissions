@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 119: Function with Array Arg | %s | %s\n' "$1" "$2"
+summarize_array() {
+  local -n items_ref="$1"
+  local last_index=$((${#items_ref[@]} - 1))
+  printf 'count=%s first=%s last=%s\n' "${#items_ref[@]}" "${items_ref[0]}" "${items_ref[$last_index]}"
+}
+
+colors=(red green blue)
+summarize_array colors

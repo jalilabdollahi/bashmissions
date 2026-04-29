@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `"$func" args`.
+Use this curriculum concept: `"$func" args`.

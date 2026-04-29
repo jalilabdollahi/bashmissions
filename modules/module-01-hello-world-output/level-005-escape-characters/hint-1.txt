@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `\n`, `\t` with `echo -e`.
+Use printf to print backslashes (\\) and double quotes ("). Escape them properly in your format string.

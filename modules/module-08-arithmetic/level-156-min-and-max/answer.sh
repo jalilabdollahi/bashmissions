@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 156: Min and Max | %s | %s\n' "$1" "$2"
+min="$1"
+max="$1"
+shift
+
+for n in "$@"; do
+  if (( n < min )); then
+    min="$n"
+  fi
+  if (( n > max )); then
+    max="$n"
+  fi
+done
+
+printf 'min=%s max=%s\n' "$min" "$max"

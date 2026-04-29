@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 69: File Exists | %s | %s\n' "$1" "$2"
+path="$1"
+
+if [ -f "$path" ]; then
+  echo "file"
+elif [ -d "$path" ]; then
+  echo "directory"
+else
+  echo "missing"
+fi

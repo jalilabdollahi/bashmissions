@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+echo "Error: $1" >&2

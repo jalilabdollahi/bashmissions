@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+printf '== %-10s ==\n' "$1"

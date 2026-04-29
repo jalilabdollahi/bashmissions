@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 208: die() Function | %s | %s\n' "$1" "$2"
+die() {
+  echo "error: $*"
+  exit 2
+}
+
+if [[ ${1:-} != ok ]]; then
+  die "expected ok"
+fi
+echo "status=ok"

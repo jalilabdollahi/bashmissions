@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 109: Validate Arguments in Function | %s | %s\n' "$1" "$2"
+require_value() {
+  if [ -z "${1:-}" ]; then
+    return 1
+  fi
+  echo "valid=$1"
+}
+
+require_value "${1:-}"

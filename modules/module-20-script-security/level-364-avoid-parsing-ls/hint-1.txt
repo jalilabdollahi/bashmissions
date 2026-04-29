@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on use glob/find instead.
+Use this curriculum concept: use glob/find instead.

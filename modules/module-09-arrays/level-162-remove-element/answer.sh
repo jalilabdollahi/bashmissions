@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 162: Remove Element | %s | %s\n' "$1" "$2"
+colors=(red green blue)
+unset 'colors[1]'
+printf '%s\n' "${colors[@]}"

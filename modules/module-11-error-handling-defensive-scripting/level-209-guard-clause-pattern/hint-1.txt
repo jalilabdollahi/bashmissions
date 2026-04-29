@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on early return on bad input.
+Use the defensive scripting concept from the curriculum: early return on bad input.

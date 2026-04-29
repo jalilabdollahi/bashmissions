@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${#var}`.
+`${#name}` expands to the number of characters in the value of `name`. No subprocess; pure built-in.

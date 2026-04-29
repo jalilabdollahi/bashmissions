@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 216: Capture Group | %s | %s\n' "$1" "$2"
+record="user:alice"
+if [[ $record =~ ^user:([a-z]+)$ ]]; then
+  echo "name=${BASH_REMATCH[1]}"
+fi

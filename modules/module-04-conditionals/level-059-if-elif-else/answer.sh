@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 59: if-elif-else | %s | %s\n' "$1" "$2"
+if [ "$1" = "start" ]; then
+  echo "starting"
+elif [ "$1" = "stop" ]; then
+  echo "stopping"
+else
+  echo "unknown"
+fi

@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 60: Test String Equality | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+
+if [ "$a" = "$b" ]; then
+  echo "same"
+else
+  echo "different"
+fi

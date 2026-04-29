@@ -1,20 +1,7 @@
 # Random in Range
 
-This level practices **`$(( RANDOM % N ))`**.
+This mission practices `$(( RANDOM % N ))` from Module 8 of the curriculum.
 
-This pattern shows up in everyday automation work, where scripts need to turn files and arguments into predictable output.
+Bash arithmetic is fast and convenient for integers. Use `$(( ... ))` for calculated values, `(( ... ))` for arithmetic tests or updates, and `bc` when a script needs decimal math.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 153: Random in Range | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The reference solution keeps the arithmetic expression visible so the level's focus stays clear.

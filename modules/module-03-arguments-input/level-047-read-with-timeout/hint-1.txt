@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `read -t`.
+read -t N fails if input is not available before the timeout.

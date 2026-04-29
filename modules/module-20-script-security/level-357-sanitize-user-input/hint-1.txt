@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on strip dangerous chars.
+Use this curriculum concept: strip dangerous chars.

@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Full call: `printf '== %-10s ==\n' "$1"`. The literal `==` and spaces around the field are part of the format, not part of the title.

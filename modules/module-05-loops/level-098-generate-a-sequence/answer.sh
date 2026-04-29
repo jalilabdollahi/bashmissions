@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 98: Generate a Sequence | %s | %s\n' "$1" "$2"
+for n in $(seq 1 4); do
+  echo "num=$n"
+done

@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 55: Getopts Basics | %s | %s\n' "$1" "$2"
+a="false"
+b="none"
+
+while getopts "ab:" opt; do
+  case "$opt" in
+    a) a="true" ;;
+    b) b="$OPTARG" ;;
+  esac
+done
+
+printf 'a=%s b=%s
+' "$a" "$b"

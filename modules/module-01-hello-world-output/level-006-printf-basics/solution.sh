@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+printf 'Name=%s; Score=%s\n' "$1" "$2"

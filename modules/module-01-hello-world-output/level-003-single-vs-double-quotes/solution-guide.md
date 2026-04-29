@@ -3,9 +3,9 @@
 Try building the script in this order:
 
 1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+2. Save the first argument in `name`.
+3. Print `single: $name` using single quotes.
+4. Print `double: <arg1>` using double quotes.
 
 A working shape looks like this:
 
@@ -13,7 +13,9 @@ A working shape looks like this:
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '3' 'Single vs Double Quotes' "$1" "$2"
+name="$1"
+echo 'single: $name'
+echo "double: $name"
 ```
 
 Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

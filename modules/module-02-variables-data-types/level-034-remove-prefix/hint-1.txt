@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${var#pattern}`.
+`${var#pattern}` removes the **shortest** match of `pattern` from the **beginning** of `$var`. The pattern is a glob, not a regex.

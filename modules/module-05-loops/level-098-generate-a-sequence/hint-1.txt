@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `seq` in loop.
+`seq 1 4` prints numbers from 1 through 4.

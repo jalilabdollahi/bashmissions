@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+for arg in "$@"; do
+  echo "arg=$arg"
+done

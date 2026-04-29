@@ -4,29 +4,28 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Uppercase Variable
 difficulty: beginner
-xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 30: Uppercase Variable
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 60
+objective: "Read `$1` into a variable and print it fully uppercased using `${var^^}` \u2014 no `tr`, no `awk`, just parameter expansion."
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 30: Uppercase Variable | alpha | beta'
+  - hello
+  expected_stdout: HELLO
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 30: Uppercase Variable | spaces allowed | 42'
+  - MiXeD CaSe
+  expected_stdout: MIXED CASE
+  expected_exit: 0
+  comparison: exact
+- args:
+  - bash 4.0+
+  expected_stdout: BASH 4.0+
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`${var^^}`'
+- case conversion
 scaffold: true

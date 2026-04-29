@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 171: Associative Array | %s | %s\n' "$1" "$2"
+declare -A capitals=([france]=paris [japan]=tokyo)
+echo "france=${capitals[france]}"
+echo "japan=${capitals[japan]}"

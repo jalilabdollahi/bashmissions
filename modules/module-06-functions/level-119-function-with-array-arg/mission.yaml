@@ -5,24 +5,12 @@ module_display: Functions
 title: Function with Array Arg
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 119: Function with Array
-  Arg | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Pass an array to a function using a nameref and print `count=3 first=red
+  last=blue`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 119: Function with Array Arg | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 119: Function with Array Arg | spaces allowed | 42'
+- args: []
+  expected_stdout: count=3 first=red last=blue
   expected_exit: 0
   comparison: exact
 fixtures:

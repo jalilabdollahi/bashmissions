@@ -5,24 +5,18 @@ module_display: String Manipulation
 title: Substring from End
 difficulty: intermediate
 xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 123: Substring from End
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Print the last three characters of the first argument using a negative
+  substring offset.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 123: Substring from End | alpha | beta'
+  - alphabet
+  expected_stdout: bet
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 123: Substring from End | spaces allowed | 42'
+  - filename.txt
+  expected_stdout: txt
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -1,20 +1,21 @@
 # printf vs echo
 
-This level practices **choosing the right output tool**.
+This level demonstrates why `printf` is more reliable than `echo` for printing arbitrary data.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+`echo` may interpret escape sequences like `\n` as a newline depending on the shell or flags. `printf` with `%s` always prints the argument as a raw string.
 
-Focus on three things:
+Key takeaway:
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
+- `printf 'raw: %s\n' "$1"` — the `%s` specifier never interprets the value.
+- `echo "$1"` — may or may not interpret `\n` as a newline.
 
-A tiny working example looks like this:
+Example run:
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 7: printf vs echo | alpha | beta
+./solution.sh 'a\nb'
+# raw: a\nb
+./solution.sh '*'
+# raw: *
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Use `printf '%s\n'` whenever you need to print values that might contain backslashes or shell metacharacters.

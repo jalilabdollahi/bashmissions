@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 195: Redirect in Function | %s | %s\n' "$1" "$2"
+write_report() {
+  echo "report:start"
+  echo "report:done"
+}
+
+write_report > report.log
+cat report.log

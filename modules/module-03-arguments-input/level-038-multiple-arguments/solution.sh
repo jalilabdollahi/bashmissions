@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+printf 'first=%s second=%s third=%s
+' "$1" "$2" "$3"

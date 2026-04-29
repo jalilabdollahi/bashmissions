@@ -1,19 +1,19 @@
 # Guide for Ternary-Style One-Liner
 
-Try building the script in this order:
+Goal: Use a conditional one-liner with `[[ ... ]] && ... || ...`. Print `pass` when the first argument is `ok`; otherwise print `fail`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify the value or path being tested.
+2. Write the conditional form from this level: `[[ cond ]] && true || false`.
+3. Quote variable expansions unless the syntax specifically needs an unquoted pattern.
+4. Match the expected output and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '75' 'Ternary-Style One-Liner' "$1" "$2"
+[[ ${1:-} == "ok" ]] && echo "pass" || echo "fail"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

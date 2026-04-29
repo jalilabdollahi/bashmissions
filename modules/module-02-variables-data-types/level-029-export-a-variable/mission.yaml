@@ -4,29 +4,24 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Export a Variable
 difficulty: beginner
-xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 29: Export a Variable
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 70
+objective: "Set a variable `GREETING` to `$1` and `export` it so a child shell process can see it. Then run `bash -c 'echo \"$GREETING\"'` \u2014 the child shell must print the value."
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 29: Export a Variable | alpha | beta'
+  - hello
+  expected_stdout: hello
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 29: Export a Variable | spaces allowed | 42'
+  - hi from export
+  expected_stdout: hi from export
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`export`'
+- environment inheritance
+- subshells
 scaffold: true

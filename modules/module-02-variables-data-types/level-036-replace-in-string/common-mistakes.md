@@ -1,13 +1,11 @@
 # Common Mistakes for Replace in String
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 36: Replace in String | alpha | beta`.
+- Single slash vs. double: `${var/x/y}` replaces only the **first** `x`. To replace all, use `${var//x/y}`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Treating `old` as a regex. `${var//*/-}` doesn't replace "any character" — `*` matches the whole string in glob terms. To match any single character, use `?`.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting to escape special glob characters. To replace literal `*`, write `${var//\*/x}` (escape the asterisk).
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Putting a space accidentally: `${var// / -}` replaces a single space with `space-dash`, not `dash`. The replacement is everything between the second `/` and the closing `}`.
+
+- Trying to use `sed`-style flags: `${var//x/y/g}` is invalid — there's no `g` flag because `//` already means "all".

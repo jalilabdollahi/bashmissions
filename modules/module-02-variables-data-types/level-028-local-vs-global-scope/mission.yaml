@@ -5,28 +5,19 @@ module_display: Variables & Data Types
 title: Local vs Global Scope
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 28: Local vs Global Scope
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: "Set `x=global` at the top of the script. Define a function `demo` that uses `local x=local` and prints `inside: $x`. After calling the function, print `outside: $x` \u2014 the global value should be untouched."
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 28: Local vs Global Scope | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 28: Local vs Global Scope | spaces allowed | 42'
+- args: []
+  expected_stdout: 'inside: local
+
+    outside: global'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`local` keyword (preview)'
+- '`local`'
+- function scope
+- dynamic scoping
 scaffold: true

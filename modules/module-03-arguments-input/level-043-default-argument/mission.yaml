@@ -5,24 +5,22 @@ module_display: Arguments & Input
 title: Default Argument
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 43: Default Argument |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Print `Hello, <name>` where `<name>` is the first argument if provided,
+  otherwise `guest`. Use `${1:-guest}` rather than an `if` statement.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 43: Default Argument | alpha | beta'
+  - Ada
+  expected_stdout: Hello, Ada
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 43: Default Argument | spaces allowed | 42'
+  - two words
+  expected_stdout: Hello, two words
+  expected_exit: 0
+  comparison: exact
+- args: []
+  expected_stdout: Hello, guest
   expected_exit: 0
   comparison: exact
 fixtures:

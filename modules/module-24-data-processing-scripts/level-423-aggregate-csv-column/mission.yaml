@@ -4,29 +4,18 @@ module_name: data-processing-scripts
 module_display: Data Processing Scripts
 title: Aggregate CSV Column
 difficulty: advanced
-xp: 255
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `aggregate-csv-column:423:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 240
+objective: 'Aggregate a CSV numeric column and print sum, min, and max.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: aggregate-csv-column:423:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: aggregate-csv-column:423:processed:3:verbose
+  expected_stdout: 'sum=60
+min=10
+max=30'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+- data.csv
 concepts:
-- sum/avg/min/max
-scaffold: false
+- 'sum/avg/min/max'
+scaffold: true

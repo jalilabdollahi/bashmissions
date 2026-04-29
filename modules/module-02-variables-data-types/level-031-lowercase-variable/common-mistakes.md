@@ -1,13 +1,11 @@
 # Common Mistakes for Lowercase Variable
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 31: Lowercase Variable | alpha | beta`.
+- Misremembering the symbol. Uppercase uses `^` (carets); lowercase uses `,` (commas). It helps that `^` "points up" and `,` "drops down".
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Swapping single and double comma: `${var,}` only lowercases the first character. Easy mistake when copy-pasting from upper-case examples.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Bash 3.x doesn't support these. On older macOS, fall back to `echo "$text" | tr '[:upper:]' '[:lower:]'`.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Forgetting the braces: `echo $text,,` prints the literal commas. The expansion only happens inside `${ }`.
+
+- Comparing without normalising: `[[ "$answer" == "yes" ]]` fails for `Yes` and `YES`. Lowercase first or compare against a pattern: `[[ "$answer" =~ ^[Yy] ]]`.

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `2>`.
+Use the redirection or pipeline form from the curriculum: `2>`.

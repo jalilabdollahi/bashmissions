@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `wc -l`.
+Use the curriculum concept for this level: `wc -l`.

@@ -1,19 +1,29 @@
 # Guide for Function as Callback
 
-Try building the script in this order:
+Goal: Pass a function name as a callback to another function. Use it to print `HELLO`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Define the function needed for the level.
+2. Use the function pattern from this concept: passing function name.
+3. Call the function with quoted arguments when values may contain spaces.
+4. Match stdout and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '113' 'Function as Callback' "$1" "$2"
-```
+uppercase() {
+  echo "${1^^}"
+}
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+run_callback() {
+  local callback="$1"
+  local value="$2"
+  "$callback" "$value"
+}
+
+run_callback uppercase hello
+```

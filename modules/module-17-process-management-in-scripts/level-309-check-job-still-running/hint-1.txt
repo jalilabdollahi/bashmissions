@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `kill -0 $pid`.
+Use this curriculum concept: `kill -0 $pid`.

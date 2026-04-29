@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `read -p "prompt" var`.
+read -p combines prompting and reading; redirected tests provide the input non-interactively.

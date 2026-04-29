@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `name=value` (no spaces).
+Bash assigns variables with `name=value`. There must be **no spaces** around the `=`.

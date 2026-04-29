@@ -4,35 +4,16 @@ module_name: system-automation-scripts
 module_display: System Automation Scripts
 title: Config Distributor
 difficulty: expert
-xp: 415
-objective: 'Write `solution.sh` for the mission `Config Distributor`.
-
-  When passed an existing input file, print `config-distributor:444:expert:<mode>`
-  where `<mode>` is `ok` by default or the second argument.
-
-  If the input file does not exist, print nothing and exit 1.
-
-  For expert levels, treat the fixture data as the script''s working input.'
+xp: 220
+objective: 'Simulate config distributor safely in the workspace.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: config-distributor:444:expert:ok
+  expected_stdout: 'config_distributor=ok'
   expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - audit
-  expected_stdout: config-distributor:444:expert:audit
-  expected_exit: 0
-  comparison: exact
-- args:
-  - missing.txt
-  expected_stdout: ''
-  expected_exit: 1
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- rsync config to servers
-scaffold: false
+- 'rsync config to servers'
+scaffold: true

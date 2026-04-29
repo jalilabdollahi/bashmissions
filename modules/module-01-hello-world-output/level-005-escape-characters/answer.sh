@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 5: Escape Characters | %s | %s\n' "$1" "$2"
+# Print: File: C:\tmp\report.txt | Quote: "done"
+printf 'File: C:\\tmp\\%s | Quote: "%s"\n' "$1" "$2"

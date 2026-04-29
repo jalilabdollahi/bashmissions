@@ -5,29 +5,21 @@ module_display: Regular Expressions in Bash
 title: Character Classes
 difficulty: intermediate
 xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 223: Character Classes
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use a POSIX character class to accept alphabetic words and reject words with digits.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 223: Character Classes | alpha | beta'
+  - 'Bash'
+  expected_stdout: 'alpha=yes'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 223: Character Classes | spaces allowed | 42'
+  - 'Bash3'
+  expected_stdout: 'alpha=no'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- '`[a-z]`'
-- '`[[:alpha:]]`'
+- '`[a-z]`, `[[:alpha:]]`'
 scaffold: true

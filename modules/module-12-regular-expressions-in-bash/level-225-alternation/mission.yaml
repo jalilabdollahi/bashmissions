@@ -5,28 +5,21 @@ module_display: Regular Expressions in Bash
 title: Alternation
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 225: Alternation | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use alternation to accept start or stop and reject other commands.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 225: Alternation | alpha | beta'
+  - 'start'
+  expected_stdout: 'command=allowed'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 225: Alternation | spaces allowed | 42'
+  - 'restart'
+  expected_stdout: 'command=blocked'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- '`(foo\|bar)`'
+- '`(foo|bar)`'
 scaffold: true

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `\|\|` inside `[[ ]]`.
+Inside `[[ ]]`, `||` means either condition may be true.

@@ -1,23 +1,15 @@
-# Guide for Hardening Checklist Script
+# Solution Guide: Hardening Checklist Script
 
-Try building the script in this order:
-
-1. Read the input path from `$1` and the optional mode from `$2`.
-2. If the input file is missing, exit with status `1` and print nothing.
-3. Default the mode to `ok` when no second argument is provided.
-4. Print `hardening-checklist-script:454:expert:<mode>` for the success path.
-
-A working shape looks like this:
+This level focuses on check security settings.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-input=${1:-}
-mode=${2:-ok}
-
-[ -f "$input" ] || exit 1
-printf '%s\n' 'hardening-checklist-script:454:expert:'"$mode"
+workdir=hardening_checklist_script.work
+mkdir -p "$workdir"
+echo evidence > "$workdir/evidence.txt"
+tar -czf "$workdir/archive.tgz" -C "$workdir" evidence.txt
+[[ -s "$workdir/archive.tgz" ]] && echo 'hardening_checklist_script=ok'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the concept safely inside the mission workspace.

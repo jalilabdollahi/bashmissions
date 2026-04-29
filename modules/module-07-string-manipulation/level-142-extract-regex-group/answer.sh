@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 142: Extract Regex Group | %s | %s\n' "$1" "$2"
+str="$1"
+if [[ $str =~ ^user:([A-Za-z0-9_]+)$ ]]; then
+  echo "name=${BASH_REMATCH[1]}"
+else
+  echo "no match"
+fi

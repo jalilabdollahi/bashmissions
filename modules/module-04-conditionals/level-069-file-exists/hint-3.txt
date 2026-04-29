@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+`-e` means exists, but this level asks you to distinguish files from directories too.

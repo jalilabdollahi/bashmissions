@@ -1,20 +1,26 @@
 # Print Current Date
 
-This level practices **`$(date)` command substitution**.
+**Command substitution** captures the stdout of a command and inserts it into another string. The two equivalent forms in Bash:
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+- `$(command)` — modern, nestable, recommended.
+- `` `command` `` — legacy backticks; harder to read and to nest.
 
-Focus on three things:
+The `date` utility takes a format string starting with `+`. Useful tokens:
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+| Token | Meaning           | Example  |
+|-------|-------------------|----------|
+| `%Y`  | 4-digit year      | `2026`   |
+| `%m`  | 2-digit month     | `04`     |
+| `%d`  | 2-digit day       | `29`     |
+| `%H`  | hour (00–23)      | `14`     |
+| `%M`  | minute (00–59)    | `07`     |
+| `%S`  | second (00–59)    | `33`     |
+| `%F`  | shorthand for `%Y-%m-%d` | `2026-04-29` |
+| `%T`  | shorthand for `%H:%M:%S` | `14:07:33` |
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 13: Print Current Date | alpha | beta
+echo "today is $(date +%Y-%m-%d)"
+# today is 2026-04-29
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Because the value changes daily, the test uses a regex `today is \d{4}-\d{2}-\d{2}` rather than a fixed string.

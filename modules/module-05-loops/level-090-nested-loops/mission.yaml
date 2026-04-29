@@ -5,24 +5,18 @@ module_display: Loops
 title: Nested Loops
 difficulty: beginner
 xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 90: Nested Loops | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use nested loops to print all row/column pairs for rows `A B` and columns
+  `1 2` in row-major order.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 90: Nested Loops | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 90: Nested Loops | spaces allowed | 42'
+- args: []
+  expected_stdout: 'A1
+
+    A2
+
+    B1
+
+    B2'
   expected_exit: 0
   comparison: exact
 fixtures:

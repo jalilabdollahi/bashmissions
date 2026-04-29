@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `sed 's/old/new/'`.
+Use the regex concept from the curriculum: `sed 's/old/new/'`.

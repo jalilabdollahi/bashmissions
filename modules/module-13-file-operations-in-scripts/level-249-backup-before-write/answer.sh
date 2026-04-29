@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='backup-before-write:249:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
-fi
-
-printf '%s\n' "$output"
+echo "mode=old" > app.conf
+cp app.conf app.conf.bak
+echo "mode=new" > app.conf
+echo "current=$(cat app.conf)"
+echo "backup=$(cat app.conf.bak)"

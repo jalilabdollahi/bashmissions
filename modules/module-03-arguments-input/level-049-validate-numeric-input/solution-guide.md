@@ -1,19 +1,24 @@
 # Guide for Validate Numeric Input
 
-Try building the script in this order:
+Goal: Validate that the first argument contains only digits using `[[ $value =~ ^[0-9]+$ ]]`. If valid, print `number: <value>`; otherwise print nothing and exit with status 1.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
+2. Read the input using the curriculum concept for this level: test with regex `[[ $var =~ ^[0-9]+$ ]]`.
+3. Print only the required output, with quoted variable expansions.
+4. Run the mission tests, including the failure or empty-input case when one is listed.
+
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '49' 'Validate Numeric Input' "$1" "$2"
-```
+value="$1"
+if [[ ! $value =~ ^[0-9]+$ ]]; then
+  exit 1
+fi
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+echo "number: $value"
+```

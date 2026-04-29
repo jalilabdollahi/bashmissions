@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+The closing delimiter must be at the start of its own line, with nothing after it. Indenting `EOF` will break the heredoc unless you use the special `<<-` form with tabs.

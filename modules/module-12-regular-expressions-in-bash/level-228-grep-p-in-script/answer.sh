@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 228: grep -P in Script | %s | %s\n' "$1" "$2"
+grep -Po 'id=\K[0-9]+' fixtures/data.txt

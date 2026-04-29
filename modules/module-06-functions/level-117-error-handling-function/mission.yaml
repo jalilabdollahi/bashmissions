@@ -5,25 +5,18 @@ module_display: Functions
 title: Error-Handling Function
 difficulty: intermediate
 xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 117: Error-Handling Function
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Define a `die` function that prints `error: missing value` to stderr and
+  exits 1 when no argument is provided. With an argument, print `value=<arg>`.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 117: Error-Handling Function | alpha | beta'
+  - ok
+  expected_stdout: value=ok
   expected_exit: 0
   comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 117: Error-Handling Function | spaces allowed | 42'
-  expected_exit: 0
+- args: []
+  expected_stdout: ''
+  expected_exit: 1
   comparison: exact
 fixtures:
 - data.txt

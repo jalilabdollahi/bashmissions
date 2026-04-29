@@ -1,13 +1,11 @@
 # Common Mistakes for Print Environment Variable
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 12: Print Environment Variable | alpha | beta`.
+- Printing the literal text `$HOME` and `$USER`. Single quotes prevent expansion: `echo 'HOME=$HOME'` outputs the dollar signs verbatim. Use double quotes.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Wrong key order. The expected format is `HOME=... USER=...` — `USER` first will fail the regex.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Extra spaces or punctuation. The regex is strict: one space between the two `KEY=value` pairs, nothing else.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Assuming the values are fixed. `$HOME` and `$USER` differ per user; do not hard-code `/root` or your own username.
+
+- Forgetting that `set -u` makes unset variables an error. Both `HOME` and `USER` are normally set, but on a stripped-down environment use `${USER:-unknown}` to provide a fallback.

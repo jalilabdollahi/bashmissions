@@ -5,28 +5,30 @@ module_display: Conditionals
 title: Logical OR in Test
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 67: Logical OR in Test
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use `||` inside `[[ ]]` to check whether either of the first two arguments
+  is `yes`. Print `allowed` if either one is `yes`; otherwise print `denied`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 67: Logical OR in Test | alpha | beta'
+  - 'yes'
+  - 'no'
+  expected_stdout: allowed
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 67: Logical OR in Test | spaces allowed | 42'
+  - 'no'
+  - 'yes'
+  expected_stdout: allowed
+  expected_exit: 0
+  comparison: exact
+- args:
+  - 'no'
+  - 'no'
+  expected_stdout: denied
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`\|\|` inside `[[ ]]`'
+- '`||` inside `[[ ]]`'
 scaffold: true

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on create users from CSV.
+Use this curriculum concept: create users from CSV.

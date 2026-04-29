@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+declare -i n="$1"
+n+=10
+echo "$n"

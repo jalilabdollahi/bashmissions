@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Print only the final expected lines; redirect any teaching/demo noise into files or /dev/null.

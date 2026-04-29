@@ -1,19 +1,18 @@
-# Guide for Validate and Extract
+# Solution Guide: Validate and Extract
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on combined match + capture.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '231' 'Validate and Extract' "$1" "$2"
+record=${1:-}
+if [[ $record =~ ^([a-z]+):([0-9]+)$ ]]; then
+  echo "name=${BASH_REMATCH[1]}"
+  echo "score=${BASH_REMATCH[2]}"
+else
+  echo "invalid"
+fi
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script keeps the regex focused and prints only the deterministic result expected by the checker.

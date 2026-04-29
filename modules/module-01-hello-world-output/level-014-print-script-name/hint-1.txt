@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `$0`.
+`$0` holds the name the script was invoked as. It might include a path like `./solution.sh` or `/tmp/foo/solution.sh` depending on how it was run.

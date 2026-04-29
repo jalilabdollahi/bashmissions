@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `< file` not `cat file \|`.
+Use this curriculum concept: `< file` not `cat file |`.

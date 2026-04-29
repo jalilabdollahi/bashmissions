@@ -1,8 +1,13 @@
 # Escape Characters
 
-This level practices **`\n`, `\t` with `echo -e`**.
+This level teaches you how to print special characters in Bash output, such as backslashes and double quotes.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+Key takeaways:
+- Use printf for precise formatting and escaping.
+- Escape backslashes (\\) and double quotes (\").
+- Always quote your variables.
+
+This skill is essential for producing exact output in scripts, especially when working with file paths or quoted strings.
 
 Focus on three things:
 

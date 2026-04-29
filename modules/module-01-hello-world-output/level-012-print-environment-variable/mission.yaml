@@ -5,29 +5,17 @@ module_display: Hello World & Output
 title: Print Environment Variable
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 12: Print Environment
-  Variable | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print one line with the values of `$HOME` and `$USER` in the format `HOME=<home> USER=<user>`. Use the actual values from the environment, not literal placeholders.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 12: Print Environment Variable | alpha | beta'
+- args: []
+  expected_stdout: 'HOME=\S+ USER=\S+'
   expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 12: Print Environment Variable | spaces allowed | 42'
-  expected_exit: 0
-  comparison: exact
+  comparison: regex
 fixtures:
 - data.txt
 concepts:
 - '`$HOME`'
 - '`$USER`'
+- environment variables
 scaffold: true

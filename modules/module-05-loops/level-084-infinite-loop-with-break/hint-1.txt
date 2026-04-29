@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `while true; do ... break; done`.
+`while true` needs an explicit `break` or it will run forever.

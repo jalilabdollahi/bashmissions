@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+`printf` interprets `\033` as the escape byte automatically. With `echo`, you'd need `echo -e` or the bytes won't be expanded.

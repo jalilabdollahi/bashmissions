@@ -1,4 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 112: Recursive Tree Walk | %s | %s\n' "$1" "$2"
+walk() {
+  local dir="$1"
+  local base="$2"
+  local item rel
+  for item in "$dir"/*; do
+    [ -e "$item" ] || continue
+    rel="${item#$base/}"
+    if [ -d "$item" ]; then
+      walk "$item" "$base"
+    else
+      echo "$rel"
+    fi
+  done
+}
+
+walk fixtures/tree fixtures/tree

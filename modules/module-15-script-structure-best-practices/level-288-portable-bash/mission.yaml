@@ -4,29 +4,16 @@ module_name: script-structure-best-practices
 module_display: Script Structure & Best Practices
 title: Portable Bash
 difficulty: advanced
-xp: 255
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `portable-bash:288:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 175
+objective: 'Use portable shell constructs for a simple file test and output.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: portable-bash:288:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: portable-bash:288:processed:3:verbose
+  expected_stdout: 'portable=readable'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- avoid bashisms where possible
-scaffold: false
+- 'avoid bashisms where possible'
+scaffold: true

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on maintain exit code through functions.
+Use the defensive scripting concept from the curriculum: maintain exit code through functions.

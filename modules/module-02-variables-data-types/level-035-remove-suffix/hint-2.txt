@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+`${var%%pattern}` (double percent) removes the **longest** match. Use it to strip *all* extensions, not just the last.

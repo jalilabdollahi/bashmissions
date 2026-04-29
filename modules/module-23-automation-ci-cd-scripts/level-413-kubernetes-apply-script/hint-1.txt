@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on apply + wait + verify.
+Use this curriculum concept: apply wait verify.

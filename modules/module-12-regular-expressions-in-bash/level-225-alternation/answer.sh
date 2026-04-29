@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 225: Alternation | %s | %s\n' "$1" "$2"
+cmd=${1:-}
+if [[ $cmd =~ ^(start|stop)$ ]]; then
+  echo "command=allowed"
+else
+  echo "command=blocked"
+fi

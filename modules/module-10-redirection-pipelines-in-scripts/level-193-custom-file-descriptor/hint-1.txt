@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `exec 3>file`.
+Use the redirection or pipeline form from the curriculum: `exec 3>file`.

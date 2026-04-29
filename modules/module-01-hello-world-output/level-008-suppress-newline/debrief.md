@@ -1,20 +1,18 @@
 # Suppress Newline
 
-This level practices **`echo -n`**.
+This level teaches `echo -n`, which suppresses the trailing newline that `echo` normally adds.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+Key points:
 
-Focus on three things:
+- `echo "Hello"` outputs `Hello\n` (with newline).
+- `echo -n "Hello"` outputs `Hello` (no newline).
+- This is useful when you want to continue output on the same line or when a trailing newline would break a downstream tool.
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+Example run:
 
 ```bash
 ./solution.sh alpha beta
 # LEVEL 8: Suppress Newline | alpha | beta
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Note: `printf` is often preferred for portability, but `echo -n` is widely supported in bash scripts.

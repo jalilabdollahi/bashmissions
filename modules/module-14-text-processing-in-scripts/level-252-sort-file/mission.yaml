@@ -3,30 +3,19 @@ module: 14
 module_name: text-processing-in-scripts
 module_display: Text Processing in Scripts
 title: Sort File
-difficulty: advanced
-xp: 245
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `sort-file:252:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+difficulty: intermediate
+xp: 135
+objective: 'Sort a text file alphabetically.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: sort-file:252:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: sort-file:252:processed:3:verbose
+  expected_stdout: 'apple
+banana
+cherry'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`sort` in script'
-scaffold: false
+scaffold: true

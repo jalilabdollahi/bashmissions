@@ -1,13 +1,11 @@
 # Common Mistakes for Use a Variable
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 20: Use a Variable | alpha | beta`.
+- `echo "$name_suffix"` when you meant `echo "${name}_suffix"`. The first reads variable `name_suffix` (unset → empty); the second concatenates `$name` with `_suffix`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Skipping the double quotes: `echo $name` performs word splitting. If `$name` is `has spaces`, you get two arguments to echo. Always quote.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using single quotes around the variable: `echo '$name'` prints the literal text `$name`. Single quotes suppress all expansion.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Using `${var}` everywhere out of habit. It's not wrong, just noisy when not needed: `echo "$name"` is cleaner than `echo "${name}"`.
+
+- Believing `${name}` somehow "evaluates" or "calls" the variable. It just expands to the value, exactly like `$name` — the only purpose of the braces is to terminate the variable name.

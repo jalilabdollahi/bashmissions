@@ -5,24 +5,17 @@ module_display: String Manipulation
 title: Check Suffix
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 139: Check Suffix | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Print `yes` if the first argument ends with `.log`, otherwise print `no`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 139: Check Suffix | alpha | beta'
+  - app.log
+  expected_stdout: 'yes'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 139: Check Suffix | spaces allowed | 42'
+  - archive.log.old
+  expected_stdout: 'no'
   expected_exit: 0
   comparison: exact
 fixtures:

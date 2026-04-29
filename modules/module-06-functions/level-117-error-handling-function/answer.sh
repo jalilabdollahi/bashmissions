@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 117: Error-Handling Function | %s | %s\n' "$1" "$2"
+die() {
+  echo "error: $1" >&2
+  exit 1
+}
+
+if [ -z "${1:-}" ]; then
+  die "missing value"
+fi
+
+echo "value=$1"

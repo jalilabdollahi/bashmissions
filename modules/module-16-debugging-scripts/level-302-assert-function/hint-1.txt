@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on assert_eq, assert_true.
+Use this curriculum concept: assert_eq, assert_true.

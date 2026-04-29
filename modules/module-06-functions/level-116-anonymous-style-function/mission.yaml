@@ -5,24 +5,12 @@ module_display: Functions
 title: Anonymous-Style Function
 difficulty: intermediate
 xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 116: Anonymous-Style Function
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use an inline function definition inside a subshell or grouped block and
+  print `inline`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 116: Anonymous-Style Function | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 116: Anonymous-Style Function | spaces allowed | 42'
+- args: []
+  expected_stdout: inline
   expected_exit: 0
   comparison: exact
 fixtures:

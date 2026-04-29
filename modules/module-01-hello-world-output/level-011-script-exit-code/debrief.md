@@ -1,20 +1,18 @@
 # Script Exit Code
 
-This level practices **`exit 0`, `exit 1`**.
+Every Unix process returns a number when it ends — its **exit status**. By convention `0` means success, and anything from `1` to `255` signals failure. Tools like `make`, `bash &&`, and CI pipelines all key off this number.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+In Bash:
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+- `exit` with no argument exits with the status of the last command.
+- `exit 0` forces a clean success.
+- `exit 1` (or any nonzero) signals an error.
+- The special variable `$?` holds the previous command's status.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 11: Script Exit Code | alpha | beta
+./solution.sh 0   # prints "exit code: 0", returns 0
+./solution.sh 1   # prints "exit code: 1", returns 1
+echo $?           # 1
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The script tests above run your solution three times and check both stdout and the returned exit code. You can verify yourself with `echo $?` after a run.

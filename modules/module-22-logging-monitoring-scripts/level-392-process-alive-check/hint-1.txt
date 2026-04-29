@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on pidfile pattern.
+Use this curriculum concept: pidfile pattern.

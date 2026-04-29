@@ -1,19 +1,26 @@
 # Guide for Loop with Pipe
 
-Try building the script in this order:
+Goal: Read piped input with a `while read` loop and count the lines. With piped input, print `piped=<count>`; without piped input, print `piped=0`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify what the loop should iterate over.
+2. Use the loop pattern from this level: `while read` from pipe.
+3. Keep the loop body small and print only the required output.
+4. Make sure the loop stops; infinite loops must have an obvious `break` or exit path.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '94' 'Loop with Pipe' "$1" "$2"
-```
+count=0
+if [ -p /dev/stdin ]; then
+  while IFS= read -r _line; do
+    ((count += 1))
+  done
+fi
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+echo "piped=$count"
+```

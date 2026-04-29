@@ -5,24 +5,17 @@ module_display: String Manipulation
 title: Capitalize First Letter
 difficulty: intermediate
 xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 132: Capitalize First
-  Letter | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Capitalize only the first character of the first argument using `${str^}`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 132: Capitalize First Letter | alpha | beta'
+  - hello
+  expected_stdout: Hello
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 132: Capitalize First Letter | spaces allowed | 42'
+  - bash scripting
+  expected_stdout: Bash scripting
   expected_exit: 0
   comparison: exact
 fixtures:

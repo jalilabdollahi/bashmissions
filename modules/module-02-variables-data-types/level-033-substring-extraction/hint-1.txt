@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${var:offset:length}`.
+`${var:offset:length}` slices a substring. `offset` is 0-based; `length` is optional (defaults to the rest of the string).

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 16: Colorized Output | %s | %s\n' "$1" "$2"
+printf '\033[32mOK\033[0m\n'

@@ -1,1 +1,12 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+A compact solution can be shaped like this:
+
+if [ -p /dev/stdin ]; then
+  count=0
+  while IFS= read -r _line; do
+    ((count += 1))
+  done
+  printf 'pipe: %s lines
+' "$count"
+else
+  echo "no pipe"
+fi

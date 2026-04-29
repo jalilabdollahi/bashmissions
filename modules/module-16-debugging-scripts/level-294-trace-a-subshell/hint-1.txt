@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `bash -x script.sh`.
+Use this curriculum concept: `bash -x script.sh`.

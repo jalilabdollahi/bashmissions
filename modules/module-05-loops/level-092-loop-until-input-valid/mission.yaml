@@ -5,24 +5,21 @@ module_display: Loops
 title: Loop until Input Valid
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 92: Loop until Input Valid
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Loop over the arguments until you find the first all-numeric value. Print
+  `valid=<value>` and stop. If none is found, print `no valid input`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 92: Loop until Input Valid | alpha | beta'
+  - abc
+  - '12'
+  - xyz
+  expected_stdout: valid=12
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 92: Loop until Input Valid | spaces allowed | 42'
+  - 'no'
+  - still-no
+  expected_stdout: no valid input
   expected_exit: 0
   comparison: exact
 fixtures:

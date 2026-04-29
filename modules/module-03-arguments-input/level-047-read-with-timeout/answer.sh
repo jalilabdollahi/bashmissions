@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 47: Read with Timeout | %s | %s\n' "$1" "$2"
+if read -r -t 1 value < "$1"; then
+  echo "read: $value"
+else
+  echo "timeout"
+  exit 1
+fi

@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Wrap a command in `$(...)` to capture its output and embed it in another string. This is called command substitution.

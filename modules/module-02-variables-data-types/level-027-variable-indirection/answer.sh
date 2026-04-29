@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 27: Variable Indirection | %s | %s\n' "$1" "$2"
+COLOR_RED="red"
+COLOR_BLUE="blue"
+key="$1"
+echo "${!key}"

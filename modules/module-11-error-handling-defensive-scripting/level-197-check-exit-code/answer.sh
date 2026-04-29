@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 197: Check Exit Code | %s | %s\n' "$1" "$2"
+grep -q beta fixtures/data.txt
+code=$?
+echo "grep_exit=$code"

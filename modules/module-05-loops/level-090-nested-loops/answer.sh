@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 90: Nested Loops | %s | %s\n' "$1" "$2"
+for row in A B; do
+  for col in 1 2; do
+    echo "$row$col"
+  done
+done

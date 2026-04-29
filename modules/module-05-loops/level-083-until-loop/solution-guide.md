@@ -1,19 +1,23 @@
 # Guide for until Loop
 
-Try building the script in this order:
+Goal: Use an `until [ condition ]` loop to print `count=1`, `count=2`, and `count=3`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify what the loop should iterate over.
+2. Use the loop pattern from this level: `until [ condition ]`.
+3. Keep the loop body small and print only the required output.
+4. Make sure the loop stops; infinite loops must have an obvious `break` or exit path.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '83' 'until Loop' "$1" "$2"
+count=1
+until [ "$count" -gt 3 ]; do
+  echo "count=$count"
+  ((count += 1))
+done
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

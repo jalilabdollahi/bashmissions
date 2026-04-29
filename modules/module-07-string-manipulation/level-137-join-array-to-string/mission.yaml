@@ -5,29 +5,25 @@ module_display: String Manipulation
 title: Join Array to String
 difficulty: intermediate
 xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 137: Join Array to String
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Join the arguments with commas using the `IFS=,` array join trick.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 137: Join Array to String | alpha | beta'
+  - red
+  - green
+  - blue
+  expected_stdout: red,green,blue
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 137: Join Array to String | spaces allowed | 42'
+  - one
+  - two words
+  - three
+  expected_stdout: one,two words,three
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`IFS='
-- '` join trick'
+- '`IFS=,` join trick'
 scaffold: true

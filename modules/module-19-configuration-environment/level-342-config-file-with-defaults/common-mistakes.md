@@ -1,13 +1,5 @@
-# Common Mistakes for Config File with Defaults
+# Common Mistakes
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `config-file-with-defaults:342:processed:3`.
-
-- Forgetting to quote variables.
-  Check that the input file exists before printing anything, and return exit code `1` when it does not.
-
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
-
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Leaving background jobs or open file descriptors behind.
+- Printing extra debug output that is not part of the expected result.
+- Forgetting to quote paths, arguments, or config values.

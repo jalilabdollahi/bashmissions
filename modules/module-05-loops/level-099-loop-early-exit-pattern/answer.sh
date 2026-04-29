@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 99: Loop Early Exit Pattern | %s | %s\n' "$1" "$2"
+while IFS= read -r line; do
+  if [ "$line" = "STOP" ]; then
+    exit 0
+  fi
+  echo "$line"
+done < "$1"

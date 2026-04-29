@@ -1,13 +1,11 @@
 # Common Mistakes for Local vs Global Scope
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 28: Local vs Global Scope | alpha | beta`.
+- Forgetting `local`. An assignment inside a function silently mutates (or creates) a global variable — a bug that surfaces only when two functions both happen to use the same name.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Using `local` at the top level. It's only valid inside a function definition.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Believing dynamic scope works like lexical scope. Inside a function called by another function, you can see the caller's locals (unless the caller used `local`). This is rarely useful; treat it as a hazard.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Combining `local` with positional parameters: `local 1="$1"` is invalid (you can't make `$1` itself local). Instead: `local name="$1"`.
+
+- Forgetting that `local` requires the variable name as its argument: `local name=value` is correct; `local "$name=value"` does word splitting and breaks.

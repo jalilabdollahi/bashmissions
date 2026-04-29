@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 62: Test Empty String | %s | %s\n' "$1" "$2"
+value="${1:-}"
+
+if [ -z "$value" ]; then
+  echo "empty"
+else
+  echo "not empty"
+fi

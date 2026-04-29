@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on trap SIGHUP to reload.
+Use this curriculum concept: trap SIGHUP to reload.

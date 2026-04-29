@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on Deploy to dev/staging/prod with promotion gates.
+Use this curriculum concept: combine 5+ Bash scripting concepts.

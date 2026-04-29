@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 151: Float Arithmetic with bc | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+result=$(echo "scale=2; $a / $b" | bc)
+echo "result=$result"

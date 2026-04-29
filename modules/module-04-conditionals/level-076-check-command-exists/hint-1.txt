@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `command -v`.
+`command -v name` succeeds when a command can be found in PATH.

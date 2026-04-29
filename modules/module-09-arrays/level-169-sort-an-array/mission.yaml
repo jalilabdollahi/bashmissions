@@ -4,29 +4,18 @@ module_name: arrays
 module_display: Arrays
 title: Sort an Array
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 169: Sort an Array | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 145
+objective: 'Sort an array alphabetically by piping its elements through sort and reading the result into a new array.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 169: Sort an Array | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 169: Sort an Array | spaces allowed | 42'
+  expected_stdout: 'apple
+banana
+cherry'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`readarray` + `sort`'
 scaffold: true

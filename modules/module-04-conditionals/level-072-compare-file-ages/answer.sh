@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 72: Compare File Ages | %s | %s\n' "$1" "$2"
+first=$(mktemp)
+second=$(mktemp)
+trap 'rm -f "$first" "$second"' EXIT
+
+touch -t 202001010000 "$first"
+touch -t 202001010001 "$second"
+
+if [ "$second" -nt "$first" ]; then
+  echo "second newer"
+fi

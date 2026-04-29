@@ -5,24 +5,26 @@ module_display: Conditionals
 title: Nested if Statements
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 78: Nested if Statements
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use nested `if` statements to classify two arguments: role and environment.
+  Print `admin-prod`, `admin-other`, or `user`.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 78: Nested if Statements | alpha | beta'
+  - admin
+  - prod
+  expected_stdout: admin-prod
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 78: Nested if Statements | spaces allowed | 42'
+  - admin
+  - dev
+  expected_stdout: admin-other
+  expected_exit: 0
+  comparison: exact
+- args:
+  - guest
+  - prod
+  expected_stdout: user
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 173: Iterate Assoc Array | %s | %s\n' "$1" "$2"
+declare -A ports=([web]=80 [ssh]=22 [dns]=53)
+mapfile -t keys < <(printf '%s\n' "${!ports[@]}" | sort)
+for key in "${keys[@]}"; do
+  echo "$key=${ports[$key]}"
+done

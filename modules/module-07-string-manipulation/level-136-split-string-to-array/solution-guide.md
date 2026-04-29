@@ -1,19 +1,21 @@
 # Guide for Split String to Array
 
-Try building the script in this order:
+Goal: Split the first argument on commas into an array and print `count=N first=<first> last=<last>`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Store the input string in a variable.
+2. Apply the string operation from this concept: `IFS` split.
+3. Quote input assignments so spaces remain part of the string.
+4. Print exactly the transformed value or classification requested by the mission.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '136' 'Split String to Array' "$1" "$2"
+IFS=, read -r -a parts <<< "$1"
+last_index=$((${#parts[@]} - 1))
+printf 'count=%s first=%s last=%s\n' "${#parts[@]}" "${parts[0]}" "${parts[$last_index]}"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

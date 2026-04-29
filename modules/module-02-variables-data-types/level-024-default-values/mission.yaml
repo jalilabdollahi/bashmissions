@@ -4,29 +4,27 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Default Values
 difficulty: beginner
-xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 24: Default Values | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 60
+objective: Print `Hello, <name>` where `<name>` is `$1` if provided, otherwise the literal `anonymous`. Use the `${1:-default}` form, not an `if` statement.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 24: Default Values | alpha | beta'
+  - Jalil
+  expected_stdout: Hello, Jalil
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 24: Default Values | spaces allowed | 42'
+  - world
+  expected_stdout: Hello, world
+  expected_exit: 0
+  comparison: exact
+- args: []
+  expected_stdout: Hello, anonymous
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`${var:-default}`'
+- fallback values
 scaffold: true

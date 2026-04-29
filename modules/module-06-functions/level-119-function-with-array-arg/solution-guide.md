@@ -1,19 +1,26 @@
 # Guide for Function with Array Arg
 
-Try building the script in this order:
+Goal: Pass an array to a function using a nameref and print `count=3 first=red last=blue`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Define the function needed for the level.
+2. Use the function pattern from this concept: passing arrays via nameref.
+3. Call the function with quoted arguments when values may contain spaces.
+4. Match stdout and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '119' 'Function with Array Arg' "$1" "$2"
-```
+summarize_array() {
+  local -n items_ref="$1"
+  local last_index=$((${#items_ref[@]} - 1))
+  printf 'count=%s first=%s last=%s\n' "${#items_ref[@]}" "${items_ref[0]}" "${items_ref[$last_index]}"
+}
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+colors=(red green blue)
+summarize_array colors
+```

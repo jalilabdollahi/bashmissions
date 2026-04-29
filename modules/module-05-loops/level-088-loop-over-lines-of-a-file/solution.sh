@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+while IFS= read -r line; do
+  echo "line=$line"
+done < "$1"

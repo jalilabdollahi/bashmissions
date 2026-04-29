@@ -1,13 +1,11 @@
 # Common Mistakes for Print Version Info
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 18: Print Version Info | alpha | beta`.
+- Spaces around `=` in assignment: `name = "$1"`. Bash reads this as "run the command `name` with arguments `=` and `$1`" and fails.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Single-quoting the output: `echo '$name version $version'` prints the literal text including dollar signs. Use double quotes so variables expand.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Wrong word between the variables. The expected format is `<name> version <version>` — singular `version`, all lowercase. `Version` or `ver` won't match.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Forgetting to copy `$2`. If you only assign `name="$1"` and reference `$2` later, the script still works, but the level explicitly asks for two named variables — use them both.
+
+- Trailing punctuation. `echo "$name version $version."` adds a period the test doesn't expect.

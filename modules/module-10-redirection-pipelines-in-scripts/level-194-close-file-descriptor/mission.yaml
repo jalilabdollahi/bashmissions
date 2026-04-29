@@ -4,29 +4,17 @@ module_name: redirection-pipelines-in-scripts
 module_display: Redirection & Pipelines in Scripts
 title: Close File Descriptor
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 194: Close File Descriptor
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Open and close a custom file descriptor, then report that the descriptor was closed.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 194: Close File Descriptor | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 194: Close File Descriptor | spaces allowed | 42'
+  expected_stdout: 'fd3=closed
+before close'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`exec 3>&-`'
 scaffold: true

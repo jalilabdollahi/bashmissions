@@ -1,26 +1,16 @@
-# Guide for Use Meaningful Names
+# Solution Guide: Use Meaningful Names
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `use-meaningful-names:283:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on naming conventions.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='use-meaningful-names:283:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+source_file="fixtures/data.txt"
+destination_file="result.txt"
+cp "$source_file" "$destination_file"
+printf 'destination=%s\n' "$destination_file"
+printf 'content=%s\n' "$(< "$destination_file")"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

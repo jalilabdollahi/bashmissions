@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 88: Loop over Lines of a File | %s | %s\n' "$1" "$2"
+while IFS= read -r line; do
+  echo "line=$line"
+done < "$1"

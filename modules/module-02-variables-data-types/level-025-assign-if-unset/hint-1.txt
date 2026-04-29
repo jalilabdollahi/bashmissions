@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${var:=default}`.
+`${var:=default}` (with `=`) substitutes the default *and* assigns it to `var` — unlike `:-` which only substitutes.

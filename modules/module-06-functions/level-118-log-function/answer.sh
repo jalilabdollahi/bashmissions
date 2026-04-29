@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 118: Log Function | %s | %s\n' "$1" "$2"
+log() {
+  local message="$1"
+  printf '[%s] %s\n' "$(date +%Y-%m-%d)" "$message"
+}
+
+log "deploy"

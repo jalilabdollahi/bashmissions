@@ -5,24 +5,22 @@ module_display: String Manipulation
 title: Check Substring
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 140: Check Substring |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Print `yes` if the first argument contains `mid`, otherwise print `no`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 140: Check Substring | alpha | beta'
+  - amidb
+  expected_stdout: 'yes'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 140: Check Substring | spaces allowed | 42'
+  - middle
+  expected_stdout: 'yes'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - edge
+  expected_stdout: 'no'
   expected_exit: 0
   comparison: exact
 fixtures:

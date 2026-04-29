@@ -1,0 +1,4 @@
+name,region,cpu
+api,east,150
+web,west,50
+worker,east,200

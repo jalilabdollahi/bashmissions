@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+x="global"
+demo() {
+  local x="local"
+  echo "inside: $x"
+}
+demo
+echo "outside: $x"

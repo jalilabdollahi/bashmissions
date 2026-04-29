@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 215: Basic Regex Match | %s | %s\n' "$1" "$2"
+value="server-42"
+if [[ $value =~ [0-9]+ ]]; then
+  echo "match=yes"
+else
+  echo "match=no"
+fi

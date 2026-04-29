@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 140: Check Substring | %s | %s\n' "$1" "$2"
+str="$1"
+if [[ $str == *mid* ]]; then
+  echo "yes"
+else
+  echo "no"
+fi

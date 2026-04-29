@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on while read loop.
+The robust file-reading pattern is while IFS= read -r line; do ...; done < "$file".

@@ -4,29 +4,29 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Integer Variables
 difficulty: beginner
-xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 23: Integer Variables
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 70
+objective: Declare an integer variable holding `$1`, add `10` to it with `+=`, and print the result. Without the integer attribute, `+=` would do string concatenation instead.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 23: Integer Variables | alpha | beta'
+  - '5'
+  expected_stdout: '15'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 23: Integer Variables | spaces allowed | 42'
+  - '100'
+  expected_stdout: '110'
+  expected_exit: 0
+  comparison: exact
+- args:
+  - '-3'
+  expected_stdout: '7'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`declare -i`'
+- arithmetic vs string
+- '`+=`'
 scaffold: true

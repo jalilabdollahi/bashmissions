@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='find-files-by-pattern:245:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
-fi
-
-printf '%s\n' "$output"
+mkdir -p logs
+touch logs/app.log logs/app.txt logs/error.log
+find logs -type f -name '*.log' -printf '%f\n' | sort

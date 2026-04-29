@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on decision trees.
+A nested `if` lets one decision happen only inside another branch.

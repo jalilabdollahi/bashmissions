@@ -1,19 +1,21 @@
 # Guide for for Loop over Range
 
-Try building the script in this order:
+Goal: Use brace expansion in a `for` loop to print the numbers 1 through 5, one per line.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify what the loop should iterate over.
+2. Use the loop pattern from this level: `for i in {1..10}`.
+3. Keep the loop body small and print only the required output.
+4. Make sure the loop stops; infinite loops must have an obvious `break` or exit path.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '80' 'for Loop over Range' "$1" "$2"
+for i in {1..5}; do
+  echo "$i"
+done
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

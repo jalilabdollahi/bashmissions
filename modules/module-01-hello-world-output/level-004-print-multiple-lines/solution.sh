@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+echo "Line 1: $1"
+echo "Line 2: $2"
+echo "Done."

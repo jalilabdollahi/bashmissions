@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on collect forensic data.
+Use this curriculum concept: collect forensic data.

@@ -1,19 +1,26 @@
 # Guide for Assign a Variable
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Assign `$1` to a named variable: `greeting="$1"`.
+3. Print the variable: `echo "$greeting"`.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '19' 'Assign a Variable' "$1" "$2"
+greeting="$1"
+echo "$greeting"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh hello       # hello
+./solution.sh "has spaces" # has spaces
+```
+
+Use `answer` if stuck.

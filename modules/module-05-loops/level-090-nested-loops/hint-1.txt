@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on matrix iteration.
+The inner loop runs completely for each outer loop value.

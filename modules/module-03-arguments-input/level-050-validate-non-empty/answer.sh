@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 50: Validate Non-Empty | %s | %s\n' "$1" "$2"
+value="${1:-}"
+if [[ -z $value ]]; then
+  exit 1
+fi
+
+echo "value: $value"

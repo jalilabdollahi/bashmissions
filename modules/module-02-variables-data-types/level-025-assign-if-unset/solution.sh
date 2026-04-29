@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+name="$1"
+: "${name:=guest}"
+echo "Welcome, $name"

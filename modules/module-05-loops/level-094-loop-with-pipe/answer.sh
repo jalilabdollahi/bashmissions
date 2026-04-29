@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 94: Loop with Pipe | %s | %s\n' "$1" "$2"
+count=0
+if [ -p /dev/stdin ]; then
+  while IFS= read -r _line; do
+    ((count += 1))
+  done
+fi
+
+echo "piped=$count"

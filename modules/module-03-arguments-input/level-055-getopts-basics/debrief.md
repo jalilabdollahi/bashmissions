@@ -1,20 +1,7 @@
 # Getopts Basics
 
-This level practices **`getopts "ab:" opt`**.
+This mission practices `getopts "ab:" opt` from Module 3 of the curriculum.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+The important habit is to treat script input deliberately: positional arguments, `read`, validation checks, and option parsing all have slightly different rules. Quoting expansions and checking missing input early keeps small Bash tools predictable.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 55: Getopts Basics | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The reference answer is intentionally small so the curriculum concept stays visible.

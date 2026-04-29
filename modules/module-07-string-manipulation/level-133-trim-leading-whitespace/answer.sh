@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s extglob
 
-printf 'LEVEL 133: Trim Leading Whitespace | %s | %s\n' "$1" "$2"
+str="$1"
+echo "${str##+([[:space:]])}"

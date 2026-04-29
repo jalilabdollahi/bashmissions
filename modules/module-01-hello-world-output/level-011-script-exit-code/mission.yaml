@@ -5,29 +5,25 @@ module_display: Hello World & Output
 title: Script Exit Code
 difficulty: beginner
 xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 11: Script Exit Code |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print `exit code: <arg1>` and exit with status `<arg1>` (a number).'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 11: Script Exit Code | alpha | beta'
+- args: ['0']
+  expected_stdout: 'exit code: 0'
   expected_exit: 0
   comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 11: Script Exit Code | spaces allowed | 42'
-  expected_exit: 0
+- args: ['1']
+  expected_stdout: 'exit code: 1'
+  expected_exit: 1
+  comparison: exact
+- args: ['7']
+  expected_stdout: 'exit code: 7'
+  expected_exit: 7
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`exit 0`'
 - '`exit 1`'
+- exit status
 scaffold: true

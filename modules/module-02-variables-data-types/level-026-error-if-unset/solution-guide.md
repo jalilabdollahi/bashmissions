@@ -1,19 +1,26 @@
 # Guide for Error If Unset
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Read `$1` with the fail-fast expansion: `name="${1:?missing argument}"`.
+3. Print `Hello, $name` — only reached if `$1` was provided.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '26' 'Error If Unset' "$1" "$2"
+name="${1:?missing argument}"
+echo "Hello, $name"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh Jalil      # Hello, Jalil
+./solution.sh; echo $?   # error message on stderr, exit 1
+```
+
+Inspect the stderr separately: `./solution.sh 2>err.log` then `cat err.log`. Use `answer` if stuck.

@@ -1,26 +1,19 @@
-# Guide for Strict Mode Setup
+# Solution Guide: Strict Mode Setup
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `strict-mode-setup:276:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `set -euo pipefail` + IFS.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
+IFS=$'\n\t'
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='strict-mode-setup:276:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+items=$'alpha\nbeta gamma'
+count=0
+for item in $items; do
+  ((++count))
+done
+echo "strict=on"
+echo "items=$count"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

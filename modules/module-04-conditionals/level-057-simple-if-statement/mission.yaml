@@ -5,24 +5,18 @@ module_display: Conditionals
 title: Simple if Statement
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 57: Simple if Statement
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use a simple `if [ condition ]; then` statement. If the first argument
+  is `yes`, print `matched`; otherwise print nothing and exit 0.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 57: Simple if Statement | alpha | beta'
+  - 'yes'
+  expected_stdout: matched
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 57: Simple if Statement | spaces allowed | 42'
+  - 'no'
+  expected_stdout: ''
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -5,29 +5,17 @@ module_display: Hello World & Output
 title: Escape Characters
 difficulty: beginner
 xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 5: Escape Characters |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use escape characters to print backslashes and double quotes.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 5: Escape Characters | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 5: Escape Characters | spaces allowed | 42'
+- args: ['report.txt', 'done']
+  expected_stdout: 'File: C:\tmp\report.txt | Quote: "done"'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`\n`'
-- '`\t` with `echo -e`'
+- escape sequences
+- backslash
+- quotes
 scaffold: true

@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 92: Loop until Input Valid | %s | %s\n' "$1" "$2"
+while (( $# > 0 )); do
+  if [[ $1 =~ ^[0-9]+$ ]]; then
+    echo "valid=$1"
+    exit 0
+  fi
+  shift
+done
+
+echo "no valid input"

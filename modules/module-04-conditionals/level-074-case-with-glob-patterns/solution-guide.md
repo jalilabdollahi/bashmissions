@@ -1,19 +1,23 @@
 # Guide for Case with Glob Patterns
 
-Try building the script in this order:
+Goal: Use `case` glob patterns to classify the first argument. Print `shell` for `*.sh`, `text` for `*.txt`, and `other` for everything else.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify the value or path being tested.
+2. Write the conditional form from this level: `case` pattern matching.
+3. Quote variable expansions unless the syntax specifically needs an unquoted pattern.
+4. Match the expected output and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '74' 'Case with Glob Patterns' "$1" "$2"
+case "${1:-}" in
+  *.sh) echo "shell" ;;
+  *.txt) echo "text" ;;
+  *) echo "other" ;;
+esac
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

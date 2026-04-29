@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 166: Array from Command | %s | %s\n' "$1" "$2"
+mapfile -t names < <(printf '%s\n' alpha beta gamma)
+printf '%s\n' "${names[@]}"

@@ -1,20 +1,3 @@
-# Loop over Array
+# Debrief
 
-This level practices **`for item in "${arr[@]}"`**.
-
-This pattern shows up in everyday automation work, where scripts need to turn files and arguments into predictable output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 164: Loop over Array | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+You practiced `Loop over Array` with the Bash array pattern ``for item in "${arr[@]}"``. This is a building block for scripts that keep lists, lookup tables, and structured command output in memory.

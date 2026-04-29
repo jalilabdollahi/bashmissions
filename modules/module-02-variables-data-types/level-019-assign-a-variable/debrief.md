@@ -1,20 +1,23 @@
 # Assign a Variable
 
-This level practices **`name=value` (no spaces)**.
-
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+In Bash, variable assignment looks deceptively similar to other languages — but the syntax is strict:
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 19: Assign a Variable | alpha | beta
+name=value          # OK
+name="value"        # OK, recommended for anything with spaces or special chars
+name = "value"      # ERROR: spaces are forbidden
+name= value         # ERROR: assigns empty string to name, then tries to run `value`
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The shell uses spaces as the separator between command and arguments, so `name = value` is parsed as "run command `name` with two arguments". This is a common stumble for people coming from Python or JavaScript.
+
+Notes:
+
+- Variables are untyped — every value is a string. You can interpret it as a number with arithmetic operators (`$((n+1))`) but the storage is text.
+- Names can contain letters, digits, and underscores, and cannot start with a digit.
+- Convention: lowercase for script-local variables, ALL_CAPS for environment variables and constants.
+
+```bash
+greeting="hello"
+echo "$greeting"   # hello
+```

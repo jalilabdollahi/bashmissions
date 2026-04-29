@@ -5,28 +5,21 @@ module_display: Regular Expressions in Bash
 title: Match a Number
 difficulty: intermediate
 xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 218: Match a Number |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use an anchored numeric regex to print number or not-number for the argument.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 218: Match a Number | alpha | beta'
+  - '12345'
+  expected_stdout: 'number'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 218: Match a Number | spaces allowed | 42'
+  - '12a'
+  expected_stdout: 'not-number'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`^[0-9]+$`'
 scaffold: true

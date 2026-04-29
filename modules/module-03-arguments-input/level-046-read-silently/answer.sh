@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 46: Read Silently | %s | %s\n' "$1" "$2"
+read -r -s password < "$1"
+printf 'Password length: %s
+' "${#password}"

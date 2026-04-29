@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on printf with padding.
+`printf '%10s' x` pads `x` with spaces on the left to width 10. The minus sign in `%-10s` left-aligns instead, padding on the right.

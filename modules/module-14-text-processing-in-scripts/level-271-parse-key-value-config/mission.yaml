@@ -3,30 +3,18 @@ module: 14
 module_name: text-processing-in-scripts
 module_display: Text Processing in Scripts
 title: Parse Key=Value Config
-difficulty: advanced
-xp: 235
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `parse-key-value-config:271:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+difficulty: intermediate
+xp: 125
+objective: 'Parse a key=value config file, skipping blank lines and comments.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: parse-key-value-config:271:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: parse-key-value-config:271:processed:3:verbose
+  expected_stdout: 'host=localhost
+port=8080'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- while read + IFS
-scaffold: false
+- 'while read + IFS'
+scaffold: true

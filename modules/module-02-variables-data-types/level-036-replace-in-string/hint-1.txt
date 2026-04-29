@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${var//old/new}`.
+`${var/old/new}` replaces the **first** match of `old` (a glob pattern) with `new`. `${var//old/new}` (double slash) replaces **all** matches.

@@ -5,28 +5,28 @@ module_display: Conditionals
 title: File Exists
 difficulty: beginner
 xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 69: File Exists | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Inspect the path in `$1`. Print `file` if it is a regular file, `directory`
+  if it is a directory, and `missing` if it does not exist.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 69: File Exists | alpha | beta'
+  - fixtures/data.txt
+  expected_stdout: file
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 69: File Exists | spaces allowed | 42'
+  - fixtures/sample-dir
+  expected_stdout: directory
+  expected_exit: 0
+  comparison: exact
+- args:
+  - fixtures/nope.txt
+  expected_stdout: missing
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
+- sample-dir
 concepts:
 - '`-e`'
 - '`-f`'

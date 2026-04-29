@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+With the integer attribute, `n+=10` adds 10. Without it, `n+=10` *concatenates* the string `10` to the end.

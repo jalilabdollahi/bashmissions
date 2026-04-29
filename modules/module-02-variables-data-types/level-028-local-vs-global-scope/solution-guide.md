@@ -1,19 +1,33 @@
 # Guide for Local vs Global Scope
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Set `x="global"` at the top level.
+3. Define a function `demo` that declares `local x="local"` and prints `inside: $x`.
+4. Call `demo`, then print `outside: $x`.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '28' 'Local vs Global Scope' "$1" "$2"
+x="global"
+demo() {
+  local x="local"
+  echo "inside: $x"
+}
+demo
+echo "outside: $x"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh
+# inside: local
+# outside: global
+```
+
+Drop `local` and rerun: now both lines print `local`. Use `answer` if stuck.

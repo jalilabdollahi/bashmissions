@@ -1,1 +1,3 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Match exactly two lines:
+single: $name
+double: <arg1>

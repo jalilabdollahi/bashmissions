@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='read-line-by-line:237:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
-fi
-
-printf '%s\n' "$output"
+n=1
+while IFS= read -r line; do
+  echo "$n:$line"
+  ((n++))
+done < fixtures/data.txt

@@ -1,4 +1,0 @@
-service=api status=ok latency_ms=120
-service=worker status=warn latency_ms=340
-service=db status=ok latency_ms=95
-mission=440 title=user-provisioning-script

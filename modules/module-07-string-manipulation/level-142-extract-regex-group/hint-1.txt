@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${BASH_REMATCH[1]}`.
+Parentheses in a Bash regex create capture groups.

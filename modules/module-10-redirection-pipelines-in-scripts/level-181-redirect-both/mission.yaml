@@ -4,29 +4,17 @@ module_name: redirection-pipelines-in-scripts
 module_display: Redirection & Pipelines in Scripts
 title: Redirect Both
 difficulty: intermediate
-xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 181: Redirect Both | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 145
+objective: 'Redirect stdout and stderr from the same block into one file, then print that file.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 181: Redirect Both | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 181: Redirect Both | spaces allowed | 42'
+  expected_stdout: 'stdout: ready
+stderr: warning'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`&>`'
 scaffold: true

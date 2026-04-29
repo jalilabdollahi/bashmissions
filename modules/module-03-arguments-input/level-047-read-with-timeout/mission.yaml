@@ -5,24 +5,14 @@ module_display: Arguments & Input
 title: Read with Timeout
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 47: Read with Timeout
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use `read -r -t 1` to read from the file path in `$1`. If the read succeeds,
+  print `read: <value>`; if it times out or fails, print `timeout` and exit with status
+  1.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 47: Read with Timeout | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 47: Read with Timeout | spaces allowed | 42'
+  - fixtures/data.txt
+  expected_stdout: 'read: fast'
   expected_exit: 0
   comparison: exact
 fixtures:

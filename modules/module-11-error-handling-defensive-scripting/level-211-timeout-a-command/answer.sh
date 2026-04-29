@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 211: Timeout a Command | %s | %s\n' "$1" "$2"
+timeout 0.1s sleep 1
+code=$?
+echo "timeout_exit=$code"

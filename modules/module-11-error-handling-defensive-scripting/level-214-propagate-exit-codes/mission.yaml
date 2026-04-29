@@ -4,29 +4,16 @@ module_name: error-handling-defensive-scripting
 module_display: Error Handling & Defensive Scripting
 title: Propagate Exit Codes
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 214: Propagate Exit Codes
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 145
+objective: 'Return a command status from a function and report the propagated code.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 214: Propagate Exit Codes | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 214: Propagate Exit Codes | spaces allowed | 42'
+  expected_stdout: 'function_exit=1'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- maintain exit code through functions
+- 'maintain exit code through functions'
 scaffold: true

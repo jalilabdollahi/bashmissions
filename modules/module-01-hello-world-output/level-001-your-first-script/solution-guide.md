@@ -1,19 +1,18 @@
 # Guide for Your First Script
 
-Try building the script in this order:
+This level is a true hello-world starter. Keep it simple:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Add a shebang.
+2. Enable safe defaults.
+3. Print exactly one line: `Hello, BashMissions!`
 
-A working shape looks like this:
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '1' 'Your First Script' "$1" "$2"
+echo "Hello, BashMissions!"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The validator checks exact output text, so avoid extra spaces or punctuation changes.

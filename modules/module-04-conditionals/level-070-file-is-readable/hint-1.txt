@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `-r`, `-w`, `-x`.
+`-r` checks whether a path can be read.

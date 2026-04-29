@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+if [ -r "$1" ]; then
+  echo "readable"
+else
+  echo "not readable"
+fi

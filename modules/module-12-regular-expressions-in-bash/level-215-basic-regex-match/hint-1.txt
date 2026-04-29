@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `[[ $str =~ pattern ]]`.
+Use the regex concept from the curriculum: `[[ $str =~ pattern ]]`.

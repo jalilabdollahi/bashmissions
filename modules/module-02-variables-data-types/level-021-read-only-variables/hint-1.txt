@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `readonly`.
+`readonly NAME=value` (or `declare -r NAME=value`) makes a variable immutable — later assignments fail with an error.

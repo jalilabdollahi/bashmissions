@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `while IFS= read -r line < <(cmd)`.
+Process substitution lets a loop read from a command without using a pipeline subshell.

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+if [ "$1" = "on" ]; then
+  echo "enabled"
+else
+  echo "disabled"
+fi

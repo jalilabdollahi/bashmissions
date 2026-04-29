@@ -1,13 +1,6 @@
 # Common Mistakes for Overriding a Function
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 115: Overriding a Function | alpha | beta`.
-
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
-
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
-
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Defining a function but forgetting to call it.
+- Confusing script arguments with function arguments.
+- Using `return` for strings; in Bash, functions print string results and `return` sets an exit code.
+- Letting a deliberate non-zero function return abort a `set -e` script before it can be handled.

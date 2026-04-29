@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+name="$1"
+version="$2"
+echo "$name version $version"

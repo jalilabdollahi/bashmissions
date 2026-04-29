@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on extract values with grep/awk.
+Use the curriculum concept for this level: extract values with grep/awk.

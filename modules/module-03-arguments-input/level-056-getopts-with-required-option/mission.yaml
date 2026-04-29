@@ -5,25 +5,30 @@ module_display: Arguments & Input
 title: Getopts with Required Option
 difficulty: beginner
 xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 56: Getopts with Required
-  Option | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use `getopts` to require `-f VALUE`. If `-f` is missing or has no value,
+  print nothing and exit with status 1. If present, print `file=<value>`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 56: Getopts with Required Option | alpha | beta'
+  - -f
+  - config.yml
+  expected_stdout: file=config.yml
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 56: Getopts with Required Option | spaces allowed | 42'
+  - -f
+  - two words.txt
+  expected_stdout: file=two words.txt
   expected_exit: 0
+  comparison: exact
+- args: []
+  expected_stdout: ''
+  expected_exit: 1
+  comparison: exact
+- args:
+  - -f
+  expected_stdout: ''
+  expected_exit: 1
   comparison: exact
 fixtures:
 - data.txt

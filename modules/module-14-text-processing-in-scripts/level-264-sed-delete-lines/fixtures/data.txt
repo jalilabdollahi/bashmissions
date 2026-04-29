@@ -1,3 +1,4 @@
-alpha
-beta
-gamma
+INFO start
+DEBUG trace
+WARN disk
+DEBUG more

@@ -4,29 +4,17 @@ module_name: data-processing-scripts
 module_display: Data Processing Scripts
 title: Count Log Events
 difficulty: advanced
-xp: 245
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `count-log-events:427:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 230
+objective: 'Count log event types into a frequency table.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: count-log-events:427:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: count-log-events:427:processed:3:verbose
+  expected_stdout: 'ERROR=2
+INFO=1'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+- app.log
 concepts:
-- frequency table
-scaffold: false
+- 'frequency table'
+scaffold: true

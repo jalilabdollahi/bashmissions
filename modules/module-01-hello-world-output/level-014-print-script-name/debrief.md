@@ -1,20 +1,25 @@
 # Print Script Name
 
-This level practices **`$0`**.
+In Bash, the positional parameters `$0`, `$1`, `$2`, … hold the words on the command line that started the script. The first one is special:
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+- `$0` — the script itself, exactly as invoked. Could be `solution.sh`, `./solution.sh`, or an absolute path like `/usr/local/bin/foo`.
+- `$1`, `$2`, … — the arguments passed *after* the script name.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+Because `$0` may include a directory, scripts that want only the bare filename pipe it through **`basename`**:
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 14: Print Script Name | alpha | beta
+basename /usr/local/bin/foo   # foo
+basename ./solution.sh        # solution.sh
+basename solution.sh          # solution.sh
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Combined:
+
+```bash
+echo "script: $(basename "$0")"
+```
+
+Self-aware scripts use this for things like:
+- usage strings: `echo "Usage: $(basename "$0") <args>"`
+- log lines that include their own name
+- behaving differently when invoked through a symlink (`ln -s mytool foo` lets one script act as both `mytool` and `foo`)

@@ -1,20 +1,34 @@
 # Multi-line String
 
-This level practices **here-string with echo**.
-
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+A **here-document** ("heredoc") is the cleanest way to feed a multi-line block of text to a command's stdin in Bash. The form:
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 15: Multi-line String | alpha | beta
+cat <<EOF
+first line
+second line
+EOF
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Anatomy:
+
+- `<<EOF` — start the heredoc; `EOF` is the *delimiter* (any token works: `END`, `DONE`, `STOP`).
+- The lines that follow become stdin for the command before `<<`.
+- A line containing only the delimiter ends the block.
+
+Variations worth knowing:
+
+| Form         | Behavior                                                  |
+|--------------|-----------------------------------------------------------|
+| `<<EOF`      | Variables and `$()` expand inside the body.               |
+| `<<'EOF'`    | Quoted delimiter — body is **literal**, no expansion.     |
+| `<<-EOF`     | Strips leading **tabs** from each body line (only tabs).  |
+
+Heredocs are how scripts emit usage strings, generated config files, and SQL blocks without escaping every quote.
+
+```bash
+cat <<EOF
+line one
+line two
+line three
+EOF
+```

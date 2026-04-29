@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on line-by-line state machine.
+Use the regex concept from the curriculum: line-by-line state machine.

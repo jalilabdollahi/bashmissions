@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `[[ $str == *suffix ]]`.
+A leading `*` in the pattern allows any prefix.

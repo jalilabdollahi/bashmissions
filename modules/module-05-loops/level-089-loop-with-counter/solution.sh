@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+counter=1
+while IFS= read -r line; do
+  echo "$counter:$line"
+  ((counter += 1))
+done < "$1"

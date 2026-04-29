@@ -1,13 +1,13 @@
 # Common Mistakes for Print a Message
 
 - Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 2: Print a Message | alpha | beta`.
+  The validator compares against output like `Message: Hello Bash`.
 
 - Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+  Use `"$1"` so spaces in arguments stay intact.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Using the wrong argument.
+  This level uses only the first argument (`$1`).
 
 - Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+  Read the mission again and match the exact prefix and punctuation.

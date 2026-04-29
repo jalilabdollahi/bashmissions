@@ -1,20 +1,20 @@
 # Print Environment Variable
 
-This level practices **`$HOME`, `$USER`**.
+Every Unix process inherits an **environment**: a set of `KEY=value` pairs passed down from its parent. In a Bash script, these are visible as regular variables.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+The most common ones:
 
-Focus on three things:
+- `$HOME` — the current user's home directory (e.g. `/home/jalil`).
+- `$USER` — the login name.
+- `$PATH` — colon-separated list of directories searched for commands.
+- `$PWD` — the current working directory.
+- `$SHELL` — the user's login shell.
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+You can list everything with `env` or `printenv`. Set your own with `export NAME=value` (more in module 19).
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 12: Print Environment Variable | alpha | beta
+echo "HOME=$HOME USER=$USER"
+# HOME=/home/jalil USER=jalil
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Because actual values differ per machine, the test uses a regex (`HOME=\S+ USER=\S+`) — you can run your solution and eyeball it.

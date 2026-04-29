@@ -1,13 +1,16 @@
 # Common Mistakes for Suppress Newline
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 8: Suppress Newline | alpha | beta`.
+- Using `echo "LEVEL 8: Suppress Newline | $1 | $2"` without `-n`.
+  This adds a trailing newline, which will fail the exact comparison.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Forgetting to quote `"$1"` or `"$2"`.
+  Unquoted arguments break with inputs containing spaces (e.g., `spaces allowed`).
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Only using `$1` and missing `$2`.
+  The output requires both arguments separated by ` | `.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Using `printf 'LEVEL 8: Suppress Newline | %s | %s\n'` instead of `echo -n`.
+  That works but misses the `echo -n` concept this level is teaching.
+
+- Getting the output format wrong.
+  The required format is exactly `LEVEL 8: Suppress Newline | <arg1> | <arg2>` — spacing and pipe separators must match exactly.

@@ -5,24 +5,17 @@ module_display: Loops
 title: Loop over Lines of a File
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 88: Loop over Lines of
-  a File | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Read the file path in `$1` line by line with `while IFS= read -r line`
+  and print each line as `line=<value>`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 88: Loop over Lines of a File | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 88: Loop over Lines of a File | spaces allowed | 42'
+  - fixtures/data.txt
+  expected_stdout: 'line=alpha
+
+    line=beta
+
+    line=gamma'
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on here-string with echo.
+A here-document feeds a block of literal text to a command's stdin. The form is `cat <<DELIM`, then the lines, then a closing `DELIM` on its own line.

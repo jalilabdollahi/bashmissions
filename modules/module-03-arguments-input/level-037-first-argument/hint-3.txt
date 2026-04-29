@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Print only the first argument. Do not include `$2`, labels, or extra text.

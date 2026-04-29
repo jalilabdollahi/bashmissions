@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `export`.
+`export NAME=value` (or `export NAME` after assignment) marks a variable for inclusion in the **environment** of every child process this shell spawns.

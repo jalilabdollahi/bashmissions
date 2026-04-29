@@ -5,28 +5,19 @@ module_display: Functions
 title: Recursive Tree Walk
 difficulty: intermediate
 xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 112: Recursive Tree Walk
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Recursively walk `fixtures/tree` and print each file path relative to that
+  directory in sorted traversal order.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 112: Recursive Tree Walk | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 112: Recursive Tree Walk | spaces allowed | 42'
+- args: []
+  expected_stdout: 'a.txt
+
+    sub/b.txt'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
+- tree
 concepts:
 - directory traversal
 scaffold: true

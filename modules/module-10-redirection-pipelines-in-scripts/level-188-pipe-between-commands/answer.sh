@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 188: Pipe Between Commands | %s | %s\n' "$1" "$2"
+count=$(printf '%s\n' alpha beta beta gamma | grep -c 'beta')
+echo "beta_count=$count"

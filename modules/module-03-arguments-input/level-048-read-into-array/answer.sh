@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 48: Read into Array | %s | %s\n' "$1" "$2"
+read -r -a words < "$1"
+last_index=$((${#words[@]} - 1))
+printf 'count=%s first=%s last=%s
+' "${#words[@]}" "${words[0]}" "${words[$last_index]}"

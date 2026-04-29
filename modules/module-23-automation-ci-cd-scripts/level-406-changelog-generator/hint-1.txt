@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on git log formatting.
+Use this curriculum concept: git log formatting.

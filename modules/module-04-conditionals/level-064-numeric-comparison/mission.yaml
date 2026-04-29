@@ -5,24 +5,26 @@ module_display: Conditionals
 title: Numeric Comparison
 difficulty: beginner
 xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 64: Numeric Comparison
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Compare the first two arguments as integers. Print `less`, `equal`, or
+  `greater` using numeric test operators such as `-lt`, `-eq`, and `-gt`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 64: Numeric Comparison | alpha | beta'
+  - '3'
+  - '5'
+  expected_stdout: less
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 64: Numeric Comparison | spaces allowed | 42'
+  - '7'
+  - '7'
+  expected_stdout: equal
+  expected_exit: 0
+  comparison: exact
+- args:
+  - '10'
+  - '2'
+  expected_stdout: greater
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -1,13 +1,11 @@
 # Common Mistakes for Read-Only Variables
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 21: Read-Only Variables | alpha | beta`.
+- Forgetting that `set -e` kills the script on a failed readonly reassignment, and that `NAME=x 2>/dev/null || true` (no subshell) does **not** help — Bash treats this violation as fatal and skips the `||`. Wrap in a subshell: `( NAME=x ) 2>/dev/null || true`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Trying to `unset` a readonly variable. It can't be done — `unset` itself fails. The variable lives until the shell exits.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Putting `readonly` after the assignment: `NAME="x"; readonly NAME` works, but `readonly NAME="x"` is the canonical one-liner.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Confusing `readonly` with `local`. `local` scopes a variable to a function; `readonly` makes it immutable. They're orthogonal — you can have a `local readonly`.
+
+- Spelling: `readonly` is one word, no hyphen. `read-only` won't work.

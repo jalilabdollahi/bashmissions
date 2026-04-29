@@ -4,29 +4,17 @@ module_name: error-handling-defensive-scripting
 module_display: Error Handling & Defensive Scripting
 title: Cleanup Temp Files
 difficulty: intermediate
-xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 207: Cleanup Temp Files
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Create a temp file, remove it from an EXIT trap, and report that cleanup happened.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 207: Cleanup Temp Files | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 207: Cleanup Temp Files | spaces allowed | 42'
+  expected_stdout: 'temp=created
+temp=removed'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- trap + mktemp
+- 'trap + mktemp'
 scaffold: true

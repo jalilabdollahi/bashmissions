@@ -5,24 +5,13 @@ module_display: Arguments & Input
 title: Read into Array
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 48: Read into Array |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use `read -r -a words` to split the first line of the file path in `$1`
+  into an array. Print `count=<n> first=<first> last=<last>`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 48: Read into Array | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 48: Read into Array | spaces allowed | 42'
+  - fixtures/data.txt
+  expected_stdout: count=3 first=alpha last=gamma
   expected_exit: 0
   comparison: exact
 fixtures:

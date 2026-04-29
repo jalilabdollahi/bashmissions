@@ -5,28 +5,16 @@ module_display: Hello World & Output
 title: Print Script Name
 difficulty: beginner
 xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 14: Print Script Name
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print `script: <name>` where `<name>` is the script''s own filename (without any directory part). Use `$0`, not a hard-coded literal.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 14: Print Script Name | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 14: Print Script Name | spaces allowed | 42'
+- args: []
+  expected_stdout: 'script: solution.sh'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`$0`'
+- '`basename`'
 scaffold: true

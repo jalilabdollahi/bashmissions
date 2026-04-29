@@ -1,20 +1,7 @@
 # Loop with Index
 
-This level practices **C-style with array index**.
+This mission practices C-style with array index from Module 5 of the curriculum.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+Loops let Bash scripts repeat work over fixed lists, numeric ranges, files, command output, and user input. The key habits are choosing the right loop shape, preserving input with quotes or `read -r`, and making the stopping condition clear.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 91: Loop with Index | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The reference solution keeps the loop pattern visible so the level's focus stays easy to spot.

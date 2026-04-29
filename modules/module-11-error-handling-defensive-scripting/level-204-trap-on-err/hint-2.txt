@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Keep the failure path controlled so the script prints the expected result instead of crashing unpredictably.

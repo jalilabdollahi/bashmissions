@@ -1,3 +1,3 @@
-alpha
-beta
-gamma
+INFO ok
+error failed
+skip this

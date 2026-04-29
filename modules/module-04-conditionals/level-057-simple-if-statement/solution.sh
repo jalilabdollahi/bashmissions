@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+if [ "$1" = "yes" ]; then
+  echo "matched"
+fi

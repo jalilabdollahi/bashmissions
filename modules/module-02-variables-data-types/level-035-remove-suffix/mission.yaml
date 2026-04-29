@@ -4,29 +4,28 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Remove Suffix
 difficulty: beginner
-xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 35: Remove Suffix | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 70
+objective: "Take a filename in `$1` and print it with the last extension removed using `${filename%.*}` \u2014 strips from the last `.` to the end."
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 35: Remove Suffix | alpha | beta'
+  - report.pdf
+  expected_stdout: report
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 35: Remove Suffix | spaces allowed | 42'
+  - archive.tar.gz
+  expected_stdout: archive.tar
+  expected_exit: 0
+  comparison: exact
+- args:
+  - noext
+  expected_stdout: noext
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`${var%pattern}`'
+- suffix removal
 scaffold: true

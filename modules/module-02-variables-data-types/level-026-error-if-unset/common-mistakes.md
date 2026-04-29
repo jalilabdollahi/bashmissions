@@ -1,13 +1,11 @@
 # Common Mistakes for Error If Unset
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 26: Error If Unset | alpha | beta`.
+- Expecting the script to *continue* after the assertion fires. It doesn't — `${var:?...}` aborts the whole script (or returns from a function). That's the point.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Using `:?` and ignoring the difference from `?`. `${var?msg}` only fires when `var` is unset; an explicitly-empty string passes silently. `${var:?msg}` treats both the same way.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting that the message goes to **stderr**, not stdout. If you redirect only stdout, the error message still appears.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Using `${var:?...}` in an interactive shell and being surprised that the shell doesn't quit. In an interactive shell it just returns 1 to the prompt; in a script it aborts.
+
+- Putting it inside `[[ ]]` or `(( ))` and expecting normal behaviour. The expansion is parsed in those contexts but the abort still happens — usually not what you intend.

@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 204: Trap on ERR | %s | %s\n' "$1" "$2"
+cat > err-child.sh <<'CHILD'
+#!/usr/bin/env bash
+set -Ee
+trap 'echo "err=handled"' ERR
+false
+CHILD
+bash err-child.sh || true

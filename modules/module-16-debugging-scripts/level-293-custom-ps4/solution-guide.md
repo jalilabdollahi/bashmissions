@@ -1,26 +1,20 @@
-# Guide for Custom PS4
+# Solution Guide: Custom PS4
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `custom-ps4:293:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on show file/line in trace.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='custom-ps4:293:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+exec 3> trace.log
+BASH_XTRACEFD=3
+PS4='+${LINENO}: '
+set -x
+name="api"
+set +x
+exec 3>&-
+printf 'name=%s\n' "$name"
+grep -Eq '^\+[0-9]+: name=api' trace.log && echo 'ps4=line'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

@@ -4,29 +4,17 @@ module_name: error-handling-defensive-scripting
 module_display: Error Handling & Defensive Scripting
 title: Trap on EXIT
 difficulty: intermediate
-xp: 155
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 203: Trap on EXIT | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 135
+objective: 'Use an EXIT trap to print a cleanup marker after the main work finishes.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 203: Trap on EXIT | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 203: Trap on EXIT | spaces allowed | 42'
+  expected_stdout: 'work=done
+cleanup=done'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- cleanup always runs
+- 'cleanup always runs'
 scaffold: true

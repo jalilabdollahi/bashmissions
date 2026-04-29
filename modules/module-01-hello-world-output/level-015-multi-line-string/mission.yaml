@@ -5,28 +5,16 @@ module_display: Hello World & Output
 title: Multi-line String
 difficulty: beginner
 xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 15: Multi-line String
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print three lines exactly: `line one`, `line two`, `line three`. Use a here-doc (`cat <<EOF ... EOF`) — not three separate `echo` calls.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 15: Multi-line String | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 15: Multi-line String | spaces allowed | 42'
+- args: []
+  expected_stdout: "line one\nline two\nline three"
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- here-string with echo
+- here-document
+- '`cat <<EOF`'
 scaffold: true

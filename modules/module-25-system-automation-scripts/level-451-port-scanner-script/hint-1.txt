@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on nc loop over ports.
+Use this curriculum concept: nc loop over ports.

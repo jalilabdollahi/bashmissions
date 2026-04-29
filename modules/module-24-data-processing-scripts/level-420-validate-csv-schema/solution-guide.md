@@ -1,26 +1,11 @@
-# Guide for Validate CSV Schema
+# Solution Guide: Validate CSV Schema
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `validate-csv-schema:420:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on check column count.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='validate-csv-schema:420:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+awk -F, 'NF != 3 {bad++} END {print bad ? "schema=bad" : "schema=ok"}' fixtures/data.csv
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script uses a small fixture so the data operation is visible and deterministic.

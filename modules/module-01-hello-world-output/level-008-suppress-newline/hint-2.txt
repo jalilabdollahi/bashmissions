@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Use `"$1"` and `"$2"` to expand the two arguments. The output format is: `LEVEL 8: Suppress Newline | <arg1> | <arg2>`

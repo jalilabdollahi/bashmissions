@@ -4,29 +4,18 @@ module_name: arrays
 module_display: Arrays
 title: Array from Command
 difficulty: intermediate
-xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 166: Array from Command
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 165
+objective: 'Capture command output into an array with mapfile, then print the captured lines.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 166: Array from Command | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 166: Array from Command | spaces allowed | 42'
+  expected_stdout: 'alpha
+beta
+gamma'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`mapfile -t arr < <(cmd)`'
 scaffold: true

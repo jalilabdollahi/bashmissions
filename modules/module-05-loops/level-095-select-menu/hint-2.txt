@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Use a here-string from `$1` so the test can run non-interactively.

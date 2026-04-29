@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 49: Validate Numeric Input | %s | %s\n' "$1" "$2"
+value="$1"
+if [[ ! $value =~ ^[0-9]+$ ]]; then
+  exit 1
+fi
+
+echo "number: $value"

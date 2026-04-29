@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 21: Read-Only Variables | %s | %s\n' "$1" "$2"
+readonly NAME="$1"
+( NAME="changed" ) 2>/dev/null || true
+echo "$NAME"

@@ -4,29 +4,16 @@ module_name: arrays
 module_display: Arrays
 title: Return Array from Function
 difficulty: intermediate
-xp: 145
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 177: Return Array from
-  Function | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Make a function output one item per line, capture that output into an array, and print the joined result.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 177: Return Array from Function | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 177: Return Array from Function | spaces allowed | 42'
+  expected_stdout: 'items=alpha beta gamma'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- output parsing
+- 'output parsing'
 scaffold: true

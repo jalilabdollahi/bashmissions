@@ -1,19 +1,23 @@
 # Guide for if-else
 
-Try building the script in this order:
+Goal: Use `if`/`else` to make a binary decision. Print `enabled` when the first argument is `on`; otherwise print `disabled`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify the value or path being tested.
+2. Write the conditional form from this level: binary decision.
+3. Quote variable expansions unless the syntax specifically needs an unquoted pattern.
+4. Match the expected output and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '58' 'if-else' "$1" "$2"
+if [ "$1" = "on" ]; then
+  echo "enabled"
+else
+  echo "disabled"
+fi
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

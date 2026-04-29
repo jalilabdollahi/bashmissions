@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 172: Add Key-Value | %s | %s\n' "$1" "$2"
+declare -A scores
+scores[alice]=10
+scores[bob]=20
+echo "alice=${scores[alice]}"
+echo "bob=${scores[bob]}"

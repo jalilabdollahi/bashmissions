@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on log which command failed.
+Use the defensive scripting concept from the curriculum: log which command failed.

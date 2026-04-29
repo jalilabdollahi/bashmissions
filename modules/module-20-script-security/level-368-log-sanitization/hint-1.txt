@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on remove secrets from logs.
+Use this curriculum concept: remove secrets from logs.

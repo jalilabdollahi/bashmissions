@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Stdout stays empty on the error path — the message goes to stderr, and the script terminates immediately.

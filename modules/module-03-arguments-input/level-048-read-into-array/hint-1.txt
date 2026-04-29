@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `read -a arr`.
+read -a fills an indexed array from words on one input line.

@@ -5,24 +5,16 @@ module_display: Functions
 title: Functions in a Loop
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 114: Functions in a Loop
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Define a function that formats one item, then call it from a loop over
+  `build test deploy`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 114: Functions in a Loop | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 114: Functions in a Loop | spaces allowed | 42'
+- args: []
+  expected_stdout: 'step=build
+
+    step=test
+
+    step=deploy'
   expected_exit: 0
   comparison: exact
 fixtures:

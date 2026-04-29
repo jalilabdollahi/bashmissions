@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 193: Custom File Descriptor | %s | %s\n' "$1" "$2"
+exec 3> fd.log
+echo "alpha" >&3
+echo "beta" >&3
+exec 3>&-
+cat fd.log

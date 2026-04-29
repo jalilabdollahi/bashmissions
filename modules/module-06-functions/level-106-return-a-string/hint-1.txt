@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on via echo + $().
+Bash functions cannot return strings with `return`; they print them.

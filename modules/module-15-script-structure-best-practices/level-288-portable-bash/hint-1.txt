@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on avoid bashisms where possible.
+Use this curriculum concept: avoid bashisms where possible.

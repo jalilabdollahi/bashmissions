@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on parse `--flag value` with while/case.
+Manual long-option parsing usually combines while, case, and shift.

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+case "${1:-}" in
+  *.sh) echo "shell" ;;
+  *.txt) echo "text" ;;
+  *) echo "other" ;;
+esac

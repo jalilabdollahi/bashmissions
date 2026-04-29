@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `case` pattern matching.
+`case` patterns can use globs like `*.sh` and `*.txt`.

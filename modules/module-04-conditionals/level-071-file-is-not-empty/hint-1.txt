@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `-s`.
+`-s` is true for an existing file whose size is greater than zero.

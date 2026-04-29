@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on guard clause pattern.
+A guard clause checks invalid input at the top of a function.

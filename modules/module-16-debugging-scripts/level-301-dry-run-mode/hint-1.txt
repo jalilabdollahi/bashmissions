@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `DRY_RUN=1` flag.
+Use this curriculum concept: `DRY_RUN=1` flag.

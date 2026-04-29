@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${var,,}`.
+`${var,,}` is the lowercase counterpart of `${var^^}`. Both are pure parameter expansion — no subprocess.

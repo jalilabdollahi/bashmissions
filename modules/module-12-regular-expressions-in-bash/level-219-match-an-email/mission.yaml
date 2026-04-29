@@ -5,28 +5,21 @@ module_display: Regular Expressions in Bash
 title: Match an Email
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 219: Match an Email |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Validate a simple email address with a Bash regex.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 219: Match an Email | alpha | beta'
+  - 'ada@example.com'
+  expected_stdout: 'email=valid'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 219: Match an Email | spaces allowed | 42'
+  - 'ada.example.com'
+  expected_stdout: 'email=invalid'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- email regex pattern
+- 'email regex pattern'
 scaffold: true

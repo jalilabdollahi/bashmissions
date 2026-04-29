@@ -4,29 +4,17 @@ module_name: script-structure-best-practices
 module_display: Script Structure & Best Practices
 title: Use Local Variables
 difficulty: advanced
-xp: 245
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `use-local-variables:282:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 215
+objective: 'Use a local variable inside a function so the global value is unchanged.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: use-local-variables:282:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: use-local-variables:282:processed:3:verbose
+  expected_stdout: 'inside=local
+outside=global'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- prevent global leaks
-scaffold: false
+- 'prevent global leaks'
+scaffold: true

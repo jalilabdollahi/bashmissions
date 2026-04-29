@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Keep regex variables unquoted on the right side of `=~`; quote normal string expansions elsewhere.

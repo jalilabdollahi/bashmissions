@@ -5,25 +5,24 @@ module_display: Arguments & Input
 title: Validate Non-Empty
 difficulty: beginner
 xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 50: Validate Non-Empty
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Validate that the first argument is not empty. If it is empty or missing,
+  print nothing and exit with status 1. Otherwise print `value: <arg>`.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 50: Validate Non-Empty | alpha | beta'
+  - hello
+  expected_stdout: 'value: hello'
   expected_exit: 0
   comparison: exact
 - args:
   - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 50: Validate Non-Empty | spaces allowed | 42'
+  expected_stdout: 'value: spaces allowed'
   expected_exit: 0
+  comparison: exact
+- args:
+  - ''
+  expected_stdout: ''
+  expected_exit: 1
   comparison: exact
 fixtures:
 - data.txt

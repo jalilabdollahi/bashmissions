@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 136: Split String to Array | %s | %s\n' "$1" "$2"
+IFS=, read -r -a parts <<< "$1"
+last_index=$((${#parts[@]} - 1))
+printf 'count=%s first=%s last=%s\n' "${#parts[@]}" "${parts[0]}" "${parts[$last_index]}"

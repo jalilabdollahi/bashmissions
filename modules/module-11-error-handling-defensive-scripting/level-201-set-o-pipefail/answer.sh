@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 201: set -o pipefail | %s | %s\n' "$1" "$2"
+if (set -o pipefail; false | true); then
+  echo "pipeline=ok"
+else
+  echo "pipeline=failed"
+fi

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 218: Match a Number | %s | %s\n' "$1" "$2"
+value=${1:-}
+if [[ $value =~ ^[0-9]+$ ]]; then
+  echo "number"
+else
+  echo "not-number"
+fi

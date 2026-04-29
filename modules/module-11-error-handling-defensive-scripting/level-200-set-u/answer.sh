@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 200: set -u | %s | %s\n' "$1" "$2"
+if (set -u; echo "$missing_value") 2> unset.log; then
+  echo "unexpected=success"
+else
+  echo "unset=blocked"
+fi

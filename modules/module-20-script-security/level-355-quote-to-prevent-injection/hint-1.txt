@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `"$var"` vs eval danger.
+Use this curriculum concept: `"$var"` vs eval danger.

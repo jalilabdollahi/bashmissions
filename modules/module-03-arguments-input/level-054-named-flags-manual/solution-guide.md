@@ -1,19 +1,39 @@
 # Guide for Named Flags (manual)
 
-Try building the script in this order:
+Goal: Manually parse `--name VALUE` and `--count VALUE` using a `while` loop, `case`, and `shift`. Print `name=<name> count=<count>`. Default missing values to `unknown` and `0`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
+2. Read the input using the curriculum concept for this level: parse `--flag value` with while/case.
+3. Print only the required output, with quoted variable expansions.
+4. Run the mission tests, including the failure or empty-input case when one is listed.
+
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '54' 'Named Flags (manual)' "$1" "$2"
-```
+name="unknown"
+count="0"
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+while (( $# > 0 )); do
+  case "$1" in
+    --name)
+      name="$2"
+      shift 2
+      ;;
+    --count)
+      count="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+printf 'name=%s count=%s
+' "$name" "$count"
+```

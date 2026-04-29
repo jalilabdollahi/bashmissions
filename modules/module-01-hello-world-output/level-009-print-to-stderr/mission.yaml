@@ -5,28 +5,16 @@ module_display: Hello World & Output
 title: Print to Stderr
 difficulty: beginner
 xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 9: Print to Stderr | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print the message to stderr only as: Error: <arg1>'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 9: Print to Stderr | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 9: Print to Stderr | spaces allowed | 42'
+- args: ['disk full']
+  expected_stdout: ''
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`echo >&2`'
+- stderr
+- file descriptor 2
 scaffold: true

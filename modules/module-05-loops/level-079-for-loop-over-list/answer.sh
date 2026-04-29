@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 79: for Loop over List | %s | %s\n' "$1" "$2"
+for item in alpha beta gamma; do
+  echo "$item"
+done

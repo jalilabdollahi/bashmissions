@@ -5,25 +5,25 @@ module_display: Arguments & Input
 title: Validate Numeric Input
 difficulty: beginner
 xp: 90
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 49: Validate Numeric Input
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Validate that the first argument contains only digits using `[[ $value
+  =~ ^[0-9]+$ ]]`. If valid, print `number: <value>`; otherwise print nothing and
+  exit with status 1.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 49: Validate Numeric Input | alpha | beta'
+  - '42'
+  expected_stdout: 'number: 42'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 49: Validate Numeric Input | spaces allowed | 42'
+  - '007'
+  expected_stdout: 'number: 007'
   expected_exit: 0
+  comparison: exact
+- args:
+  - abc
+  expected_stdout: ''
+  expected_exit: 1
   comparison: exact
 fixtures:
 - data.txt

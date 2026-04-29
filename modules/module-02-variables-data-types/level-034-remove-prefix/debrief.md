@@ -1,20 +1,39 @@
 # Remove Prefix
 
-This level practices **`${var#pattern}`**.
+Bash has two **prefix-stripping** parameter expansions:
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+| Form              | Removes from the start...                         |
+|-------------------|---------------------------------------------------|
+| `${var#pattern}`  | shortest match of `pattern`                       |
+| `${var##pattern}` | longest match of `pattern`                        |
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+The `pattern` is a **shell glob**, not a regex: `*`, `?`, `[abc]`, brace expansion etc.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 34: Remove Prefix | alpha | beta
+filename="report.tar.gz"
+
+echo "${filename#*.}"    # tar.gz   — strips up to the *first* dot
+echo "${filename##*.}"   # gz       — strips up to the *last* dot
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Useful idioms:
+
+```bash
+# get everything after the first slash:
+path="/etc/nginx/conf.d/site.conf"
+echo "${path#*/}"     # etc/nginx/conf.d/site.conf
+
+# get the basename (everything after the last slash):
+echo "${path##*/}"    # site.conf
+
+# strip a known prefix:
+v="v1.2.3"
+echo "${v#v}"         # 1.2.3
+```
+
+Things to remember:
+
+- These are *globs*, so `.` is literal, `*` matches any sequence, `?` matches one character.
+- If the pattern doesn't match, the variable comes back unchanged.
+- Pair these with their sibling, suffix removal `%` and `%%` (next level).
+- Combine with replacement `${var/old/new}` for full string surgery without `sed`.

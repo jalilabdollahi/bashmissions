@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Use the requested text-processing tool in the pipeline, then shape the output exactly.

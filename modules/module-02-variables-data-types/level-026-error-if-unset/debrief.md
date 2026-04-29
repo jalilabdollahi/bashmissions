@@ -1,20 +1,33 @@
 # Error If Unset
 
-This level practices **`${var:?error}`**.
-
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+`${var:?message}` is the **fail-fast** parameter expansion. If `$var` is unset or empty, Bash prints `var: message` to stderr and exits the script (or returns from the function) with a non-zero status.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 26: Error If Unset | alpha | beta
+name="${1:?missing argument}"
+echo "Hello, $name"
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Run with no argument:
+
+```
+$ ./solution.sh
+./solution.sh: line 4: 1: missing argument
+$ echo $?
+1
+```
+
+This is the canonical way to assert that a positional parameter was provided, in one line and without an `if`. It pairs naturally with `set -euo pipefail` at the top of a script.
+
+| Form               | When var is unset/empty...                            |
+|--------------------|-------------------------------------------------------|
+| `${var:?message}`  | print `var: message` to stderr, exit 1                |
+| `${var?message}`   | same, but only fires on **unset** (empty passes)      |
+
+Common patterns:
+
+```bash
+: "${API_KEY:?set API_KEY in your environment}"
+: "${1:?usage: $0 <input-file>}"
+```
+
+The leading `:` is the no-op command — used when you only care about the side-effect (the assertion) and not the value.

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 170: Unique Elements | %s | %s\n' "$1" "$2"
+items=(beta alpha beta gamma alpha)
+mapfile -t unique < <(printf '%s\n' "${items[@]}" | sort | uniq)
+printf '%s\n' "${unique[@]}"

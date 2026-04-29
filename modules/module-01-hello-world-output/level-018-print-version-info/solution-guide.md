@@ -1,19 +1,29 @@
 # Guide for Print Version Info
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Copy the two arguments into named variables: `name="$1"`, `version="$2"`.
+3. `echo` them in a double-quoted string with the literal word `version` between.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '18' 'Print Version Info' "$1" "$2"
+name="$1"
+version="$2"
+echo "$name version $version"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh mytool 1.2.3
+# mytool version 1.2.3
+./solution.sh app v0.1
+# app version v0.1
+```
+
+`printf '%s version %s\n' "$name" "$version"` is an equally valid form. Use `answer` if stuck.

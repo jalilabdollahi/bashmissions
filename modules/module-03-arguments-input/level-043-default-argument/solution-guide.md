@@ -1,19 +1,20 @@
 # Guide for Default Argument
 
-Try building the script in this order:
+Goal: Print `Hello, <name>` where `<name>` is the first argument if provided, otherwise `guest`. Use `${1:-guest}` rather than an `if` statement.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
+2. Read the input using the curriculum concept for this level: `${1:-default}`.
+3. Print only the required output, with quoted variable expansions.
+4. Run the mission tests, including the failure or empty-input case when one is listed.
+
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '43' 'Default Argument' "$1" "$2"
+name="${1:-guest}"
+echo "Hello, $name"
 ```
-
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.

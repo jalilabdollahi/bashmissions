@@ -1,20 +1,21 @@
 # Print a Banner
 
-This level practices **printf with padding**.
+`printf` borrows its format syntax from C. The most useful field specifier for shell scripts is `%s` (string), with optional **width** and **alignment**:
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+| Format    | "hi" → output    | "longer" → output |
+|-----------|------------------|--------------------|
+| `%s`      | `hi`             | `longer`           |
+| `%10s`    | `        hi`     | `    longer`       |
+| `%-10s`   | `hi        `     | `longer    `       |
+| `%.3s`    | `hi`             | `lon` (truncated)  |
+| `%-10.10s`| `hi        `     | `longer    `       |
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+Key rule: **width is a minimum, never a maximum**. A string longer than the field prints in full and the columns no longer line up. To enforce a hard cap, use `.N` (precision) — `%-10.10s` left-aligns *and* truncates.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 17: Print a Banner | alpha | beta
+printf '== %-10s ==\n' hi          # == hi         ==
+printf '== %-10s ==\n' BashMission # == BashMission ==   (overflow)
+printf '== %-10.10s ==\n' BashMission # == BashMissio ==  (truncated)
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Banners, log columns, status tables, and CLI usage strings all lean on padded `%s`.

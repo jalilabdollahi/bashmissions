@@ -5,28 +5,20 @@ module_display: Hello World & Output
 title: Print a Message
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 2: Print a Message | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print the first argument as: Message: <arg1>'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 2: Print a Message | alpha | beta'
+- args: ['Hello Bash']
+  expected_stdout: 'Message: Hello Bash'
   expected_exit: 0
   comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 2: Print a Message | spaces allowed | 42'
+- args: ['spaces are kept']
+  expected_stdout: 'Message: spaces are kept'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- echo with a string argument
+- positional arguments
+- printf
 scaffold: true

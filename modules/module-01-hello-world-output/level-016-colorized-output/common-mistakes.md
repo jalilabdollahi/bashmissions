@@ -1,13 +1,11 @@
 # Common Mistakes for Colorized Output
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 16: Colorized Output | alpha | beta`.
+- `echo '\033[32mOK\033[0m'` (no `-e`) prints the literal characters instead of the escape codes. Either use `printf` or pass `-e` to `echo`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Single quotes vs. double quotes don't matter for octal escapes inside `printf`. But `$'...'` strings *do* expand backslash escapes — they produce real ESC bytes for assignment, e.g. `green=$'\033[32m'`.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting the reset: `\033[32mOK` (without the trailing `\033[0m`) leaves every line afterwards in green until the terminal sees a reset.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Wrong color number. `\033[3` plus a digit `0..7` are foreground colors, `\033[4` + digit are background. `\033[32m` is green; `\033[2m` is "dim" — easy to mistype.
+
+- Dumping color codes to a non-tty. Pipe a colorized script through `cat -v` and you'll see `^[[32mOK^[[0m`. Always check `[ -t 1 ]` before colorizing in production scripts.

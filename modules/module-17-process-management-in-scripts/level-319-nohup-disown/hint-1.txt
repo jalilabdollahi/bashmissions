@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on detach from terminal.
+Use this curriculum concept: detach from terminal.

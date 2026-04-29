@@ -5,24 +5,20 @@ module_display: Arguments & Input
 title: First Argument
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 37: First Argument | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Print only the first positional argument. Use `$1`, quote it, and do not
+  print any other arguments.
 expected_script_name: solution.sh
 test_cases:
 - args:
   - alpha
   - beta
-  expected_stdout: 'LEVEL 37: First Argument | alpha | beta'
+  expected_stdout: alpha
   expected_exit: 0
   comparison: exact
 - args:
   - spaces allowed
   - '42'
-  expected_stdout: 'LEVEL 37: First Argument | spaces allowed | 42'
+  expected_stdout: spaces allowed
   expected_exit: 0
   comparison: exact
 fixtures:

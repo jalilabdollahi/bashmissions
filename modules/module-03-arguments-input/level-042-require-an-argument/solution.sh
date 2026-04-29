@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+if (( $# == 0 )); then
+  exit 1
+fi
+
+echo "arg: $1"

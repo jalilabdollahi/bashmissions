@@ -1,20 +1,10 @@
 # Print Multiple Lines
 
-This level practices **multiple echo statements**.
+You learned how to print multiple lines using echo. This is a core Bash skill for producing readable output and scripts that match requirements.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+Key takeaways:
+- Use echo for each line you want to print.
+- Quote your variables to handle spaces in arguments.
+- Match the required output exactly.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 4: Print Multiple Lines | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+This approach is the foundation for more advanced Bash scripting.

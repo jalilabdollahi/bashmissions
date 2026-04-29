@@ -5,28 +5,25 @@ module_display: Hello World & Output
 title: Single vs Double Quotes
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 3: Single vs Double Quotes
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Show quoting behavior with two lines: single: $name and double: <arg1>.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 3: Single vs Double Quotes | alpha | beta'
+- args: ['alpha']
+  expected_stdout: |-
+    single: $name
+    double: alpha
   expected_exit: 0
   comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 3: Single vs Double Quotes | spaces allowed | 42'
+- args: ['two words']
+  expected_stdout: |-
+    single: $name
+    double: two words
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- quoting differences
+- single quotes
+- double quotes
+- variable expansion
 scaffold: true

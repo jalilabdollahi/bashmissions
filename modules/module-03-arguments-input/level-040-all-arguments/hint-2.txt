@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Match the mission output exactly, including punctuation, spacing, and exit status. Test the edge case shown in the mission before moving on.

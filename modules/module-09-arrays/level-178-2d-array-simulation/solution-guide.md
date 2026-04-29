@@ -1,19 +1,19 @@
-# Guide for 2D Array Simulation
+# Solution Guide: 2D Array Simulation
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on key encoding trick.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '178' '2D Array Simulation' "$1" "$2"
+declare -A grid
+grid[0,0]=A
+grid[0,1]=B
+grid[1,0]=C
+grid[1,1]=D
+
+echo "${grid[0,0]}${grid[0,1]}"
+echo "${grid[1,0]}${grid[1,1]}"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script keeps the array operation small and visible, then prints deterministic output for the checker.

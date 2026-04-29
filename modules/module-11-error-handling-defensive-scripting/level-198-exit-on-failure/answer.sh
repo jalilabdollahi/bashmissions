@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 198: Exit on Failure | %s | %s\n' "$1" "$2"
+mkdir -p output || exit 1
+echo "created=output"

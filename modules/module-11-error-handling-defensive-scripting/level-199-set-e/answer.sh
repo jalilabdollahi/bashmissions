@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-printf 'LEVEL 199: set -e | %s | %s\n' "$1" "$2"
+set +e
+(set -e; echo before; false; echo after)
+code=$?
+set -e
+if (( code != 0 )); then
+  echo "aborted=true"
+fi

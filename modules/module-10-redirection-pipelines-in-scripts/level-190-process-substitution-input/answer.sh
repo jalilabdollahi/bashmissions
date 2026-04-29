@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 190: Process Substitution Input | %s | %s\n' "$1" "$2"
+if diff <(printf '%s\n' alpha beta) <(printf '%s\n' alpha beta) > /dev/null; then
+  echo "streams match"
+else
+  echo "streams differ"
+fi

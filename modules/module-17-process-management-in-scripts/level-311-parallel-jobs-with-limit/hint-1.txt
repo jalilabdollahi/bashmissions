@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on N workers pattern.
+Use this curriculum concept: N workers pattern.

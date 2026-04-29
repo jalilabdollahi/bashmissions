@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 141: Regex Match | %s | %s\n' "$1" "$2"
+str="$1"
+if [[ $str =~ ^[0-9]{3}$ ]]; then
+  echo "match"
+else
+  echo "no match"
+fi

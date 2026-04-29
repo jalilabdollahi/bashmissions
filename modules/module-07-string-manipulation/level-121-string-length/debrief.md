@@ -1,20 +1,7 @@
 # String Length
 
-This level practices **`${#str}`**.
+This mission practices `${#str}` from Module 7 of the curriculum.
 
-This pattern shows up in everyday automation work, where scripts need to turn files and arguments into predictable output.
+Bash has a surprisingly rich set of native string tools. Parameter expansion handles length, substrings, trimming, case conversion, and replacement without spawning external commands, while `[[ ]]` adds glob and regex matching for classification and extraction.
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
-
-```bash
-./solution.sh alpha beta
-# LEVEL 121: String Length | alpha | beta
-```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The reference solution keeps the specific expansion or match form visible so the string operation is easy to recognize.

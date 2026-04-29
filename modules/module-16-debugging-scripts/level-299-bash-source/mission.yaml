@@ -4,29 +4,16 @@ module_name: debugging-scripts
 module_display: Debugging Scripts
 title: BASH_SOURCE
 difficulty: advanced
-xp: 265
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `bash-source:299:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 205
+objective: 'Use `BASH_SOURCE` to print the current script file name.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: bash-source:299:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: bash-source:299:processed:3:verbose
+  expected_stdout: 'source=solution.sh'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- source file tracking
-scaffold: false
+- 'source file tracking'
+scaffold: true

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `${var:?error}`.
+`${var:?message}` substitutes `$var` if set/non-empty; otherwise it prints `var: message` to stderr and exits with status 1 (in scripts) or returns 1 (in interactive shells).

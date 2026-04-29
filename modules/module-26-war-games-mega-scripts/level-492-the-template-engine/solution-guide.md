@@ -1,23 +1,25 @@
-# Guide for The Template Engine
+# Solution Guide: The Template Engine
 
-Try building the script in this order:
-
-1. Read the input path from `$1` and the optional mode from `$2`.
-2. If the input file is missing, exit with status `1` and print nothing.
-3. Default the mode to `ok` when no second argument is provided.
-4. Print `the-template-engine:492:expert:<mode>` for the success path.
-
-A working shape looks like this:
+This level focuses on combine 5+ Bash scripting concepts.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-ok}
-
-[ -f "$input" ] || exit 1
-printf '%s\n' 'the-template-engine:492:expert:'"$mode"
+mission='The Template Engine'
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+log="$tmp/mission.log"
+declare -a steps=(prepare validate execute verify report)
+run_step() { local step=$1; printf '%s:%s
+' "$mission" "$step" >> "$log"; }
+for step in "${steps[@]}"; do run_step "$step"; done
+printf 'mission=%s
+' "$mission"
+printf 'steps=%s
+' "$(wc -l < "$log")"
+printf 'status=complete
+'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the concept safely inside the mission workspace.

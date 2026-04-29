@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 164: Loop over Array | %s | %s\n' "$1" "$2"
+steps=(build test deploy)
+for step in "${steps[@]}"; do
+  echo "step=$step"
+done

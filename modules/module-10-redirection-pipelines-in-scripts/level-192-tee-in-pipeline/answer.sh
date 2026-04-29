@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 192: Tee in Pipeline | %s | %s\n' "$1" "$2"
+printf '%s\n' alpha beta gamma | tee pipeline.log | wc -l | awk '{print "lines=" $1}'
+echo "logged=$(wc -l < pipeline.log)"

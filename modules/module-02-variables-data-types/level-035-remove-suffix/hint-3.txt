@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+If the pattern doesn't match the end, the variable is returned unchanged — `${noext%.*}` is `noext`.

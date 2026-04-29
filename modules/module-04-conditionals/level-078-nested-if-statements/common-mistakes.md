@@ -1,13 +1,6 @@
 # Common Mistakes for Nested if Statements
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 78: Nested if Statements | alpha | beta`.
-
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
-
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
-
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Using string comparison operators for numeric tests, or numeric operators for strings.
+- Forgetting spaces inside `[ ... ]`; `["$1" = yes]` is not valid test syntax.
+- Leaving variables unquoted in single-bracket tests, which breaks empty values and values with spaces.
+- Printing extra debug text that the exact-output validator does not expect.

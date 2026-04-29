@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Quote array expansions with double quotes so elements that contain spaces stay intact.

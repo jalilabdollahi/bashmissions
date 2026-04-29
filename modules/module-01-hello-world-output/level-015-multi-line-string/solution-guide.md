@@ -1,19 +1,32 @@
 # Guide for Multi-line String
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Open a heredoc with `cat <<EOF`.
+3. Write the three lines verbatim.
+4. Close the heredoc with `EOF` on its own line, at column 1.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '15' 'Multi-line String' "$1" "$2"
+cat <<EOF
+line one
+line two
+line three
+EOF
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh
+# line one
+# line two
+# line three
+```
+
+Try the same with `<<'EOF'` and notice that `$HOME` would print literally instead of expanding. Use `answer` if stuck.

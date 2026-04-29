@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 143: Integer Addition | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+echo "sum=$((a + b))"

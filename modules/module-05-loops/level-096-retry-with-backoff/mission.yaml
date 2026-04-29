@@ -5,24 +5,16 @@ module_display: Loops
 title: Retry with Backoff
 difficulty: intermediate
 xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 96: Retry with Backoff
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Simulate three retry attempts with exponential backoff values. Print `attempt=1
+  wait=1`, `attempt=2 wait=2`, and `attempt=3 wait=4`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 96: Retry with Backoff | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 96: Retry with Backoff | spaces allowed | 42'
+- args: []
+  expected_stdout: 'attempt=1 wait=1
+
+    attempt=2 wait=2
+
+    attempt=3 wait=4'
   expected_exit: 0
   comparison: exact
 fixtures:

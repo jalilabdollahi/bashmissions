@@ -4,29 +4,17 @@ module_name: arrays
 module_display: Arrays
 title: Pass Array to Function
 difficulty: intermediate
-xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 176: Pass Array to Function
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 165
+objective: 'Pass an array to a function by name using a nameref, then print its count and first value.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 176: Pass Array to Function | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 176: Pass Array to Function | spaces allowed | 42'
+  expected_stdout: 'count=3
+first=alpha'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- nameref `declare -n`
+- 'nameref `declare -n`'
 scaffold: true

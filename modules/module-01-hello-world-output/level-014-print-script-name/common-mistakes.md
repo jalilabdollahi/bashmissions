@@ -1,13 +1,11 @@
 # Common Mistakes for Print Script Name
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 14: Print Script Name | alpha | beta`.
+- Hard-coding `script: solution.sh`. The point is to *read* the script's name from `$0`, so this passes the test but skips the lesson.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Using `$0` directly without `basename`. If the script is invoked as `./solution.sh` or `/full/path/solution.sh`, `$0` will include the path — the test expects the bare filename.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting the inner quotes: `basename $0` breaks if the path has a space. The robust form is `basename "$0"`.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Confusing `$0` with `$1`. `$0` is the script itself; `$1` is the first argument *after* the script name.
+
+- Using `${0##*/}` is fine — Bash parameter expansion that strips everything up to the last `/`, equivalent to `basename "$0"` and faster (no subprocess).

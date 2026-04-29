@@ -1,26 +1,21 @@
-# Guide for Assert Function
+# Solution Guide: Assert Function
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `assert-function:302:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on assert_eq, assert_true.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='assert-function:302:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+assert_eq() {
+  local expected=$1
+  local actual=$2
+  if [[ $expected != "$actual" ]]; then
+    printf 'not ok: expected %s got %s\n' "$expected" "$actual"
+    exit 1
+  fi
+  printf 'ok: %s\n' "$actual"
+}
+assert_eq "42" "$((40 + 2))"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the structure or debugging pattern while keeping checker output predictable.

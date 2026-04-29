@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='copy-a-file:240:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
+cp fixtures/data.txt copy.txt
+if cmp -s fixtures/data.txt copy.txt; then
+  echo "copy=ok"
 fi
-
-printf '%s\n' "$output"

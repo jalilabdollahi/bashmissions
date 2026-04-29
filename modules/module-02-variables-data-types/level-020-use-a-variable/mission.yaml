@@ -5,28 +5,28 @@ module_display: Variables & Data Types
 title: Use a Variable
 difficulty: beginner
 xp: 50
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 20: Use a Variable | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: "Assign `$1` to a variable, then print `<value>_suffix` \u2014 use `${var}` braces so Bash doesn't try to read a variable named `var_suffix`."
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 20: Use a Variable | alpha | beta'
+  - foo
+  expected_stdout: foo_suffix
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 20: Use a Variable | spaces allowed | 42'
+  - app
+  expected_stdout: app_suffix
+  expected_exit: 0
+  comparison: exact
+- args:
+  - my-thing
+  expected_stdout: my-thing_suffix
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- '`$var` and `${var}`'
+- '`$var`'
+- '`${var}` braces'
+- string interpolation
 scaffold: true

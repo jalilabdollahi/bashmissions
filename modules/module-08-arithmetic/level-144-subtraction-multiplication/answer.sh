@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 144: Subtraction & Multiplication | %s | %s\n' "$1" "$2"
+a="$1"
+b="$2"
+printf 'diff=%s product=%s\n' "$((a - b))" "$((a * b))"

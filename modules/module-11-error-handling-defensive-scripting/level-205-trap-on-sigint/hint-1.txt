@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on graceful Ctrl-C.
+Use the defensive scripting concept from the curriculum: graceful Ctrl-C.

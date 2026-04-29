@@ -1,13 +1,11 @@
 # Common Mistakes for Unset a Variable
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 22: Unset a Variable | alpha | beta`.
+- Confusing `unset v` with `v=`. The first removes the variable; the second sets it to empty string. They behave differently in `${v:-default}` only when paired with the non-`:` form `${v-default}`.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Trying to `unset $v` (with the dollar sign). That expands `$v` to its value first, then tries to unset a variable with that name — almost never what you want. Always `unset v`, no dollar sign.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Trying to `unset` a `readonly` variable. Bash refuses; the variable stays.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Forgetting that `unset` works on functions too. `unset -f myfn` removes a function definition. Without `-f` it looks for a variable first.
+
+- Using `unset` in a function and expecting it to remove a variable from the parent shell. Inside a function, `unset` follows scope rules — it removes the local copy first.

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on upgrade old format.
+Use this curriculum concept: upgrade old format.

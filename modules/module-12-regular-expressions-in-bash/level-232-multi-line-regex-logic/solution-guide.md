@@ -1,19 +1,25 @@
-# Guide for Multi-line Regex Logic
+# Solution Guide: Multi-line Regex Logic
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on line-by-line state machine.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '232' 'Multi-line Regex Logic' "$1" "$2"
+in_services=0
+while IFS= read -r line; do
+  if [[ $line =~ ^\[services\]$ ]]; then
+    in_services=1
+    continue
+  fi
+  if [[ $line =~ ^\[.*\]$ ]]; then
+    in_services=0
+    continue
+  fi
+  if (( in_services )) && [[ $line =~ ^name=([a-z-]+)$ ]]; then
+    echo "service=${BASH_REMATCH[1]}"
+  fi
+done < fixtures/data.txt
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script keeps the regex focused and prints only the deterministic result expected by the checker.

@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `&` background + `wait`.
+Appending `&` starts a command group in the background.

@@ -1,20 +1,35 @@
 # Remove Suffix
 
-This level practices **`${var%pattern}`**.
+Mirror of `${var#pattern}` but operating on the **end** of the string.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+| Form              | Removes from the end...                           |
+|-------------------|---------------------------------------------------|
+| `${var%pattern}`  | shortest match of `pattern`                       |
+| `${var%%pattern}` | longest match of `pattern`                        |
 
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+Pattern is again a **glob**, not a regex.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 35: Remove Suffix | alpha | beta
+filename="archive.tar.gz"
+
+echo "${filename%.*}"    # archive.tar   — strips the last extension
+echo "${filename%%.*}"   # archive       — strips everything from the first dot
+
+path="/var/log/syslog.1"
+echo "${path%.*}"        # /var/log/syslog
+echo "${path%/*}"        # /var/log      — strips the last segment
+
+# strip a known suffix:
+log="error.log"
+echo "${log%.log}"       # error
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Idiom: combine prefix and suffix removal to extract a middle slice without `sed`:
+
+```bash
+url="https://example.com/path/to/file.txt?query=1"
+host="${url#*://}"        # example.com/path/to/file.txt?query=1
+host="${host%%/*}"        # example.com
+```
+
+When the pattern doesn't match, the original value comes back. That's a feature, not a bug — it lets you write `${name%.bak}` and have it be a no-op for files that don't end in `.bak`.

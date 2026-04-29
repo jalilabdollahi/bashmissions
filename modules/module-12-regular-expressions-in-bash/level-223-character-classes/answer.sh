@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 223: Character Classes | %s | %s\n' "$1" "$2"
+word=${1:-}
+if [[ $word =~ ^[[:alpha:]]+$ ]]; then
+  echo "alpha=yes"
+else
+  echo "alpha=no"
+fi

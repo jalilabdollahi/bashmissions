@@ -5,28 +5,20 @@ module_display: Hello World & Output
 title: printf vs echo
 difficulty: beginner
 xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 7: printf vs echo | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Print the first argument literally (no escape interpretation) as: raw: <arg1>.'
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 7: printf vs echo | alpha | beta'
+- args: ['a\nb']
+  expected_stdout: 'raw: a\nb'
   expected_exit: 0
   comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 7: printf vs echo | spaces allowed | 42'
+- args: ['*']
+  expected_stdout: 'raw: *'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- choosing the right output tool
+- printf reliability
+- echo caveats
 scaffold: true

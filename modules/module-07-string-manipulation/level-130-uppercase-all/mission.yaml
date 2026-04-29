@@ -5,24 +5,17 @@ module_display: String Manipulation
 title: Uppercase All
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 130: Uppercase All | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Uppercase the entire first argument using `${str^^}`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 130: Uppercase All | alpha | beta'
+  - hello world
+  expected_stdout: HELLO WORLD
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 130: Uppercase All | spaces allowed | 42'
+  - Bash123
+  expected_stdout: BASH123
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -5,24 +5,17 @@ module_display: String Manipulation
 title: Replace All Matches
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 129: Replace All Matches
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Replace every `-` in the first argument with `_` using `${str//-/_}`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 129: Replace All Matches | alpha | beta'
+  - alpha-beta-gamma
+  expected_stdout: alpha_beta_gamma
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 129: Replace All Matches | spaces allowed | 42'
+  - a-b-c-d
+  expected_stdout: a_b_c_d
   expected_exit: 0
   comparison: exact
 fixtures:

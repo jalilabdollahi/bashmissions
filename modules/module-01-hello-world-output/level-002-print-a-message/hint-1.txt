@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on echo with a string argument.
+Use the first argument (`$1`) and print it with the prefix `Message:`.

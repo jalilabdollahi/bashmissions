@@ -1,26 +1,13 @@
-# Guide for XDG Base Dirs
+# Solution Guide: XDG Base Dirs
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `xdg-base-dirs:345:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `$XDG_CONFIG_HOME`.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='xdg-base-dirs:345:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+echo "config=$XDG_CONFIG_HOME/bashmissions/config"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script demonstrates the pattern in a small, deterministic way suitable for the mission runner.

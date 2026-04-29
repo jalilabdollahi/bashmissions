@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `exit 0`, `exit 1`.
+Every script returns an exit status — 0 means success, anything 1–255 means failure. The `exit` builtin sets it explicitly.

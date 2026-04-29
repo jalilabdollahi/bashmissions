@@ -1,1 +1,4 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+A compact solution can be shaped like this:
+
+read -r value < "$1"
+echo "You said: $value"

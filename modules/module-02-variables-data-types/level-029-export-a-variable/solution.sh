@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+export GREETING="$1"
+bash -c 'echo "$GREETING"'

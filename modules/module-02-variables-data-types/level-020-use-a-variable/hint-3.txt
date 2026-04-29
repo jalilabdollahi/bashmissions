@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Inside double quotes, write `"${name}_suffix"` to interpolate `name` and append the literal `_suffix`.

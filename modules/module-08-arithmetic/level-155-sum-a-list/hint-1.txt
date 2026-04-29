@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on loop accumulator.
+Initialize an accumulator before the loop.

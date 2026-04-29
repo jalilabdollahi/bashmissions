@@ -5,24 +5,23 @@ module_display: Conditionals
 title: Case Statement
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 73: Case Statement | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use a `case` statement on the first argument. Print `red=#ff0000`, `green=#00ff00`,
+  `blue=#0000ff`, or `unknown`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 73: Case Statement | alpha | beta'
+  - red
+  expected_stdout: red=#ff0000
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 73: Case Statement | spaces allowed | 42'
+  - green
+  expected_stdout: green=#00ff00
+  expected_exit: 0
+  comparison: exact
+- args:
+  - yellow
+  expected_stdout: unknown
   expected_exit: 0
   comparison: exact
 fixtures:

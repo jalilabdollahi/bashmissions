@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+if [[ $1 == *.txt ]]; then
+  echo "text file"
+else
+  echo "other"
+fi

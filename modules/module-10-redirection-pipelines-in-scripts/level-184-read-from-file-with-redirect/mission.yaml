@@ -4,25 +4,13 @@ module_name: redirection-pipelines-in-scripts
 module_display: Redirection & Pipelines in Scripts
 title: Read from File with Redirect
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 184: Read from File with
-  Redirect | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Read the first line from the provided file using input redirection and print it as first=<line>.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 184: Read from File with Redirect | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 184: Read from File with Redirect | spaces allowed | 42'
+  - 'fixtures/data.txt'
+  expected_stdout: 'first=alpha'
   expected_exit: 0
   comparison: exact
 fixtures:

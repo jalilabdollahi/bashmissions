@@ -1,1 +1,8 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+A compact solution can be shaped like this:
+
+if read -r -t 1 value < "$1"; then
+  echo "read: $value"
+else
+  echo "timeout"
+  exit 1
+fi

@@ -5,24 +5,17 @@ module_display: Arguments & Input
 title: Read a File Line by Line
 difficulty: beginner
 xp: 60
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 51: Read a File Line by
-  Line | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Read the file path in `$1` line by line with `while IFS= read -r line`.
+  Print each line with a one-based line number as `N: <line>`.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 51: Read a File Line by Line | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 51: Read a File Line by Line | spaces allowed | 42'
+  - fixtures/data.txt
+  expected_stdout: '1: one
+
+    2: two
+
+    3: three'
   expected_exit: 0
   comparison: exact
 fixtures:

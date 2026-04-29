@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on multiple branches.
+Use `elif` when one more specific condition should be checked before the fallback.

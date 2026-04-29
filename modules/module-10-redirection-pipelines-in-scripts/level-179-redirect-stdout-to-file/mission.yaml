@@ -4,29 +4,17 @@ module_name: redirection-pipelines-in-scripts
 module_display: Redirection & Pipelines in Scripts
 title: Redirect stdout to File
 difficulty: intermediate
-xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 179: Redirect stdout to
-  File | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 125
+objective: 'Redirect stdout into a file, append another line, then print the file contents.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 179: Redirect stdout to File | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 179: Redirect stdout to File | spaces allowed | 42'
+  expected_stdout: 'first
+second'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
 - '`>` and `>>`'
 scaffold: true

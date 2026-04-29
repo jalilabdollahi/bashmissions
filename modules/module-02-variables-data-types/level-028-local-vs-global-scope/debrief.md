@@ -1,20 +1,36 @@
 # Local vs Global Scope
 
-This level practices **`local` keyword (preview)**.
-
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+By default, every Bash variable is **global** — even if assigned inside a function. The `local` keyword changes that: it creates a variable that exists only for the lifetime of the function call.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 28: Local vs Global Scope | alpha | beta
+x="global"
+demo() {
+  local x="local"
+  echo "inside: $x"
+}
+demo
+echo "outside: $x"
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+Output:
+
+```
+inside: local
+outside: global
+```
+
+Bash uses **dynamic scoping**: a function can see and modify variables from any enclosing function on the call stack, unless those callers used `local`. This is unusual — most languages use lexical scoping — and it's why disciplined use of `local` matters.
+
+Idioms:
+
+- Mark every function parameter as `local`:
+  ```bash
+  greet() {
+    local name="$1"
+    echo "hello, $name"
+  }
+  ```
+- Combine attributes: `local -i count=0`, `local -r MAX=10`, `local -a items=()`.
+- Avoid the `name=value command` form, which doesn't make `name` local — it just sets it for one command's environment.
+
+`local` only works inside a function. At the top level it errors with `local: can only be used in a function`.

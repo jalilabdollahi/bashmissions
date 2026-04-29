@@ -4,29 +4,27 @@ module_name: variables-data-types
 module_display: Variables & Data Types
 title: Unset a Variable
 difficulty: beginner
-xp: 70
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 22: Unset a Variable |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+xp: 60
+objective: 'Assign `$1` to a variable, print `before: <value>`, then `unset` the variable and print `after: empty` using `${var:-empty}` as a fallback.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 22: Unset a Variable | alpha | beta'
+  - hello
+  expected_stdout: 'before: hello
+
+    after: empty'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 22: Unset a Variable | spaces allowed | 42'
+  - world
+  expected_stdout: 'before: world
+
+    after: empty'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
 - '`unset`'
+- variable lifecycle
 scaffold: true

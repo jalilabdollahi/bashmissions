@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on run linters, collect exit codes.
+Use this curriculum concept: collect exit codes.

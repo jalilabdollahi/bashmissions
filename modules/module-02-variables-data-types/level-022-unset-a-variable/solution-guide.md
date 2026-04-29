@@ -1,19 +1,31 @@
 # Guide for Unset a Variable
 
-Try building the script in this order:
+Build the script in this order:
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+1. Start with the bash shebang.
+2. Assign `$1` to a variable.
+3. Print `before: <value>`.
+4. `unset` the variable.
+5. Print `after: ${v:-empty}` — the fallback covers the now-unset case.
 
-A working shape looks like this:
+A working shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '22' 'Unset a Variable' "$1" "$2"
+v="$1"
+echo "before: $v"
+unset v
+echo "after: ${v:-empty}"
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+Sanity check:
+
+```bash
+./solution.sh hello
+# before: hello
+# after: empty
+```
+
+Try replacing `unset v` with `v=` and notice the output is the same — `${v:-empty}` treats empty and unset the same way. Use `answer` if stuck.

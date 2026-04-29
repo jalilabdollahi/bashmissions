@@ -5,24 +5,17 @@ module_display: String Manipulation
 title: Trim Both Ends
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 135: Trim Both Ends |
-  <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Trim leading and trailing whitespace from the first argument.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 135: Trim Both Ends | alpha | beta'
+  - '  hello  '
+  expected_stdout: hello
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 135: Trim Both Ends | spaces allowed | 42'
+  - "\t mixed value  "
+  expected_stdout: mixed value
   expected_exit: 0
   comparison: exact
 fixtures:

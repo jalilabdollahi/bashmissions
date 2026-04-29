@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO: solve the mission
+if [ "$1" != "$2" ]; then
+  echo "different"
+else
+  echo "same"
+fi

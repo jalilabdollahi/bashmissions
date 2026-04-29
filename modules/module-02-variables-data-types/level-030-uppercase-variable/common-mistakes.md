@@ -1,13 +1,11 @@
 # Common Mistakes for Uppercase Variable
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 30: Uppercase Variable | alpha | beta`.
+- Trying `${var^^}` on Bash 3.x (older macOS): `bad substitution` error. Use `tr '[:lower:]' '[:upper:]'` for portability or `#!/usr/bin/env bash` to ensure a modern Bash if installed.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Confusing single-caret `^` (first char only) with double-caret `^^` (all chars). Same with `,` vs `,,`.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Quoting issues: `echo $var^^` — the caret is a literal character there. The expansion form is `${var^^}` *inside* `${ }`.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Trying to chain expansions: `${${var^^}//x/y}` — Bash doesn't support nested expansions. Use a temporary variable.
+
+- Expecting non-ASCII letters to convert. Behaviour depends on the shell's locale (`LC_CTYPE`). With `C` locale, only ASCII A–Z / a–z are recognised.

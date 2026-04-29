@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Quote the right-hand side with double quotes (`name="$1"`) so values with spaces survive intact.

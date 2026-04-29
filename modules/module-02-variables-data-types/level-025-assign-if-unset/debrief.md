@@ -1,20 +1,26 @@
 # Assign If Unset
 
-This level practices **`${var:=default}`**.
-
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
-
-Focus on three things:
-
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
-
-A tiny working example looks like this:
+`${var:=default}` is `${var:-default}`'s side-effecting cousin. It both **substitutes** the default and **assigns** it to the variable for use later in the script.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 25: Assign If Unset | alpha | beta
+: "${PORT:=8080}"
+echo "starting on port $PORT"   # 8080
+echo "$PORT"                    # 8080  — the variable now holds the default
 ```
 
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.
+The `:` (no-op) command is the standard way to trigger the expansion when you don't want to use the substituted value yet. The expansion runs, the assignment happens, and `:` discards the output.
+
+Restrictions and pitfalls:
+
+- Cannot be used on positional parameters: `${1:=foo}` errors with `cannot assign in this way`. Copy first: `name="$1"; : "${name:=foo}"`.
+- Cannot be used on read-only variables.
+- Like `:-`, the colon makes empty strings count as "unset". Without the colon (`${var=default}`), only truly unset variables get the default.
+
+Useful in scripts that read config values from the environment with a documented default:
+
+```bash
+: "${LOG_LEVEL:=info}"
+: "${MAX_RETRIES:=3}"
+```
+
+After those two lines, both variables are guaranteed to hold a value — either inherited from the environment or the script's default.

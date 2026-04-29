@@ -1,13 +1,11 @@
 # Common Mistakes for Remove Prefix
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 34: Remove Prefix | alpha | beta`.
+- Confusing `#` with `##`: single is *shortest* match, double is *longest*. Easy to get backwards.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Treating the pattern as a regex. `${var#.*}` matches a literal dot followed by any characters — but the `.` is literal, not "any char". For "any char", use `?` (single) or `*` (any number).
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting that `*` is greedy in the longest-match form. `${path##*/}` strips up to the **last** `/`, leaving just the basename.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Trying to anchor like a regex. The patterns are implicitly anchored: `#` is start, `%` is end. There's no `^` or `$`.
+
+- Using on the wrong side. `${var#.tar.gz}` does nothing for `report.tar.gz` because the prefix doesn't match. Use `${var%.tar.gz}` (suffix) or `${var#*.}`.

@@ -1,20 +1,36 @@
 # Lowercase Variable
 
-This level practices **`${var,,}`**.
+Pair partner of `${var^^}`. Same syntax, opposite direction.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+| Form         | Effect                                     |
+|--------------|--------------------------------------------|
+| `${name,}`   | lowercase the first character              |
+| `${name,,}`  | lowercase every character                  |
+| `${name,,[A-M]}` | lowercase only `A`–`M`                 |
 
-Focus on three things:
+Common use cases:
 
-- Read the required inputs carefully.
-- Match the expected output exactly.
-- Return the correct exit status for success and failure cases.
+- Normalising user input for case-insensitive comparison:
+  ```bash
+  read -r answer
+  if [[ "${answer,,}" == "yes" ]]; then ...
+  ```
+- Building consistent tag/key names from mixed-case sources.
+- Making CLI flags forgiving:
+  ```bash
+  case "${1,,}" in
+    --help|-h) ... ;;
+    --version|-v) ... ;;
+  esac
+  ```
 
-A tiny working example looks like this:
+Behaviour notes:
+
+- Non-letters pass through untouched.
+- Locale-aware: in a UTF-8 locale, `Ä` becomes `ä`. In `C` locale, only A–Z map.
+- Idempotent: lowercasing an already-lowercase string is a no-op.
 
 ```bash
-./solution.sh alpha beta
-# LEVEL 31: Lowercase Variable | alpha | beta
+text="MiXeD CaSe"
+echo "${text,,}"   # mixed case
 ```
-
-Once you can make a script satisfy a small contract like this, you can reuse the same approach in bigger Bash programs.

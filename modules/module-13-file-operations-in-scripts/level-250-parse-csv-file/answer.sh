@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='parse-csv-file:250:processed:3'
-if [ "$mode" = "verbose" ]; then
-  output+=':verbose'
-fi
-
-printf '%s\n' "$output"
+first=1
+while IFS=, read -r name role; do
+  if (( first )); then
+    first=0
+    continue
+  fi
+  echo "$name=$role"
+done < fixtures/data.txt

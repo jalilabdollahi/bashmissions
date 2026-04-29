@@ -1,19 +1,33 @@
 # Guide for Getopts with Required Option
 
-Try building the script in this order:
+Goal: Use `getopts` to require `-f VALUE`. If `-f` is missing or has no value, print nothing and exit with status 1. If present, print `file=<value>`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
+2. Read the input using the curriculum concept for this level: error on missing optarg.
+3. Print only the required output, with quoted variable expansions.
+4. Run the mission tests, including the failure or empty-input case when one is listed.
+
+Reference shape:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '56' 'Getopts with Required Option' "$1" "$2"
-```
+file=""
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+while getopts ":f:" opt; do
+  case "$opt" in
+    f) file="$OPTARG" ;;
+    :) exit 1 ;;
+    \?) exit 1 ;;
+  esac
+done
+
+if [[ -z $file ]]; then
+  exit 1
+fi
+
+echo "file=$file"
+```

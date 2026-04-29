@@ -1,19 +1,27 @@
 # Guide for Check OS Type
 
-Try building the script in this order:
+Goal: Inspect `uname -s` and print exactly one of `Linux`, `macOS`, or `Other`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Identify the value or path being tested.
+2. Write the conditional form from this level: `uname` in condition.
+3. Quote variable expansions unless the syntax specifically needs an unquoted pattern.
+4. Match the expected output and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '77' 'Check OS Type' "$1" "$2"
-```
+os=$(uname -s)
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+if [ "$os" = "Linux" ]; then
+  echo "Linux"
+elif [ "$os" = "Darwin" ]; then
+  echo "macOS"
+else
+  echo "Other"
+fi
+```

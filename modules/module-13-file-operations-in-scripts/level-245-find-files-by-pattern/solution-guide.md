@@ -1,26 +1,14 @@
-# Guide for Find Files by Pattern
+# Solution Guide: Find Files by Pattern
 
-Try building the script in this order:
-
-1. Read the input file path from `$1`.
-2. Exit with status `1` and print nothing if the file does not exist.
-3. Print `find-files-by-pattern:245:processed:3` when the file exists.
-4. If the second argument is `verbose`, append `:verbose` to the output.
-
-A working shape looks like this:
+This level focuses on `find` in script.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-input=${1:-}
-mode=${2:-}
-
-[ -f "$input" ] || exit 1
-
-output='find-files-by-pattern:245:processed:3'
-[ "$mode" = 'verbose' ] && output+=':verbose'
-printf '%s\n' "$output"
+mkdir -p logs
+touch logs/app.log logs/app.txt logs/error.log
+find logs -type f -name '*.log' -printf '%f\n' | sort
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The script performs the file or text operation directly, then prints deterministic output for the checker.

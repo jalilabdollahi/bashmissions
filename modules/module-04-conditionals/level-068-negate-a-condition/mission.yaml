@@ -5,24 +5,18 @@ module_display: Conditionals
 title: Negate a Condition
 difficulty: beginner
 xp: 80
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 68: Negate a Condition
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Use `!` to negate a condition. Print `guest` when the first argument is
+  not `admin`; print `admin` when it is exactly `admin`.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 68: Negate a Condition | alpha | beta'
+  - admin
+  expected_stdout: admin
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 68: Negate a Condition | spaces allowed | 42'
+  - sam
+  expected_stdout: guest
   expected_exit: 0
   comparison: exact
 fixtures:

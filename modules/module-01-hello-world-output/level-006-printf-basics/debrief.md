@@ -1,8 +1,13 @@
 # printf Basics
 
-This level practices **`printf` format strings**.
+This level teaches you how to use printf to format output with placeholders.
 
-This is a foundation skill. Small shell scripts become much easier once you can reliably read inputs and print exactly the right output.
+Key takeaways:
+- Use printf for precise formatting.
+- Use %s for string placeholders.
+- Always quote your variables.
+
+This skill is essential for producing exact output in scripts.
 
 Focus on three things:
 

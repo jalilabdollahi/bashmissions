@@ -1,3 +1,7 @@
-alpha
-beta
-gamma
+[meta]
+name=demo
+[services]
+name=api
+name=worker
+[other]
+name=ignored

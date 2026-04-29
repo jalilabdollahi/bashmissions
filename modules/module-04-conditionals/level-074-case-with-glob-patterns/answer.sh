@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 74: Case with Glob Patterns | %s | %s\n' "$1" "$2"
+case "${1:-}" in
+  *.sh) echo "shell" ;;
+  *.txt) echo "text" ;;
+  *) echo "other" ;;
+esac

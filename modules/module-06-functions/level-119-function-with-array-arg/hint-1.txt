@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on passing arrays via nameref.
+`local -n ref=name` creates a nameref to another variable.

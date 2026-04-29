@@ -5,28 +5,17 @@ module_display: Functions
 title: Function Library
 difficulty: intermediate
 xp: 125
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 110: Function Library
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: Source `fixtures/helpers.sh` and call its `say_library` function so the
+  script prints `from library`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 110: Function Library | alpha | beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 110: Function Library | spaces allowed | 42'
+- args: []
+  expected_stdout: from library
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
+- helpers.sh
 concepts:
 - source a helper file
 scaffold: true

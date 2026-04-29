@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on verify checksum.
+Use this curriculum concept: verify checksum.

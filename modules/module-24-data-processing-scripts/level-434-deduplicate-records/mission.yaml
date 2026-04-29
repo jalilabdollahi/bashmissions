@@ -4,29 +4,17 @@ module_name: data-processing-scripts
 module_display: Data Processing Scripts
 title: Deduplicate Records
 difficulty: advanced
-xp: 265
-objective: 'Write `solution.sh` to inspect the input path given as the first argument.
-
-  If the file exists, print `deduplicate-records:434:processed:3`.
-
-  If a second argument is provided and equals `verbose`, append `:verbose`.
-
-  If the file is missing, print nothing and exit 1.'
+xp: 200
+objective: 'Deduplicate records by the first CSV key with sort.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - fixtures/data.txt
-  expected_stdout: deduplicate-records:434:processed:3
-  expected_exit: 0
-  comparison: exact
-- args:
-  - fixtures/data.txt
-  - verbose
-  expected_stdout: deduplicate-records:434:processed:3:verbose
+  expected_stdout: '1,alice
+2,bob'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+- data.csv
 concepts:
-- sort -u on key
-scaffold: false
+- 'sort -u on key'
+scaffold: true

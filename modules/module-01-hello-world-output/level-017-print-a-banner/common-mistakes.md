@@ -1,13 +1,11 @@
 # Common Mistakes for Print a Banner
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against output like `LEVEL 17: Print a Banner | alpha | beta`.
+- Hand-counting spaces. The whole point of `%-10s` is to let printf do the math. Solutions like `echo "== $1         =="` work for one input length and break for others.
 
-- Forgetting to quote variables.
-  Use `"$1"` and `"$2"` so spaces in arguments stay intact.
+- Right-aligning by mistake: `%10s` (no minus sign) pads on the **left**, not the right. The expected format is left-aligned, so the title appears immediately after `== `.
 
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
+- Forgetting `\n` in the format string. `printf` does not add a trailing newline; without it the next line will run together.
 
-- Solving only the happy path.
-  Read the mission again and make sure you also handle missing inputs or optional arguments when the level asks for them.
+- Quoting the format with double quotes when single will do: `printf "%-10s" "$1"` works but `$` in a format string can bite you. Prefer single-quoted formats.
+
+- Adding extra padding outside the field: `printf '==  %-10s  =='` (two spaces each side) makes the banner 2 columns wider than the test expects.

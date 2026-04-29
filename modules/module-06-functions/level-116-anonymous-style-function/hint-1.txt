@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on inline definition.
+Bash does not have true anonymous functions, but you can define a tiny function inline near its call site.

@@ -1,19 +1,28 @@
 # Guide for Error-Handling Function
 
-Try building the script in this order:
+Goal: Define a `die` function that prints `error: missing value` to stderr and exits 1 when no argument is provided. With an argument, print `value=<arg>`.
 
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
+Work in this order:
 
-A working shape looks like this:
+1. Define the function needed for the level.
+2. Use the function pattern from this concept: die() pattern.
+3. Call the function with quoted arguments when values may contain spaces.
+4. Match stdout and exit status exactly.
+
+Reference solution:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '117' 'Error-Handling Function' "$1" "$2"
-```
+die() {
+  echo "error: $1" >&2
+  exit 1
+}
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+if [ -z "${1:-}" ]; then
+  die "missing value"
+fi
+
+echo "value=$1"
+```

@@ -1,1 +1,1 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.
+Width is a *minimum*: a 12-character title is printed in full, no truncation. The test exercises both shorter-than-10 and longer-than-10 inputs.

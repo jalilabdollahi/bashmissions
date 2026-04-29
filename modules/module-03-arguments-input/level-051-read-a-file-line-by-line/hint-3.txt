@@ -1,1 +1,8 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+A compact solution can be shaped like this:
+
+line_number=1
+while IFS= read -r line; do
+  printf '%s: %s
+' "$line_number" "$line"
+  ((line_number += 1))
+done < "$1"

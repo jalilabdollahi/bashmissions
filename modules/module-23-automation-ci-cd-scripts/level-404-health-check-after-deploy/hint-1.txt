@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on poll until healthy.
+Use this curriculum concept: poll until healthy.

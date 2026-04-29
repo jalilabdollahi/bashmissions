@@ -5,32 +5,21 @@ module_display: Regular Expressions in Bash
 title: Quantifiers
 difficulty: intermediate
 xp: 165
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 224: Quantifiers | <arg1>
-  | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Use regex quantifiers to validate a two-letter, four-digit code.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 224: Quantifiers | alpha | beta'
+  - 'AB-1234'
+  expected_stdout: 'code=valid'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 224: Quantifiers | spaces allowed | 42'
+  - 'A-1234'
+  expected_stdout: 'code=invalid'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- '`*`'
-- '`+`'
-- '`?`'
-- '`{n'
-- m}`
+- '`*`, `+`, `?`, `{n,m}`'
 scaffold: true

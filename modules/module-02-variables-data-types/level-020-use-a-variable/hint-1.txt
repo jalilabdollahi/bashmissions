@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `$var` and `${var}`.
+`$var` and `${var}` mean the same thing — but only the braced form makes the variable name unambiguous when followed by letters, digits, or underscores.

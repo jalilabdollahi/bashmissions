@@ -5,28 +5,22 @@ module_display: Regular Expressions in Bash
 title: Validate and Extract
 difficulty: intermediate
 xp: 135
-objective: 'Write `solution.sh` so it prints exactly `LEVEL 231: Validate and Extract
-  | <arg1> | <arg2>`.
-
-  Use the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.
-
-  Exit with status 0 on success.'
+objective: 'Validate a `name:score` record and extract both fields when it matches.'
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - alpha
-  - beta
-  expected_stdout: 'LEVEL 231: Validate and Extract | alpha | beta'
+  - 'alice:42'
+  expected_stdout: 'name=alice
+score=42'
   expected_exit: 0
   comparison: exact
 - args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'LEVEL 231: Validate and Extract | spaces allowed | 42'
+  - 'alice-score'
+  expected_stdout: 'invalid'
   expected_exit: 0
   comparison: exact
 fixtures:
-- data.txt
+[]
 concepts:
-- combined match + capture
+- 'combined match + capture'
 scaffold: true

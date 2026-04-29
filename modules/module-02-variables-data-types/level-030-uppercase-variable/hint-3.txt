@@ -1,1 +1,1 @@
-Match the required output exactly, and remember to `exit 1` for the missing-file path when the mission asks for it.
+Available in Bash 4.0 and later. On macOS's default `/bin/bash` (3.2), use `tr '[:lower:]' '[:upper:]'` instead.

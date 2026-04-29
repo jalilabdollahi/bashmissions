@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL 207: Cleanup Temp Files | %s | %s\n' "$1" "$2"
+tmp=$(mktemp)
+trap 'rm -f "$tmp"; echo "temp=removed"' EXIT
+echo "temp=created"

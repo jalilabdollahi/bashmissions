@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on `for arg in "$@"`.
+`"$@"` preserves each argument as its own value.

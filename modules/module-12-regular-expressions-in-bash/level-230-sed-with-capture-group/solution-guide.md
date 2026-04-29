@@ -1,19 +1,12 @@
-# Guide for sed with Capture Group
+# Solution Guide: sed with Capture Group
 
-Try building the script in this order:
-
-1. Start the script with a bash shebang.
-2. Read the first two command-line arguments from `$1` and `$2`.
-3. Print the exact required text in one line, preserving spaces inside each argument.
-4. Use quoted variables so inputs like `spaces allowed` still work correctly.
-
-A working shape looks like this:
+This level focuses on `sed 's/\(.*\)/[\1]/'`.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'LEVEL %s: %s | %s | %s\n' '230' 'sed with Capture Group' "$1" "$2"
+echo 'status=ready' | sed 's/\(.*\)/[\1]/'
 ```
 
-Write it yourself first if you can. If you are still blocked, use the `answer` command to inspect the reference solution.
+The sed expression captures the entire line with `\(.*\)` and reuses it as `\1` inside square brackets.
