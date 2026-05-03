@@ -5,15 +5,15 @@ module_display: File Operations in Scripts
 title: Find Files by Age
 difficulty: intermediate
 xp: 155
-objective: 'Create old and new files, then use `find -mtime` to print only the old file.'
+objective: Create old and new files, then use `find -mtime` to print only the old
+  file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'old.log'
+- args: []
+  expected_stdout: old.log
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`find -mtime`'
 scaffold: true

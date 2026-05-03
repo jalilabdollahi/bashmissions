@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
-with_timeout(){ timeout 0.1s "$@"; }
-with_timeout sleep 1
-code=$?
-echo "timeout=$code"
+# TODO: solve the mission

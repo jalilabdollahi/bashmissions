@@ -19,7 +19,8 @@ if str(REPO_ROOT) not in sys.path:
 try:
     from engine.certificate import render_certificate, save_certificate
     from engine.player import PlayerProgress
-    from engine.runner import prepare_level, run_level, level_workspace
+    from engine.runner import prepare_level, run_level, level_workspace, set_active_workspace
+    from engine.scaffold import create_starter_script
     from engine.ui import (
         console,
         show_answer,
@@ -41,7 +42,8 @@ try:
 except ModuleNotFoundError:
     from certificate import render_certificate, save_certificate
     from player import PlayerProgress
-    from runner import prepare_level, run_level, level_workspace
+    from runner import prepare_level, run_level, level_workspace, set_active_workspace
+    from scaffold import create_starter_script
     from ui import (
         console,
         show_answer,
@@ -266,6 +268,8 @@ def game_loop() -> int:
         workspace = level_workspace(lv_data)
         if not workspace.exists():
             workspace = prepare_level(lv_data)
+        else:
+            set_active_workspace(workspace)
 
         show_mission(
             lv_data,
@@ -334,12 +338,8 @@ def game_loop() -> int:
             if command_name == "edit":
                 script_path = current_script_path(lv_data, workspace)
                 if not script_path.exists():
-                    # copy scaffold from level dir if available
-                    scaffold = level_dir(lv_data) / "solution.sh"
-                    if scaffold.exists():
-                        import shutil
-                        shutil.copy2(scaffold, script_path)
-                    else:
+                    create_starter_script(lv_data, level_dir(lv_data), script_path)
+                    if not script_path.exists():
                         script_path.write_text("#!/usr/bin/env bash\n\n", encoding="utf-8")
                 open_editor(script_path)
                 continue

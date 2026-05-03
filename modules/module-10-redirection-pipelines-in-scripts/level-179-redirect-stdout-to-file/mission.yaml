@@ -5,16 +5,16 @@ module_display: Redirection & Pipelines in Scripts
 title: Redirect stdout to File
 difficulty: intermediate
 xp: 125
-objective: 'Redirect stdout into a file, append another line, then print the file contents.'
+objective: Redirect stdout into a file, append another line, then print the file contents.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'first
-second'
+- args: []
+  expected_stdout: |-
+    first
+    second
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`>` and `>>`'
 scaffold: true

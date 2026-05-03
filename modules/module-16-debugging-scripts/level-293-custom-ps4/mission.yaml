@@ -5,16 +5,16 @@ module_display: Debugging Scripts
 title: Custom PS4
 difficulty: advanced
 xp: 195
-objective: 'Set a custom `PS4` prompt so traces include line context.'
+objective: Set a custom `PS4` prompt so traces include line context.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'name=api
-ps4=line'
+- args: []
+  expected_stdout: |-
+    name=api
+    ps4=line
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'show file/line in trace'
+- show file/line in trace
 scaffold: true

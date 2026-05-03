@@ -5,15 +5,14 @@ module_display: Logging & Monitoring Scripts
 title: Process Alive Check
 difficulty: advanced
 xp: 240
-objective: 'Demonstrate process alive check in a deterministic monitoring script.'
+objective: Demonstrate process alive check in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alive=yes'
+- args: []
+  expected_stdout: alive=yes
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'pidfile pattern'
+- pidfile pattern
 scaffold: true

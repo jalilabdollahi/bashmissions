@@ -5,17 +5,17 @@ module_display: Arrays
 title: Loop over Array
 difficulty: intermediate
 xp: 145
-objective: 'Loop over an array of workflow steps and print each as step=<name>.'
+objective: Loop over an array of workflow steps and print each as step=<name>.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'step=build
-step=test
-step=deploy'
+- args: []
+  expected_stdout: |-
+    step=build
+    step=test
+    step=deploy
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`for item in "${arr[@]}"`'
 scaffold: true

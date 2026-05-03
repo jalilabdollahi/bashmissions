@@ -7,24 +7,12 @@
     "title": "Your First Script",
     "difficulty": "beginner",
     "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 1: Your First Script | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Create a script that prints exactly: Hello, BashMissions!",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 1: Your First Script | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 1: Your First Script | spaces allowed | 42",
+        "args": [],
+        "expected_stdout": "Hello, BashMissions!",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -33,8 +21,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`#!/bin/bash`",
-      "`echo`"
+      "shebang",
+      "echo"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-001-your-first-script",
@@ -53,24 +41,22 @@
     "title": "Print a Message",
     "difficulty": "beginner",
     "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 2: Print a Message | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print the first argument as: Message: <arg1>",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "Hello Bash"
         ],
-        "expected_stdout": "LEVEL 2: Print a Message | alpha | beta",
+        "expected_stdout": "Message: Hello Bash",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "spaces are kept"
         ],
-        "expected_stdout": "LEVEL 2: Print a Message | spaces allowed | 42",
+        "expected_stdout": "Message: spaces are kept",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -79,7 +65,8 @@
       "data.txt"
     ],
     "concepts": [
-      "echo with a string argument"
+      "positional arguments",
+      "printf"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-002-print-a-message",
@@ -98,24 +85,22 @@
     "title": "Single vs Double Quotes",
     "difficulty": "beginner",
     "xp": 80,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 3: Single vs Double Quotes | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Show quoting behavior with two lines: single: $name and double: <arg1>.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "alpha"
         ],
-        "expected_stdout": "LEVEL 3: Single vs Double Quotes | alpha | beta",
+        "expected_stdout": "single: $name\ndouble: alpha",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "two words"
         ],
-        "expected_stdout": "LEVEL 3: Single vs Double Quotes | spaces allowed | 42",
+        "expected_stdout": "single: $name\ndouble: two words",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -124,7 +109,9 @@
       "data.txt"
     ],
     "concepts": [
-      "quoting differences"
+      "single quotes",
+      "double quotes",
+      "variable expansion"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-003-single-vs-double-quotes",
@@ -143,24 +130,15 @@
     "title": "Print Multiple Lines",
     "difficulty": "beginner",
     "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 4: Print Multiple Lines | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print exactly three lines:\nLine 1: <arg1>\nLine 2: <arg2>\nDone.\nUse the first argument for <arg1> and the second argument for <arg2>.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "apple",
+          "banana"
         ],
-        "expected_stdout": "LEVEL 4: Print Multiple Lines | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 4: Print Multiple Lines | spaces allowed | 42",
+        "expected_stdout": "Line 1: apple\nLine 2: banana\nDone.",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -169,7 +147,8 @@
       "data.txt"
     ],
     "concepts": [
-      "multiple echo statements"
+      "newline",
+      "multi-line output"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-004-print-multiple-lines",
@@ -188,24 +167,15 @@
     "title": "Escape Characters",
     "difficulty": "beginner",
     "xp": 50,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 5: Escape Characters | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print exactly one line:\nFile: C:\\tmp\\<arg1> | Quote: \"<arg2>\"\nUse the first argument for <arg1> and the second argument for <arg2>.\nPreserve the literal backslashes and double quotes in the output.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "report.txt",
+          "done"
         ],
-        "expected_stdout": "LEVEL 5: Escape Characters | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 5: Escape Characters | spaces allowed | 42",
+        "expected_stdout": "File: C:\\tmp\\report.txt | Quote: \"done\"",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -214,8 +184,9 @@
       "data.txt"
     ],
     "concepts": [
-      "`\\n`",
-      "`\\t` with `echo -e`"
+      "escape sequences",
+      "backslash",
+      "quotes"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-005-escape-characters",
@@ -234,24 +205,24 @@
     "title": "printf Basics",
     "difficulty": "beginner",
     "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 6: printf Basics | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print exactly one line in this format:\nName=<arg1>; Score=<arg2>\nUse the first argument for <arg1> and the second argument for <arg2>.\nUse printf placeholders instead of building the line by hand.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "Sara",
+          "95"
         ],
-        "expected_stdout": "LEVEL 6: printf Basics | alpha | beta",
+        "expected_stdout": "Name=Sara; Score=95",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "Ali",
+          "7"
         ],
-        "expected_stdout": "LEVEL 6: printf Basics | spaces allowed | 42",
+        "expected_stdout": "Name=Ali; Score=7",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -260,7 +231,7 @@
       "data.txt"
     ],
     "concepts": [
-      "`printf` format strings"
+      "printf format specifiers"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-006-printf-basics",
@@ -279,24 +250,22 @@
     "title": "printf vs echo",
     "difficulty": "beginner",
     "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 7: printf vs echo | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print the first argument literally (no escape interpretation) as: raw: <arg1>.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "a\\nb"
         ],
-        "expected_stdout": "LEVEL 7: printf vs echo | alpha | beta",
+        "expected_stdout": "raw: a\\nb",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "*"
         ],
-        "expected_stdout": "LEVEL 7: printf vs echo | spaces allowed | 42",
+        "expected_stdout": "raw: *",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -305,7 +274,8 @@
       "data.txt"
     ],
     "concepts": [
-      "choosing the right output tool"
+      "printf reliability",
+      "echo caveats"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-007-printf-vs-echo",
@@ -350,7 +320,7 @@
       "data.txt"
     ],
     "concepts": [
-      "`echo -n`"
+      "echo -n"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-008-suppress-newline",
@@ -369,24 +339,15 @@
     "title": "Print to Stderr",
     "difficulty": "beginner",
     "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 9: Print to Stderr | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print the first argument to stderr only, exactly as: Error: <arg1>",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "disk full"
         ],
-        "expected_stdout": "LEVEL 9: Print to Stderr | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 9: Print to Stderr | spaces allowed | 42",
+        "expected_stdout": "",
+        "expected_stderr": "Error: disk full",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -395,7 +356,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`echo >&2`"
+      "stderr",
+      "file descriptor 2"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-009-print-to-stderr",
@@ -460,25 +422,31 @@
     "title": "Script Exit Code",
     "difficulty": "beginner",
     "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 11: Script Exit Code | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print `exit code: <arg1>` and exit with status `<arg1>` (a number).",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "0"
         ],
-        "expected_stdout": "LEVEL 11: Script Exit Code | alpha | beta",
+        "expected_stdout": "exit code: 0",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "1"
         ],
-        "expected_stdout": "LEVEL 11: Script Exit Code | spaces allowed | 42",
-        "expected_exit": 0,
+        "expected_stdout": "exit code: 1",
+        "expected_exit": 1,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "7"
+        ],
+        "expected_stdout": "exit code: 7",
+        "expected_exit": 7,
         "comparison": "exact"
       }
     ],
@@ -487,7 +455,8 @@
     ],
     "concepts": [
       "`exit 0`",
-      "`exit 1`"
+      "`exit 1`",
+      "exit status"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-011-script-exit-code",
@@ -506,26 +475,14 @@
     "title": "Print Environment Variable",
     "difficulty": "beginner",
     "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 12: Print Environment Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print one line with the values of `$HOME` and `$USER` in the format `HOME=<home> USER=<user>`. Use the actual values from the environment, not literal placeholders.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 12: Print Environment Variable | alpha | beta",
+        "args": [],
+        "expected_stdout": "HOME=\\S+ USER=\\S+",
         "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 12: Print Environment Variable | spaces allowed | 42",
-        "expected_exit": 0,
-        "comparison": "exact"
+        "comparison": "regex"
       }
     ],
     "fixtures": [
@@ -533,7 +490,8 @@
     ],
     "concepts": [
       "`$HOME`",
-      "`$USER`"
+      "`$USER`",
+      "environment variables"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-012-print-environment-variable",
@@ -552,33 +510,22 @@
     "title": "Print Current Date",
     "difficulty": "beginner",
     "xp": 80,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 13: Print Current Date | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print `today is YYYY-MM-DD` using the current date. Use command substitution with `date +%Y-%m-%d` \u2014 do not hard-code a date.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 13: Print Current Date | alpha | beta",
+        "args": [],
+        "expected_stdout": "today is \\d{4}-\\d{2}-\\d{2}",
         "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 13: Print Current Date | spaces allowed | 42",
-        "expected_exit": 0,
-        "comparison": "exact"
+        "comparison": "regex"
       }
     ],
     "fixtures": [
       "data.txt"
     ],
     "concepts": [
-      "`$(date)` command substitution"
+      "`$(...)` command substitution",
+      "`date` with format strings"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-013-print-current-date",
@@ -597,24 +544,12 @@
     "title": "Print Script Name",
     "difficulty": "beginner",
     "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 14: Print Script Name | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print `script: <name>` where `<name>` is the script's own filename (without any directory part). Use `$0`, not a hard-coded literal.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 14: Print Script Name | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 14: Print Script Name | spaces allowed | 42",
+        "args": [],
+        "expected_stdout": "script: solution.sh",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -623,7 +558,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`$0`"
+      "`$0`",
+      "`basename`"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-014-print-script-name",
@@ -642,24 +578,12 @@
     "title": "Multi-line String",
     "difficulty": "beginner",
     "xp": 50,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 15: Multi-line String | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print three lines exactly: `line one`, `line two`, `line three`. Use a here-doc (`cat <<EOF ... EOF`) \u2014 not three separate `echo` calls.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 15: Multi-line String | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 15: Multi-line String | spaces allowed | 42",
+        "args": [],
+        "expected_stdout": "line one\nline two\nline three",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -668,7 +592,8 @@
       "data.txt"
     ],
     "concepts": [
-      "here-string with echo"
+      "here-document",
+      "`cat <<EOF`"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-015-multi-line-string",
@@ -687,33 +612,22 @@
     "title": "Colorized Output",
     "difficulty": "beginner",
     "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 16: Colorized Output | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print the word `OK` in green using ANSI escape codes, then reset the color. Output should be `\\033[32mOK\\033[0m`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 16: Colorized Output | alpha | beta",
+        "args": [],
+        "expected_stdout": "\\x1b\\[32mOK\\x1b\\[0m",
         "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 16: Colorized Output | spaces allowed | 42",
-        "expected_exit": 0,
-        "comparison": "exact"
+        "comparison": "regex"
       }
     ],
     "fixtures": [
       "data.txt"
     ],
     "concepts": [
-      "ANSI escape codes"
+      "ANSI escape codes",
+      "`\\033[` color sequences"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-016-colorized-output",
@@ -732,24 +646,30 @@
     "title": "Print a Banner",
     "difficulty": "beginner",
     "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 17: Print a Banner | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Print a banner with the title from `$1`, padded to 10 columns. Format: `== <title>      ==` \u2014 left-aligned title in a 10-wide field, surrounded by `== ` and ` ==`. Use `printf` width specifiers, not manual spaces.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hi"
         ],
-        "expected_stdout": "LEVEL 17: Print a Banner | alpha | beta",
+        "expected_stdout": "== hi         ==",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "banner"
         ],
-        "expected_stdout": "LEVEL 17: Print a Banner | spaces allowed | 42",
+        "expected_stdout": "== banner     ==",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "BashMission"
+        ],
+        "expected_stdout": "== BashMission ==",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -758,7 +678,8 @@
       "data.txt"
     ],
     "concepts": [
-      "printf with padding"
+      "`printf` width specifiers",
+      "left/right alignment with `%-Ns` and `%Ns`"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-017-print-a-banner",
@@ -777,24 +698,33 @@
     "title": "Print Version Info",
     "difficulty": "beginner",
     "xp": 80,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 18: Print Version Info | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Take a tool name in `$1` and a version string in `$2`, store them in named variables, and print `<name> version <version>`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "mytool",
+          "1.2.3"
         ],
-        "expected_stdout": "LEVEL 18: Print Version Info | alpha | beta",
+        "expected_stdout": "mytool version 1.2.3",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "app",
+          "v0.1"
         ],
-        "expected_stdout": "LEVEL 18: Print Version Info | spaces allowed | 42",
+        "expected_stdout": "app version v0.1",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "bashmissions",
+          "2026.04"
+        ],
+        "expected_stdout": "bashmissions version 2026.04",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -803,7 +733,9 @@
       "data.txt"
     ],
     "concepts": [
-      "combining variables in output"
+      "combining variables in output",
+      "variable assignment",
+      "string interpolation"
     ],
     "scaffold": true,
     "path": "modules/module-01-hello-world-output/level-018-print-version-info",
@@ -821,25 +753,31 @@
     "module_display": "Variables & Data Types",
     "title": "Assign a Variable",
     "difficulty": "beginner",
-    "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 19: Assign a Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 50,
+    "objective": "Assign `$1` to a variable named `greeting`, then print its value.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hello"
         ],
-        "expected_stdout": "LEVEL 19: Assign a Variable | alpha | beta",
+        "expected_stdout": "hello",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "BashMissions"
         ],
-        "expected_stdout": "LEVEL 19: Assign a Variable | spaces allowed | 42",
+        "expected_stdout": "BashMissions",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "has spaces"
+        ],
+        "expected_stdout": "has spaces",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -848,7 +786,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`name=value` (no spaces)"
+      "variable assignment",
+      "no spaces around `=`"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-019-assign-a-variable",
@@ -867,24 +806,30 @@
     "title": "Use a Variable",
     "difficulty": "beginner",
     "xp": 50,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 20: Use a Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Assign `$1` to a variable, then print `<value>_suffix` \u2014 use `${var}` braces so Bash doesn't try to read a variable named `var_suffix`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "foo"
         ],
-        "expected_stdout": "LEVEL 20: Use a Variable | alpha | beta",
+        "expected_stdout": "foo_suffix",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "app"
         ],
-        "expected_stdout": "LEVEL 20: Use a Variable | spaces allowed | 42",
+        "expected_stdout": "app_suffix",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "my-thing"
+        ],
+        "expected_stdout": "my-thing_suffix",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -893,7 +838,9 @@
       "data.txt"
     ],
     "concepts": [
-      "`$var` and `${var}`"
+      "`$var`",
+      "`${var}` braces",
+      "string interpolation"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-020-use-a-variable",
@@ -912,24 +859,22 @@
     "title": "Read-Only Variables",
     "difficulty": "beginner",
     "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 21: Read-Only Variables | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Mark a variable holding `$1` as `readonly`, attempt to reassign it (the attempt must be ignored), then print the original value to confirm it didn't change.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "original"
         ],
-        "expected_stdout": "LEVEL 21: Read-Only Variables | alpha | beta",
+        "expected_stdout": "original",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "v1.0.0"
         ],
-        "expected_stdout": "LEVEL 21: Read-Only Variables | spaces allowed | 42",
+        "expected_stdout": "v1.0.0",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -938,7 +883,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`readonly`"
+      "`readonly`",
+      "immutable variables"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-021-read-only-variables",
@@ -956,25 +902,23 @@
     "module_display": "Variables & Data Types",
     "title": "Unset a Variable",
     "difficulty": "beginner",
-    "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 22: Unset a Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 60,
+    "objective": "Assign `$1` to a variable, print `before: <value>`, then `unset` the variable and print `after: empty` using `${var:-empty}` as a fallback.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hello"
         ],
-        "expected_stdout": "LEVEL 22: Unset a Variable | alpha | beta",
+        "expected_stdout": "before: hello\nafter: empty",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "world"
         ],
-        "expected_stdout": "LEVEL 22: Unset a Variable | spaces allowed | 42",
+        "expected_stdout": "before: world\nafter: empty",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -983,7 +927,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`unset`"
+      "`unset`",
+      "variable lifecycle"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-022-unset-a-variable",
@@ -1001,25 +946,31 @@
     "module_display": "Variables & Data Types",
     "title": "Integer Variables",
     "difficulty": "beginner",
-    "xp": 80,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 23: Integer Variables | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Declare an integer variable holding `$1`, add `10` to it with `+=`, and print the result. Without the integer attribute, `+=` would do string concatenation instead.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "5"
         ],
-        "expected_stdout": "LEVEL 23: Integer Variables | alpha | beta",
+        "expected_stdout": "15",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "100"
         ],
-        "expected_stdout": "LEVEL 23: Integer Variables | spaces allowed | 42",
+        "expected_stdout": "110",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "-3"
+        ],
+        "expected_stdout": "7",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1028,7 +979,9 @@
       "data.txt"
     ],
     "concepts": [
-      "`declare -i`"
+      "`declare -i`",
+      "arithmetic vs string",
+      "`+=`"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-023-integer-variables",
@@ -1046,25 +999,29 @@
     "module_display": "Variables & Data Types",
     "title": "Default Values",
     "difficulty": "beginner",
-    "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 24: Default Values | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 60,
+    "objective": "Print `Hello, <name>` where `<name>` is `$1` if provided, otherwise the literal `anonymous`. Use the `${1:-default}` form, not an `if` statement.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "Jalil"
         ],
-        "expected_stdout": "LEVEL 24: Default Values | alpha | beta",
+        "expected_stdout": "Hello, Jalil",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "world"
         ],
-        "expected_stdout": "LEVEL 24: Default Values | spaces allowed | 42",
+        "expected_stdout": "Hello, world",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [],
+        "expected_stdout": "Hello, anonymous",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1073,7 +1030,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var:-default}`"
+      "`${var:-default}`",
+      "fallback values"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-024-default-values",
@@ -1091,25 +1049,23 @@
     "module_display": "Variables & Data Types",
     "title": "Assign If Unset",
     "difficulty": "beginner",
-    "xp": 50,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 25: Assign If Unset | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Use `${name:=guest}` (note the `=`, not `-`) to set a default. After the expansion, `$name` must actually hold the default value. Print `Welcome, <name>`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "Jalil"
         ],
-        "expected_stdout": "LEVEL 25: Assign If Unset | alpha | beta",
+        "expected_stdout": "Welcome, Jalil",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          ""
         ],
-        "expected_stdout": "LEVEL 25: Assign If Unset | spaces allowed | 42",
+        "expected_stdout": "Welcome, guest",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1118,7 +1074,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var:=default}`"
+      "`${var:=default}`",
+      "side-effecting expansion"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-025-assign-if-unset",
@@ -1136,26 +1093,22 @@
     "module_display": "Variables & Data Types",
     "title": "Error If Unset",
     "difficulty": "beginner",
-    "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 26: Error If Unset | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Use `${1:?missing argument}` so the script aborts with a non-zero exit when called with no argument. When `$1` is provided, print `Hello, <name>`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "Jalil"
         ],
-        "expected_stdout": "LEVEL 26: Error If Unset | alpha | beta",
+        "expected_stdout": "Hello, Jalil",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 26: Error If Unset | spaces allowed | 42",
-        "expected_exit": 0,
+        "args": [],
+        "expected_stdout": "",
+        "expected_exit": 1,
         "comparison": "exact"
       }
     ],
@@ -1163,7 +1116,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var:?error}`"
+      "`${var:?error}`",
+      "fail-fast scripts"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-026-error-if-unset",
@@ -1181,25 +1135,23 @@
     "module_display": "Variables & Data Types",
     "title": "Variable Indirection",
     "difficulty": "beginner",
-    "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 27: Variable Indirection | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 80,
+    "objective": "Define two variables `COLOR_RED=red` and `COLOR_BLUE=blue` in the script. Take a variable *name* in `$1` and print the value it points to using `${!key}` indirection.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "COLOR_RED"
         ],
-        "expected_stdout": "LEVEL 27: Variable Indirection | alpha | beta",
+        "expected_stdout": "red",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "COLOR_BLUE"
         ],
-        "expected_stdout": "LEVEL 27: Variable Indirection | spaces allowed | 42",
+        "expected_stdout": "blue",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1208,7 +1160,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${!varname}`"
+      "`${!var}`",
+      "indirect reference"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-027-variable-indirection",
@@ -1227,24 +1180,12 @@
     "title": "Local vs Global Scope",
     "difficulty": "beginner",
     "xp": 80,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 28: Local vs Global Scope | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Set `x=global` at the top of the script. Define a function `demo` that uses `local x=local` and prints `inside: $x`. After calling the function, print `outside: $x` \u2014 the global value should be untouched.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
-        "args": [
-          "alpha",
-          "beta"
-        ],
-        "expected_stdout": "LEVEL 28: Local vs Global Scope | alpha | beta",
-        "expected_exit": 0,
-        "comparison": "exact"
-      },
-      {
-        "args": [
-          "spaces allowed",
-          "42"
-        ],
-        "expected_stdout": "LEVEL 28: Local vs Global Scope | spaces allowed | 42",
+        "args": [],
+        "expected_stdout": "inside: local\noutside: global",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1253,7 +1194,9 @@
       "data.txt"
     ],
     "concepts": [
-      "`local` keyword (preview)"
+      "`local`",
+      "function scope",
+      "dynamic scoping"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-028-local-vs-global-scope",
@@ -1271,25 +1214,23 @@
     "module_display": "Variables & Data Types",
     "title": "Export a Variable",
     "difficulty": "beginner",
-    "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 29: Export a Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Set a variable `GREETING` to `$1` and `export` it so a child shell process can see it. Then run `bash -c 'echo \"$GREETING\"'` \u2014 the child shell must print the value.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hello"
         ],
-        "expected_stdout": "LEVEL 29: Export a Variable | alpha | beta",
+        "expected_stdout": "hello",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "hi from export"
         ],
-        "expected_stdout": "LEVEL 29: Export a Variable | spaces allowed | 42",
+        "expected_stdout": "hi from export",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1298,7 +1239,9 @@
       "data.txt"
     ],
     "concepts": [
-      "`export`"
+      "`export`",
+      "environment inheritance",
+      "subshells"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-029-export-a-variable",
@@ -1316,25 +1259,31 @@
     "module_display": "Variables & Data Types",
     "title": "Uppercase Variable",
     "difficulty": "beginner",
-    "xp": 50,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 30: Uppercase Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 60,
+    "objective": "Read `$1` into a variable and print it fully uppercased using `${var^^}` \u2014 no `tr`, no `awk`, just parameter expansion.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hello"
         ],
-        "expected_stdout": "LEVEL 30: Uppercase Variable | alpha | beta",
+        "expected_stdout": "HELLO",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "MiXeD CaSe"
         ],
-        "expected_stdout": "LEVEL 30: Uppercase Variable | spaces allowed | 42",
+        "expected_stdout": "MIXED CASE",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "bash 4.0+"
+        ],
+        "expected_stdout": "BASH 4.0+",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1343,7 +1292,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var^^}`"
+      "`${var^^}`",
+      "case conversion"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-030-uppercase-variable",
@@ -1362,24 +1312,30 @@
     "title": "Lowercase Variable",
     "difficulty": "beginner",
     "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 31: Lowercase Variable | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "objective": "Read `$1` and print it fully lowercased using `${var,,}`. Parameter expansion only \u2014 no `tr`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "HELLO"
         ],
-        "expected_stdout": "LEVEL 31: Lowercase Variable | alpha | beta",
+        "expected_stdout": "hello",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "MiXeD CaSe"
         ],
-        "expected_stdout": "LEVEL 31: Lowercase Variable | spaces allowed | 42",
+        "expected_stdout": "mixed case",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "BASH-4"
+        ],
+        "expected_stdout": "bash-4",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1388,9 +1344,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var",
-      "",
-      "}`"
+      "`${var,,}`",
+      "case conversion"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-031-lowercase-variable",
@@ -1408,25 +1363,31 @@
     "module_display": "Variables & Data Types",
     "title": "String Length",
     "difficulty": "beginner",
-    "xp": 70,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 32: String Length | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 60,
+    "objective": "Print the length (number of characters) of `$1` using `${#var}` parameter expansion. Don't pipe to `wc -c` \u2014 that adds 1 for the newline.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hello"
         ],
-        "expected_stdout": "LEVEL 32: String Length | alpha | beta",
+        "expected_stdout": "5",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "BashMissions"
         ],
-        "expected_stdout": "LEVEL 32: String Length | spaces allowed | 42",
+        "expected_stdout": "12",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          ""
+        ],
+        "expected_stdout": "0",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1435,7 +1396,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${#var}`"
+      "`${#var}`",
+      "string length"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-032-string-length",
@@ -1453,25 +1415,31 @@
     "module_display": "Variables & Data Types",
     "title": "Substring Extraction",
     "difficulty": "beginner",
-    "xp": 80,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 33: Substring Extraction | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Print 4 characters starting at offset 1 of `$1` using `${text:1:4}`.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "BashMissions"
         ],
-        "expected_stdout": "LEVEL 33: Substring Extraction | alpha | beta",
+        "expected_stdout": "ashM",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "hello"
         ],
-        "expected_stdout": "LEVEL 33: Substring Extraction | spaces allowed | 42",
+        "expected_stdout": "ello",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "abcdef"
+        ],
+        "expected_stdout": "bcde",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1480,7 +1448,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var:offset:length}`"
+      "`${var:offset:length}`",
+      "substring slicing"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-033-substring-extraction",
@@ -1498,25 +1467,31 @@
     "module_display": "Variables & Data Types",
     "title": "Remove Prefix",
     "difficulty": "beginner",
-    "xp": 90,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 34: Remove Prefix | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Take a filename in `$1` and print it with everything up to and including the first `.` removed. Use `${var#*.}` (single hash = shortest match).",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "file.tar.gz"
         ],
-        "expected_stdout": "LEVEL 34: Remove Prefix | alpha | beta",
+        "expected_stdout": "tar.gz",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "report.pdf"
         ],
-        "expected_stdout": "LEVEL 34: Remove Prefix | spaces allowed | 42",
+        "expected_stdout": "pdf",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "a.b.c.d"
+        ],
+        "expected_stdout": "b.c.d",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1525,7 +1500,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var#pattern}`"
+      "`${var#pattern}`",
+      "prefix removal"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-034-remove-prefix",
@@ -1543,25 +1519,31 @@
     "module_display": "Variables & Data Types",
     "title": "Remove Suffix",
     "difficulty": "beginner",
-    "xp": 50,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 35: Remove Suffix | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Take a filename in `$1` and print it with the last extension removed using `${filename%.*}` \u2014 strips from the last `.` to the end.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "report.pdf"
         ],
-        "expected_stdout": "LEVEL 35: Remove Suffix | alpha | beta",
+        "expected_stdout": "report",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "archive.tar.gz"
         ],
-        "expected_stdout": "LEVEL 35: Remove Suffix | spaces allowed | 42",
+        "expected_stdout": "archive.tar",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "noext"
+        ],
+        "expected_stdout": "noext",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1570,7 +1552,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var%pattern}`"
+      "`${var%pattern}`",
+      "suffix removal"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-035-remove-suffix",
@@ -1588,25 +1571,31 @@
     "module_display": "Variables & Data Types",
     "title": "Replace in String",
     "difficulty": "beginner",
-    "xp": 60,
-    "objective": "Write `solution.sh` so it prints exactly `LEVEL 36: Replace in String | <arg1> | <arg2>`.\nUse the script arguments as `<arg1>` and `<arg2>`, preserving spaces exactly.\nExit with status 0 on success.",
+    "xp": 70,
+    "objective": "Take `$1` and print it with **every** space replaced by a `-` using `${text// /-}`. Single-slash form (`${var/old/new}`) only replaces the first occurrence.",
     "expected_script_name": "solution.sh",
     "test_cases": [
       {
         "args": [
-          "alpha",
-          "beta"
+          "hello world"
         ],
-        "expected_stdout": "LEVEL 36: Replace in String | alpha | beta",
+        "expected_stdout": "hello-world",
         "expected_exit": 0,
         "comparison": "exact"
       },
       {
         "args": [
-          "spaces allowed",
-          "42"
+          "a b c d"
         ],
-        "expected_stdout": "LEVEL 36: Replace in String | spaces allowed | 42",
+        "expected_stdout": "a-b-c-d",
+        "expected_exit": 0,
+        "comparison": "exact"
+      },
+      {
+        "args": [
+          "nospaces"
+        ],
+        "expected_stdout": "nospaces",
         "expected_exit": 0,
         "comparison": "exact"
       }
@@ -1615,7 +1604,8 @@
       "data.txt"
     ],
     "concepts": [
-      "`${var//old/new}`"
+      "`${var//old/new}`",
+      "string replacement"
     ],
     "scaffold": true,
     "path": "modules/module-02-variables-data-types/level-036-replace-in-string",

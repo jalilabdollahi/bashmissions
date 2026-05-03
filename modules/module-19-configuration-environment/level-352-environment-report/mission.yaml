@@ -5,16 +5,16 @@ module_display: Configuration & Environment
 title: Environment Report
 difficulty: advanced
 xp: 185
-objective: 'Print selected config values in a stable report order.'
+objective: Print selected config values in a stable report order.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'APP_ENV=dev
-APP_PORT=8080'
+- args: []
+  expected_stdout: |-
+    APP_ENV=dev
+    APP_PORT=8080
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'print all config values'
+- print all config values
 scaffold: true

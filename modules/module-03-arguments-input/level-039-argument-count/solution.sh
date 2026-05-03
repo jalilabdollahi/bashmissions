@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "count: $#"
+# TODO: solve the mission

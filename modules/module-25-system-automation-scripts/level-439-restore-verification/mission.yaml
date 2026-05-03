@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Restore Verification
 difficulty: expert
 xp: 220
-objective: 'Simulate restore verification safely in the workspace.'
+objective: Simulate restore verification safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'restore_verification=ok'
+- args: []
+  expected_stdout: restore_verification=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'checksum comparison'
+- checksum comparison
 scaffold: true

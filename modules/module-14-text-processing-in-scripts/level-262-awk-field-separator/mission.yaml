@@ -5,12 +5,13 @@ module_display: Text Processing in Scripts
 title: awk Field Separator
 difficulty: intermediate
 xp: 135
-objective: 'Use `awk -F,` to parse CSV and print selected fields.'
+objective: Use `awk -F,` to parse CSV and print selected fields.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alice:admin
-bob:user'
+- args: []
+  expected_stdout: |-
+    alice:admin
+    bob:user
   expected_exit: 0
   comparison: exact
 fixtures:

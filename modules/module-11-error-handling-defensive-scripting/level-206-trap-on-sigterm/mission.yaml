@@ -5,15 +5,15 @@ module_display: Error Handling & Defensive Scripting
 title: Trap on SIGTERM
 difficulty: intermediate
 xp: 165
-objective: 'Install a SIGTERM trap and trigger it in a subshell to print a graceful message.'
+objective: Install a SIGTERM trap and trigger it in a subshell to print a graceful
+  message.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'sigterm=handled'
+- args: []
+  expected_stdout: sigterm=handled
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'handle kill signal'
+- handle kill signal
 scaffold: true

@@ -5,16 +5,16 @@ module_display: Script Structure & Best Practices
 title: Strict Mode Setup
 difficulty: advanced
 xp: 205
-objective: 'Enable strict mode and set a safe IFS before processing input.'
+objective: Enable strict mode and set a safe IFS before processing input.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'strict=on
-items=2'
+- args: []
+  expected_stdout: |-
+    strict=on
+    items=2
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`set -euo pipefail` + IFS'
 scaffold: true

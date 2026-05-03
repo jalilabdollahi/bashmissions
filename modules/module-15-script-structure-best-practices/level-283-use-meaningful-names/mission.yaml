@@ -5,16 +5,17 @@ module_display: Script Structure & Best Practices
 title: Use Meaningful Names
 difficulty: advanced
 xp: 175
-objective: 'Use descriptive variable names while copying data from source to destination.'
+objective: Use descriptive variable names while copying data from source to destination.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'destination=result.txt
-content=ready'
+- args: []
+  expected_stdout: |-
+    destination=result.txt
+    content=ready
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'naming conventions'
+- naming conventions
 scaffold: true

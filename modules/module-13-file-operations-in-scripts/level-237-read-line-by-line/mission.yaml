@@ -5,13 +5,14 @@ module_display: File Operations in Scripts
 title: Read Line by Line
 difficulty: intermediate
 xp: 165
-objective: 'Read a file line by line and number each line.'
+objective: Read a file line by line and number each line.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '1:alpha
-2:two words
-3:gamma'
+- args: []
+  expected_stdout: |-
+    1:alpha
+    2:two words
+    3:gamma
   expected_exit: 0
   comparison: exact
 fixtures:

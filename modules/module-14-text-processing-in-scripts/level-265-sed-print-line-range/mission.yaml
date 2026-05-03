@@ -5,13 +5,14 @@ module_display: Text Processing in Scripts
 title: sed Print Line Range
 difficulty: intermediate
 xp: 165
-objective: 'Use sed to print a line range from a file.'
+objective: Use sed to print a line range from a file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'two
-three
-four'
+- args: []
+  expected_stdout: |-
+    two
+    three
+    four
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Service Restart Orchestrator
 difficulty: expert
 xp: 220
-objective: 'Simulate service restart orchestrator safely in the workspace.'
+objective: Simulate service restart orchestrator safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'service_restart_orchestrator=ok'
+- args: []
+  expected_stdout: service_restart_orchestrator=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'rolling restart'
+- rolling restart
 scaffold: true

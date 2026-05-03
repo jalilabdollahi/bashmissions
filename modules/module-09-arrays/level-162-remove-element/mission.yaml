@@ -5,16 +5,17 @@ module_display: Arrays
 title: Remove Element
 difficulty: intermediate
 xp: 125
-objective: 'Remove the middle element from an array with unset, then print the remaining values on separate lines.'
+objective: Remove the middle element from an array with unset, then print the remaining
+  values on separate lines.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'red
-blue'
+- args: []
+  expected_stdout: |-
+    red
+    blue
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`unset arr[i]`'
 scaffold: true

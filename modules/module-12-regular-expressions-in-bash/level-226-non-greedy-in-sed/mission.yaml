@@ -5,15 +5,15 @@ module_display: Regular Expressions in Bash
 title: Non-Greedy in sed
 difficulty: intermediate
 xp: 135
-objective: 'Use a POSIX sed workaround for a shortest a-to-b replacement by avoiding a greedy dot-star.'
+objective: Use a POSIX sed workaround for a shortest a-to-b replacement by avoiding
+  a greedy dot-star.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'X a456b'
+- args: []
+  expected_stdout: X a456b
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`sed ''s/a.*?b/X/''` (POSIX)'
 scaffold: true

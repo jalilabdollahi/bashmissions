@@ -5,15 +5,14 @@ module_display: Configuration & Environment
 title: Config Schema Check
 difficulty: advanced
 xp: 195
-objective: 'Validate numeric config is inside an allowed range.'
+objective: Validate numeric config is inside an allowed range.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'port=valid'
+- args: []
+  expected_stdout: port=valid
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'validate types, ranges'
+- validate types, ranges
 scaffold: true

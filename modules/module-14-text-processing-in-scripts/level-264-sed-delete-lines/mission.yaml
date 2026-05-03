@@ -5,12 +5,13 @@ module_display: Text Processing in Scripts
 title: sed Delete Lines
 difficulty: intermediate
 xp: 155
-objective: 'Use sed to delete DEBUG lines.'
+objective: Use sed to delete DEBUG lines.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'INFO start
-WARN disk'
+- args: []
+  expected_stdout: |-
+    INFO start
+    WARN disk
   expected_exit: 0
   comparison: exact
 fixtures:

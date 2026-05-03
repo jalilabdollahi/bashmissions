@@ -5,16 +5,17 @@ module_display: Arrays
 title: 2D Array Simulation
 difficulty: intermediate
 xp: 135
-objective: 'Simulate a 2D array with associative-array keys like row,column and print a two-row grid.'
+objective: Simulate a 2D array with associative-array keys like row,column and print
+  a two-row grid.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'AB
-CD'
+- args: []
+  expected_stdout: |-
+    AB
+    CD
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'key encoding trick'
+- key encoding trick
 scaffold: true

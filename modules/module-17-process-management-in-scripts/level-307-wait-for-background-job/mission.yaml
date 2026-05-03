@@ -5,15 +5,14 @@ module_display: Process Management in Scripts
 title: Wait for Background Job
 difficulty: advanced
 xp: 195
-objective: 'Wait for a specific background job and print its exit status.'
+objective: Wait for a specific background job and print its exit status.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'wait_status=0'
+- args: []
+  expected_stdout: wait_status=0
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`wait $pid`'
 scaffold: true

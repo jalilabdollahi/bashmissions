@@ -5,11 +5,11 @@ module_display: Text Processing in Scripts
 title: sed In-Place Edit
 difficulty: intermediate
 xp: 135
-objective: 'Copy a config fixture, edit it in place with `sed -i`, and print the result.'
+objective: Copy a config fixture, edit it in place with `sed -i`, and print the result.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'enabled=true'
+- args: []
+  expected_stdout: enabled=true
   expected_exit: 0
   comparison: exact
 fixtures:

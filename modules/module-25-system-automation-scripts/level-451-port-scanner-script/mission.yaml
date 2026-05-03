@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Port Scanner Script
 difficulty: expert
 xp: 240
-objective: 'Simulate port scanner script safely in the workspace.'
+objective: Simulate port scanner script safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'port_scanner_script=ok'
+- args: []
+  expected_stdout: port_scanner_script=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'nc loop over ports'
+- nc loop over ports
 scaffold: true

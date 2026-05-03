@@ -5,16 +5,17 @@ module_display: Debugging Scripts
 title: set -v Verbose
 difficulty: advanced
 xp: 185
-objective: 'Enable verbose mode for a small child script and capture the commands Bash reads.'
+objective: Enable verbose mode for a small child script and capture the commands Bash
+  reads.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'verbose
-verbose=written'
+- args: []
+  expected_stdout: |-
+    verbose
+    verbose=written
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`set -v`'
 scaffold: true

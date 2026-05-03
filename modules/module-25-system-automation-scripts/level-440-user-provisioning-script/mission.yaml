@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: User Provisioning Script
 difficulty: expert
 xp: 230
-objective: 'Simulate user provisioning script safely in the workspace.'
+objective: Simulate user provisioning script safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'user_provisioning_script=ok'
+- args: []
+  expected_stdout: user_provisioning_script=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'create users from CSV'
+- create users from CSV
 scaffold: true

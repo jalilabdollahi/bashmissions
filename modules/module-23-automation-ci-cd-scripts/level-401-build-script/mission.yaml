@@ -5,16 +5,16 @@ module_display: Automation & CI/CD Scripts
 title: Build Script
 difficulty: advanced
 xp: 200
-objective: 'Demonstrate build script as a safe CI/CD helper script.'
+objective: Demonstrate build script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'compile=ok
-test=ok'
+- args: []
+  expected_stdout: |-
+    compile=ok
+    test=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'compile + test + report'
+- compile + test + report
 scaffold: true

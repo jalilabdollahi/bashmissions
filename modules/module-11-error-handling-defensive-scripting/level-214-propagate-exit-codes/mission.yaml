@@ -5,15 +5,15 @@ module_display: Error Handling & Defensive Scripting
 title: Propagate Exit Codes
 difficulty: intermediate
 xp: 145
-objective: 'Return a command status from a function and report the propagated code.'
+objective: Return a command status from a function and report the propagated code.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'function_exit=1'
+- args: []
+  expected_stdout: function_exit=1
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'maintain exit code through functions'
+- maintain exit code through functions
 scaffold: true

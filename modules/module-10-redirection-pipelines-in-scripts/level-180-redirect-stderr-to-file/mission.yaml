@@ -5,15 +5,15 @@ module_display: Redirection & Pipelines in Scripts
 title: Redirect stderr to File
 difficulty: intermediate
 xp: 135
-objective: 'Send an error message to stderr, redirect it into a file, then print the captured error.'
+objective: Send an error message to stderr, redirect it into a file, then print the
+  captured error.
 expected_script_name: solution.sh
 test_cases:
-- args:
+- args: []
   expected_stdout: 'warning: disk low'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`2>`'
 scaffold: true

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-tr '[:lower:]' '[:upper:]' < fixtures/data.txt
+# TODO: solve the mission

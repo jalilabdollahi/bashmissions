@@ -5,15 +5,14 @@ module_display: Process Management in Scripts
 title: nohup & disown
 difficulty: advanced
 xp: 215
-objective: 'Use `nohup` for a background command and handle `disown` safely when available.'
+objective: Use `nohup` for a background command and handle `disown` safely when available.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'detached'
+- args: []
+  expected_stdout: detached
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'detach from terminal'
+- detach from terminal
 scaffold: true

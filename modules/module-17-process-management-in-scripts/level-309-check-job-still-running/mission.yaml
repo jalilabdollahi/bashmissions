@@ -5,15 +5,14 @@ module_display: Process Management in Scripts
 title: Check Job Still Running
 difficulty: advanced
 xp: 215
-objective: 'Use `kill -0` to check that a background process is still running.'
+objective: Use `kill -0` to check that a background process is still running.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'running=yes'
+- args: []
+  expected_stdout: running=yes
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`kill -0 $pid`'
 scaffold: true

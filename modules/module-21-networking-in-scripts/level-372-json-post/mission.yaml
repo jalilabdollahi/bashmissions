@@ -5,16 +5,16 @@ module_display: Networking in Scripts
 title: JSON POST
 difficulty: advanced
 xp: 230
-objective: 'Prepare JSON POST headers and payload.'
+objective: Prepare JSON POST headers and payload.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'header=Content-Type: application/json
-json={"name":"ada"}'
+- args: []
+  expected_stdout: |-
+    header=Content-Type: application/json
+    json={"name":"ada"}
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`curl -H "Content-Type: application/json"`'
 scaffold: true

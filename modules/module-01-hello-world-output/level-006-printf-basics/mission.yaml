@@ -5,7 +5,11 @@ module_display: Hello World & Output
 title: printf Basics
 difficulty: beginner
 xp: 60
-objective: 'Use printf placeholders to format two values.'
+objective: |-
+  Print exactly one line in this format:
+  Name=<arg1>; Score=<arg2>
+  Use the first argument for <arg1> and the second argument for <arg2>.
+  Use printf placeholders instead of building the line by hand.
 expected_script_name: solution.sh
 test_cases:
 - args: ['Sara', '95']

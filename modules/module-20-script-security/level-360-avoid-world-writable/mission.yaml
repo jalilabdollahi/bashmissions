@@ -5,15 +5,14 @@ module_display: Script Security
 title: Avoid World-Writable
 difficulty: advanced
 xp: 200
-objective: 'Fix broad permissions after creating a file.'
+objective: Fix broad permissions after creating a file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'perm=600'
+- args: []
+  expected_stdout: perm=600
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'chmod after create'
+- chmod after create
 scaffold: true

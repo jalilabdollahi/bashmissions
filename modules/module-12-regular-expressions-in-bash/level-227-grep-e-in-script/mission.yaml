@@ -5,16 +5,17 @@ module_display: Regular Expressions in Bash
 title: grep -E in Script
 difficulty: intermediate
 xp: 145
-objective: 'Use `grep -E` to print only log lines that are ERROR or WARN.'
+objective: Use `grep -E` to print only log lines that are ERROR or WARN.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'WARN: disk
-ERROR: network'
+- args: []
+  expected_stdout: |-
+    WARN: disk
+    ERROR: network
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'extended regex in scripts'
+- extended regex in scripts
 scaffold: true

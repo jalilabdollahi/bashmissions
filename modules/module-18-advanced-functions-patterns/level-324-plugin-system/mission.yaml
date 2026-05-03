@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Plugin System
 difficulty: advanced
 xp: 185
-objective: 'Source plugin files from a directory and call a function they provide.'
+objective: Source plugin files from a directory and call a function they provide.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'plugin=loaded'
+- args: []
+  expected_stdout: plugin=loaded
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'source files from a dir'
+- source files from a dir
 scaffold: true

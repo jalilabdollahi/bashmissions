@@ -5,13 +5,14 @@ module_display: Text Processing in Scripts
 title: Column Alignment
 difficulty: intermediate
 xp: 155
-objective: 'Use `column -t` to align CSV-style rows into columns.'
+objective: Use `column -t` to align CSV-style rows into columns.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'name   score
-alice  10
-bob    200'
+- args: []
+  expected_stdout: |-
+    name   score
+    alice  10
+    bob    200
   expected_exit: 0
   comparison: exact
 fixtures:

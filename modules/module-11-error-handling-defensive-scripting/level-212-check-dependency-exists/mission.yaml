@@ -5,15 +5,14 @@ module_display: Error Handling & Defensive Scripting
 title: Check Dependency Exists
 difficulty: intermediate
 xp: 125
-objective: 'Check for a required command with `command -v` before using it.'
+objective: Check for a required command with `command -v` before using it.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'printf=found'
+- args: []
+  expected_stdout: printf=found
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`command -v` guard'
 scaffold: true

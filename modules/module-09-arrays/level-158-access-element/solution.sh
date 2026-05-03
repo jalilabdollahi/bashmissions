@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-colors=(red green blue)
-echo "${colors[0]}"
+# TODO: solve the mission

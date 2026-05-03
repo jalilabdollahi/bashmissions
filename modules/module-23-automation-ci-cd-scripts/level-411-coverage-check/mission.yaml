@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Coverage Check
 difficulty: advanced
 xp: 200
-objective: 'Demonstrate coverage check as a safe CI/CD helper script.'
+objective: Demonstrate coverage check as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'coverage=pass'
+- args: []
+  expected_stdout: coverage=pass
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'threshold'
+- threshold
 scaffold: true

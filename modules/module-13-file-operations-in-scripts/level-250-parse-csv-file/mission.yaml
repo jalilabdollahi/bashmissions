@@ -5,16 +5,17 @@ module_display: File Operations in Scripts
 title: Parse CSV File
 difficulty: intermediate
 xp: 145
-objective: 'Parse a CSV fixture with `IFS=, read` and print `name=role` lines.'
+objective: Parse a CSV fixture with `IFS=, read` and print `name=role` lines.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alice=admin
-bob=user'
+- args: []
+  expected_stdout: |-
+    alice=admin
+    bob=user
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'IFS split per line'
+- IFS split per line
 scaffold: true

@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Middleware Chain
 difficulty: advanced
 xp: 215
-objective: 'Pass a value through a chain of functions.'
+objective: Pass a value through a chain of functions.
 expected_script_name: solution.sh
 test_cases:
-- args:
+- args: []
   expected_stdout: '[ab]'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'pipeline of functions'
+- pipeline of functions
 scaffold: true

@@ -5,7 +5,11 @@ module_display: Hello World & Output
 title: Escape Characters
 difficulty: beginner
 xp: 50
-objective: 'Use escape characters to print backslashes and double quotes.'
+objective: |-
+  Print exactly one line:
+  File: C:\tmp\<arg1> | Quote: "<arg2>"
+  Use the first argument for <arg1> and the second argument for <arg2>.
+  Preserve the literal backslashes and double quotes in the output.
 expected_script_name: solution.sh
 test_cases:
 - args: ['report.txt', 'done']

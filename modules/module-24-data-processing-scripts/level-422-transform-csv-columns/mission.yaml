@@ -5,16 +5,17 @@ module_display: Data Processing Scripts
 title: Transform CSV Columns
 difficulty: advanced
 xp: 230
-objective: 'Reorder CSV columns with awk.'
+objective: Reorder CSV columns with awk.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'admin,alice
-user,bob'
+- args: []
+  expected_stdout: |-
+    admin,alice
+    user,bob
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.csv
 concepts:
-- 'awk reorder'
+- awk reorder
 scaffold: true

@@ -5,16 +5,17 @@ module_display: Text Processing in Scripts
 title: Transform JSON-like Text
 difficulty: intermediate
 xp: 135
-objective: 'Extract name values from simple JSON-like text using grep and awk.'
+objective: Extract name values from simple JSON-like text using grep and awk.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'name=api
-name=worker'
+- args: []
+  expected_stdout: |-
+    name=api
+    name=worker
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'extract values with grep/awk'
+- extract values with grep/awk
 scaffold: true

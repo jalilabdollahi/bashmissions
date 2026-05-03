@@ -5,17 +5,17 @@ module_display: Process Management in Scripts
 title: Semaphore Pattern
 difficulty: advanced
 xp: 195
-objective: 'Use a FIFO semaphore to limit concurrent background work.'
+objective: Use a FIFO semaphore to limit concurrent background work.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'a
-b
-c'
+- args: []
+  expected_stdout: |-
+    a
+    b
+    c
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'limit concurrent jobs'
+- limit concurrent jobs
 scaffold: true

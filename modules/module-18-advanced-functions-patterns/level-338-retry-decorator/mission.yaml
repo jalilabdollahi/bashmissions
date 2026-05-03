@@ -5,16 +5,16 @@ module_display: Advanced Functions & Patterns
 title: Retry Decorator
 difficulty: advanced
 xp: 175
-objective: 'Wrap a command with retry logic until it succeeds.'
+objective: Wrap a command with retry logic until it succeeds.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'retry=1
-success=2'
+- args: []
+  expected_stdout: |-
+    retry=1
+    success=2
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'wrap any command'
+- wrap any command
 scaffold: true

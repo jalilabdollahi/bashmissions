@@ -5,15 +5,15 @@ module_display: Script Structure & Best Practices
 title: Modular Script Layout
 difficulty: advanced
 xp: 195
-objective: 'Organize a script into config, helper, and main sections and print the result from `main`.'
+objective: Organize a script into config, helper, and main sections and print the
+  result from `main`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'bashmissions:module-layout'
+- args: []
+  expected_stdout: bashmissions:module-layout
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'organize into sections'
+- organize into sections
 scaffold: true

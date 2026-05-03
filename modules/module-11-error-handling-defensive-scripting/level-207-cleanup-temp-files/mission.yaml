@@ -5,16 +5,17 @@ module_display: Error Handling & Defensive Scripting
 title: Cleanup Temp Files
 difficulty: intermediate
 xp: 125
-objective: 'Create a temp file, remove it from an EXIT trap, and report that cleanup happened.'
+objective: Create a temp file, remove it from an EXIT trap, and report that cleanup
+  happened.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'temp=created
-temp=removed'
+- args: []
+  expected_stdout: |-
+    temp=created
+    temp=removed
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'trap + mktemp'
+- trap + mktemp
 scaffold: true

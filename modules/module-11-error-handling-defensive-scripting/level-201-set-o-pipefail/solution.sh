@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
-if (set -o pipefail; false | true); then
-  echo "pipeline=ok"
-else
-  echo "pipeline=failed"
-fi
+# TODO: solve the mission

@@ -5,15 +5,15 @@ module_display: Process Management in Scripts
 title: Run in Background
 difficulty: advanced
 xp: 175
-objective: 'Start a command in the background, wait for it, and print the produced file.'
+objective: Start a command in the background, wait for it, and print the produced
+  file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'background done'
+- args: []
+  expected_stdout: background done
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`cmd &`'
 scaffold: true

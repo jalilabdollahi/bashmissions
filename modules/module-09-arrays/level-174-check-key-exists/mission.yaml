@@ -18,8 +18,7 @@ test_cases:
   expected_stdout: 'missing'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`[[ -v map[key] ]]`'
 scaffold: true

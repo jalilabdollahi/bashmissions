@@ -18,8 +18,7 @@ test_cases:
   expected_stdout: 'email=invalid'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - 'email regex pattern'
 scaffold: true

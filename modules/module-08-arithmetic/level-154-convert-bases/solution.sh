@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'hex=%x\n' "$1"
+# TODO: solve the mission

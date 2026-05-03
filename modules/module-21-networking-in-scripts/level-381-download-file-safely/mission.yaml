@@ -5,15 +5,14 @@ module_display: Networking in Scripts
 title: Download File Safely
 difficulty: advanced
 xp: 220
-objective: 'Download local file and verify checksum.'
+objective: Download local file and verify checksum.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'checksum=ok'
+- args: []
+  expected_stdout: checksum=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'verify checksum'
+- verify checksum
 scaffold: true

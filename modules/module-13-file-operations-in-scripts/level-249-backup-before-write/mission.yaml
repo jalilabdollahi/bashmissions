@@ -5,16 +5,16 @@ module_display: File Operations in Scripts
 title: Backup Before Write
 difficulty: intermediate
 xp: 135
-objective: 'Back up a file before overwriting it, then print current and backup contents.'
+objective: Back up a file before overwriting it, then print current and backup contents.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'current=mode=new
-backup=mode=old'
+- args: []
+  expected_stdout: |-
+    current=mode=new
+    backup=mode=old
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'cp + write pattern'
+- cp + write pattern
 scaffold: true

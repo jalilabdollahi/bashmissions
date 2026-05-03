@@ -5,16 +5,17 @@ module_display: Process Management in Scripts
 title: Wait All Backgrounds
 difficulty: advanced
 xp: 205
-objective: 'Start two background jobs, wait for all of them, and print their outputs in sorted order.'
+objective: Start two background jobs, wait for all of them, and print their outputs
+  in sorted order.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'one
-two'
+- args: []
+  expected_stdout: |-
+    one
+    two
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`wait`'
 scaffold: true

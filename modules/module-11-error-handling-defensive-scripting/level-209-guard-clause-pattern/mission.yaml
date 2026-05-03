@@ -5,20 +5,20 @@ module_display: Error Handling & Defensive Scripting
 title: Guard Clause Pattern
 difficulty: intermediate
 xp: 145
-objective: 'Use an early guard clause to reject an empty argument before doing the main work.'
+objective: Use an early guard clause to reject an empty argument before doing the
+  main work.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'missing=value'
+- args: []
+  expected_stdout: missing=value
   expected_exit: 0
   comparison: exact
 - args:
-  - 'alpha'
-  expected_stdout: 'value=alpha'
+  - alpha
+  expected_stdout: value=alpha
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'early return on bad input'
+- early return on bad input
 scaffold: true

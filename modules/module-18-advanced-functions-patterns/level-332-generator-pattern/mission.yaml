@@ -5,16 +5,16 @@ module_display: Advanced Functions & Patterns
 title: Generator Pattern
 difficulty: advanced
 xp: 215
-objective: 'Use a function with global state to generate increasing numbers.'
+objective: Use a function with global state to generate increasing numbers.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'id=1
-id=2'
+- args: []
+  expected_stdout: |-
+    id=1
+    id=2
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'function + global state'
+- function + global state
 scaffold: true

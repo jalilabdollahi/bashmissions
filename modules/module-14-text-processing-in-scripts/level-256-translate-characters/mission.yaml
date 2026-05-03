@@ -5,11 +5,11 @@ module_display: Text Processing in Scripts
 title: Translate Characters
 difficulty: intermediate
 xp: 125
-objective: 'Translate lowercase text to uppercase with `tr`.'
+objective: Translate lowercase text to uppercase with `tr`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'HELLO BASH'
+- args: []
+  expected_stdout: HELLO BASH
   expected_exit: 0
   comparison: exact
 fixtures:

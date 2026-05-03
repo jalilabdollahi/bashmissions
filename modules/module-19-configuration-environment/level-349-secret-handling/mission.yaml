@@ -5,15 +5,14 @@ module_display: Configuration & Environment
 title: Secret Handling
 difficulty: advanced
 xp: 205
-objective: 'Use a secret without printing its value.'
+objective: Use a secret without printing its value.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'token=loaded'
+- args: []
+  expected_stdout: token=loaded
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'never echo secrets'
+- never echo secrets
 scaffold: true

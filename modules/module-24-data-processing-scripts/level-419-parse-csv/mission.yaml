@@ -5,16 +5,17 @@ module_display: Data Processing Scripts
 title: Parse CSV
 difficulty: advanced
 xp: 200
-objective: 'Parse a CSV file with `IFS=, read` and print `name=score` records.'
+objective: Parse a CSV file with `IFS=, read` and print `name=score` records.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alice=10
-bob=20'
+- args: []
+  expected_stdout: |-
+    alice=10
+    bob=20
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.csv
 concepts:
-- 'IFS + while read'
+- IFS + while read
 scaffold: true

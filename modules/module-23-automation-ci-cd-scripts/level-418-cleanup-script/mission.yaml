@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Cleanup Script
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate cleanup script as a safe CI/CD helper script.'
+objective: Demonstrate cleanup script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'removed=old.log'
+- args: []
+  expected_stdout: removed=old.log
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'remove old artifacts'
+- remove old artifacts
 scaffold: true

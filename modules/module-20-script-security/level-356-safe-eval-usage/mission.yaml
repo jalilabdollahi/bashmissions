@@ -5,16 +5,16 @@ module_display: Script Security
 title: Safe eval Usage
 difficulty: advanced
 xp: 210
-objective: 'Use a dispatch case instead of evaluating user input.'
+objective: Use a dispatch case instead of evaluating user input.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'rejected=unsafe
-hacked=no'
+- args: []
+  expected_stdout: |-
+    rejected=unsafe
+    hacked=no
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'never eval user input'
+- never eval user input
 scaffold: true

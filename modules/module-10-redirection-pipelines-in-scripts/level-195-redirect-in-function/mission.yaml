@@ -5,16 +5,17 @@ module_display: Redirection & Pipelines in Scripts
 title: Redirect in Function
 difficulty: intermediate
 xp: 135
-objective: 'Write function output to a log by redirecting the function call, then print the log.'
+objective: Write function output to a log by redirecting the function call, then print
+  the log.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'report:start
-report:done'
+- args: []
+  expected_stdout: |-
+    report:start
+    report:done
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'function with fd'
+- function with fd
 scaffold: true

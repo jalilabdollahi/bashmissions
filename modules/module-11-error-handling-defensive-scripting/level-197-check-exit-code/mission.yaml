@@ -5,11 +5,11 @@ module_display: Error Handling & Defensive Scripting
 title: Check Exit Code
 difficulty: intermediate
 xp: 125
-objective: 'Run a command, save `$?`, and print the command exit code.'
+objective: Run a command, save `$?`, and print the command exit code.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'grep_exit=0'
+- args: []
+  expected_stdout: grep_exit=0
   expected_exit: 0
   comparison: exact
 fixtures:

@@ -5,15 +5,15 @@ module_display: Configuration & Environment
 title: Config Migration
 difficulty: advanced
 xp: 195
-objective: 'Migrate an old config key to a new key.'
+objective: Migrate an old config key to a new key.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'endpoint=http://localhost'
+- args: []
+  expected_stdout: endpoint=http://localhost
   expected_exit: 0
   comparison: exact
 fixtures:
 - old.conf
 concepts:
-- 'upgrade old format'
+- upgrade old format
 scaffold: true

@@ -5,16 +5,17 @@ module_display: Data Processing Scripts
 title: Deduplicate Records
 difficulty: advanced
 xp: 200
-objective: 'Deduplicate records by the first CSV key with sort.'
+objective: Deduplicate records by the first CSV key with sort.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '1,alice
-2,bob'
+- args: []
+  expected_stdout: |-
+    1,alice
+    2,bob
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.csv
 concepts:
-- 'sort -u on key'
+- sort -u on key
 scaffold: true

@@ -5,15 +5,15 @@ module_display: Arrays
 title: Append to Array
 difficulty: intermediate
 xp: 165
-objective: 'Start with two deployment stages, append production, and print the final stage list.'
+objective: Start with two deployment stages, append production, and print the final
+  stage list.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'build test production'
+- args: []
+  expected_stdout: build test production
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`arr+=(new)`'
 scaffold: true

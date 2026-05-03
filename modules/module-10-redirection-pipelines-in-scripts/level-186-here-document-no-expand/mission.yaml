@@ -5,16 +5,16 @@ module_display: Redirection & Pipelines in Scripts
 title: Here-Document No Expand
 difficulty: intermediate
 xp: 145
-objective: 'Use a quoted here-document delimiter so variables remain literal text.'
+objective: Use a quoted here-document delimiter so variables remain literal text.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '$name
-$(date)'
+- args: []
+  expected_stdout: |-
+    $name
+    $(date)
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`<<''EOF''`'
 scaffold: true

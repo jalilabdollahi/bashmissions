@@ -5,15 +5,14 @@ module_display: Debugging Scripts
 title: Test-Driven Bash
 difficulty: advanced
 xp: 195
-objective: 'Write a function plus a tiny test that verifies it.'
+objective: Write a function plus a tiny test that verifies it.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'test=pass'
+- args: []
+  expected_stdout: test=pass
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'write tests for your function'
+- write tests for your function
 scaffold: true

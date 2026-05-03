@@ -5,16 +5,18 @@ module_display: Regular Expressions in Bash
 title: Multi-line Regex Logic
 difficulty: intermediate
 xp: 145
-objective: 'Read a file line by line, enter a section when `[services]` appears, and print service names until the next section.'
+objective: Read a file line by line, enter a section when `[services]` appears, and
+  print service names until the next section.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'service=api
-service=worker'
+- args: []
+  expected_stdout: |-
+    service=api
+    service=worker
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'line-by-line state machine'
+- line-by-line state machine
 scaffold: true

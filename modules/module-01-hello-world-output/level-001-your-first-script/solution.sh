@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Hello, BashMissions!"
+# TODO: solve the mission

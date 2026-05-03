@@ -5,15 +5,15 @@ module_display: Error Handling & Defensive Scripting
 title: Trap on SIGINT
 difficulty: intermediate
 xp: 155
-objective: 'Install a SIGINT trap and trigger it in a subshell to print a graceful message.'
+objective: Install a SIGINT trap and trigger it in a subshell to print a graceful
+  message.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'sigint=handled'
+- args: []
+  expected_stdout: sigint=handled
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'graceful Ctrl-C'
+- graceful Ctrl-C
 scaffold: true

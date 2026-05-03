@@ -5,16 +5,16 @@ module_display: Script Security
 title: Drop Privileges
 difficulty: advanced
 xp: 220
-objective: 'Simulate a privilege-drop guard without elevated permissions.'
+objective: Simulate a privilege-drop guard without elevated permissions.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'target=fatemeh
-drop_privileges=simulated'
+- args: []
+  expected_stdout: |-
+    target=fatemeh
+    drop_privileges=simulated
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'run as target user safely'
+- run as target user safely
 scaffold: true

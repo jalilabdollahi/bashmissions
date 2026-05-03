@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Test Runner Script
 difficulty: advanced
 xp: 240
-objective: 'Demonstrate test runner script as a safe CI/CD helper script.'
+objective: Demonstrate test runner script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'tests=2 passed'
+- args: []
+  expected_stdout: tests=2 passed
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'parse output'
+- parse output
 scaffold: true

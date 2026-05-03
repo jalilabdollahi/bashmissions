@@ -5,15 +5,15 @@ module_display: File Operations in Scripts
 title: Delete Safely
 difficulty: intermediate
 xp: 165
-objective: 'Delete only a known temporary file after checking it exists and has a safe suffix.'
+objective: Delete only a known temporary file after checking it exists and has a safe
+  suffix.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'deleted=yes'
+- args: []
+  expected_stdout: deleted=yes
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'check before delete'
+- check before delete
 scaffold: true

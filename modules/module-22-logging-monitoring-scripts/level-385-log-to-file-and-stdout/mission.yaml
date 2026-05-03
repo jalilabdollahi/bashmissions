@@ -5,16 +5,16 @@ module_display: Logging & Monitoring Scripts
 title: Log to File and Stdout
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate log to file and stdout in a deterministic monitoring script.'
+objective: Demonstrate log to file and stdout in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'build ok
-logged=build ok'
+- args: []
+  expected_stdout: |-
+    build ok
+    logged=build ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'tee'
+- tee
 scaffold: true

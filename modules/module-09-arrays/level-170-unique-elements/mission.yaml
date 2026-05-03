@@ -5,17 +5,17 @@ module_display: Arrays
 title: Unique Elements
 difficulty: intermediate
 xp: 155
-objective: 'Print each unique array element once by combining sort and uniq.'
+objective: Print each unique array element once by combining sort and uniq.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha
-beta
-gamma'
+- args: []
+  expected_stdout: |-
+    alpha
+    beta
+    gamma
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'sort + uniq trick'
+- sort + uniq trick
 scaffold: true

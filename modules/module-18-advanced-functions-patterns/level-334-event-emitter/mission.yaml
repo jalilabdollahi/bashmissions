@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Event Emitter
 difficulty: advanced
 xp: 185
-objective: 'Register handlers in an array and emit an event to them.'
+objective: Register handlers in an array and emit an event to them.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ready=api'
+- args: []
+  expected_stdout: ready=api
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'signal-driven pattern'
+- signal-driven pattern
 scaffold: true

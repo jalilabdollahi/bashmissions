@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
-false | true
-statuses=("${PIPESTATUS[@]}")
-echo "statuses=${statuses[*]}"
+# TODO: solve the mission

@@ -5,11 +5,11 @@ module_display: Text Processing in Scripts
 title: Delete Characters
 difficulty: intermediate
 xp: 135
-objective: 'Delete dashes from an identifier with `tr -d`.'
+objective: Delete dashes from an identifier with `tr -d`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ABC123'
+- args: []
+  expected_stdout: ABC123
   expected_exit: 0
   comparison: exact
 fixtures:

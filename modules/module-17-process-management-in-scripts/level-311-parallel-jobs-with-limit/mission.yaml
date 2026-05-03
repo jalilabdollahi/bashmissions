@@ -5,17 +5,17 @@ module_display: Process Management in Scripts
 title: Parallel Jobs with Limit
 difficulty: advanced
 xp: 185
-objective: 'Run work items with a simple two-worker concurrency limit.'
+objective: Run work items with a simple two-worker concurrency limit.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'a
-b
-c'
+- args: []
+  expected_stdout: |-
+    a
+    b
+    c
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'N workers pattern'
+- N workers pattern
 scaffold: true

@@ -5,16 +5,16 @@ module_display: File Operations in Scripts
 title: Append to a File
 difficulty: intermediate
 xp: 145
-objective: 'Create a file, append a second line with `>>`, then print the file.'
+objective: Create a file, append a second line with `>>`, then print the file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'first
-second'
+- args: []
+  expected_stdout: |-
+    first
+    second
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`>>`'
 scaffold: true

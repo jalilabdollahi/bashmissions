@@ -5,16 +5,17 @@ module_display: Error Handling & Defensive Scripting
 title: set -e
 difficulty: intermediate
 xp: 145
-objective: 'Show that `set -e` aborts a failing subshell before the line after `false` can run.'
+objective: Show that `set -e` aborts a failing subshell before the line after `false`
+  can run.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'before
-aborted=true'
+- args: []
+  expected_stdout: |-
+    before
+    aborted=true
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'abort on error'
+- abort on error
 scaffold: true

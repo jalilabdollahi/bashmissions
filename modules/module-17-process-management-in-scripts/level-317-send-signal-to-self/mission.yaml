@@ -5,15 +5,14 @@ module_display: Process Management in Scripts
 title: Send Signal to Self
 difficulty: advanced
 xp: 195
-objective: 'Install a USR1 trap and send that signal to the current script.'
+objective: Install a USR1 trap and send that signal to the current script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'usr1=handled'
+- args: []
+  expected_stdout: usr1=handled
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`kill -USR1 $$`'
 scaffold: true

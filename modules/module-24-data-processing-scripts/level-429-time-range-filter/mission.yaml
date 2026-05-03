@@ -5,16 +5,17 @@ module_display: Data Processing Scripts
 title: Time-Range Filter
 difficulty: advanced
 xp: 200
-objective: 'Filter log rows within a lexical HH:MM time range.'
+objective: Filter log rows within a lexical HH:MM time range.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'start
-stop'
+- args: []
+  expected_stdout: |-
+    start
+    stop
   expected_exit: 0
   comparison: exact
 fixtures:
 - events.log
 concepts:
-- 'compare timestamps'
+- compare timestamps
 scaffold: true

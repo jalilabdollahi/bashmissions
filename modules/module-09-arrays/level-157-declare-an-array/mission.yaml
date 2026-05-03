@@ -5,15 +5,15 @@ module_display: Arrays
 title: Declare an Array
 difficulty: intermediate
 xp: 125
-objective: 'Declare an indexed array containing alpha, beta, and gamma, then print all values on one line separated by spaces.'
+objective: Declare an indexed array containing alpha, beta, and gamma, then print
+  all values on one line separated by spaces.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha beta gamma'
+- args: []
+  expected_stdout: alpha beta gamma
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`arr=(a b c)`'
 scaffold: true

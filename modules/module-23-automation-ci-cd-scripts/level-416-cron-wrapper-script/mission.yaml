@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Cron Wrapper Script
 difficulty: advanced
 xp: 200
-objective: 'Demonstrate cron wrapper script as a safe CI/CD helper script.'
+objective: Demonstrate cron wrapper script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'cron=ran'
+- args: []
+  expected_stdout: cron=ran
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'lock log notify'
+- lock log notify
 scaffold: true

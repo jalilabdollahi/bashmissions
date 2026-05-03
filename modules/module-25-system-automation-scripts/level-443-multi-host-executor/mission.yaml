@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Multi-Host Executor
 difficulty: expert
 xp: 210
-objective: 'Simulate multi-host executor safely in the workspace.'
+objective: Simulate multi-host executor safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'multi_host_executor=ok'
+- args: []
+  expected_stdout: multi_host_executor=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'run command on host list'
+- run command on host list
 scaffold: true

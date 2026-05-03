@@ -5,16 +5,17 @@ module_display: Redirection & Pipelines in Scripts
 title: Custom File Descriptor
 difficulty: intermediate
 xp: 165
-objective: 'Open file descriptor 3 for writing, write two lines through it, then print the file.'
+objective: Open file descriptor 3 for writing, write two lines through it, then print
+  the file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha
-beta'
+- args: []
+  expected_stdout: |-
+    alpha
+    beta
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`exec 3>file`'
 scaffold: true

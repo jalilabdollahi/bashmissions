@@ -5,15 +5,15 @@ module_display: Script Structure & Best Practices
 title: Proper Shebang
 difficulty: advanced
 xp: 175
-objective: 'Start the script with the proper env bash shebang and print that first line from the running script.'
+objective: Start the script with the proper env bash shebang and print that first
+  line from the running script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'shebang=#!/usr/bin/env bash'
+- args: []
+  expected_stdout: shebang=#!/usr/bin/env bash
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`#!/usr/bin/env bash`'
 scaffold: true

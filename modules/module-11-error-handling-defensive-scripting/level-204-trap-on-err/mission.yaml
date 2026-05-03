@@ -5,15 +5,14 @@ module_display: Error Handling & Defensive Scripting
 title: Trap on ERR
 difficulty: intermediate
 xp: 145
-objective: 'Use an ERR trap in a subshell to log that a command failed.'
+objective: Use an ERR trap in a subshell to log that a command failed.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'err=handled'
+- args: []
+  expected_stdout: err=handled
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'log which command failed'
+- log which command failed
 scaffold: true

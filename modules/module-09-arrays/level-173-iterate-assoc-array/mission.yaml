@@ -5,17 +5,18 @@ module_display: Arrays
 title: Iterate Assoc Array
 difficulty: intermediate
 xp: 135
-objective: 'Iterate over an associative array by key and print key=value pairs in sorted key order.'
+objective: Iterate over an associative array by key and print key=value pairs in sorted
+  key order.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'dns=53
-ssh=22
-web=80'
+- args: []
+  expected_stdout: |-
+    dns=53
+    ssh=22
+    web=80
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`for k in "${!map[@]}"`'
 scaffold: true

@@ -5,15 +5,14 @@ module_display: Redirection & Pipelines in Scripts
 title: Redirect stderr to stdout
 difficulty: intermediate
 xp: 155
-objective: 'Redirect stderr into stdout so a pipeline can transform the error message.'
+objective: Redirect stderr into stdout so a pipeline can transform the error message.
 expected_script_name: solution.sh
 test_cases:
-- args:
+- args: []
   expected_stdout: 'captured: error: missing config'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`2>&1`'
 scaffold: true

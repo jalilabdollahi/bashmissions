@@ -5,16 +5,16 @@ module_display: Script Security
 title: Quote to Prevent Injection
 difficulty: advanced
 xp: 200
-objective: 'Show safe quoting by treating a dangerous-looking value as data, not code.'
+objective: Show safe quoting by treating a dangerous-looking value as data, not code.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'safe=<alpha; touch hacked>
-hacked=no'
+- args: []
+  expected_stdout: |-
+    safe=<alpha; touch hacked>
+    hacked=no
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`"$var"` vs eval danger'
 scaffold: true

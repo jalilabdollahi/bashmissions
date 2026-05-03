@@ -5,12 +5,13 @@ module_display: Text Processing in Scripts
 title: awk with Condition
 difficulty: intermediate
 xp: 165
-objective: 'Use awk to print names from rows whose third column is greater than 100.'
+objective: Use awk to print names from rows whose third column is greater than 100.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'api
-worker'
+- args: []
+  expected_stdout: |-
+    api
+    worker
   expected_exit: 0
   comparison: exact
 fixtures:

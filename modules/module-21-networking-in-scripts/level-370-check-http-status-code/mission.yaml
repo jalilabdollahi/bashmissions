@@ -5,15 +5,14 @@ module_display: Networking in Scripts
 title: Check HTTP Status Code
 difficulty: advanced
 xp: 210
-objective: 'Capture a curl status code for a local file URL.'
+objective: Capture a curl status code for a local file URL.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'code=000'
+- args: []
+  expected_stdout: code=000
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`curl -o /dev/null -w "%{http_code}"`'
 scaffold: true

@@ -5,15 +5,15 @@ module_display: Error Handling & Defensive Scripting
 title: set -o pipefail
 difficulty: intermediate
 xp: 165
-objective: 'Use `set -o pipefail` so a failing command inside a pipeline makes the pipeline fail.'
+objective: Use `set -o pipefail` so a failing command inside a pipeline makes the
+  pipeline fail.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'pipeline=failed'
+- args: []
+  expected_stdout: pipeline=failed
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'catch pipe failures'
+- catch pipe failures
 scaffold: true

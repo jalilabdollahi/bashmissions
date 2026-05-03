@@ -5,15 +5,14 @@ module_display: Error Handling & Defensive Scripting
 title: Timeout a Command
 difficulty: intermediate
 xp: 165
-objective: 'Use `timeout` to stop a slow command and print the timeout exit code.'
+objective: Use `timeout` to stop a slow command and print the timeout exit code.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'timeout_exit=124'
+- args: []
+  expected_stdout: timeout_exit=124
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`timeout` command'
 scaffold: true

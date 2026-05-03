@@ -5,17 +5,18 @@ module_display: Data Processing Scripts
 title: Aggregate CSV Column
 difficulty: advanced
 xp: 240
-objective: 'Aggregate a CSV numeric column and print sum, min, and max.'
+objective: Aggregate a CSV numeric column and print sum, min, and max.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'sum=60
-min=10
-max=30'
+- args: []
+  expected_stdout: |-
+    sum=60
+    min=10
+    max=30
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.csv
 concepts:
-- 'sum/avg/min/max'
+- sum/avg/min/max
 scaffold: true

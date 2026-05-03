@@ -5,11 +5,11 @@ module_display: Text Processing in Scripts
 title: Squeeze Whitespace
 difficulty: intermediate
 xp: 145
-objective: 'Squeeze repeated spaces down to one space.'
+objective: Squeeze repeated spaces down to one space.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha beta gamma'
+- args: []
+  expected_stdout: alpha beta gamma
   expected_exit: 0
   comparison: exact
 fixtures:
