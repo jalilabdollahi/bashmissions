@@ -5,16 +5,16 @@ module_display: Logging & Monitoring Scripts
 title: Summary Report Generator
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate summary report generator in a deterministic monitoring script.'
+objective: Demonstrate summary report generator in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ok=2
-fail=1'
+- args: []
+  expected_stdout: |-
+    ok=2
+    fail=1
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'aggregate daily stats'
+- aggregate daily stats
 scaffold: true

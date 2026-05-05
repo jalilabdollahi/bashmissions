@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-tr '[:lower:]' '[:upper:]' <<< "hello from bash"
+# TODO: solve the mission

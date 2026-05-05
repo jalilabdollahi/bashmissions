@@ -5,16 +5,16 @@ module_display: Debugging Scripts
 title: Debug Log Function
 difficulty: advanced
 xp: 175
-objective: 'Write a debug function that logs only when `DEBUG=1`.'
+objective: Write a debug function that logs only when `DEBUG=1`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'DEBUG: loading config
-run=ok'
+- args: []
+  expected_stdout: |-
+    DEBUG: loading config
+    run=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'conditional `DEBUG` variable'
+- conditional `DEBUG` variable
 scaffold: true

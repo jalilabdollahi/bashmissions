@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-filename="$1"
-echo "${filename%.*}"
+# TODO: solve the mission

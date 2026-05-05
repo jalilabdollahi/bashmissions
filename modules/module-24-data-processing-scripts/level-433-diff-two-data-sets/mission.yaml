@@ -5,17 +5,18 @@ module_display: Data Processing Scripts
 title: Diff Two Data Sets
 difficulty: advanced
 xp: 240
-objective: 'Diff two sorted data sets with `comm`.'
+objective: Diff two sorted data sets with `comm`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'left=alpha
-left=right=gamma'
+- args: []
+  expected_stdout: |-
+    left=alpha
+    left=right=gamma
   expected_exit: 0
   comparison: exact
 fixtures:
 - a.txt
 - b.txt
 concepts:
-- 'comm or diff'
+- comm or diff
 scaffold: true

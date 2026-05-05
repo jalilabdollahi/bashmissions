@@ -5,16 +5,17 @@ module_display: Arrays
 title: Delete Key
 difficulty: intermediate
 xp: 155
-objective: 'Delete one key from an associative array, then prove the deleted key is gone and another key remains.'
+objective: Delete one key from an associative array, then prove the deleted key is
+  gone and another key remains.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'red=missing
-blue=1'
+- args: []
+  expected_stdout: |-
+    red=missing
+    blue=1
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`unset map[key]`'
 scaffold: true

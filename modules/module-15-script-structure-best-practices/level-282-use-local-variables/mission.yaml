@@ -5,16 +5,16 @@ module_display: Script Structure & Best Practices
 title: Use Local Variables
 difficulty: advanced
 xp: 215
-objective: 'Use a local variable inside a function so the global value is unchanged.'
+objective: Use a local variable inside a function so the global value is unchanged.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'inside=local
-outside=global'
+- args: []
+  expected_stdout: |-
+    inside=local
+    outside=global
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'prevent global leaks'
+- prevent global leaks
 scaffold: true

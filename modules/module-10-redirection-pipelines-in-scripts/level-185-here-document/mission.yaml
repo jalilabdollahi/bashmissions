@@ -5,16 +5,16 @@ module_display: Redirection & Pipelines in Scripts
 title: Here-Document
 difficulty: intermediate
 xp: 135
-objective: 'Use a here-document to write two lines to a file, then print the file.'
+objective: Use a here-document to write two lines to a file, then print the file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'name=backup
-status=ready'
+- args: []
+  expected_stdout: |-
+    name=backup
+    status=ready
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`<<EOF ... EOF`'
 scaffold: true

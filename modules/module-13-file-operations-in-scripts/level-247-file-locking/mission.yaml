@@ -5,16 +5,16 @@ module_display: File Operations in Scripts
 title: File Locking
 difficulty: intermediate
 xp: 165
-objective: 'Acquire a nonblocking lock with `flock` and write through the lock.'
+objective: Acquire a nonblocking lock with `flock` and write through the lock.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'lock=acquired
-locked'
+- args: []
+  expected_stdout: |-
+    lock=acquired
+    locked
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`flock`'
 scaffold: true

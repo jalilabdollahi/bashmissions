@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-shift
-echo "next: $1"
+# TODO: solve the mission

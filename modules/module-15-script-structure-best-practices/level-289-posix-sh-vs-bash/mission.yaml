@@ -5,16 +5,16 @@ module_display: Script Structure & Best Practices
 title: POSIX sh vs bash
 difficulty: advanced
 xp: 185
-objective: 'Show a feature that requires Bash and report the current shell capability.'
+objective: Show a feature that requires Bash and report the current shell capability.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'bash=yes
-array_second=beta'
+- args: []
+  expected_stdout: |-
+    bash=yes
+    array_second=beta
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'know when you need bash'
+- know when you need bash
 scaffold: true

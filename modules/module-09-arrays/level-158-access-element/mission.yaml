@@ -5,15 +5,15 @@ module_display: Arrays
 title: Access Element
 difficulty: intermediate
 xp: 135
-objective: 'Create an array of colors and print only the first element using array index 0.'
+objective: Create an array of colors and print only the first element using array
+  index 0.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'red'
+- args: []
+  expected_stdout: red
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`${arr[0]}`'
 scaffold: true

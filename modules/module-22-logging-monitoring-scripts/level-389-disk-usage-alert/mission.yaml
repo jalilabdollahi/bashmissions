@@ -5,15 +5,14 @@ module_display: Logging & Monitoring Scripts
 title: Disk Usage Alert
 difficulty: advanced
 xp: 210
-objective: 'Demonstrate disk usage alert in a deterministic monitoring script.'
+objective: Demonstrate disk usage alert in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'disk=ok'
+- args: []
+  expected_stdout: disk=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'threshold + notification'
+- threshold + notification
 scaffold: true

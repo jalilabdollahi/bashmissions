@@ -5,15 +5,14 @@ module_display: Networking in Scripts
 title: Check Port Open
 difficulty: advanced
 xp: 200
-objective: 'Check nc availability for port checks.'
+objective: Check nc availability for port checks.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'port_check=ready'
+- args: []
+  expected_stdout: port_check=ready
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`nc -z host port`'
 scaffold: true

@@ -5,16 +5,16 @@ module_display: Process Management in Scripts
 title: Subshell Variable Isolation
 difficulty: advanced
 xp: 205
-objective: 'Show that variable changes inside a subshell do not affect the parent shell.'
+objective: Show that variable changes inside a subshell do not affect the parent shell.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'inside=child
-outside=parent'
+- args: []
+  expected_stdout: |-
+    inside=child
+    outside=parent
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'changes don''t leak'
+- changes don't leak
 scaffold: true

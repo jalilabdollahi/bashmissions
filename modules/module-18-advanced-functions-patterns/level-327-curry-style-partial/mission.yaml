@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Curry-Style Partial
 difficulty: advanced
 xp: 215
-objective: 'Create a function factory that builds a prefixed logger.'
+objective: Create a function factory that builds a prefixed logger.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'api=ready'
+- args: []
+  expected_stdout: api=ready
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'factory functions'
+- factory functions
 scaffold: true

@@ -5,15 +5,14 @@ module_display: Logging & Monitoring Scripts
 title: Audit Trail
 difficulty: advanced
 xp: 210
-objective: 'Demonstrate audit trail in a deterministic monitoring script.'
+objective: Demonstrate audit trail in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'deploy:ok'
+- args: []
+  expected_stdout: deploy:ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'append action'
+- append action
 scaffold: true

@@ -5,15 +5,14 @@ module_display: Networking in Scripts
 title: Pass Auth Header
 difficulty: advanced
 xp: 240
-objective: 'Build an auth header without printing the token.'
+objective: Build an auth header without printing the token.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'auth_header=ready'
+- args: []
+  expected_stdout: auth_header=ready
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'Bearer token'
+- Bearer token
 scaffold: true

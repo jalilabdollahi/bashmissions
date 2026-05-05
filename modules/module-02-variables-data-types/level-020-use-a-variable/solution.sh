@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-name="$1"
-echo "${name}_suffix"
+# TODO: solve the mission

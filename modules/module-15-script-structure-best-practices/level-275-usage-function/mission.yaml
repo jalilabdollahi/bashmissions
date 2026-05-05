@@ -5,20 +5,19 @@ module_display: Script Structure & Best Practices
 title: Usage Function
 difficulty: advanced
 xp: 195
-objective: 'Create a `print_usage` function and call it for `--help` or missing input.'
+objective: Create a `print_usage` function and call it for `--help` or missing input.
 expected_script_name: solution.sh
 test_cases:
-- args:
+- args: []
   expected_stdout: 'Usage: solution.sh <file>'
   expected_exit: 0
   comparison: exact
 - args:
-  - 'notes.txt'
-  expected_stdout: 'file=notes.txt'
+  - notes.txt
+  expected_stdout: file=notes.txt
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'print_usage() with exit'
+- print_usage() with exit
 scaffold: true

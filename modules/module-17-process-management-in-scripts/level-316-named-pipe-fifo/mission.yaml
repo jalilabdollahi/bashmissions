@@ -5,15 +5,14 @@ module_display: Process Management in Scripts
 title: Named Pipe (FIFO)
 difficulty: advanced
 xp: 185
-objective: 'Create a FIFO, send a line through it, and read it back.'
+objective: Create a FIFO, send a line through it, and read it back.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'line=from fifo'
+- args: []
+  expected_stdout: line=from fifo
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`mkfifo`'
 scaffold: true

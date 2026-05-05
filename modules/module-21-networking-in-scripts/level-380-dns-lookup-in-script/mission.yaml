@@ -5,15 +5,15 @@ module_display: Networking in Scripts
 title: DNS Lookup in Script
 difficulty: advanced
 xp: 210
-objective: 'Check for a DNS lookup tool (`dig` or `nslookup`) before a script depends on DNS queries.'
+objective: Check for a DNS lookup tool (`dig` or `nslookup`) before a script depends
+  on DNS queries.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'dns_tool=found'
+- args: []
+  expected_stdout: dns_tool=found
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`dig`, `nslookup`'
 scaffold: true

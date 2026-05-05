@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: SSH Key Distributor
 difficulty: expert
 xp: 200
-objective: 'Simulate ssh key distributor safely in the workspace.'
+objective: Simulate ssh key distributor safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ssh_key_distributor=ok'
+- args: []
+  expected_stdout: ssh_key_distributor=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'push keys to multiple hosts'
+- push keys to multiple hosts
 scaffold: true

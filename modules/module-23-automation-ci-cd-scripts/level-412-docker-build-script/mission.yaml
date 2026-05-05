@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Docker Build Script
 difficulty: advanced
 xp: 210
-objective: 'Demonstrate docker build script as a safe CI/CD helper script.'
+objective: Demonstrate docker build script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'docker_build=stub'
+- args: []
+  expected_stdout: docker_build=stub
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'build tag push'
+- build tag push
 scaffold: true

@@ -5,15 +5,14 @@ module_display: Debugging Scripts
 title: LINENO in Errors
 difficulty: advanced
 xp: 185
-objective: 'Include `$LINENO` in an error helper so failures point to a line.'
+objective: Include `$LINENO` in an error helper so failures point to a line.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'line=10 message=missing input'
+- args: []
+  expected_stdout: line=10 message=missing input
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`$LINENO`'
 scaffold: true

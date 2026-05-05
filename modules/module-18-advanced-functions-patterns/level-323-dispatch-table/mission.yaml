@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Dispatch Table
 difficulty: advanced
 xp: 175
-objective: 'Dispatch a command through an associative array of function names.'
+objective: Dispatch a command through an associative array of function names.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'hello=bash'
+- args: []
+  expected_stdout: hello=bash
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'assoc array of function names'
+- assoc array of function names
 scaffold: true

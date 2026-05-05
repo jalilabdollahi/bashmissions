@@ -5,15 +5,14 @@ module_display: Regular Expressions in Bash
 title: sed with Capture Group
 difficulty: intermediate
 xp: 125
-objective: 'Use a sed capture group to wrap a key-value line in brackets.'
+objective: Use a sed capture group to wrap a key-value line in brackets.
 expected_script_name: solution.sh
 test_cases:
-- args:
+- args: []
   expected_stdout: '[status=ready]'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`sed ''s/\(.*\)/[\1]/''`'
 scaffold: true

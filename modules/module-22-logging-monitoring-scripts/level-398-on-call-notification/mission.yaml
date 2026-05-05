@@ -5,15 +5,14 @@ module_display: Logging & Monitoring Scripts
 title: On-Call Notification
 difficulty: advanced
 xp: 200
-objective: 'Demonstrate on-call notification in a deterministic monitoring script.'
+objective: Demonstrate on-call notification in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'notify=queued'
+- args: []
+  expected_stdout: notify=queued
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'webhook alert'
+- webhook alert
 scaffold: true

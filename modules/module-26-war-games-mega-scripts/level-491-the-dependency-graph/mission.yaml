@@ -1,21 +1,22 @@
 id: 491
 module: 26
 module_name: war-games-mega-scripts
-module_display: War Games: Mega Scripts
+module_display: 'War Games: Mega Scripts'
 title: The Dependency Graph
 difficulty: expert
 xp: 240
-objective: 'Implement the mega-script mission `The Dependency Graph` using structured steps, temp workspace, cleanup trap, arrays, functions, and reporting.'
+objective: Implement the mega-script mission `The Dependency Graph` using structured
+  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'mission=The Dependency Graph
-steps=5
-status=complete'
+- args: []
+  expected_stdout: |-
+    mission=The Dependency Graph
+    steps=5
+    status=complete
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'combine 5+ Bash scripting concepts'
+- combine 5+ Bash scripting concepts
 scaffold: true

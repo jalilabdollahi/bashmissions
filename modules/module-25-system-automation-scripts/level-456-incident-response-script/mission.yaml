@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Incident Response Script
 difficulty: expert
 xp: 240
-objective: 'Simulate incident response script safely in the workspace.'
+objective: Simulate incident response script safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'incident_response_script=ok'
+- args: []
+  expected_stdout: incident_response_script=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'collect forensic data'
+- collect forensic data
 scaffold: true

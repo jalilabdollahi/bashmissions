@@ -5,16 +5,16 @@ module_display: Advanced Functions & Patterns
 title: Builder Pattern
 difficulty: advanced
 xp: 195
-objective: 'Build configuration through small setter functions.'
+objective: Build configuration through small setter functions.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'host=localhost
-port=8080'
+- args: []
+  expected_stdout: |-
+    host=localhost
+    port=8080
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'chained config calls'
+- chained config calls
 scaffold: true

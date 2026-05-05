@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
-if (set -u; echo "$missing_value") 2> unset.log; then
-  echo "unexpected=success"
-else
-  echo "unset=blocked"
-fi
+# TODO: solve the mission

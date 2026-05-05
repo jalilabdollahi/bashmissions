@@ -5,17 +5,18 @@ module_display: Arrays
 title: Slice an Array
 difficulty: intermediate
 xp: 135
-objective: 'Use array slicing to print three elements starting at index 1 from a five-item array.'
+objective: Use array slicing to print three elements starting at index 1 from a five-item
+  array.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'one
-two
-three'
+- args: []
+  expected_stdout: |-
+    one
+    two
+    three
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`${arr[@]:start:len}`'
 scaffold: true

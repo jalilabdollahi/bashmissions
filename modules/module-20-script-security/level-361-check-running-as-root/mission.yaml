@@ -5,15 +5,14 @@ module_display: Script Security
 title: Check Running as Root
 difficulty: advanced
 xp: 210
-objective: 'Check whether the script is running as root.'
+objective: Check whether the script is running as root.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'root=no'
+- args: []
+  expected_stdout: root=no
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'guard non-root scripts'
+- guard non-root scripts
 scaffold: true

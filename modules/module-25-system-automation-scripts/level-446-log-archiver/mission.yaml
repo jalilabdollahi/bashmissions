@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Log Archiver
 difficulty: expert
 xp: 240
-objective: 'Simulate log archiver safely in the workspace.'
+objective: Simulate log archiver safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'log_archiver=ok'
+- args: []
+  expected_stdout: log_archiver=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'compress + move old logs'
+- compress + move old logs
 scaffold: true

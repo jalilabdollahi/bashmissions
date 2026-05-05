@@ -5,16 +5,16 @@ module_display: Process Management in Scripts
 title: Command Group
 difficulty: advanced
 xp: 215
-objective: 'Use a command group to redirect multiple lines into one file.'
+objective: Use a command group to redirect multiple lines into one file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha
-beta'
+- args: []
+  expected_stdout: |-
+    alpha
+    beta
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`{ ... }`'
 scaffold: true

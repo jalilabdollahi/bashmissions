@@ -5,17 +5,18 @@ module_display: Arrays
 title: Array from Command
 difficulty: intermediate
 xp: 165
-objective: 'Capture command output into an array with mapfile, then print the captured lines.'
+objective: Capture command output into an array with mapfile, then print the captured
+  lines.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha
-beta
-gamma'
+- args: []
+  expected_stdout: |-
+    alpha
+    beta
+    gamma
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`mapfile -t arr < <(cmd)`'
 scaffold: true

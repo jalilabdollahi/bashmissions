@@ -5,17 +5,18 @@ module_display: Data Processing Scripts
 title: Join Two CSVs
 difficulty: advanced
 xp: 200
-objective: 'Join two CSV files by their first column key.'
+objective: Join two CSV files by their first column key.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alice=admin
-bob=user'
+- args: []
+  expected_stdout: |-
+    alice=admin
+    bob=user
   expected_exit: 0
   comparison: exact
 fixtures:
 - users.csv
 - roles.csv
 concepts:
-- 'join on key'
+- join on key
 scaffold: true

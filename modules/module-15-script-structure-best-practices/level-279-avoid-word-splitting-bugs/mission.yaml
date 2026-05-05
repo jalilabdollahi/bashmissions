@@ -5,20 +5,20 @@ module_display: Script Structure & Best Practices
 title: Avoid Word Splitting Bugs
 difficulty: advanced
 xp: 185
-objective: 'Loop over `"$@"` so arguments containing spaces remain single arguments.'
+objective: Loop over `"$@"` so arguments containing spaces remain single arguments.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - 'alpha'
-  - 'two words'
-  - 'gamma'
-  expected_stdout: '<alpha>
-<two words>
-<gamma>'
+  - alpha
+  - two words
+  - gamma
+  expected_stdout: |-
+    <alpha>
+    <two words>
+    <gamma>
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`"$@"` not `$@`'
 scaffold: true

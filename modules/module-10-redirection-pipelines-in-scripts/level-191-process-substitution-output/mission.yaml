@@ -5,16 +5,17 @@ module_display: Redirection & Pipelines in Scripts
 title: Process Substitution Output
 difficulty: intermediate
 xp: 145
-objective: 'Send output through process substitution to transform it into a file, then print the transformed file.'
+objective: Send output through process substitution to transform it into a file, then
+  print the transformed file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ALPHA
-BETA'
+- args: []
+  expected_stdout: |-
+    ALPHA
+    BETA
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`cmd >(other_cmd)`'
 scaffold: true

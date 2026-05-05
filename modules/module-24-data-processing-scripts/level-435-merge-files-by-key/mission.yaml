@@ -5,11 +5,11 @@ module_display: Data Processing Scripts
 title: Merge Files by Key
 difficulty: advanced
 xp: 210
-objective: 'Merge three key-based files with join.'
+objective: Merge three key-based files with join.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '1,alice,admin,east'
+- args: []
+  expected_stdout: 1,alice,admin,east
   expected_exit: 0
   comparison: exact
 fixtures:
@@ -17,5 +17,5 @@ fixtures:
 - b.csv
 - c.csv
 concepts:
-- 'multi-file join'
+- multi-file join
 scaffold: true

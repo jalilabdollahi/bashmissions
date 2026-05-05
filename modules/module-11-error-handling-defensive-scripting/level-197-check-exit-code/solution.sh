@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
-grep -q beta fixtures/data.txt
-code=$?
-echo "grep_exit=$code"
+# TODO: solve the mission

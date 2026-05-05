@@ -5,15 +5,14 @@ module_display: Logging & Monitoring Scripts
 title: CPU Load Check
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate cpu load check in a deterministic monitoring script.'
+objective: Demonstrate cpu load check in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'load=checked'
+- args: []
+  expected_stdout: load=checked
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'uptime parse'
+- uptime parse
 scaffold: true

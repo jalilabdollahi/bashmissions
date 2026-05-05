@@ -5,13 +5,14 @@ module_display: Text Processing in Scripts
 title: Count Occurrences
 difficulty: intermediate
 xp: 165
-objective: 'Count repeated lines and print the counts from most common to least common.'
+objective: Count repeated lines and print the counts from most common to least common.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'beta=3
-alpha=2
-gamma=1'
+- args: []
+  expected_stdout: |-
+    beta=3
+    alpha=2
+    gamma=1
   expected_exit: 0
   comparison: exact
 fixtures:

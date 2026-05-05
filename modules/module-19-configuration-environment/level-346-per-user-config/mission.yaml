@@ -5,15 +5,14 @@ module_display: Configuration & Environment
 title: Per-User Config
 difficulty: advanced
 xp: 175
-objective: 'Build and read a per-user config path under HOME.'
+objective: Build and read a per-user config path under HOME.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'theme=dark'
+- args: []
+  expected_stdout: theme=dark
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`~/.config/app/config`'
 scaffold: true

@@ -5,15 +5,15 @@ module_display: Data Processing Scripts
 title: Convert CSV to JSON
 difficulty: advanced
 xp: 210
-objective: 'Convert the first data row of a CSV file into a JSON object.'
+objective: Convert the first data row of a CSV file into a JSON object.
 expected_script_name: solution.sh
 test_cases:
-- args:
+- args: []
   expected_stdout: '{"name":"alice","score":10}'
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.csv
 concepts:
-- 'awk JSON output'
+- awk JSON output
 scaffold: true

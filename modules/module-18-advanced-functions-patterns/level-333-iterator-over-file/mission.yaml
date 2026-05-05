@@ -5,16 +5,17 @@ module_display: Advanced Functions & Patterns
 title: Iterator over File
 difficulty: advanced
 xp: 175
-objective: 'Read a file through an iterator-style function.'
+objective: Read a file through an iterator-style function.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'next=alpha
-next=beta'
+- args: []
+  expected_stdout: |-
+    next=alpha
+    next=beta
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'closure-style read'
+- closure-style read
 scaffold: true

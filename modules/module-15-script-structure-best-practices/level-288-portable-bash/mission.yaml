@@ -5,15 +5,15 @@ module_display: Script Structure & Best Practices
 title: Portable Bash
 difficulty: advanced
 xp: 175
-objective: 'Use portable shell constructs for a simple file test and output.'
+objective: Use portable shell constructs for a simple file test and output.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'portable=readable'
+- args: []
+  expected_stdout: portable=readable
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'avoid bashisms where possible'
+- avoid bashisms where possible
 scaffold: true

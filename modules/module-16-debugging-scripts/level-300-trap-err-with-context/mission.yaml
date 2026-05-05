@@ -5,15 +5,15 @@ module_display: Debugging Scripts
 title: Trap ERR with Context
 difficulty: advanced
 xp: 215
-objective: 'Install an ERR trap that reports the failing command and line from a child script.'
+objective: Install an ERR trap that reports the failing command and line from a child
+  script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'err_line=4 cmd=false'
+- args: []
+  expected_stdout: err_line=4 cmd=false
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'log command + line'
+- log command + line
 scaffold: true

@@ -5,16 +5,17 @@ module_display: Script Structure & Best Practices
 title: DRY with Functions
 difficulty: advanced
 xp: 185
-objective: 'Avoid duplicated output logic by using one function for repeated status lines.'
+objective: Avoid duplicated output logic by using one function for repeated status
+  lines.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'api=ok
-worker=ok'
+- args: []
+  expected_stdout: |-
+    api=ok
+    worker=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'no copy-pasted logic'
+- no copy-pasted logic
 scaffold: true

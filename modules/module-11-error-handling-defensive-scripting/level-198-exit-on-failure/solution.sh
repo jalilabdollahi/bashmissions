@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
-mkdir -p output || exit 1
-echo "created=output"
+# TODO: solve the mission

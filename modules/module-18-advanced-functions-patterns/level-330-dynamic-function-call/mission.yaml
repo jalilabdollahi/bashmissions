@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Dynamic Function Call
 difficulty: advanced
 xp: 195
-objective: 'Call a function by name stored in a variable.'
+objective: Call a function by name stored in a variable.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'deploy=api'
+- args: []
+  expected_stdout: deploy=api
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`"$func" args`'
 scaffold: true

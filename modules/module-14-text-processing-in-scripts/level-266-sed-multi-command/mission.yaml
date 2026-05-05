@@ -5,12 +5,13 @@ module_display: Text Processing in Scripts
 title: sed Multi-command
 difficulty: intermediate
 xp: 125
-objective: 'Use multiple sed commands with `-e` to edit and filter lines.'
+objective: Use multiple sed commands with `-e` to edit and filter lines.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'INFO ok
-ERROR failed'
+- args: []
+  expected_stdout: |-
+    INFO ok
+    ERROR failed
   expected_exit: 0
   comparison: exact
 fixtures:

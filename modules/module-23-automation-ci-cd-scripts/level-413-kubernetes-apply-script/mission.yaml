@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Kubernetes Apply Script
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate kubernetes apply script as a safe CI/CD helper script.'
+objective: Demonstrate kubernetes apply script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'kube_apply=stub'
+- args: []
+  expected_stdout: kube_apply=stub
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'apply wait verify'
+- apply wait verify
 scaffold: true

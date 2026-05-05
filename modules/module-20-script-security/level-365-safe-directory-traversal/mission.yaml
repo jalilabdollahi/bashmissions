@@ -5,15 +5,14 @@ module_display: Script Security
 title: Safe Directory Traversal
 difficulty: advanced
 xp: 200
-objective: 'Reject symlinks during traversal.'
+objective: Reject symlinks during traversal.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'skip=link.txt'
+- args: []
+  expected_stdout: skip=link.txt
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'check symlinks'
+- check symlinks
 scaffold: true

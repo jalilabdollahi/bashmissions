@@ -5,17 +5,18 @@ module_display: Redirection & Pipelines in Scripts
 title: Log Everything with exec
 difficulty: intermediate
 xp: 145
-objective: 'Use exec with tee so later stdout is printed and logged, then show the log contents after restoring stdout.'
+objective: Use exec with tee so later stdout is printed and logged, then show the
+  log contents after restoring stdout.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'build started
-build finished
-log:build started,build finished'
+- args: []
+  expected_stdout: |-
+    build started
+    build finished
+    log:build started,build finished
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`exec > >(tee logfile)`'
 scaffold: true

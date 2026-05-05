@@ -5,15 +5,14 @@ module_display: Configuration & Environment
 title: XDG Base Dirs
 difficulty: advanced
 xp: 215
-objective: 'Resolve a config path using XDG_CONFIG_HOME with a fallback.'
+objective: Resolve a config path using XDG_CONFIG_HOME with a fallback.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'config=/home/fatemeh/.config/bashmissions/config'
+- args: []
+  expected_stdout: config=/home/fatemeh/.config/bashmissions/config
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`$XDG_CONFIG_HOME`'
 scaffold: true

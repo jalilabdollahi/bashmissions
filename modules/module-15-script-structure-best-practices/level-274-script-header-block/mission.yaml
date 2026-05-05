@@ -5,17 +5,17 @@ module_display: Script Structure & Best Practices
 title: Script Header Block
 difficulty: advanced
 xp: 185
-objective: 'Include a small header block and print the metadata from it.'
+objective: Include a small header block and print the metadata from it.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'Name: report-status
-Usage: report-status [environment]
-Description: Demonstrates a documented script header.'
+- args: []
+  expected_stdout: |-
+    Name: report-status
+    Usage: report-status [environment]
+    Description: Demonstrates a documented script header.
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'name, author, usage, description'
+- name, author, usage, description
 scaffold: true

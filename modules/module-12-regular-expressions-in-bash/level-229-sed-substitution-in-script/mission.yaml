@@ -5,15 +5,14 @@ module_display: Regular Expressions in Bash
 title: sed Substitution in Script
 difficulty: intermediate
 xp: 165
-objective: 'Use sed substitution to replace the first color name in a string.'
+objective: Use sed substitution to replace the first color name in a string.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'color=blue'
+- args: []
+  expected_stdout: color=blue
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`sed ''s/old/new/''`'
 scaffold: true

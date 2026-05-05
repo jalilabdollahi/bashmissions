@@ -5,15 +5,14 @@ module_display: Script Security
 title: Log Sanitization
 difficulty: advanced
 xp: 230
-objective: 'Sanitize secrets before logging.'
+objective: Sanitize secrets before logging.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'login token=[REDACTED] user=ada'
+- args: []
+  expected_stdout: login token=[REDACTED] user=ada
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'remove secrets from logs'
+- remove secrets from logs
 scaffold: true

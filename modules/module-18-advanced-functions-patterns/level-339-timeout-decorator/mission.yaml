@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Timeout Decorator
 difficulty: advanced
 xp: 185
-objective: 'Wrap a command with `timeout` and print the timeout exit status.'
+objective: Wrap a command with `timeout` and print the timeout exit status.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'timeout=124'
+- args: []
+  expected_stdout: timeout=124
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`timeout` wrapping'
 scaffold: true

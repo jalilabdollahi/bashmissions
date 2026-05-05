@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "script: $(basename "$0")"
+# TODO: solve the mission

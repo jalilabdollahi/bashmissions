@@ -5,15 +5,14 @@ module_display: Regular Expressions in Bash
 title: Capture Group
 difficulty: intermediate
 xp: 135
-objective: 'Match `user:<name>` and print the captured name from `BASH_REMATCH[1]`.'
+objective: Match `user:<name>` and print the captured name from `BASH_REMATCH[1]`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'name=alice'
+- args: []
+  expected_stdout: name=alice
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`${BASH_REMATCH[1]}`'
 scaffold: true

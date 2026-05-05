@@ -5,16 +5,16 @@ module_display: Debugging Scripts
 title: Trace Specific Block
 difficulty: advanced
 xp: 215
-objective: 'Trace only one block while leaving the rest of the script quiet.'
+objective: Trace only one block while leaving the rest of the script quiet.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'before,inside,after
-block=traced'
+- args: []
+  expected_stdout: |-
+    before,inside,after
+    block=traced
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`set -x; ...; set +x`'
 scaffold: true

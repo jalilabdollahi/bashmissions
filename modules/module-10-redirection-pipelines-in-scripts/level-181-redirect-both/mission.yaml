@@ -5,16 +5,17 @@ module_display: Redirection & Pipelines in Scripts
 title: Redirect Both
 difficulty: intermediate
 xp: 145
-objective: 'Redirect stdout and stderr from the same block into one file, then print that file.'
+objective: Redirect stdout and stderr from the same block into one file, then print
+  that file.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'stdout: ready
-stderr: warning'
+- args: []
+  expected_stdout: |-
+    stdout: ready
+    stderr: warning
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`&>`'
 scaffold: true

@@ -5,7 +5,12 @@ module_display: Hello World & Output
 title: Print Multiple Lines
 difficulty: beginner
 xp: 90
-objective: 'Print three lines using both arguments.'
+objective: |-
+  Print exactly three lines:
+  Line 1: <arg1>
+  Line 2: <arg2>
+  Done.
+  Use the first argument for <arg1> and the second argument for <arg2>.
 expected_script_name: solution.sh
 test_cases:
 - args: ['apple', 'banana']

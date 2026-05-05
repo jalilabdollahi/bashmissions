@@ -5,13 +5,14 @@ module_display: File Operations in Scripts
 title: Read Entire File
 difficulty: intermediate
 xp: 155
-objective: 'Read an entire fixture file with command substitution and print it unchanged.'
+objective: Read an entire fixture file with command substitution and print it unchanged.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'alpha
-beta
-gamma'
+- args: []
+  expected_stdout: |-
+    alpha
+    beta
+    gamma
   expected_exit: 0
   comparison: exact
 fixtures:

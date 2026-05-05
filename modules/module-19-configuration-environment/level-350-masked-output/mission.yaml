@@ -5,15 +5,14 @@ module_display: Configuration & Environment
 title: Masked Output
 difficulty: advanced
 xp: 215
-objective: 'Mask a secret before printing a log line.'
+objective: Mask a secret before printing a log line.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'token=****** status=ok'
+- args: []
+  expected_stdout: token=****** status=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'replace secret in logs'
+- replace secret in logs
 scaffold: true

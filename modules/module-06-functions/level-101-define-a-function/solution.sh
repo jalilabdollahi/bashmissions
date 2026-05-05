@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-greet() {
-  echo "hello from function"
-}
-
-greet
+# TODO: solve the mission

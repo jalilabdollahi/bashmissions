@@ -5,16 +5,16 @@ module_display: Process Management in Scripts
 title: GNU Parallel Basics
 difficulty: advanced
 xp: 185
-objective: 'Check for GNU parallel and use a safe fallback when it is not installed.'
+objective: Check for GNU parallel and use a safe fallback when it is not installed.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'item=a
-item=b'
+- args: []
+  expected_stdout: |-
+    item=a
+    item=b
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`parallel` tool'
 scaffold: true

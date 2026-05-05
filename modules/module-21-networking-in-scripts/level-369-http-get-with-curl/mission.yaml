@@ -5,15 +5,14 @@ module_display: Networking in Scripts
 title: HTTP GET with curl
 difficulty: advanced
 xp: 200
-objective: 'Use curl -s against a local file URL.'
+objective: Use curl -s against a local file URL.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'hello http'
+- args: []
+  expected_stdout: hello http
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`curl -s URL`'
 scaffold: true

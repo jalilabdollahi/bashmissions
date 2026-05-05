@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Deploy Script
 difficulty: advanced
 xp: 210
-objective: 'Demonstrate deploy script as a safe CI/CD helper script.'
+objective: Demonstrate deploy script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'deploy=ok'
+- args: []
+  expected_stdout: deploy=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'copy + restart + verify'
+- copy + restart + verify
 scaffold: true

@@ -5,15 +5,14 @@ module_display: Script Security
 title: Prevent TOCTOU
 difficulty: advanced
 xp: 210
-objective: 'Prevent TOCTOU by writing temp then rename.'
+objective: Prevent TOCTOU by writing temp then rename.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ready'
+- args: []
+  expected_stdout: ready
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'atomic operations'
+- atomic operations
 scaffold: true

@@ -5,17 +5,18 @@ module_display: Arrays
 title: All Elements
 difficulty: intermediate
 xp: 145
-objective: 'Print every array element on its own line, preserving an element that contains a space.'
+objective: Print every array element on its own line, preserving an element that contains
+  a space.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'red
-green leaf
-blue'
+- args: []
+  expected_stdout: |-
+    red
+    green leaf
+    blue
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`${arr[@]}`'
 scaffold: true

@@ -18,8 +18,7 @@ test_cases:
   expected_stdout: 'ip=invalid'
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - 'IP regex pattern'
 scaffold: true

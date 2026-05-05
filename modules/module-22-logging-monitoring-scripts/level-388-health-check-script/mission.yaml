@@ -5,17 +5,17 @@ module_display: Logging & Monitoring Scripts
 title: Health Check Script
 difficulty: advanced
 xp: 200
-objective: 'Demonstrate health check script in a deterministic monitoring script.'
+objective: Demonstrate health check script in a deterministic monitoring script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'process=ok
-disk=ok
-memory=ok'
+- args: []
+  expected_stdout: |-
+    process=ok
+    disk=ok
+    memory=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'process disk memory'
+- process disk memory
 scaffold: true

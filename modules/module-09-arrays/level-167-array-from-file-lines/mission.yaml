@@ -5,18 +5,20 @@ module_display: Arrays
 title: Array from File Lines
 difficulty: intermediate
 xp: 125
-objective: 'Read the provided file into an array with mapfile, then print the line count, first line, and last line.'
+objective: Read the provided file into an array with mapfile, then print the line
+  count, first line, and last line.
 expected_script_name: solution.sh
 test_cases:
 - args:
-  - 'fixtures/data.txt'
-  expected_stdout: 'count=3
-first=first line
-last=third line'
+  - fixtures/data.txt
+  expected_stdout: |-
+    count=3
+    first=first line
+    last=third line
   expected_exit: 0
   comparison: exact
 fixtures:
 - data.txt
 concepts:
-- 'mapfile'
+- mapfile
 scaffold: true

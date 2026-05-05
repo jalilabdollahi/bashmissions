@@ -5,15 +5,14 @@ module_display: Data Processing Scripts
 title: Generate HTML Report
 difficulty: advanced
 xp: 220
-objective: 'Generate an HTML report with a heredoc.'
+objective: Generate an HTML report with a heredoc.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '<table><tr><td>ok</td></tr></table>'
+- args: []
+  expected_stdout: <table><tr><td>ok</td></tr></table>
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'heredoc HTML'
+- heredoc HTML
 scaffold: true

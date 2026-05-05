@@ -5,15 +5,14 @@ module_display: Configuration & Environment
 title: Override via Env Var
 difficulty: advanced
 xp: 195
-objective: 'Let an environment variable override a config value.'
+objective: Let an environment variable override a config value.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'env=prod'
+- args: []
+  expected_stdout: env=prod
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`${VAR:-config_value}`'
 scaffold: true

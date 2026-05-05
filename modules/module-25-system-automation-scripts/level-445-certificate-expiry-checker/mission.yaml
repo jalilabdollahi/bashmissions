@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Certificate Expiry Checker
 difficulty: expert
 xp: 230
-objective: 'Simulate certificate expiry checker safely in the workspace.'
+objective: Simulate certificate expiry checker safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'certificate_expiry_checker=ok'
+- args: []
+  expected_stdout: certificate_expiry_checker=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'parse openssl output'
+- parse openssl output
 scaffold: true

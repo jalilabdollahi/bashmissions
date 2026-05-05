@@ -2,25 +2,40 @@
 from __future__ import annotations
 
 import os
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
 
 try:
+    from engine.scaffold import create_starter_script
     from engine.safety import SAFE_PATH, ensure_workspace, validate_script
     from engine.validator import compare_output
 except ModuleNotFoundError:
+    from scaffold import create_starter_script
     from safety import SAFE_PATH, ensure_workspace, validate_script
     from validator import compare_output
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TMP_ROOT = Path("/tmp/bashmissions")
+CURRENT_WORKSPACE_LINK = TMP_ROOT / "current"
 
 
 def level_workspace(level_data: dict) -> Path:
     workspace = TMP_ROOT / level_data["module_path_slug"] / level_data["level_path_slug"] / "workspace"
     ensure_workspace(workspace)
     return workspace
+
+
+def set_active_workspace(workspace: Path) -> None:
+    """Point /tmp/bashmissions/current at the workspace for the active level."""
+    ensure_workspace(workspace)
+    TMP_ROOT.mkdir(parents=True, exist_ok=True)
+    if CURRENT_WORKSPACE_LINK.is_symlink() or CURRENT_WORKSPACE_LINK.is_file():
+        CURRENT_WORKSPACE_LINK.unlink()
+    elif CURRENT_WORKSPACE_LINK.exists():
+        return
+    CURRENT_WORKSPACE_LINK.symlink_to(workspace, target_is_directory=True)
 
 
 def copytree_contents(src: Path, dst: Path) -> None:
@@ -43,19 +58,16 @@ def prepare_level(level_data: dict) -> Path:
     fixtures_dir = level_dir / "fixtures"
     if fixtures_dir.exists():
         shutil.copytree(fixtures_dir, workspace / "fixtures", dirs_exist_ok=True)
-    scaffold = level_dir / "solution.sh"
-    if scaffold.exists():
-        shutil.copy2(scaffold, workspace / "solution.sh")
-    elif level_data.get("scaffold"):
-        (workspace / "solution.sh").write_text("#!/usr/bin/env bash\nset -euo pipefail\n\n", encoding="utf-8")
+    create_starter_script(level_data, level_dir, workspace / "solution.sh")
+    set_active_workspace(workspace)
     return workspace
 
 
 def _bash_command(script_name: str, args: list[str]) -> str:
-    quoted = " ".join(subprocess.list2cmdline([arg]) for arg in args)
+    quoted = " ".join(shlex.quote(arg) for arg in args)
     return (
         "ulimit -t 5 -f 10240 -u 50 -n 64;"
-        f"PATH='{SAFE_PATH}'; bash {subprocess.list2cmdline([script_name])}"
+        f"PATH='{SAFE_PATH}'; bash {shlex.quote(script_name)}"
         + (f" {quoted}" if quoted else "")
     )
 
@@ -84,7 +96,7 @@ def run_level(level_data: dict, workspace: Path) -> list[dict]:
     check_script = level_dir / "check.sh"
     results: list[dict] = []
     for test_case in level_data.get("test_cases", []):
-        args = [str(arg) for arg in test_case.get("args", [])]
+        args = [str(arg) for arg in (test_case.get("args") or [])]
         try:
             run = subprocess.run(
                 ["bash", "-lc", _bash_command(solution.name, args)],
@@ -129,6 +141,9 @@ def run_level(level_data: dict, workspace: Path) -> list[dict]:
                 message_text = "The level checker took too long to finish and was stopped after 5 seconds."
         else:
             passed = compare_output(actual_stdout, test_case.get("expected_stdout", ""), test_case.get("comparison", "exact"))
+            if "expected_stderr" in test_case:
+                stderr_mode = test_case.get("stderr_comparison", test_case.get("comparison", "exact"))
+                passed = passed and compare_output(actual_stderr, test_case.get("expected_stderr", ""), stderr_mode)
             passed = passed and actual_exit == test_case.get("expected_exit", 0)
             if not passed and actual_stderr:
                 message_text = actual_stderr
@@ -137,6 +152,8 @@ def run_level(level_data: dict, workspace: Path) -> list[dict]:
                 "args": args,
                 "expected_stdout": test_case.get("expected_stdout"),
                 "actual_stdout": actual_stdout,
+                "expected_stderr": test_case.get("expected_stderr"),
+                "actual_stderr": actual_stderr,
                 "expected_exit": test_case.get("expected_exit", 0),
                 "actual_exit": actual_exit,
                 "passed": passed,

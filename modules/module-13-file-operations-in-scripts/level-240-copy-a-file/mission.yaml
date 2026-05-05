@@ -5,11 +5,11 @@ module_display: File Operations in Scripts
 title: Copy a File
 difficulty: intermediate
 xp: 145
-objective: 'Copy a fixture file, verify the copy matches, and print the result.'
+objective: Copy a fixture file, verify the copy matches, and print the result.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'copy=ok'
+- args: []
+  expected_stdout: copy=ok
   expected_exit: 0
   comparison: exact
 fixtures:

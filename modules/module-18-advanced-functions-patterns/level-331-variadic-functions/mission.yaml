@@ -5,16 +5,16 @@ module_display: Advanced Functions & Patterns
 title: Variadic Functions
 difficulty: advanced
 xp: 205
-objective: 'Forward all arguments through a variadic function.'
+objective: Forward all arguments through a variadic function.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '<alpha>
-<two words>'
+- args: []
+  expected_stdout: |-
+    <alpha>
+    <two words>
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`"$@"` forwarding'
 scaffold: true

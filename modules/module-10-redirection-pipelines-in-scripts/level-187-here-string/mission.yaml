@@ -5,15 +5,15 @@ module_display: Redirection & Pipelines in Scripts
 title: Here-String
 difficulty: intermediate
 xp: 155
-objective: 'Feed a string into a command with a here-string and print the uppercase result.'
+objective: Feed a string into a command with a here-string and print the uppercase
+  result.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'HELLO FROM BASH'
+- args: []
+  expected_stdout: HELLO FROM BASH
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`cmd <<< "string"`'
 scaffold: true

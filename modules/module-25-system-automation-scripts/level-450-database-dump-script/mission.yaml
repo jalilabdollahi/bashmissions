@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Database Dump Script
 difficulty: expert
 xp: 230
-objective: 'Simulate database dump script safely in the workspace.'
+objective: Simulate database dump script safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'database_dump_script=ok'
+- args: []
+  expected_stdout: database_dump_script=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'dump + compress + verify'
+- dump + compress + verify
 scaffold: true

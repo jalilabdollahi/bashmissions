@@ -5,16 +5,17 @@ module_display: Arrays
 title: Pass Array to Function
 difficulty: intermediate
 xp: 165
-objective: 'Pass an array to a function by name using a nameref, then print its count and first value.'
+objective: Pass an array to a function by name using a nameref, then print its count
+  and first value.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'count=3
-first=alpha'
+- args: []
+  expected_stdout: |-
+    count=3
+    first=alpha
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'nameref `declare -n`'
+- nameref `declare -n`
 scaffold: true

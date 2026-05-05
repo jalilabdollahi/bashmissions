@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Config Distributor
 difficulty: expert
 xp: 220
-objective: 'Simulate config distributor safely in the workspace.'
+objective: Simulate config distributor safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'config_distributor=ok'
+- args: []
+  expected_stdout: config_distributor=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'rsync config to servers'
+- rsync config to servers
 scaffold: true

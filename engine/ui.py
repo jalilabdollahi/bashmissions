@@ -1,6 +1,7 @@
 """Rich terminal UI for BashMissions — modelled after k8smissions."""
 from __future__ import annotations
 
+import shlex
 from pathlib import Path
 
 from rich import box
@@ -270,7 +271,7 @@ def show_mission(
     objective = level_data.get("objective", "").strip()
     concepts  = "  •  ".join(level_data.get("concepts", []))
 
-    content = Group(
+    content_items = [
         meta,
         Rule(style="grey50"),
         Text(f"MISSION:    {level_data.get('title', '')}", style="bold white"),
@@ -278,7 +279,11 @@ def show_mission(
         Text(f"OBJECTIVE:  {objective}", style="bright_green"),
         Text(""),
         Text(f"CONCEPTS:   {concepts}", style="grey70"),
-    )
+    ]
+    validator = _validator_examples(level_data)
+    if validator:
+        content_items.extend([Text(""), validator])
+    content = Group(*content_items)
 
     console.print(
         Panel(
@@ -320,8 +325,36 @@ def show_mission(
     )
 
 
+def _validator_examples(level_data: dict) -> Text | None:
+    cases = level_data.get("test_cases", [])
+    if not cases:
+        return None
+    text = Text("VALIDATOR: ", style="bold bright_yellow")
+    shown = cases[:2]
+    for index, case in enumerate(shown, start=1):
+        args = " ".join(shlex.quote(str(arg)) for arg in case.get("args", [])) or "(no args)"
+        text.append(f"\n  case {index}: ./solution.sh {args}", style="grey70")
+        if "expected_stdout" in case:
+            text.append("\n    stdout: ", style="bright_yellow")
+            text.append(_inline_block(str(case.get("expected_stdout", ""))), style="white")
+        if "expected_stderr" in case:
+            text.append("\n    stderr: ", style="bright_yellow")
+            text.append(_inline_block(str(case.get("expected_stderr", ""))), style="white")
+        text.append(f"\n    exit:   {case.get('expected_exit', 0)}", style="bright_yellow")
+    remaining = len(cases) - len(shown)
+    if remaining > 0:
+        text.append(f"\n  + {remaining} more case(s)", style="grey50")
+    return text
+
+
+def _inline_block(value: str) -> str:
+    if value == "":
+        return "(empty)"
+    return value.replace("\n", "\\n")
+
+
 def _sandbox_tree(workspace: Path) -> Tree:
-    tree = Tree(f"[dim]{workspace}[/dim]")
+    tree = Tree(f"[dim]{workspace}[/dim]  [blue](shortcut: /tmp/bashmissions/current)[/blue]")
     if not workspace.exists():
         tree.add("[dim]workspace not ready — type reset[/dim]")
         return tree
@@ -362,8 +395,8 @@ def show_run_result(report: dict) -> None:
             expected = "[dim]—[/dim]"
             got      = "[dim]—[/dim]"
         else:
-            expected = repr(r.get("expected_stdout", ""))
-            got      = r.get("message", "") or repr(r.get("actual_stdout", ""))
+            expected = _result_streams(r, "expected")
+            got      = r.get("message", "") or _result_streams(r, "actual")
 
         table.add_row(str(idx), status, args_str, expected, got)
 
@@ -380,6 +413,14 @@ def show_run_result(report: dict) -> None:
             padding=(0, 1),
         )
     )
+
+
+def _result_streams(result: dict, prefix: str) -> str:
+    stdout = result.get(f"{prefix}_stdout", "")
+    stderr = result.get(f"{prefix}_stderr")
+    if stderr is None:
+        return repr(stdout)
+    return f"stdout={stdout!r}\nstderr={stderr!r}"
     if not passed_all:
         console.print(
             Panel(
@@ -615,7 +656,7 @@ def show_help() -> None:
 
     write = _section("WRITE", [
         ("3  edit code", "Open solution.sh in $EDITOR (default: nano)"),
-        ("ls",           "Show the workspace files for this level"),
+        ("ls",           "Show workspace files and /tmp/bashmissions/current"),
         ("7  reset",     "Wipe workspace and start the level fresh"),
     ], "bright_yellow")
 

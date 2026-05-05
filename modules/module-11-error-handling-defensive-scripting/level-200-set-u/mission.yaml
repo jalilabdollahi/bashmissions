@@ -5,15 +5,14 @@ module_display: Error Handling & Defensive Scripting
 title: set -u
 difficulty: intermediate
 xp: 155
-objective: 'Show that `set -u` treats an unset variable as an error.'
+objective: Show that `set -u` treats an unset variable as an error.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'unset=blocked'
+- args: []
+  expected_stdout: unset=blocked
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'abort on unset variable'
+- abort on unset variable
 scaffold: true

@@ -5,13 +5,14 @@ module_display: Text Processing in Scripts
 title: Sort File
 difficulty: intermediate
 xp: 135
-objective: 'Sort a text file alphabetically.'
+objective: Sort a text file alphabetically.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'apple
-banana
-cherry'
+- args: []
+  expected_stdout: |-
+    apple
+    banana
+    cherry
   expected_exit: 0
   comparison: exact
 fixtures:

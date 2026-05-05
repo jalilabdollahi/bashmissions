@@ -5,16 +5,16 @@ module_display: Automation & CI/CD Scripts
 title: Dependency Checker
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate dependency checker as a safe CI/CD helper script.'
+objective: Demonstrate dependency checker as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'bash=found
-curl=found'
+- args: []
+  expected_stdout: |-
+    bash=found
+    curl=found
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'check all tools'
+- check all tools
 scaffold: true

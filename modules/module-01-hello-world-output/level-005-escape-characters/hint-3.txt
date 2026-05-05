@@ -1,1 +1,1 @@
-Match the required output exactly. If arguments are missing, print an error and exit 1.
+Match the required output exactly, including the backslashes, double quotes, spaces, and pipe separator.

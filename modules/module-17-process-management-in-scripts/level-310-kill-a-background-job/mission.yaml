@@ -5,15 +5,14 @@ module_display: Process Management in Scripts
 title: Kill a Background Job
 difficulty: advanced
 xp: 175
-objective: 'Start a long-running background job, kill it, and confirm it stopped.'
+objective: Start a long-running background job, kill it, and confirm it stopped.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'stopped=yes'
+- args: []
+  expected_stdout: stopped=yes
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`kill $pid`'
 scaffold: true

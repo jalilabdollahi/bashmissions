@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Rollback Script
 difficulty: advanced
 xp: 220
-objective: 'Demonstrate rollback script as a safe CI/CD helper script.'
+objective: Demonstrate rollback script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'version=previous'
+- args: []
+  expected_stdout: version=previous
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'restore previous version'
+- restore previous version
 scaffold: true

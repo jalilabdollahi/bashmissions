@@ -5,17 +5,17 @@ module_display: Script Structure & Best Practices
 title: ShellCheck Clean Script
 difficulty: advanced
 xp: 215
-objective: 'Write a small shellcheck-clean loop with quoted expansions and arrays.'
+objective: Write a small shellcheck-clean loop with quoted expansions and arrays.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: '[alpha]
-[two words]
-[gamma]'
+- args: []
+  expected_stdout: |-
+    [alpha]
+    [two words]
+    [gamma]
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'write shellcheck-clean code'
+- write shellcheck-clean code
 scaffold: true

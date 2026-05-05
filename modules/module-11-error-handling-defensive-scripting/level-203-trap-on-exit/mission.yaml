@@ -5,16 +5,16 @@ module_display: Error Handling & Defensive Scripting
 title: Trap on EXIT
 difficulty: intermediate
 xp: 135
-objective: 'Use an EXIT trap to print a cleanup marker after the main work finishes.'
+objective: Use an EXIT trap to print a cleanup marker after the main work finishes.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'work=done
-cleanup=done'
+- args: []
+  expected_stdout: |-
+    work=done
+    cleanup=done
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'cleanup always runs'
+- cleanup always runs
 scaffold: true

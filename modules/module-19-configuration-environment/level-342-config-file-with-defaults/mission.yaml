@@ -5,16 +5,17 @@ module_display: Configuration & Environment
 title: Config File with Defaults
 difficulty: advanced
 xp: 185
-objective: 'Merge defaults with an optional config file override.'
+objective: Merge defaults with an optional config file override.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'host=localhost
-port=8080'
+- args: []
+  expected_stdout: |-
+    host=localhost
+    port=8080
   expected_exit: 0
   comparison: exact
 fixtures:
 - app.conf
 concepts:
-- 'layered config merging'
+- layered config merging
 scaffold: true

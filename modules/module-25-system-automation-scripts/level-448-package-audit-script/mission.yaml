@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: Package Audit Script
 difficulty: expert
 xp: 210
-objective: 'Simulate package audit script safely in the workspace.'
+objective: Simulate package audit script safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'package_audit_script=ok'
+- args: []
+  expected_stdout: package_audit_script=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'list installed'
+- list installed
 scaffold: true

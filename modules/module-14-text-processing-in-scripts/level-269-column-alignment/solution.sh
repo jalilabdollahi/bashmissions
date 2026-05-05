@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-column -t -s, fixtures/data.txt
+# TODO: solve the mission

@@ -5,15 +5,14 @@ module_display: Automation & CI/CD Scripts
 title: Environment Promo Script
 difficulty: advanced
 xp: 240
-objective: 'Demonstrate environment promo script as a safe CI/CD helper script.'
+objective: Demonstrate environment promo script as a safe CI/CD helper script.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'promoted=staging'
+- args: []
+  expected_stdout: promoted=staging
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'promote config'
+- promote config
 scaffold: true

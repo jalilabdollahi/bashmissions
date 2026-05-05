@@ -5,15 +5,14 @@ module_display: System Automation Scripts
 title: SSL Checker Script
 difficulty: expert
 xp: 200
-objective: 'Simulate ssl checker script safely in the workspace.'
+objective: Simulate ssl checker script safely in the workspace.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'ssl_checker_script=ok'
+- args: []
+  expected_stdout: ssl_checker_script=ok
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
-- 'verify cert chain'
+- verify cert chain
 scaffold: true

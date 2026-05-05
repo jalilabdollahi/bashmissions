@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cat <<'HTML'
-<table><tr><td>ok</td></tr></table>
-HTML
+
+# TODO: solve the mission

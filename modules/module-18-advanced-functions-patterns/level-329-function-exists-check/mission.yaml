@@ -5,15 +5,14 @@ module_display: Advanced Functions & Patterns
 title: Function Exists Check
 difficulty: advanced
 xp: 185
-objective: 'Check whether a function exists with `declare -F`.'
+objective: Check whether a function exists with `declare -F`.
 expected_script_name: solution.sh
 test_cases:
-- args:
-  expected_stdout: 'build=exists'
+- args: []
+  expected_stdout: build=exists
   expected_exit: 0
   comparison: exact
-fixtures:
-[]
+fixtures: []
 concepts:
 - '`declare -F func`'
 scaffold: true
