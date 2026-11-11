@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# curl stand-in: -s, -S, -f/--fail and --max-time N.
+# Status comes from fixtures/http/<host><path>.status (default 200 if a .body exists, else 404).
+# FAKE_NET=down  -> exit 6 (could not resolve host)
+# FAKE_NET=refused -> exit 7 (connection refused)
+silent=0 show_err=0 fail=0 url=
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -S|--show-error) show_err=1 ;;
+    -sS|-Ss) silent=1; show_err=1 ;;
+    -f|--fail) fail=1 ;;
+    -sf|-fs) silent=1; fail=1 ;;
+    -sSf|-fsS|-sfS|-Ssf|-fSs|-Sfs) silent=1; show_err=1; fail=1 ;;
+    --max-time) shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+rest=${url#*://}; host=${rest%%/*}; path=/${rest#*/}
+say() { if (( ! silent || show_err )); then echo "$1" >&2; fi; }
+case ${FAKE_NET:-up} in
+  down)    say "curl: (6) Could not resolve host: $host"; exit 6 ;;
+  refused) say "curl: (7) Failed to connect to $host port 443: Connection refused"; exit 7 ;;
+esac
+base=fixtures/http/$host$path
+code=404
+[[ -f $base.body ]] && code=200
+[[ -f $base.status ]] && code=$(tr -d '[:space:]' < "$base.status")
+if (( fail && code >= 400 )); then
+  say "curl: (22) The requested URL returned error: $code"
+  exit 22
+fi
+if [[ -f $base.body ]]; then cat "$base.body"; else echo "no such customer"; fi

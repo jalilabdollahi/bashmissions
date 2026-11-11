@@ -1,0 +1,6 @@
+`sed -n -E 's/PATTERN/\1/p'` prints only the lines where the substitution happened, and `\1` is the first parenthesised group. A character class with `^` means "anything except":
+
+  echo '{"a":"x","b":7}' | sed -nE 's/.*"b": *"?([^",}]*).*/\1/p'
+  # prints 7
+
+Notice the quotes inside the pattern: they belong to the key. To use a shell variable inside a single-quoted sed script, close and reopen the quotes: `'s/.*"'"$field"'":.../'`.

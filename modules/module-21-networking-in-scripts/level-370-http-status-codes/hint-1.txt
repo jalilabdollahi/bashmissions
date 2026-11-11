@@ -1,0 +1,1 @@
+Every HTTP answer starts with a three-digit status code: 2xx means fine, 3xx a redirect, 4xx "your request was wrong", 5xx "the server is broken". curl can print that number for you instead of the page. Also think about what the number is when the server cannot be reached at all.

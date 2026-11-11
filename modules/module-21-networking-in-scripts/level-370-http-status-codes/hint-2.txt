@@ -1,0 +1,5 @@
+`-w` (write-out) prints a message after the transfer, and `%{http_code}` is one of its variables. You usually do not want the page itself, so send it to the bin with `-o /dev/null`:
+
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+
+A case statement is a tidy way to test ranges: `case $code in [45]??) ... ;; esac`. If curl cannot connect it still prints 000, but exits non-zero, so under `set -e` add `|| true`.

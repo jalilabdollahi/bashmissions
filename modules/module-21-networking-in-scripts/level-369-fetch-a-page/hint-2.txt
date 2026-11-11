@@ -1,0 +1,9 @@
+`curl URL` prints the body. Used alone it also draws a progress meter on stderr, which you do not want in a script: add `-s` (silent).
+
+  page=$(curl -s https://example.test/hello.txt)
+
+If curl cannot connect, it exits non-zero, so you can test it:
+
+  if ! page=$(curl -s "$url"); then ... fi
+
+`${page:-fallback}` gives a fallback when the variable is empty.

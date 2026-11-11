@@ -1,0 +1,1 @@
+By default curl only fails when it cannot talk to the server at all. A "500 Internal Server Error" page is a perfectly good response as far as curl is concerned, and its body goes straight into your variable. There is a switch that says "treat an error status as a failure", and curl's exit status then tells you what went wrong.

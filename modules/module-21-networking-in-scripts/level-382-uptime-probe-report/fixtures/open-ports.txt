@@ -1,0 +1,3 @@
+mail.lanternfish.example 25
+mail.lanternfish.example 587
+db.lanternfish.example 5432

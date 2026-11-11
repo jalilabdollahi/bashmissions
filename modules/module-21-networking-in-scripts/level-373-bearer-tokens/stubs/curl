@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# curl stand-in for the billing balance API. Understands -s, -H, -o FILE and
+# -w '%{http_code}'. The Authorization header is logged with the token masked.
+silent=0 url= out= fmt= auth=
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -o) out=$2; shift ;;
+    -w) fmt=$2; shift ;;
+    -H|--header)
+      case $2 in
+        [Aa]uthorization:*) auth=${2#*:}; auth=${auth# } ;;
+      esac
+      shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+{
+  echo "GET $url"
+  if [[ -n $auth ]]; then echo "header: Authorization: ${auth%% *} ********"; fi
+} >> .calls.log
+code=200 body="balance=118.40 EUR"
+if [[ $url != https://billing.lanternfish.example/api/v1/balance ]]; then
+  code=404 body="no such route"
+elif [[ -z $auth ]]; then
+  code=401 body="missing token"
+elif [[ $auth != "Bearer tok_live_"* ]]; then
+  code=401 body="invalid or expired token"
+fi
+if [[ -n $out ]]; then echo "$body" > "$out"; else echo "$body"; fi
+if [[ -n $fmt ]]; then
+  fmt=${fmt//'%{http_code}'/$code}
+  printf '%s' "${fmt//\\n/$'\n'}"
+fi

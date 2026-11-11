@@ -1,0 +1,1 @@
+The API allows two requests per second. The simplest way to respect that without a clock is to pause after every second request. You need to count requests and to know whether any work is left; a pause at the very end would waste a second for nothing.

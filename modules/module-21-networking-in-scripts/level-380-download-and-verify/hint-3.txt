@@ -1,0 +1,11 @@
+  tmp_file=$(mktemp); tmp_sum=$(mktemp)
+  trap 'rm -f "$tmp_file" "$tmp_sum"' EXIT
+  if ! curl -sS --fail -o "$tmp_file" "$base/$name" 2>/dev/null; then ... exit 1; fi
+  if ! curl -sS --fail -o "$tmp_sum" "$base/$name.cksum" 2>/dev/null; then ... exit 1; fi
+  actual=$(cksum < "$tmp_file")
+  expected=$(cut -d' ' -f1,2 "$tmp_sum")
+  if [[ $actual != "$expected" ]]; then ... fi
+  mv "$tmp_file" "$name"
+  echo "verified: $name"
+
+Each failure has its own message on stderr and exit 1.

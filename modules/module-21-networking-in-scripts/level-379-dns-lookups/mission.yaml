@@ -1,0 +1,64 @@
+id: 379
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: DNS Lookups
+difficulty: advanced
+xp: 220
+story: |
+  Harbour Bakery moved their website to a new server and now half of their
+  customers see the old one. That smells like DNS. Noor has a list of names
+  and wants to know, for each, which IPv4 addresses the world currently
+  gets. Typing `dig` forty times is not how anyone wants to spend a
+  Thursday.
+objective: |
+  Write solution.sh. Every argument is a hostname. For each one, ask DNS for
+  its A records with `dig +short NAME` and print
+    NAME -> ADDR1,ADDR2
+  with the addresses in the order dig returned them, joined by commas and no
+  spaces.
+
+  dig +short may also print alias lines (a CNAME target such as
+  `shop.lanternfish.example.`) before the addresses; only lines that look
+  like IPv4 addresses (four numbers separated by dots) belong in the output.
+  A name that has no addresses gives `NAME -> no answer`.
+
+  If dig itself fails (exit status other than 0) print `NAME -> lookup failed`
+  and carry on with the next name. Exit with status 1 if any name had no
+  answer or failed, otherwise 0. With no arguments print
+  `usage: solution.sh NAME...` to stderr and exit 2.
+concepts:
+  - "dig +short prints only the answers"
+  - "an empty answer is not a failed command"
+  - "filtering IPv4 lines out of mixed output"
+required_patterns:
+  - pattern: 'dig\s+\+short\b'
+    message: "Ask dig for just the answers with +short."
+test_cases:
+  - name: one name with an alias and two addresses
+    args: [www.harbourbakery.example]
+    expected_stdout: "www.harbourbakery.example -> 203.0.113.10,203.0.113.11"
+    expected_files:
+      .calls.log: |
+        dig +short www.harbourbakery.example A
+  - name: two plain names
+    args: [mail.tidewater.example, books.tidewater.example]
+    expected_stdout: |-
+      mail.tidewater.example -> 198.51.100.7
+      books.tidewater.example -> 203.0.113.44
+  - name: a name that does not exist
+    args: [shop.harbourbakery.example, mail.tidewater.example]
+    expected_stdout: |-
+      shop.harbourbakery.example -> no answer
+      mail.tidewater.example -> 198.51.100.7
+    expected_exit: 1
+  - name: resolvers unreachable
+    args: [mail.tidewater.example]
+    env:
+      FAKE_DNS: down
+    expected_stdout: "mail.tidewater.example -> lookup failed"
+    expected_exit: 1
+  - name: no names
+    args: []
+    expected_stderr: "usage: solution.sh NAME..."
+    expected_exit: 2

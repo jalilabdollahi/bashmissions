@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Records the requested pause instead of waiting, so tests stay fast.
+echo "sleep $*" >> .calls.log

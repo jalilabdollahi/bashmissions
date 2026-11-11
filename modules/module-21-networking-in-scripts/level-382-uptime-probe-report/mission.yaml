@@ -1,0 +1,117 @@
+id: 382
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Uptime Probe Report
+difficulty: expert
+xp: 300
+story: |
+  Lanternfish has outgrown "somebody refreshes the status page". Mara has
+  written down everything that should answer, websites and raw TCP services
+  alike, in one small text file, and wants a single script that probes the
+  whole list and reports. If anything is down, the script's own exit status
+  must say so, because tomorrow a cron job will read it instead of you.
+objective: |
+  Write solution.sh. Its one argument is a probe list file. Each line is one
+  of
+    http NAME URL
+    tcp NAME HOST PORT
+  Blank lines and lines starting with `#` are ignored.
+
+  Probe every entry, in file order, and print one line each:
+  - `http`: status code via `curl -s -o /dev/null -w '%{http_code}' --max-time 3`.
+    Codes 200 to 399 are up; other codes print `DOWN NAME (HTTP CODE)`;
+    code 000 (curl could not connect) prints `DOWN NAME (no connection)`.
+  - `tcp`: `nc -z -w 2 HOST PORT`. Success is up; failure prints
+    `DOWN NAME (port closed)`.
+  - any other first word: `DOWN NAME (unknown type WORD)`.
+  An entry that is up prints `UP NAME`.
+
+  At the end print `summary: U up, D down`. Exit with status 1 if D is above
+  zero, otherwise 0. No argument: print `usage: solution.sh PROBE_FILE` to
+  stderr, exit 2. A file that cannot be read: print `cannot read FILE` to
+  stderr, exit 2.
+concepts:
+  - "combining HTTP status checks and TCP port checks"
+  - "reading a config file line by line, skipping comments"
+  - "the exit status as the machine-readable result"
+required_patterns:
+  - pattern: '%\{http_code\}'
+    message: "Use curl -w '%{http_code}' to get the status code."
+  - pattern: '\bnc\b.*-[A-Za-z]*z'
+    message: "Probe TCP entries with nc -z."
+  - pattern: '\bwhile\b.*\bread\b'
+    message: "Read the probe list line by line with while read."
+test_cases:
+  - name: everything is up
+    args: [probes.txt]
+    files:
+      probes.txt: |
+        # Lanternfish public services
+        http web https://www.lanternfish.example/
+        http status https://status.lanternfish.example/health
+
+        tcp mail mail.lanternfish.example 25
+        tcp db db.lanternfish.example 5432
+    expected_stdout: |-
+      UP web
+      UP status
+      UP mail
+      UP db
+      summary: 4 up, 0 down
+  - name: a mix of up and down
+    args: [probes.txt]
+    files:
+      probes.txt: |
+        http billing https://billing.lanternfish.example/health
+        http docs https://docs.lanternfish.example/
+        http old https://old.lanternfish.example/
+        tcp submission mail.lanternfish.example 587
+        tcp mysql db.lanternfish.example 3306
+    expected_stdout: |-
+      DOWN billing (HTTP 503)
+      UP docs
+      DOWN old (HTTP 404)
+      UP submission
+      DOWN mysql (port closed)
+      summary: 2 up, 3 down
+    expected_exit: 1
+  - name: a site that does not connect
+    args: [probes.txt]
+    env:
+      FAKE_DOWN: www.lanternfish.example
+    files:
+      probes.txt: |
+        http web https://www.lanternfish.example/
+        tcp mail mail.lanternfish.example 25
+    expected_stdout: |-
+      DOWN web (no connection)
+      UP mail
+      summary: 1 up, 1 down
+    expected_exit: 1
+  - name: an unknown probe type
+    args: [probes.txt]
+    files:
+      probes.txt: |
+        # ping is not supported yet
+        ping gateway 10.0.0.1
+        http web https://www.lanternfish.example/
+    expected_stdout: |-
+      DOWN gateway (unknown type ping)
+      UP web
+      summary: 1 up, 1 down
+    expected_exit: 1
+  - name: only comments
+    args: [probes.txt]
+    files:
+      probes.txt: |
+        # nothing to do yet
+    expected_stdout: "summary: 0 up, 0 down"
+  - name: file does not exist
+    args: [nothing.txt]
+    expected_stderr: "cannot read nothing.txt"
+    expected_exit: 2
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh PROBE_FILE"
+    expected_exit: 2

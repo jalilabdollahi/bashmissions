@@ -1,0 +1,8 @@
+  json=$(curl -sS --fail "https://billing.lanternfish.example/api/v1/customers/$id") ...
+  value=$(printf '%s\n' "$json" | sed -nE 's/.*"'"$field"'": *"?([^",}]*).*/\1/p')
+  if [[ -z $value ]]; then
+    # field not found
+  fi
+  printf '%s\n' "$value"
+
+Wrap the curl call in `if ! json=$(...); then` so a 404 gives your own message, and hide curl's text with `2>/dev/null`.

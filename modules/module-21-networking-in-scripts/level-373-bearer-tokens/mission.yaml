@@ -1,0 +1,71 @@
+id: 373
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Bearer Tokens
+difficulty: advanced
+xp: 200
+story: |
+  Priya found a billing script in the team wiki with the API token pasted
+  right into it, and in the shell history, and in a chat log. She did not
+  shout, which was worse. The new rule: the token lives in the environment
+  variable LF_TOKEN, the script reads it, and nobody ever sees it in output.
+objective: |
+  Write solution.sh. It asks the billing API for the current balance:
+    GET https://billing.lanternfish.example/api/v1/balance
+  The request must carry the header `Authorization: Bearer <token>`, where
+  the token comes from the environment variable `LF_TOKEN`.
+
+  - LF_TOKEN unset or empty: print `LF_TOKEN is not set` to stderr and exit 2,
+    without contacting the server.
+  - HTTP 200: print the body as `balance: <body>` and exit 0.
+  - HTTP 401: print `billing rejected the token` to stderr and exit 1.
+  - any other code: print `unexpected HTTP <code>` to stderr and exit 1.
+
+  Find out the code with `-w '%{http_code}'` and keep the body in a temporary
+  file (`mktemp`) that you remove again. The token must never appear on
+  stdout or stderr, must not be written to any file, and must not be typed
+  into the script. Do not turn on `set -x`: it would print the token.
+concepts:
+  - "Authorization: Bearer TOKEN header"
+  - "secrets come from the environment, never from the script"
+  - "never echo, log or trace a secret"
+required_patterns:
+  - pattern: 'Authorization:\s*Bearer\s+\$\{?LF_TOKEN\}?'
+    message: "Send the header as -H \"Authorization: Bearer $LF_TOKEN\"."
+forbidden_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*x'
+    message: "set -x prints every command, token included. Leave tracing off."
+  - pattern: 'tok_'
+    message: "Do not type a token into the script; read it from LF_TOKEN."
+test_cases:
+  - name: valid token
+    args: []
+    env:
+      LF_TOKEN: tok_live_9f8e7d6c5b4a
+    expected_stdout: "balance: balance=118.40 EUR"
+    expected_files:
+      .calls.log: |
+        GET https://billing.lanternfish.example/api/v1/balance
+        header: Authorization: Bearer ********
+  - name: expired token is refused
+    args: []
+    env:
+      LF_TOKEN: tok_expired_0a1b2c3d
+    expected_stdout: ""
+    expected_stderr: "billing rejected the token"
+    expected_exit: 1
+  - name: token not set
+    args: []
+    expected_stderr: "LF_TOKEN is not set"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: token is set but empty
+    args: []
+    env:
+      LF_TOKEN: ""
+    expected_stderr: "LF_TOKEN is not set"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null

@@ -1,0 +1,13 @@
+  host=$1
+  shift
+  closed=0
+  for port in "$@"; do
+    if nc -z -w 2 "$host" "$port"; then
+      # open
+    else
+      # closed, count it
+    fi
+  done
+  # exit 1 when closed > 0
+
+Check for at least two arguments first. `shift` removes the host so "$@" is just the ports.

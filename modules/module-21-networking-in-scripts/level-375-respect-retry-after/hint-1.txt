@@ -1,0 +1,1 @@
+When a server says "slow down" it usually also says for how long, and that information is in the response headers, not in the body. So you need a way to keep the headers of a response, find one line in them, and turn it into a number to wait. Remember that a loop with a counter is the safe way to retry: it must end.

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Writes the requested pause into the call log and returns immediately.
+echo "sleep $*" >> .calls.log

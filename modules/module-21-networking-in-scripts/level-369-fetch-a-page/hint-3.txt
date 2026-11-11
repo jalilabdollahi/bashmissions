@@ -1,0 +1,9 @@
+Skeleton:
+
+  name=$1
+  if ! text=$(curl -s "https://status.lanternfish.example/components/$name.txt"); then
+    # message to stderr, exit 1
+  fi
+  printf '%s: %s\n' "$name" "${text:-...}"
+
+Check the argument count first, and do not forget the usage message goes to stderr.

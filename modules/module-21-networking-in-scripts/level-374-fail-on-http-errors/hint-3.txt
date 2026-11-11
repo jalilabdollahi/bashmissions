@@ -1,0 +1,10 @@
+  id=$1
+  rc=0
+  plan=$(curl -sS --fail "https://billing.lanternfish.example/api/v1/customers/$id/plan") || rc=$?
+  case $rc in
+    0)  printf 'plan: %s\n' "$plan" ;;
+    22) ... ; exit 3 ;;
+    *)  ... "curl exit $rc" ...; exit 4 ;;
+  esac
+
+Both failure messages go to stderr.

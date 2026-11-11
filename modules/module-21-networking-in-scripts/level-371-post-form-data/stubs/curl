@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# curl stand-in for billing's signup form. Knows -s, -d (repeatable) and -X.
+# A request with -d defaults to POST, as in the real tool. Every call is logged.
+silent=0 method= url= data= have_data=0
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -X) method=$2; shift ;;
+    -d|--data)
+      if (( have_data )); then data+="&$2"; else data=$2; fi
+      have_data=1; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+[[ -n $method ]] || { (( have_data )) && method=POST || method=GET; }
+{
+  echo "$method $url"
+  (( have_data )) && echo "data: $data"
+} >> .calls.log
+(( silent )) || printf '  %% Total    %% Received %% Xferd  Average Speed   Time    Time     Time  Current\n' >&2
+if [[ $url != https://billing.lanternfish.example/signup ]]; then
+  echo "404 not found"; exit 0
+fi
+if [[ $method != POST ]]; then
+  echo "405 this endpoint only accepts POST"; exit 0
+fi
+email= plan=
+IFS='&' read -ra pairs <<< "$data"
+for pair in "${pairs[@]}"; do
+  case $pair in
+    email=*) email=${pair#email=} ;;
+    plan=*)  plan=${pair#plan=} ;;
+  esac
+done
+if [[ -z $email || -z $plan ]]; then
+  echo "error: email and plan are required"
+elif [[ $plan != basic && $plan != pro && $plan != team ]]; then
+  echo "error: unknown plan '$plan'"
+else
+  echo "ok: $email subscribed to $plan"
+fi

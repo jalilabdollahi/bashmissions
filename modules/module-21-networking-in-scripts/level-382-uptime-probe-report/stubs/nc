@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# netcat stand-in: nc -z [-w SECONDS] HOST PORT, exit 0 when the port is listed
+# in fixtures/open-ports.txt, 1 otherwise.
+zero=0 timeout= host= port=
+while (( $# )); do
+  case $1 in
+    -z) zero=1 ;;
+    -w) timeout=$2; shift ;;
+    -*) echo "nc: invalid option -- ${1#-}" >&2; echo "usage: nc [-z] [-w timeout] host port" >&2; exit 2 ;;
+    *) if [[ -z $host ]]; then host=$1; else port=$1; fi ;;
+  esac
+  shift
+done
+if (( ! zero )) || [[ -z $host || -z $port ]]; then
+  echo "usage: nc -z [-w timeout] host port   (this stand-in only scans)" >&2
+  exit 2
+fi
+grep -qx "$host $port" fixtures/open-ports.txt

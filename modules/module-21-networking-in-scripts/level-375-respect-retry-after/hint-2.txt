@@ -1,0 +1,5 @@
+`curl -D FILE` writes the response headers to FILE. Header lines look like `Name: value` and, on the wire, end with a carriage return, so strip it with `tr -d '\r'`. Names are case-insensitive, so search with `grep -i`:
+
+  grep -i '^content-length:' "$hdr" | tr -d '\r' | cut -d: -f2 | tr -d ' '
+
+Test that you got a whole number: `[[ $n =~ ^[0-9]+$ ]]`. A counted loop: `for (( i = 1; i <= 4; i++ )); do ... done`. Under `set -o pipefail`, a grep that finds nothing fails the pipeline; add `|| true` after it.

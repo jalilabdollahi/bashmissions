@@ -1,0 +1,1 @@
+A browser asks a web server for a page and shows it. `curl` does the same thing from the command line and writes the page to stdout, so you can capture it like the output of any other command. Think about what should happen if the server cannot be reached at all.

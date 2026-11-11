@@ -1,0 +1,76 @@
+id: 372
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: JSON with Headers
+difficulty: intermediate
+xp: 180
+story: |
+  Gus wants invoices raised from a spreadsheet instead of by hand, and Theo
+  has finally put up a JSON endpoint for it. Theo's message was short:
+  "Send JSON, and tell it that it is JSON. It is picky." The first attempt,
+  a plain `-d`, came back with "unsupported media type".
+objective: |
+  Write solution.sh with two arguments: a CUSTOMER name (it may contain
+  spaces) and an AMOUNT.
+
+  Create an invoice with a POST to
+    https://billing.lanternfish.example/api/v1/invoices
+  whose body is exactly this JSON, on one line:
+    {"customer":"CUSTOMER","amount":AMOUNT}
+  (the amount is a bare number, the customer is a string in double quotes).
+  Send the one header `Content-Type: application/json` with -H.
+
+  Print the server's reply as `reply: <body>`.
+
+  Validate first and never contact the server on bad input:
+  - not exactly two arguments: print `usage: solution.sh CUSTOMER AMOUNT`
+    to stderr, exit 2
+  - AMOUNT not a number like 120 or 49.90: print `amount must be a number`
+    to stderr, exit 2
+  - CUSTOMER containing a double quote: print
+    `customer must not contain double quotes` to stderr, exit 2
+concepts:
+  - "-H 'Name: value' adds a request header"
+  - "Content-Type: application/json tells the server how to read the body"
+  - "build JSON text carefully: quotes around strings, none around numbers"
+required_patterns:
+  - pattern: '(^|\s)(-H|--header)\b'
+    message: "Add the header with curl's -H option."
+  - pattern: '(^|\s)(-d|--data)\b'
+    message: "Send the JSON body with -d."
+test_cases:
+  - name: a customer with a space in the name
+    args: ["Tidewater Books", "120"]
+    expected_stdout: |-
+      reply: {"status":"created","invoice":{"customer":"Tidewater Books","amount":120}}
+    expected_files:
+      .calls.log: |
+        POST https://billing.lanternfish.example/api/v1/invoices
+        header: Content-Type: application/json
+        body: {"customer":"Tidewater Books","amount":120}
+  - name: decimal amount
+    args: ["Harbour Bakery", "49.90"]
+    expected_stdout: |-
+      reply: {"status":"created","invoice":{"customer":"Harbour Bakery","amount":49.90}}
+    expected_files:
+      .calls.log: |
+        POST https://billing.lanternfish.example/api/v1/invoices
+        header: Content-Type: application/json
+        body: {"customer":"Harbour Bakery","amount":49.90}
+  - name: amount is not a number
+    args: ["Gull and Anchor Pub", "twelve"]
+    expected_stderr: "amount must be a number"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: a quote in the name would break the JSON
+    args: ['The "Anchor" Pub', "30"]
+    expected_stderr: "customer must not contain double quotes"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: one argument only
+    args: ["Tidewater Books"]
+    expected_stderr: "usage: solution.sh CUSTOMER AMOUNT"
+    expected_exit: 2

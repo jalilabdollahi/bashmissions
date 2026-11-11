@@ -1,0 +1,1 @@
+APIs often identify you with a token sent in a header. The token must reach the server but nowhere else: not the screen, not a log, not the script file. So the script reads it from the environment and only ever places it inside the header. Think about what the script should do when the variable is missing.

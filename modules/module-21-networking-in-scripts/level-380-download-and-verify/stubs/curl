@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# curl stand-in for the release server: -s, -S, -f/--fail, -L and -o FILE.
+# Serves fixtures/http/<host><path>.body ; a missing file is a 404.
+silent=0 show_err=0 fail=0 out= url=
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -S|--show-error) show_err=1 ;;
+    -sS|-Ss) silent=1; show_err=1 ;;
+    -f|--fail) fail=1 ;;
+    -L|--location) ;;
+    -o) out=$2; shift ;;
+    -O) echo "curl: -O is not available in this workspace; use -o FILE" >&2; exit 2 ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+echo "GET $url" >> .calls.log
+rest=${url#*://}; host=${rest%%/*}; path=/${rest#*/}
+file=fixtures/http/$host$path.body
+if [[ -f $file ]]; then
+  if [[ -n $out ]]; then cat "$file" > "$out"; else cat "$file"; fi
+elif (( fail )); then
+  if (( ! silent || show_err )); then echo "curl: (22) The requested URL returned error: 404" >&2; fi
+  exit 22
+else
+  if [[ -n $out ]]; then echo "404 Not Found" > "$out"; else echo "404 Not Found"; fi
+fi

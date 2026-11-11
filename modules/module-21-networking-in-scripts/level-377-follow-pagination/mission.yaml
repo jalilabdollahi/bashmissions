@@ -1,0 +1,90 @@
+id: 377
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Follow Pagination
+difficulty: advanced
+xp: 240
+story: |
+  Gus wants every invoice a customer has ever received, and the API hands
+  them out two at a time. Each reply ends with a little pointer: "next:
+  page 2", "next: page 3", and finally "next: null". The first version of
+  the export only fetched page one, and Gus noticed when Tidewater Books
+  had exactly two invoices in total.
+objective: |
+  Write solution.sh. It takes a customer ID. The invoice list lives at
+    https://billing.lanternfish.example/api/v1/customers/ID/invoices
+  and is served in pages: start with `?page=1`. Each reply is one line of
+  JSON such as
+    {"items":["inv-2001","inv-2002"],"next":"?page=2"}
+  where `next` is either a query string to append to the same URL or the
+  word `null` (no quotes) on the last page.
+
+  Fetch every page in order (use `-sS --fail`) and print each invoice id on
+  its own line as soon as its page arrives. At the end print `total: N`.
+  A customer without invoices gives `total: 0`.
+
+  - a page that fails: print `failed to fetch <url>` to stderr and exit 1
+    (the ids already printed stay printed, and no total follows)
+  - more than 10 pages: print `too many pages (limit 10)` to stderr and
+    exit 1, so a server that points to itself cannot trap you
+  - no argument: print `usage: solution.sh CUSTOMER_ID` to stderr, exit 2
+concepts:
+  - "loop until the server says there is no next page"
+  - "a page limit protects against endless loops"
+  - "accumulate a count across requests"
+required_patterns:
+  - pattern: '\b(while|until)\b'
+    message: "Loop with while/until until the server stops giving a next page."
+test_cases:
+  - name: three pages
+    args: [c-204]
+    expected_stdout: |-
+      inv-2001
+      inv-2002
+      inv-2003
+      inv-2004
+      inv-2005
+      total: 5
+    expected_files:
+      .calls.log: |
+        GET https://billing.lanternfish.example/api/v1/customers/c-204/invoices?page=1
+        GET https://billing.lanternfish.example/api/v1/customers/c-204/invoices?page=2
+        GET https://billing.lanternfish.example/api/v1/customers/c-204/invoices?page=3
+  - name: a single page
+    args: [c-310]
+    expected_stdout: |-
+      inv-3001
+      inv-3002
+      inv-3003
+      total: 3
+    expected_files:
+      .calls.log: |
+        GET https://billing.lanternfish.example/api/v1/customers/c-310/invoices?page=1
+  - name: no invoices at all
+    args: [c-101]
+    expected_stdout: "total: 0"
+  - name: second page fails
+    args: [c-505]
+    expected_stdout: "inv-5001"
+    expected_stderr: "failed to fetch https://billing.lanternfish.example/api/v1/customers/c-505/invoices?page=2"
+    expected_exit: 1
+  - name: a server that points to itself
+    args: [c-666]
+    expected_stdout: |-
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+      inv-6001
+    expected_stderr: "too many pages (limit 10)"
+    expected_exit: 1
+  - name: no customer id
+    args: []
+    expected_stderr: "usage: solution.sh CUSTOMER_ID"
+    expected_exit: 2

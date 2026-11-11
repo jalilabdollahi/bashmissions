@@ -1,0 +1,55 @@
+id: 369
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Fetch a Page
+difficulty: intermediate
+xp: 150
+story: |
+  Customers keep asking Noor whether "the internet at Lanternfish is broken".
+  Mara has put a tiny status page online: one text file per component. Noor
+  wants a script she can run in one line, so she stops opening a browser
+  for every ticket. It is your first script that speaks HTTP.
+objective: |
+  Write solution.sh. It takes one argument, a component name such as `web`.
+  Fetch the page
+    https://status.lanternfish.example/components/NAME.txt
+  with curl and print one line:
+    NAME: <the page text>
+  If the page is empty, print `NAME: no data` instead.
+
+  Run curl in silent mode so no progress meter reaches stderr. If curl itself
+  fails (the host cannot be reached), print `status page unreachable` to
+  stderr and exit with status 1. With no argument (or more than one), print
+  `usage: solution.sh NAME` to stderr and exit with status 2.
+concepts:
+  - "curl URL prints the response body on stdout"
+  - "curl -s switches the progress meter off"
+  - "curl's own exit status tells you the request could not be made"
+required_patterns:
+  - pattern: 'curl\s+(-[A-Za-z]*s[A-Za-z]*|--silent)\b'
+    message: "Run curl with -s so the progress meter stays quiet."
+test_cases:
+  - name: a healthy component
+    args: [web]
+    expected_stdout: "web: operational"
+    expected_stderr: ""
+  - name: a degraded component
+    args: [mail]
+    expected_stdout: "mail: degraded: outgoing queue delayed 12 min"
+    expected_stderr: ""
+  - name: an empty page
+    args: [dns]
+    expected_stdout: "dns: no data"
+    expected_stderr: ""
+  - name: the network is down
+    args: [web]
+    env:
+      FAKE_NET: down
+    expected_stdout: ""
+    expected_stderr: "status page unreachable"
+    expected_exit: 1
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh NAME"
+    expected_exit: 2

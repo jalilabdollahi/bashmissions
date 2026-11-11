@@ -1,0 +1,1 @@
+Each reply carries two things: some items and a pointer to what comes next. That is a loop: fetch, process, read the pointer, and go again until the pointer says "nothing more". Plan for two ways it can go wrong: a page that fails, and a server that keeps pointing you at a page you have already seen.

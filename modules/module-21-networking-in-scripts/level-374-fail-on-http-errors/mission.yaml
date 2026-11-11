@@ -1,0 +1,74 @@
+id: 374
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Fail on HTTP Errors
+difficulty: advanced
+xp: 200
+story: |
+  Last Tuesday a nightly script "looked up" a customer plan, got a 500 error
+  page back, and happily copied the words "internal error: database is busy"
+  into the invoice run. Gus found out when a bakery was billed for a plan
+  called "internal". Mara's verdict: curl must be taught to fail when the
+  server says no.
+objective: |
+  Write solution.sh. It takes one argument, a customer ID such as `c-204`,
+  and looks up the plan with
+    https://billing.lanternfish.example/api/v1/customers/ID/plan
+  On success print `plan: <body>` and exit 0.
+
+  Make curl treat HTTP errors (status 400 and above) as failures with
+  `--fail`, and keep error messages visible with `-S` (so use `-sS`
+  together with `--fail`). Then tell the two kinds of failure apart by
+  curl's exit status:
+  - exit 22 (the server answered with an error): print
+    `plan lookup failed: the API refused the request` to stderr, exit with 3
+  - any other curl failure (no DNS, connection refused, ...): print
+    `plan lookup failed: network error (curl exit N)` to stderr, where N is
+    curl's exit status, and exit with 4
+
+  Nothing may be printed on stdout when the lookup fails. With no argument,
+  print `usage: solution.sh CUSTOMER_ID` to stderr and exit 2.
+concepts:
+  - "--fail turns HTTP >= 400 into curl exit status 22"
+  - "-sS: silent, but still show errors"
+  - "different curl exit statuses mean different problems"
+required_patterns:
+  - pattern: '(--fail\b|\s-[A-Za-z]*f[A-Za-z]*\s)'
+    message: "Add --fail so HTTP errors become curl failures."
+test_cases:
+  - name: a known customer
+    args: [c-204]
+    expected_stdout: "plan: pro"
+  - name: the customer does not exist (404)
+    args: [c-777]
+    expected_stdout: ""
+    expected_stderr: "plan lookup failed: the API refused the request"
+    stderr_comparison: contains
+    expected_exit: 3
+  - name: the server is broken (500)
+    args: [c-500]
+    expected_stdout: ""
+    expected_stderr: "plan lookup failed: the API refused the request"
+    stderr_comparison: contains
+    expected_exit: 3
+  - name: connection refused
+    args: [c-204]
+    env:
+      FAKE_NET: refused
+    expected_stdout: ""
+    expected_stderr: "plan lookup failed: network error (curl exit 7)"
+    stderr_comparison: contains
+    expected_exit: 4
+  - name: name resolution fails
+    args: [c-204]
+    env:
+      FAKE_NET: down
+    expected_stdout: ""
+    expected_stderr: "plan lookup failed: network error (curl exit 6)"
+    stderr_comparison: contains
+    expected_exit: 4
+  - name: no customer id
+    args: []
+    expected_stderr: "usage: solution.sh CUSTOMER_ID"
+    expected_exit: 2

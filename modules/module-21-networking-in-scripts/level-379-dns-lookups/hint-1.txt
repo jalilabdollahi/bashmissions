@@ -1,0 +1,1 @@
+`dig` talks to the DNS and normally prints a long report meant for humans. There is an option that cuts it down to just the answers, one per line. Be careful with two special cases: an alias (CNAME) appears among the answers, and a name that does not exist produces no output at all instead of an error.

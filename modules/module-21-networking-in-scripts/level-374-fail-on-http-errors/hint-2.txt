@@ -1,0 +1,11 @@
+`--fail` makes curl exit with status 22 when the HTTP code is 400 or more, and print no body. `-s` hides curl's own error messages, `-S` brings them back when combined with `-s`:
+
+  data=$(curl -sS --fail "$url")
+
+To read the exit status without `set -e` killing the script, use `|| rc=$?`:
+
+  rc=0
+  data=$(curl -sS --fail "$url") || rc=$?
+  case $rc in 0) ... ;; 22) ... ;; *) ... ;; esac
+
+Other useful statuses: 6 = could not resolve host, 7 = connection refused, 28 = timeout.

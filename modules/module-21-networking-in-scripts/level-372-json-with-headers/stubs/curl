@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# curl stand-in for the invoice API: -s, -H (repeatable), -d, -X.
+# Logs the method, URL, every header that goes out and the body.
+silent=0 method= url= body= have_body=0
+headers=()
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -X) method=$2; shift ;;
+    -H|--header) headers+=("$2"); shift ;;
+    -d|--data) body=$2; have_body=1; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+[[ -n $method ]] || { (( have_body )) && method=POST || method=GET; }
+ctype=
+for h in "${headers[@]+"${headers[@]}"}"; do
+  case ${h%%:*} in
+    [Cc]ontent-[Tt]ype) ctype=${h#*:}; ctype=${ctype# } ;;
+  esac
+done
+# Like the real tool: a body without an explicit Content-Type is sent as a form.
+if (( have_body )) && [[ -z $ctype ]]; then
+  ctype=application/x-www-form-urlencoded
+  headers+=("Content-Type: $ctype")
+fi
+{
+  echo "$method $url"
+  for h in "${headers[@]+"${headers[@]}"}"; do echo "header: $h"; done
+  (( have_body )) && echo "body: $body"
+} >> .calls.log
+(( silent )) || printf '  %% Total    %% Received %% Xferd  Average Speed   Time    Time     Time  Current\n' >&2
+if [[ $url != https://billing.lanternfish.example/api/v1/invoices || $method != POST ]]; then
+  echo '{"error":"no such route"}'; exit 0
+fi
+if [[ $ctype != application/json ]]; then
+  echo '{"error":"unsupported media type"}'; exit 0
+fi
+quotes=${body//[^\"]/}
+if [[ $body != \{*\} || $body != *'"customer":"'* || $body != *'"amount":'* || $(( ${#quotes} % 2 )) -ne 0 ]]; then
+  echo '{"error":"invalid json"}'; exit 0
+fi
+echo "{\"status\":\"created\",\"invoice\":$body}"

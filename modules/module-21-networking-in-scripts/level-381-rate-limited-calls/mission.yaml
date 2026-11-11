@@ -1,0 +1,92 @@
+id: 381
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Rate-Limited Calls
+difficulty: advanced
+xp: 240
+story: |
+  The usage API is generous and strict at once: it will answer any number
+  of requests, but it bans clients that send more than two per second.
+  Gus wants the monthly bandwidth figure for every customer on a long list,
+  and Theo, who has seen what a bare loop does to that API, refuses to run
+  it unless it is paced.
+objective: |
+  Write solution.sh. Every argument is a customer ID. For each ID, in order,
+  fetch
+    https://billing.lanternfish.example/api/v1/customers/ID/usage
+  (with `-sS --fail`) and print
+    ID: <body>
+  or, when the request fails, `ID: unavailable`. A failed request counts
+  as a request and does not stop the run.
+
+  Keep to at most two requests per second: after every second request run
+  `sleep 1`, but only if more IDs are still waiting (no pointless sleep at
+  the end). The workspace `sleep` only records the pause, so tests are
+  fast.
+
+  With no arguments print `usage: solution.sh CUSTOMER_ID...` to stderr and
+  exit 2.
+concepts:
+  - "spacing requests with sleep"
+  - "a request counter and modulo decide when to pause"
+  - "no sleep after the last request"
+required_patterns:
+  - pattern: '\bsleep\s+1\b'
+    message: "Pause with sleep 1 between each pair of requests."
+  - pattern: '%|-eq|-ge|==|\(\(.*\)\)'
+    message: "Keep a request counter and test it to know when a pause is due."
+test_cases:
+  - name: five customers, two per second
+    args: [c-204, c-310, c-415, c-512, c-620]
+    expected_stdout: |-
+      c-204: 12.4 GB
+      c-310: 3.1 GB
+      c-415: 88.0 GB
+      c-512: 0.0 GB
+      c-620: 5.6 GB
+    expected_files:
+      .calls.log: |
+        GET c-204/usage
+        GET c-310/usage
+        sleep 1
+        GET c-415/usage
+        GET c-512/usage
+        sleep 1
+        GET c-620/usage
+  - name: an even number gets no trailing sleep
+    args: [c-204, c-310, c-415, c-512]
+    expected_stdout: |-
+      c-204: 12.4 GB
+      c-310: 3.1 GB
+      c-415: 88.0 GB
+      c-512: 0.0 GB
+    expected_files:
+      .calls.log: |
+        GET c-204/usage
+        GET c-310/usage
+        sleep 1
+        GET c-415/usage
+        GET c-512/usage
+  - name: a failing request still counts toward the pace
+    args: [c-999, c-204, c-620]
+    expected_stdout: |-
+      c-999: unavailable
+      c-204: 12.4 GB
+      c-620: 5.6 GB
+    expected_files:
+      .calls.log: |
+        GET c-999/usage
+        GET c-204/usage
+        sleep 1
+        GET c-620/usage
+  - name: a single customer needs no pause
+    args: [c-415]
+    expected_stdout: "c-415: 88.0 GB"
+    expected_files:
+      .calls.log: |
+        GET c-415/usage
+  - name: no customers
+    args: []
+    expected_stderr: "usage: solution.sh CUSTOMER_ID..."
+    expected_exit: 2

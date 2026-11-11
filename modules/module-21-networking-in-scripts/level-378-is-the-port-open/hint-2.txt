@@ -1,0 +1,5 @@
+`nc -z host port` connects without sending data. Exit status 0 means a connection was accepted, anything else means it was not. Add a time limit with `-w SECONDS`, otherwise a firewalled port can leave you waiting a long time:
+
+  if nc -z -w 3 db.example 5432; then echo up; else echo down; fi
+
+Using the command directly as the `if` condition is the idiomatic way to test an exit status, and it is safe under `set -e`.

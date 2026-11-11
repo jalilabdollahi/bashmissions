@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# curl stand-in for probing: -s, -o FILE, -w '%{http_code}' and --max-time N.
+# Hosts listed in FAKE_DOWN time out: curl prints 000 and exits 28.
+silent=0 out= fmt= url=
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -o) out=$2; shift ;;
+    -w) fmt=$2; shift ;;
+    -m|--max-time) shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+rest=${url#*://}; host=${rest%%/*}; path=/${rest#*/}
+[[ $path == / ]] && path=/index
+code=000 rc=0
+case " ${FAKE_DOWN:-} " in
+  *" $host "*) rc=28; (( silent )) || echo "curl: (28) Connection timed out" >&2 ;;
+  *)
+    base=fixtures/http/$host$path
+    code=404
+    [[ -f $base.body ]] && code=200
+    [[ -f $base.status ]] && code=$(tr -d '[:space:]' < "$base.status")
+    if [[ -n $out ]]; then
+      if [[ -f $base.body ]]; then cat "$base.body" > "$out"; else : > "$out"; fi
+    elif [[ -f $base.body ]]; then
+      cat "$base.body"
+    fi ;;
+esac
+if [[ -n $fmt ]]; then
+  fmt=${fmt//'%{http_code}'/$code}
+  printf '%s' "${fmt//\\n/$'\n'}"
+fi
+exit $rc

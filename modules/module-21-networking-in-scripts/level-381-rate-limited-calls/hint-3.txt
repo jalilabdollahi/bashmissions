@@ -1,0 +1,16 @@
+  sent=0
+  remaining=$#
+  for id in "$@"; do
+    if body=$(curl -sS --fail "https://billing.lanternfish.example/api/v1/customers/$id/usage" 2>/dev/null); then
+      echo "$id: $body"
+    else
+      echo "$id: unavailable"
+    fi
+    sent=$((sent + 1))
+    remaining=$((remaining - 1))
+    if (( sent % 2 == 0 && remaining > 0 )); then
+      # pause
+    fi
+  done
+
+Fill in the pause. The usage check for an empty argument list comes first.
