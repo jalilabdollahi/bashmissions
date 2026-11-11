@@ -1,0 +1,1 @@
+The looping code is the same every time; only the action per item changes. So give the loop function the action as an argument. In Bash, a function's name is simply a word, so it can travel in a variable and be run later.

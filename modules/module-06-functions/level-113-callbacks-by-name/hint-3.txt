@@ -1,0 +1,15 @@
+  apply_each() {
+    local callback=$1 item
+    shift
+    for item in "$@"; do
+      "$callback" "$item"
+    done
+  }
+
+Main part: save the mode, shift it off (only when there was one: $# -gt 0), then
+
+  case $mode in
+    upper)  apply_each upper_line "$@" ;;
+    ...
+    *)      ... >&2; exit 2 ;;
+  esac

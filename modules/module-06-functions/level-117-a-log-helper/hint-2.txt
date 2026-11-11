@@ -1,0 +1,11 @@
+A `case` statement can translate names to numbers, and `$(...)` can capture the answer of a small helper:
+
+  rank() {
+    case $1 in
+      LOW)  echo 0 ;;
+      HIGH) echo 1 ;;
+    esac
+  }
+  if (( $(rank "$level") >= $(rank "$limit") )); then ...
+
+The threshold comes from the environment with a default: `${LOG_LEVEL:-INFO}`. Remember `>&2` to print on stderr.

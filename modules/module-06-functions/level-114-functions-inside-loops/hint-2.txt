@@ -1,0 +1,8 @@
+`read -r` splits a line into variables by whitespace; with two names the first word goes in the first and the rest in the second. Calling a function in the loop body is just a normal command:
+
+  while read -r name qty; do
+    [[ -z $name ]] && continue
+    show_item "$name" "$qty"
+  done
+
+`continue` jumps to the next line of input. Do the label test inside the function with if/elif.

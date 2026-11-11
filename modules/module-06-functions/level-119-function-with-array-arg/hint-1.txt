@@ -1,1 +1,0 @@
-`local -n ref=name` creates a nameref to another variable.

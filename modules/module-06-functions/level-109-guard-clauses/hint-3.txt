@@ -1,0 +1,11 @@
+  set_quota() {
+    local name=${1:-} gb=${2:-}
+    if [[ -z $name ]]; then ... return 2; fi
+    if ! [[ $gb =~ ^[0-9]+$ ]]; then ... return 3; fi
+    if (( gb < 1 || gb > 100 )); then ... return 4; fi
+    echo "quota set: $name ${gb}GB"
+  }
+  set_quota "${1:-}" "${2:-}"
+  exit $?
+
+Fill in the messages exactly as in the objective. Test the number before doing arithmetic with it.

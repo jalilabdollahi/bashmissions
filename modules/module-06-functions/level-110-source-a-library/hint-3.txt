@@ -1,0 +1,5 @@
+  source fixtures/storage.sh
+  echo "storage lib v$STORAGE_LIB_VERSION"
+  for kb in "$@"; do
+    echo "$kb KB = $(...) MB"      # call kb_to_mb with "$kb" inside $( )
+  done

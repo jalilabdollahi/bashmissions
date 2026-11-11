@@ -1,0 +1,5 @@
+`read -r a b c` splits one line of input into three variables on whitespace. To feed it a function's output, use a here-string:
+
+  read -r first second third <<< "$(three_things)"
+
+On the function side, one `printf '%s %s %s\n' "$x" "$y" "$z"` prints the packed line. Start both min and max with the first argument (`$1`) so that negative numbers work.

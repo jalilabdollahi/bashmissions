@@ -1,0 +1,1 @@
+Read fixtures/defaults.sh first. The report function does not contain the numbers or the formatting; it calls two helpers by name. If you replace those two helpers after loading the library, the report changes behaviour without being touched.

@@ -1,0 +1,1 @@
+Start by reading the library: cat fixtures/storage.sh. It is not a program to run; it is a collection of definitions. You need a way to load those definitions into your own script so that you can use them as if you had typed them there.

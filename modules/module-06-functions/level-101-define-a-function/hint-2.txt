@@ -1,1 +1,0 @@
-Put the `echo` inside the function body.

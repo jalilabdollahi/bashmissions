@@ -1,1 +1,0 @@
-A subshell keeps the short-lived helper scoped away from the rest of the script.

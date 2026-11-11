@@ -1,0 +1,8 @@
+A recursive function has two parts: a base case that answers directly, and a step that calls itself with a smaller input and builds on the answer. The answer travels back via stdout, so capture it:
+
+  countdown_sum() {
+    if (( $1 == 0 )); then echo 0; return; fi
+    local rest
+    rest=$(countdown_sum $(( $1 - 1 )))
+    echo $(( $1 + rest ))
+  }

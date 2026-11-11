@@ -1,0 +1,1 @@
+Do not write one long script; write five tiny tools and then three or four lines that use them. Each tool has a contract in the objective. Build and try them one at a time, starting with the ones you already wrote in earlier levels: die and log.

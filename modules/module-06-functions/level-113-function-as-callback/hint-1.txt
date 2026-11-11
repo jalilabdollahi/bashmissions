@@ -1,1 +1,0 @@
-A callback can be represented by the function name as a string.

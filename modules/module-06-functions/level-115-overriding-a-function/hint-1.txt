@@ -1,1 +1,0 @@
-A later function definition with the same name replaces the earlier one.

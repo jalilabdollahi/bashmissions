@@ -1,0 +1,9 @@
+Inside domain_for, build the slug in a pipeline and print the full address:
+
+  domain_for() {
+    local slug
+    slug=$(printf '%s' "$1" | tr 'A-Z ' 'a-z-' | tr -cd 'a-z0-9-')
+    printf '%s.lanternfish.example\n' "$slug"
+  }
+
+Then in the loop:  address=$(domain_for "$name")  followed by the echo line.

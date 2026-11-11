@@ -1,0 +1,10 @@
+If a variable holds a command name, you can run it by writing the variable where the command would be:
+
+  action=date_stamp      # name of a function you defined
+  "$action" "some arg"   # runs: date_stamp "some arg"
+
+To separate the callback from the items, take the first argument and `shift` it away:
+
+  tool=$1
+  shift
+  for x in "$@"; do ... done

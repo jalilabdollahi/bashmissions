@@ -1,0 +1,8 @@
+The smallest fix is one line at the top of make_bar. Either keep the name:
+
+  make_bar() {
+    local count=${#1}
+    bar=""
+    ...
+
+or rename the counter to n and use n in the loop. Leave `bar` alone: the main loop reads it, so it must stay global.

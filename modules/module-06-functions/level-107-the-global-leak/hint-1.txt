@@ -1,0 +1,1 @@
+Run the script by hand with two or three names and watch what the numbers do. Then ask: after make_bar runs, what is the value of count? Check which variable names appear both in the main loop and inside the function.

@@ -1,1 +1,0 @@
-Capture the recursive result before multiplying.

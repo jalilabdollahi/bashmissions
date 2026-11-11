@@ -1,0 +1,15 @@
+The function body is one test: a regular file that does NOT have size above zero.
+
+  is_empty_file() {
+    [[ -f $1 && ! -s $1 ]]
+  }
+
+  for f in "$@"; do
+    if [[ ! -e $f ]]; then
+      ...missing...
+    elif is_empty_file "$f"; then
+      ...empty...
+    else
+      ...ok...
+    fi
+  done

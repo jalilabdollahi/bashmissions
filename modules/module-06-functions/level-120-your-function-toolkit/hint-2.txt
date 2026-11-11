@@ -1,0 +1,7 @@
+Reuse what the module taught:
+  - die: shift off the code, print to stderr, exit "$code"
+  - slugify: printf '%s' "$1" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed -E 's/^-+//; s/-+$//'
+    (tr -cs squeezes every run of other characters into a single hyphen)
+  - valid_quota: a regex test for digits, then a numeric range test, joined with &&
+  - tier_for: if/elif that echoes a word, captured with $( )
+Put the helpers first, the flow last.

@@ -1,1 +1,0 @@
-The failure test expects no stdout and exit status 1.

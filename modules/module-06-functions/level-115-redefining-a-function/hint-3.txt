@@ -1,0 +1,12 @@
+  source fixtures/defaults.sh
+
+  retention_days() {
+    echo 90
+  }
+  notify() {
+    echo "[ops-desk] $*"
+  }
+
+  report "$1"
+
+Put the usage check for a missing argument before the report call.

@@ -1,1 +1,0 @@
-A non-zero function return would normally stop a `set -e` script.

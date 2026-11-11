@@ -1,0 +1,42 @@
+id: 108
+module: 6
+module_name: functions
+module_display: Functions
+title: Default Parameters
+difficulty: intermediate
+xp: 120
+story: |
+  Priya asked for a backup-policy printer for the wiki. Most customers get the
+  standard 30 days and the "standard" tier; only a few differ. She does not want
+  to type the defaults every time she calls it, and she does not want the script to
+  crash when she leaves something out.
+objective: |
+  Write solution.sh. Define a function named retention_line that takes up to two
+  arguments: DAYS (default 30) and TIER (default standard). It prints:
+    keep backups for <DAYS> days (<TIER> tier)
+  Use the ${1:-default} form so that a missing OR empty argument falls back to
+  the default. The main script simply passes everything it received on to the
+  function:  retention_line "$@"
+  This script uses set -u, so a plain $1 with no argument would be an error.
+concepts:
+  - "${1:-default} fallback for a missing argument"
+  - "empty and unset both trigger :-"
+required_patterns:
+  - pattern: '\$\{1:-[^}]+\}'
+    message: "Use ${1:-30} for the days default."
+  - pattern: '\$\{2:-[^}]+\}'
+    message: "Use ${2:-standard} for the tier default."
+  - pattern: '(^|\n)\s*(function\s+)?retention_line\s*(\(\s*\))?\s*\{'
+    message: "Define a function called retention_line."
+test_cases:
+  - name: no arguments
+    expected_stdout: "keep backups for 30 days (standard tier)"
+  - name: only days
+    args: ["90"]
+    expected_stdout: "keep backups for 90 days (standard tier)"
+  - name: days and tier
+    args: ["365", "archive"]
+    expected_stdout: "keep backups for 365 days (archive tier)"
+  - name: empty first argument keeps the default
+    args: ["", "premium"]
+    expected_stdout: "keep backups for 30 days (premium tier)"

@@ -1,0 +1,9 @@
+Write `local` in front of the name, either alone or with a value:
+
+  helper() {
+    local x=5 y
+    y=$(( x + $1 ))
+    echo "$y"
+  }
+
+When helper finishes, x and y are gone. Note: with `local x=$(cmd)` the exit status of cmd is hidden, so for command substitutions declare first and assign on the next line.

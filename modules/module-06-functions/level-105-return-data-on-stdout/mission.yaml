@@ -1,0 +1,49 @@
+id: 105
+module: 6
+module_name: functions
+module_display: Functions
+title: Return Data on stdout
+difficulty: intermediate
+xp: 120
+story: |
+  Every new customer at Lanternfish gets a web address built from their business
+  name: lowercase, spaces turned into hyphens, nothing fancy. Noor types names
+  like "Gull & Anchor Pub" into the signup form and the old script produced
+  addresses with ampersands in them. Mara wants the naming rule in one function so
+  the signup form, the invoice tool and the DNS script all agree.
+objective: |
+  Write solution.sh. Each argument is a business name. Define a function named
+  domain_for that takes one name and prints (with echo or printf) its web address
+  to stdout:
+    - convert to lowercase
+    - turn spaces into hyphens
+    - delete every character that is not a-z, 0-9 or a hyphen
+    - append .lanternfish.example
+  Example: "Harbour Bakery" gives harbour-bakery.lanternfish.example
+  The main script must capture the function's output into a variable with
+  $( ), then print one line per argument:
+    <original name> -> <address>
+  Use tr for the character work (tr 'A-Z ' 'a-z-' and tr -cd 'a-z0-9-').
+concepts:
+  - "result=$(fn args) captures what a function prints"
+  - "functions pass data back by printing it"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?domain_for\s*(\(\s*\))?\s*\{'
+    message: "Define a function called domain_for."
+  - pattern: '=\s*"?\$\(\s*domain_for\b'
+    message: "Capture the result with  var=$(domain_for \"$name\")."
+test_cases:
+  - name: two words
+    args: ["Harbour Bakery"]
+    expected_stdout: "Harbour Bakery -> harbour-bakery.lanternfish.example"
+  - name: ampersand removed
+    args: ["Gull & Anchor Pub"]
+    expected_stdout: "Gull & Anchor Pub -> gull--anchor-pub.lanternfish.example"
+  - name: several customers
+    args: ["Tidewater Books", "North Pier Dental", "Eel Street 24"]
+    expected_stdout: |-
+      Tidewater Books -> tidewater-books.lanternfish.example
+      North Pier Dental -> north-pier-dental.lanternfish.example
+      Eel Street 24 -> eel-street-24.lanternfish.example
+  - name: no customers
+    expected_stdout: ""

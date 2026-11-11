@@ -1,0 +1,9 @@
+Put the function call where you would put `[[ ... ]]`:
+
+  has_pdf() { [[ -f $1.pdf ]]; }
+
+  if has_pdf "report"; then
+    echo "found"
+  fi
+
+A function with no `return` hands back the status of its last command, so a lone `[[ ... ]]` as the body is enough. `-s file` is true if the file has size greater than zero; `-f` tests for a regular file.

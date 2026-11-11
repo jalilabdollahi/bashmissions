@@ -1,1 +1,0 @@
-Send errors to stderr with `>&2`.

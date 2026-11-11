@@ -1,0 +1,1 @@
+The loop's job is to take lines apart and keep the count. Everything about how a row looks and what the thresholds are belongs in a function the loop simply calls for each line. Fix the format in one place and every row follows.

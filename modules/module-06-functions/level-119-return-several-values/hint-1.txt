@@ -1,0 +1,1 @@
+A function can only print text, so to give back three answers it prints them together, on one line, separated by spaces. The caller then takes that line apart again into three variables. Think of it as packing and unpacking.

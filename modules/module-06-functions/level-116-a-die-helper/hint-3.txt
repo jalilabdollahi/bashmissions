@@ -1,0 +1,13 @@
+  die() {
+    local code=$1
+    shift
+    echo "error: $*" >&2
+    exit "$code"
+  }
+
+  [[ $# -ge 1 ]]   || die 2 "usage: solution.sh FILE"
+  file=$1
+  [[ -e $file ]]   || die 3 ...
+  [[ -s $file ]]   || die 4 ...
+
+For counting, awk 'END { print NR }' "$file" also handles a missing final newline.

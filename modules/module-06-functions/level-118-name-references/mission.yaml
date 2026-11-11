@@ -1,0 +1,57 @@
+id: 118
+module: 6
+module_name: functions
+module_display: Functions
+title: Name References
+difficulty: advanced
+xp: 170
+story: |
+  Noor pastes hostnames from customer tickets into a file, one per line, and the
+  same host shows up three times because three customers complained. Ollie needs the
+  list without repeats, in order of first appearance. He also wants the dedupe rule
+  in a helper that can fill any list you name, because the invoice script needs
+  the same thing for customer codes. A helper that modifies the caller's list needs
+  a way to be told which list.
+objective: |
+  Write solution.sh. It reads one word per line from stdin. Blank lines are ignored.
+  An array is a variable holding a list: seen=() makes an empty one, seen+=("x")
+  appends, ${#seen[@]} is its length and "${seen[@]}" expands to every element.
+  Define a function named add_unique that takes the NAME of an array variable and a
+  VALUE. Inside, use a name reference  local -n  to work on that array, and append
+  VALUE only if it is not already in the array (exact, case-sensitive match).
+  Then the main script does:
+      seen=()
+      for each non-blank line: add_unique seen "$line"
+      print   unique: <number of elements>
+      print   one line per element, in order:   - <element>
+  Remember: pass the NAME (seen), not its value ($seen).
+concepts:
+  - "local -n ref=$1 makes ref an alias for the variable whose name is in $1"
+  - "a function can fill the caller's array"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?add_unique\s*(\(\s*\))?\s*\{'
+    message: "Define a function called add_unique."
+  - pattern: '\blocal\s+-n\b'
+    message: "Use a name reference: local -n list=$1"
+test_cases:
+  - name: duplicates removed
+    stdin: "dory\neel\ndory\nmarlin\neel\n"
+    expected_stdout: |-
+      unique: 3
+      - dory
+      - eel
+      - marlin
+  - name: case matters and blanks are skipped
+    stdin: "Dory\n\ndory\n\nDory\n"
+    expected_stdout: |-
+      unique: 2
+      - Dory
+      - dory
+  - name: no input
+    stdin: ""
+    expected_stdout: "unique: 0"
+  - name: all the same
+    stdin: "grouper\ngrouper\ngrouper\n"
+    expected_stdout: |-
+      unique: 1
+      - grouper

@@ -1,0 +1,6 @@
+`source file` reads the file and executes it in the current shell, so any functions and variables it defines stay available afterwards. The dot command does the same:
+
+  source ./helpers.sh
+  . ./helpers.sh
+
+The path is relative to where the script is run, which here is the folder that contains solution.sh and fixtures/.

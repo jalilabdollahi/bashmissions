@@ -1,0 +1,1 @@
+The function needs to know which server and which number to talk about. Just like a script, a function can be given arguments when you call it, and it can read them inside its body.

@@ -1,1 +1,0 @@
-Call the function even when the script receives no arguments.

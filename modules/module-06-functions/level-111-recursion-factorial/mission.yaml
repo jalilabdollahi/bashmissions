@@ -1,0 +1,52 @@
+id: 111
+module: 6
+module_name: functions
+module_display: Functions
+title: "Recursion: Factorial"
+difficulty: advanced
+xp: 150
+story: |
+  The backup rota at Lanternfish rotates five servers, and Ollie wonders how many
+  different orders there are. "Five times four times three times two times one,"
+  says Mara, "which mathematicians call 5 factorial. Don't multiply it out by
+  hand, teach the shell." The trick is a function that solves a smaller version of
+  its own problem.
+objective: |
+  Write solution.sh. It takes one argument N (a whole number, 0 or more) and prints
+  N factorial: the product N * (N-1) * ... * 1, with 0 factorial being 1.
+  Define a function named factorial that works recursively: it calls itself with
+  N-1 and multiplies the result by N, stopping at the base case (N is 0 or 1).
+  The function prints its result; the main script prints it with
+  factorial "$1" (no extra text).
+  Errors, both to stderr with exit status 1:
+    no argument, or not a whole number:  usage: solution.sh N
+  Use only whole numbers up to 20 (larger values do not fit in Bash arithmetic).
+concepts:
+  - "a function may call itself"
+  - "base case stops the recursion"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?factorial\s*(\(\s*\))?\s*\{[\s\S]*\bfactorial\s+["$(0-9]'
+    message: "The function factorial must call itself with a smaller number."
+test_cases:
+  - name: five
+    args: ["5"]
+    expected_stdout: "120"
+  - name: zero is one
+    args: ["0"]
+    expected_stdout: "1"
+  - name: one
+    args: ["1"]
+    expected_stdout: "1"
+  - name: ten
+    args: ["10"]
+    expected_stdout: "3628800"
+  - name: largest that fits
+    args: ["20"]
+    expected_stdout: "2432902008176640000"
+  - name: not a number
+    args: [five]
+    expected_stderr: "usage: solution.sh N"
+    expected_exit: 1
+  - name: missing argument
+    expected_stderr: "usage: solution.sh N"
+    expected_exit: 1

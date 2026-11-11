@@ -1,1 +1,0 @@
-`local` limits a variable to the function where it is declared.

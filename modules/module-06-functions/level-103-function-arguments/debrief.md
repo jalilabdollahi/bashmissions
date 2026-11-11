@@ -1,7 +1,0 @@
-# Function Arguments
-
-This mission practices `$1 $2` inside function from Module 6 of the curriculum.
-
-Functions make Bash scripts easier to structure, reuse, and test. The important habits are keeping function inputs explicit, using `return` only for status codes, printing string data when it needs to be captured, and keeping variable scope under control with `local`.
-
-The reference solution keeps the function pattern visible so the level's focus stays clear.

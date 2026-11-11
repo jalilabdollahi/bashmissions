@@ -1,0 +1,56 @@
+id: 106
+module: 6
+module_name: functions
+module_display: Functions
+title: Local Variables
+difficulty: intermediate
+xp: 120
+story: |
+  Gus wants a tiny invoice calculator for hosting add-ons: quantity times unit
+  price, plus a flat 10 percent harbour tax. Ollie wrote the first version, and
+  Theo noticed it leaves its scratch variables lying around where later code can
+  trip over them. "Housekeeping," says Mara. "A function should clean up after
+  itself."
+objective: |
+  Write solution.sh. It takes two arguments: QTY and PRICE (whole numbers).
+  Define a function named line_total that takes QTY and PRICE and prints the
+  line  line total: <amount>  where the amount includes 10 percent tax:
+      subtotal = QTY * PRICE
+      tax      = subtotal / 10         (integer division)
+      total    = subtotal + tax
+  All three working variables (subtotal, tax, total) must be declared with local
+  so they disappear when the function ends.
+  The main script calls line_total directly (no $( ) around it), then prints:
+    leaked total: <value of $total outside the function, or the word none>
+  This line proves the variable did not escape; use ${total:-none}.
+concepts:
+  - "local var keeps a variable inside the function"
+  - "variables without local are global"
+required_patterns:
+  - pattern: '\blocal\s+'
+    message: "Declare the function's working variables with local."
+  - pattern: '(^|\n)\s*(function\s+)?line_total\s*(\(\s*\))?\s*\{'
+    message: "Define a function called line_total."
+  - pattern: '\$\{total:-none\}'
+    message: "Print the outside value with ${total:-none}."
+test_cases:
+  - name: small order
+    args: ["3", "50"]
+    expected_stdout: |-
+      line total: 165
+      leaked total: none
+  - name: round numbers
+    args: ["10", "100"]
+    expected_stdout: |-
+      line total: 1100
+      leaked total: none
+  - name: tax rounds down
+    args: ["1", "19"]
+    expected_stdout: |-
+      line total: 20
+      leaked total: none
+  - name: zero quantity
+    args: ["0", "80"]
+    expected_stdout: |-
+      line total: 0
+      leaked total: none

@@ -1,1 +1,0 @@
-Pass the array name, not the expanded array contents.

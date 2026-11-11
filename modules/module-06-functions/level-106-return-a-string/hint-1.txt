@@ -1,1 +1,0 @@
-Bash functions cannot return strings with `return`; they print them.

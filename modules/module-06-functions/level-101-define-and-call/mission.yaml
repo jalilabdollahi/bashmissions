@@ -1,0 +1,55 @@
+id: 101
+module: 6
+module_name: functions
+module_display: Functions
+title: Define and Call
+difficulty: intermediate
+xp: 100
+story: |
+  Gus prints the nightly report straight from a shell script, and every section
+  starts with the same ruler line of equals signs. Last week Theo pasted the
+  ruler into the script five times and then changed one of them to 20 characters
+  "by accident". Mara looks over your shoulder: "If you copy-paste it twice,
+  make it a function."
+objective: |
+  Write solution.sh so that it defines a function named rule that prints a
+  line of exactly 24 equals signs, then uses it three times. The report must
+  look like this (TITLE comes from the environment variable $TITLE):
+    ========================
+    Nightly report: <TITLE>
+    ========================
+    All servers reporting.
+    ========================
+  The function is defined once, with name() { ...; }, and called by writing its
+  name as if it were a command. Define it before the first call.
+concepts:
+  - "name() { commands; } defines a function"
+  - "a function is run by typing its name"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?rule\s*(\(\s*\))?\s*\{'
+    message: "Define a function called rule, for example: rule() { ... }"
+test_cases:
+  - name: harbour bakery report
+    env: {TITLE: "Harbour Bakery"}
+    expected_stdout: |-
+      ========================
+      Nightly report: Harbour Bakery
+      ========================
+      All servers reporting.
+      ========================
+  - name: another title
+    env: {TITLE: "Tidewater Books"}
+    expected_stdout: |-
+      ========================
+      Nightly report: Tidewater Books
+      ========================
+      All servers reporting.
+      ========================
+  - name: title with symbols
+    env: {TITLE: "Gull & Anchor Pub (2nd site)"}
+    expected_stdout: |-
+      ========================
+      Nightly report: Gull & Anchor Pub (2nd site)
+      ========================
+      All servers reporting.
+      ========================

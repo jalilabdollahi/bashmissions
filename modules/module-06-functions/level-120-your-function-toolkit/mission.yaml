@@ -1,0 +1,96 @@
+id: 120
+module: 6
+module_name: functions
+module_display: Functions
+title: Your Function Toolkit
+difficulty: advanced
+xp: 220
+story: |
+  Friday afternoon, and Mara hands you the last job of the month: the new-customer
+  provisioning script. It has to take a business name and a disk quota, refuse nonsense,
+  explain what it is doing, and print the customer's home directory. "Five small
+  functions," she says, "each doing one thing. If any of them is longer than ten
+  lines, you are doing it wrong." This is where everything from the module comes together.
+objective: |
+  Write solution.sh, called as  ./solution.sh NAME GB  (NAME may contain spaces if
+  quoted). Build it from these five functions, with exactly these names:
+    die CODE MESSAGE...   prints "error: <message>" to stderr, exits with CODE
+    log LEVEL MESSAGE...  prints "[LEVEL] message" to stderr
+    slugify TEXT          prints TEXT lowercased, with every run of characters other
+                          than a-z and 0-9 replaced by one hyphen, and no hyphen at
+                          either end (use tr -cs and sed -E)
+    valid_quota VALUE     succeeds (status 0) only if VALUE is a whole number from 1 to 500
+    tier_for GB           prints small (up to 50), medium (up to 200) or large
+  The script then:
+    1. fewer than 2 arguments:        die 2 "usage: solution.sh NAME GB"
+    2. slug = $(slugify "$1"); empty:  die 3 "name has no usable characters"
+    3. if ! valid_quota "$2":          die 4 "invalid quota: <GB>"
+    4. log INFO "provisioning <slug>"
+       log INFO "quota <GB>GB, tier <tier>"        (tier from $(tier_for ...))
+    5. print to stdout:  home=/srv/customers/<slug>
+  Use set -euo pipefail. Check validity with valid_quota directly in an if.
+concepts:
+  - "small single-purpose functions combined into one script"
+  - "status, stdout and stderr each used for what they are best at"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?die\s*(\(\s*\))?\s*\{'
+    message: "Define die."
+  - pattern: '(^|\n)\s*(function\s+)?log\s*(\(\s*\))?\s*\{'
+    message: "Define log."
+  - pattern: '(^|\n)\s*(function\s+)?slugify\s*(\(\s*\))?\s*\{'
+    message: "Define slugify."
+  - pattern: '(^|\n)\s*(function\s+)?valid_quota\s*(\(\s*\))?\s*\{'
+    message: "Define valid_quota."
+  - pattern: '(^|\n)\s*(function\s+)?tier_for\s*(\(\s*\))?\s*\{'
+    message: "Define tier_for."
+  - pattern: '\bif\s+!\s*valid_quota\b'
+    message: "Use the function directly as a condition: if ! valid_quota \"$2\"; then"
+  - pattern: '\$\(\s*slugify\b'
+    message: "Capture the slug with $(slugify \"$1\")."
+  - pattern: '\$\(\s*tier_for\b'
+    message: "Capture the tier with $(tier_for \"$2\")."
+test_cases:
+  - name: small customer
+    args: ["Harbour Bakery", "40"]
+    expected_stdout: "home=/srv/customers/harbour-bakery"
+    expected_stderr: |-
+      [INFO] provisioning harbour-bakery
+      [INFO] quota 40GB, tier small
+  - name: punctuation collapses
+    args: ["Gull & Anchor Pub", "120"]
+    expected_stdout: "home=/srv/customers/gull-anchor-pub"
+    expected_stderr: |-
+      [INFO] provisioning gull-anchor-pub
+      [INFO] quota 120GB, tier medium
+  - name: untidy name and large tier
+    args: ["  North Pier  Dental!! ", "500"]
+    expected_stdout: "home=/srv/customers/north-pier-dental"
+    expected_stderr: |-
+      [INFO] provisioning north-pier-dental
+      [INFO] quota 500GB, tier large
+  - name: tier boundary
+    args: ["Eel St", "50"]
+    expected_stdout: "home=/srv/customers/eel-st"
+    expected_stderr: |-
+      [INFO] provisioning eel-st
+      [INFO] quota 50GB, tier small
+  - name: missing quota
+    args: ["Tidewater Books"]
+    expected_stderr: "error: usage: solution.sh NAME GB"
+    expected_exit: 2
+  - name: name with nothing usable
+    args: ["!!!", "10"]
+    expected_stderr: "error: name has no usable characters"
+    expected_exit: 3
+  - name: quota not a number
+    args: ["Tidewater Books", "lots"]
+    expected_stderr: "error: invalid quota: lots"
+    expected_exit: 4
+  - name: quota too large
+    args: ["Tidewater Books", "501"]
+    expected_stderr: "error: invalid quota: 501"
+    expected_exit: 4
+  - name: quota zero
+    args: ["Tidewater Books", "0"]
+    expected_stderr: "error: invalid quota: 0"
+    expected_exit: 4

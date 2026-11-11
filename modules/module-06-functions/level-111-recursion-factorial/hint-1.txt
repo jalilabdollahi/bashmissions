@@ -1,0 +1,1 @@
+Notice that 5! is just 5 times 4!, and 4! is 4 times 3!, and so on. Every factorial is a slightly smaller factorial in disguise. A function can call itself to solve the smaller one, as long as there is a point where it stops.

@@ -1,1 +1,0 @@
-The test uses a regex because the date changes.

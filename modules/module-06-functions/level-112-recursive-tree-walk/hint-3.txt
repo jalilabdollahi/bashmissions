@@ -1,1 +1,0 @@
-Strip the base directory prefix before printing.

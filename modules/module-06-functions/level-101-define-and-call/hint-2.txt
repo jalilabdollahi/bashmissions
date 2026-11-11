@@ -1,0 +1,7 @@
+A function is defined with a name, empty parentheses and a body in braces:
+
+  say_hi() {
+    echo "hi there"
+  }
+
+After that, writing  say_hi  on a line of its own runs the body. The definition has to appear earlier in the file than the first call.

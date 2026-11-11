@@ -1,0 +1,12 @@
+  [[ $# -ge 2 ]] || die 2 "usage: solution.sh NAME GB"
+  slug=$(slugify "$1")
+  [[ -n $slug ]] || die 3 "..."
+  if ! valid_quota "$2"; then
+    die 4 "invalid quota: $2"
+  fi
+  tier=$(tier_for "$2")
+  log INFO "..."
+  log INFO "..."
+  echo "home=/srv/customers/$slug"
+
+and valid_quota can be a single line:  [[ $1 =~ ^[0-9]+$ ]] && (( $1 >= 1 && $1 <= 500 ))
