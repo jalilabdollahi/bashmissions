@@ -6,9 +6,9 @@
 
 > **Learn Bash by writing scripts, testing them, and understanding why they work.**
 
-BashMissions is a fully local terminal game for learning Bash scripting through short, progressive coding challenges. Each level gives you a real scripting task, a sandboxed workspace, automated tests, hints, a walkthrough, a reference answer, and a post-level lesson.
+BashMissions is a fully local terminal game for learning Bash scripting through short, progressive coding challenges. You play the newest operations engineer at **Lanternfish Hosting**; every level is a real task from a colleague, with a sandboxed workspace, automated tests, hints, a walkthrough, a reference answer, and a post-level lesson.
 
-**500 progressive levels across 26 modules — beginner to expert.**  
+**500 progressive levels across 26 modules — from "I know a few commands" to "I automate production".**  
 No cloud. No accounts. No external services required.
 
 **Design and implementation by: Jalil Abdollahi**  
@@ -18,23 +18,31 @@ Email: `jalil.abdollahi@gmail.com`
 
 ## Features
 
-- **500 levels** across 26 modules covering Bash fundamentals through advanced scripting
+- **500 hand-written levels** across 26 modules, each teaching one new idea inside a small story
 - **Rich terminal UI** with compact progress views, mission briefings, and clean code display
 - **Progressive hints** that escalate into a walkthrough and reference answer when needed
 - **Per-level teaching content** including `debrief.md`, `common-mistakes.md`, and `solution-guide.md`
 - **General Bash handbook** via `guide bash` for beginners who need a broader explanation
 - **XP and progression system** with auto-save and module certificates
 - **Sandboxed workspace** under `/tmp/bashmissions/...` so learners can experiment safely
+- **Isolated test runs**: every test case runs in a fresh directory with a clean environment, so results are reproducible
+- **Works on macOS and Linux** (fake `curl`, `git`, `docker`, ... stubs keep network/system levels offline and deterministic)
 - **Watch mode** that reruns validation automatically while you work
 - **Reset support** for both the current level and full game progress
 - **Local-first** workflow with no browser dependency required
 
 ---
 
+## Requirements
+
+- Python 3.9+
+- **Bash 4 or newer** for running missions. macOS ships Bash 3.2, so install a modern one first:
+  `brew install bash` (the game finds it automatically; or set `BASHMISSIONS_BASH=/path/to/bash`)
+
 ## Quick Start
 
 ```bash
-cd /home/fatemeh/Desktop/AI-Projects/bashmissions
+cd bashmissions
 ./install.sh
 ./play.sh
 ```
@@ -132,19 +140,23 @@ bashmissions/
 ├── install.sh              # One-time setup
 ├── BASH_GUIDE.md           # General Bash handbook for beginners
 ├── requirements.txt        # Python dependencies
-├── progress.json           # Saved progress
+├── CURRICULUM.md           # The 500-level plan
+├── docs/AUTHORING.md       # Contract for writing a level
+├── progress.json           # Saved progress (local, not in git)
 ├── levels.json             # Built level registry
 ├── engine/
 │   ├── engine.py           # Main game loop
 │   ├── ui.py               # Rich terminal UI
 │   ├── player.py           # Progress persistence
-│   ├── runner.py           # Sandbox setup and test execution
-│   ├── validator.py        # Output validation helpers
+│   ├── runner.py           # Sandbox setup and isolated test execution
+│   ├── bashfind.py         # Locates a Bash 4+ interpreter
+│   ├── safety.py           # Blocks obviously destructive scripts
+│   ├── validator.py        # Output comparison helpers
 │   └── certificate.py      # Module certificate rendering
 ├── scripts/
-│   ├── generate_curriculum.py
-│   ├── generate_levels.py
-│   └── ...
+│   ├── generate_levels.py  # Builds levels.json from mission.yaml files
+│   ├── validate_levels.py  # Quality gate for every level
+│   └── test-linux.sh       # Runs the validator in a Debian container
 └── modules/
     ├── module-01-.../
     │   └── level-001-.../
@@ -156,23 +168,26 @@ bashmissions/
     │       ├── common-mistakes.md
     │       ├── solution-guide.md
     │       ├── answer.sh
-    │       ├── solution.sh
-    │       └── fixtures/
+    │       ├── solution.sh     # starter given to the player
+    │       ├── fixtures/       # optional input files
+    │       └── stubs/          # optional fake commands (curl, git, ...)
     └── ...
 ```
 
 ---
 
-## Regenerating Content
+## Writing and Checking Levels
 
-The level content is generated from the curriculum and scripts:
+Levels are written by hand following [docs/AUTHORING.md](docs/AUTHORING.md). After editing:
 
 ```bash
-python3 scripts/generate_curriculum.py
-python3 scripts/generate_levels.py
+.venv/bin/python scripts/validate_levels.py --module 7   # or --level 131, or --all
+scripts/test-linux.sh --module 7 --no-uniqueness         # same checks on Linux (Docker)
+.venv/bin/python scripts/generate_levels.py              # rebuild levels.json
 ```
 
-If you change the curriculum or generator logic, rerun both.
+The validator runs each reference answer (must pass), each starter script (must fail),
+checks portability rules, and flags levels whose texts or answers are too similar.
 
 ---
 
