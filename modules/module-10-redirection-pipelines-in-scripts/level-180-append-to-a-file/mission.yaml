@@ -1,0 +1,67 @@
+id: 180
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Append to a File
+difficulty: beginner
+xp: 100
+story: |
+  Priya wants an audit trail: every time someone touches a production box, one
+  line goes into `audit.log`. Yesterday Theo's script "logged" by overwriting
+  the file, so the whole week of history vanished and nobody noticed until the
+  audit. This time the log has to grow.
+objective: |
+  Write solution.sh that takes any number of arguments, each one an event
+  description (for example "restarted nginx on eel").
+
+  For every argument, add one line to `audit.log` in the current directory:
+
+    [audit] <event>
+
+  Lines that are already in audit.log must stay, and the new lines must come
+  after them, in argument order. If audit.log does not exist yet it must be
+  created. With no arguments, do nothing and leave the file alone.
+  Print nothing on the screen.
+concepts:
+  - ">> appends to a file"
+  - "creating a file on first append"
+required_patterns:
+  - pattern: '>>\s*"?audit\.log'
+    message: "Append to audit.log with >> so older lines survive."
+forbidden_patterns:
+  - pattern: '[^>&0-9]>\s*"?audit\.log'
+    message: "A single > would wipe the history. Use >>."
+test_cases:
+  - name: appends after existing history
+    args: ["restarted nginx on eel", "rotated keys on dory"]
+    files:
+      audit.log: |
+        [audit] logged in to anchovy
+    expected_stdout: ""
+    expected_files:
+      audit.log: |-
+        [audit] logged in to anchovy
+        [audit] restarted nginx on eel
+        [audit] rotated keys on dory
+  - name: creates the file on first use
+    args: ["opened firewall port 8443"]
+    expected_files:
+      audit.log: "[audit] opened firewall port 8443"
+  - name: no arguments leaves the log alone
+    args: []
+    files:
+      audit.log: |-
+        [audit] line one
+        [audit] line two
+    expected_files:
+      audit.log: |-
+        [audit] line one
+        [audit] line two
+  - name: one event with odd characters
+    args: ["deleted *.tmp in /var/cache; ok?"]
+    files:
+      audit.log: "[audit] start\n"
+    expected_files:
+      audit.log: |-
+        [audit] start
+        [audit] deleted *.tmp in /var/cache; ok?

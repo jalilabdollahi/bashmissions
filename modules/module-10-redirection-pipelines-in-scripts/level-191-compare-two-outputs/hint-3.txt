@@ -1,0 +1,3 @@
+  if diff <(pkg-list "$host_a" | sort) <(pkg-list "$host_b" | sort); then
+    echo "hosts match"
+  fi

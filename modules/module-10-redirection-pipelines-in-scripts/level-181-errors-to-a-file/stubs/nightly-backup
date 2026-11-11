@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake nightly-backup for BashMissions.
+# Progress goes to stdout, warnings to stderr. BACKUP_WARNINGS=N (default 0)
+# controls how many warnings it emits.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: nightly-backup SITE" >&2
+  exit 2
+fi
+site=$1
+echo "backup of $site started"
+n=${BACKUP_WARNINGS:-0}
+for ((i = 1; i <= n; i++)); do
+  echo "warning: $site: skipped locked file #$i" >&2
+done
+echo "backup of $site finished, $((12 - n)) files copied"

@@ -1,0 +1,67 @@
+id: 182
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Both Streams, One File
+difficulty: beginner
+xp: 110
+story: |
+  Priya's certificate watcher prints "checking..." on one channel and "expires
+  in 6 days!" on the other. When she reads the history she wants the story in
+  the order it happened, not two files she has to interleave by hand. One
+  file, everything in it, in order.
+objective: |
+  Write solution.sh that takes one argument, a DOMAIN, and runs
+  `cert-check DOMAIN`.
+
+  Put everything the tool prints, both stdout and stderr, into the single
+  file `cert.log`, in the order the lines were produced. Replace any old
+  content. Nothing should reach the screen from the tool.
+
+  After the tool has finished, print one line to stdout:
+
+    saved N lines
+
+  where N is the number of lines in cert.log.
+concepts:
+  - "&> sends stdout and stderr to the same file"
+required_patterns:
+  - pattern: '&>\s*"?cert\.log'
+    message: "Use &> to send both streams to cert.log."
+forbidden_patterns:
+  - pattern: '2>&1'
+    message: "The one-token shortcut &> is the lesson here; 2>&1 comes next level."
+test_cases:
+  - name: healthy certificate
+    args: [harbourbakery.example]
+    expected_stdout: "saved 3 lines"
+    expected_stderr: ""
+    expected_files:
+      cert.log: |-
+        checking harbourbakery.example
+        certificate for harbourbakery.example is valid
+        done: harbourbakery.example
+  - name: warning lands in order
+    args: [northpier.old]
+    expected_stdout: "saved 3 lines"
+    expected_stderr: ""
+    expected_files:
+      cert.log: |-
+        checking northpier.old
+        warning: certificate for northpier.old expires in 6 days
+        done: northpier.old
+  - name: previous log is replaced
+    args: [tidewater.example]
+    files:
+      cert.log: |
+        one
+        two
+        three
+        four
+        five
+    expected_stdout: "saved 3 lines"
+    expected_files:
+      cert.log: |-
+        checking tidewater.example
+        certificate for tidewater.example is valid
+        done: tidewater.example

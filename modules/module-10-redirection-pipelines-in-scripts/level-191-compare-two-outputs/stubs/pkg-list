@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake pkg-list for BashMissions: pretends to ask a server for its installed
+# packages. Reads the list from hosts/<HOST>.pkgs in the current directory.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: pkg-list HOST" >&2
+  exit 2
+fi
+if [[ ! -r hosts/$1.pkgs ]]; then
+  echo "pkg-list: unknown host $1" >&2
+  exit 3
+fi
+cat "hosts/$1.pkgs"

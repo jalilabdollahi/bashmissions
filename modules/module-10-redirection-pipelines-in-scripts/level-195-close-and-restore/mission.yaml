@@ -1,0 +1,77 @@
+id: 195
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Close and Restore
+difficulty: advanced
+xp: 170
+story: |
+  The site builder prints a screenful for every build, and Theo's wrapper
+  script scrolls it all past the on-call phone. The wrapper itself has just
+  two things to say: "started" and "finished". Mara's idea: point the script's
+  own stdout at a log file for the noisy part, then put it back. "Just
+  remember where the screen was," she says, "or you'll never see anything again."
+objective: |
+  Write solution.sh that takes one argument, a SITE name.
+
+  1. Print `build started: SITE` to the screen (stdout).
+  2. Redirect the script's own standard output to the file `build.log` for
+     the rest of the noisy part: first write the line `site=SITE` into the
+     log with `echo`, then run `compile-site SITE`. Neither of them may
+     reach the screen. Do NOT put a `>` on those two commands: change stdout
+     for the whole script with `exec`.
+  3. Restore stdout to the screen (save it before you redirect, restore it
+     afterwards, and close your saved copy).
+  4. Print `build finished: <N> lines in build.log` to the screen, where N
+     is the number of lines in build.log.
+concepts:
+  - "exec 4>&1 saves where stdout points"
+  - "exec >file redirects the script's stdout; exec 1>&4 4>&- restores it"
+required_patterns:
+  - pattern: 'exec\s+[3-9]>&1'
+    message: "Save the screen first: exec 4>&1."
+  - pattern: 'exec\s+>\s*"?build\.log'
+    message: "Redirect the script's stdout with exec > build.log."
+  - pattern: 'exec\s+1?>&[3-9]'
+    message: "Restore stdout from your saved copy: exec 1>&4."
+forbidden_patterns:
+  - pattern: 'compile-site[^\n]*>'
+    message: "Do not redirect the command itself; change stdout with exec."
+test_cases:
+  - name: normal build
+    args: [harbourbakery]
+    expected_stdout: |-
+      build started: harbourbakery
+      build finished: 4 lines in build.log
+    expected_stderr: ""
+    expected_files:
+      build.log: |-
+        site=harbourbakery
+        [1/3] reading templates for harbourbakery
+        [2/3] optimising 13 images
+        [3/3] writing sitemap.xml for harbourbakery
+  - name: another site and an old log
+    args: [pub]
+    files:
+      build.log: |
+        junk
+        junk
+        junk
+        junk
+        junk
+        junk
+    expected_stdout: |-
+      build started: pub
+      build finished: 4 lines in build.log
+    expected_files:
+      build.log: |-
+        site=pub
+        [1/3] reading templates for pub
+        [2/3] optimising 3 images
+        [3/3] writing sitemap.xml for pub
+  - name: stdout really comes back
+    args: [northpier-dental]
+    expected_stdout: |-
+      build started: northpier-dental
+      build finished: 4 lines in build.log
+    expected_stderr: ""

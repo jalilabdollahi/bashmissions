@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fake cert-check for BashMissions. Writes to both stdout and stderr, in order.
+# Domains ending in ".old" are "expiring" and trigger a warning.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: cert-check DOMAIN" >&2
+  exit 2
+fi
+echo "checking $1"
+if [[ $1 == *.old ]]; then
+  echo "warning: certificate for $1 expires in 6 days" >&2
+else
+  echo "certificate for $1 is valid"
+fi
+echo "done: $1"

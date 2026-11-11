@@ -1,0 +1,1 @@
+Instead of redirecting every command to the file by name (and reopening it each time), you can open the file once and give the open file a number. Any later command can then write "to number 3".

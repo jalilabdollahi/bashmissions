@@ -1,0 +1,5 @@
+Bash has `&>`: it sends stdout and stderr to the same file (and truncates it, like `>`). Generic example:
+
+  scan-ports eel &> scan.log
+
+To count lines without the padding macOS adds, wrap `wc -l < file` in `$(( ... ))`.

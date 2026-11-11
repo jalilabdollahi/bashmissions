@@ -1,0 +1,1 @@
+You need the output to go to two places at once: the screen and a file. Redirection can only pick one. There is a command made for the "copy" job that sits inside a pipeline.

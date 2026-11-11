@@ -1,0 +1,7 @@
+  fetch-logs | scrub-pii | ship-lines
+  status=("${PIPESTATUS[@]}")
+  echo "fetch=${status[0]} scrub=${status[1]} ship=${status[2]}"
+  names=(fetch-logs scrub-pii ship-lines)
+  for i in 0 1 2; do
+    # if status[i] is not 0: print "pipeline failed at stage $(( i + 1 )) (${names[i]})" to stderr, exit 1
+  done

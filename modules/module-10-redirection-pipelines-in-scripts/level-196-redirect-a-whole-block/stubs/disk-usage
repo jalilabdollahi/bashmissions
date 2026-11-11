@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Fake disk-usage for BashMissions. Prints "<host> /data <pct>%".
+# Hosts ending in "-full" print 97% and a warning on stderr.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: disk-usage HOST" >&2
+  exit 2
+fi
+if [[ $1 == *-full ]]; then
+  echo "$1 /data 97%"
+  echo "warning: $1: /data above 90%" >&2
+else
+  echo "$1 /data $(( ${#1} * 7 % 60 + 10 ))%"
+fi

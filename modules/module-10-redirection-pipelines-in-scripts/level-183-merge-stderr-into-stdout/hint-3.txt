@@ -1,0 +1,5 @@
+  status=0
+  sync-tool "$target" > sync.log 2>&1 || status=$?
+  echo "sync exit status: $status"
+
+The `|| status=$?` part runs only when sync-tool fails, and `$?` is then its exit code.

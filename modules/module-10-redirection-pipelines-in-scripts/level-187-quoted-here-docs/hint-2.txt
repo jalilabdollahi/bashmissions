@@ -1,0 +1,7 @@
+Put quotes around the delimiter word and the body is taken literally: no variables, no command substitution, no backslash processing.
+
+  cat <<'END'
+  total=$(( $a + $b ))
+  END
+
+You can combine it with a normal output redirection on the same line: `cat > somefile <<'END'`. The redirections are both applied to cat.

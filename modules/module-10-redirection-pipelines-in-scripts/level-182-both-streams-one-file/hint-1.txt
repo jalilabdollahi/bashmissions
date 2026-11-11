@@ -1,0 +1,1 @@
+You have already redirected the results and the errors one at a time. There is a shorthand that points both channels at the same file with one operator.

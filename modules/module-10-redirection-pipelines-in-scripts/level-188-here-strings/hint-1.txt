@@ -1,0 +1,1 @@
+`wc` and `tr` read standard input. You could produce that input with echo and a pipe, but the shell has a one-string version of the here-document that attaches a word directly to a command's input.

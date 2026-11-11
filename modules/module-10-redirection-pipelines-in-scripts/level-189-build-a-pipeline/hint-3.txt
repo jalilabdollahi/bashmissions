@@ -1,0 +1,5 @@
+  top=$( { grep -E '" 404 ' "$log" || true; } \
+    | cut -d' ' -f1 | sort | uniq -c | sort -rn | head -n 3 \
+    | awk '{ print $2 ": " $1 }' )
+
+Then print it, or print "no 404 responses" if $top is empty (`[[ -z $top ]]`). Put the file check on top. The `|| true` keeps `set -o pipefail` from failing when grep finds nothing.

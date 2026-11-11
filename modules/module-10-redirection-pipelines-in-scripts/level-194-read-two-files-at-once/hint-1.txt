@@ -1,0 +1,1 @@
+A `while read` loop already consumes one file through its standard input. A second file needs a second input channel that stays open while the loop runs, and a way to ask "give me one line from that channel".

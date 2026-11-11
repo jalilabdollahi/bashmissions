@@ -1,0 +1,5 @@
+Your script needs one line after the assignment:
+
+  tide-report "$host" > report.txt
+
+Run it twice with different hosts and look at report.txt to see that the second run replaced the first.

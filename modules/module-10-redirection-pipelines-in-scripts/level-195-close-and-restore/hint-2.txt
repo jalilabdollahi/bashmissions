@@ -1,0 +1,8 @@
+`exec` with no command changes the shell itself. The save-and-restore recipe:
+
+  exec 4>&1          # fd 4 now also points where stdout points (the screen)
+  exec > file.log    # stdout goes to the file
+  ...noisy commands...
+  exec 1>&4 4>&-     # stdout points at the screen again; fd 4 is closed
+
+Remember the left-to-right order you met earlier.

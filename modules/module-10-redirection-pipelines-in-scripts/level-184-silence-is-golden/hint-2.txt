@@ -1,0 +1,7 @@
+The file is `/dev/null`. Redirect stdout into it and then make stderr follow:
+
+  noisy-command > /dev/null 2>&1
+
+An `if` tests a command's exit status directly, so you can use the silenced command as the condition:
+
+  if noisy-command > /dev/null 2>&1; then ...

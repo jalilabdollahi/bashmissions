@@ -1,0 +1,1 @@
+Programs have two output channels: one for results and one for complaints. A plain `>` only grabs the first. The shell lets you grab the second one separately, so the complaints can be filed while the results still show up.

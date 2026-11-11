@@ -1,0 +1,7 @@
+Skeleton:
+
+  for event in "$@"; do
+    printf '[audit] %s\n' "$event" >> audit.log
+  done
+
+With zero arguments the loop body never runs, so the file is never even opened: exactly what the "no arguments" test wants.

@@ -1,0 +1,5 @@
+`>>` appends. If the file is missing, it is created. A generic example:
+
+  echo "disk check done" >> ops-notes.txt
+
+Use a `for` loop over "$@" so that each argument becomes its own line, and `printf '%s\n'` so odd characters in the text are printed as they are.

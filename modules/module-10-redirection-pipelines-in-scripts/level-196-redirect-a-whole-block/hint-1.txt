@@ -1,0 +1,1 @@
+Instead of putting a redirection on every command, bash lets you wrap several commands into one group and redirect the group. The files are opened once, up front, for everything inside.

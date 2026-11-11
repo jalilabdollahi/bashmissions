@@ -1,0 +1,1 @@
+So far you moved output away from the screen. Input has a direction too: by default a program reads from your keyboard, but the shell can connect a file there instead.

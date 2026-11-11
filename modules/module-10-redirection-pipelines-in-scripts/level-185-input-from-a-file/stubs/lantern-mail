@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Fake lantern-mail for BashMissions: reads the message body from STDIN only.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: lantern-mail RECIPIENT   (message body on stdin)" >&2
+  exit 2
+fi
+lines=0
+chars=0
+first=""
+while IFS= read -r line; do
+  [[ $lines -eq 0 ]] && first=$line
+  lines=$((lines + 1))
+  chars=$((chars + ${#line} + 1))
+done
+echo "to: $1"
+echo "body: $lines lines, $chars bytes"
+echo "first line: ${first:-<empty>}"

@@ -1,0 +1,6 @@
+  cat > "cron-$job.sh" <<'EOF'
+  ...the four literal lines, starting at column 1...
+  EOF
+  echo "wrote cron-$job.sh"
+
+The closing EOF must be alone on its line.

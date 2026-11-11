@@ -1,0 +1,76 @@
+id: 192
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Keep a Copy with tee
+difficulty: advanced
+xp: 150
+story: |
+  Theo deploys while watching the terminal; Mara reviews the log the next
+  morning. Currently he does one or the other, never both, because `> log`
+  hides the screen and a plain run leaves no record. "Plumbers have a T-fitting
+  for this," Mara says. "Water goes on to the tap AND into the bucket."
+objective: |
+  Write solution.sh that takes one argument, a SITE, and runs
+  `deploy-tool SITE`.
+
+  Every line the tool prints (stdout and stderr together) must be shown on
+  stdout AND appended to the file `deploy.log` (existing lines stay).
+  The script must exit with the same status as deploy-tool did.
+  Use `tee` for the copy and `set -o pipefail` so the pipeline reports
+  the tool's failure.
+concepts:
+  - "tee -a copies a stream to a file and passes it on"
+  - "pipefail propagates a failing stage"
+required_patterns:
+  - pattern: '\btee\s+(-a|--append)\b'
+    message: "Use tee -a so the existing log is appended to."
+  - pattern: '2>&1\s*\|'
+    message: "Merge stderr into the pipe with 2>&1 before the | so tee sees both streams."
+  - pattern: 'pipefail'
+    message: "Enable pipefail so a failing deploy-tool is not hidden by tee's success."
+test_cases:
+  - name: first deploy creates the log
+    args: [harbourbakery]
+    expected_stdout: |-
+      deploy harbourbakery: uploading build
+      deploy harbourbakery: warning: cache not warm
+      deploy harbourbakery: switching symlink
+    expected_stderr: ""
+    expected_files:
+      deploy.log: |-
+        deploy harbourbakery: uploading build
+        deploy harbourbakery: warning: cache not warm
+        deploy harbourbakery: switching symlink
+  - name: second deploy is appended
+    args: [tidewater]
+    files:
+      deploy.log: |
+        deploy harbourbakery: uploading build
+        deploy harbourbakery: switching symlink
+    expected_stdout: |-
+      deploy tidewater: uploading build
+      deploy tidewater: warning: cache not warm
+      deploy tidewater: switching symlink
+    expected_files:
+      deploy.log: |-
+        deploy harbourbakery: uploading build
+        deploy harbourbakery: switching symlink
+        deploy tidewater: uploading build
+        deploy tidewater: warning: cache not warm
+        deploy tidewater: switching symlink
+  - name: failing deploy keeps its exit status
+    args: [gull]
+    env:
+      DEPLOY_RC: "3"
+    expected_stdout: |-
+      deploy gull: uploading build
+      deploy gull: warning: cache not warm
+      deploy gull: switching symlink
+    expected_stderr: ""
+    expected_exit: 3
+    expected_files:
+      deploy.log: |-
+        deploy gull: uploading build
+        deploy gull: warning: cache not warm
+        deploy gull: switching symlink

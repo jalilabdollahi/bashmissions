@@ -1,0 +1,1 @@
+Bash remembers more than the last exit status. After a pipeline it keeps a list with the exit status of every stage, in order. The catch: the list is replaced after every single command you run, so you have to save it before doing anything else.

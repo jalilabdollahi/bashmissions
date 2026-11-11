@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake tide-report for BashMissions: prints a three-line health summary for one host.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: tide-report HOST" >&2
+  exit 2
+fi
+echo "host=$1"
+echo "disks=ok"
+echo "load=0.${#1}"

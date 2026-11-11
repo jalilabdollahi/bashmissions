@@ -1,0 +1,74 @@
+id: 193
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Open a File Descriptor
+difficulty: advanced
+xp: 160
+story: |
+  Gus wants a one-page status sheet every morning, but the script that
+  checks services also prints chatty progress for the person running it. Mixing
+  the two in one stream gave him a sheet full of "checking..." lines. Mara
+  suggests giving the script a private channel: open the report file once as
+  a numbered descriptor of your own, and write to it from anywhere, while
+  stdout stays free for the operator.
+objective: |
+  Write solution.sh that takes any number of SERVICE names. For each service
+  run `svc-status SERVICE` and capture what it prints (up or down).
+
+  Open the file `report.txt` ONCE, before the loop, as file descriptor 3
+  (replacing any old content), and write one line per service to it:
+
+    <service>: <state>
+
+  in argument order. Do not open report.txt inside the loop.
+  On stdout (the screen) print only the summary, after the loop:
+
+    checked <N> services, <M> down
+
+  where M counts the services whose svc-status exit status was non-zero.
+  With no arguments the report is an empty file and the summary reads
+  `checked 0 services, 0 down`.
+concepts:
+  - "exec 3>file opens a descriptor for the whole script"
+  - ">&3 writes to it"
+required_patterns:
+  - pattern: 'exec\s+3>\s*"?report\.txt'
+    message: "Open the report once with exec 3>report.txt."
+  - pattern: '>&3'
+    message: "Write each report line to descriptor 3 with >&3."
+forbidden_patterns:
+  - pattern: '(?<![3>])>>?\s*"?report\.txt'
+    message: "Only the exec line should name report.txt; the loop writes to >&3."
+test_cases:
+  - name: mixed services
+    args: [nginx, bad-mailer, postgres]
+    expected_stdout: "checked 3 services, 1 down"
+    expected_stderr: ""
+    expected_files:
+      report.txt: |-
+        nginx: up
+        bad-mailer: down
+        postgres: up
+  - name: all down, old report is replaced
+    args: [bad-a, bad-b]
+    files:
+      report.txt: |
+        stale: up
+        stale2: up
+        stale3: up
+    expected_stdout: "checked 2 services, 2 down"
+    expected_files:
+      report.txt: |-
+        bad-a: down
+        bad-b: down
+  - name: no services still creates the file
+    args: []
+    expected_stdout: "checked 0 services, 0 down"
+    expected_files:
+      report.txt: ""
+  - name: single service
+    args: [redis]
+    expected_stdout: "checked 1 services, 0 down"
+    expected_files:
+      report.txt: "redis: up"

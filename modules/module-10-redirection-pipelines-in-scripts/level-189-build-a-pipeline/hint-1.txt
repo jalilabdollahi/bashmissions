@@ -1,0 +1,1 @@
+Break the question into tiny steps, each done by a tool you already know: keep only the 404 lines, keep only the address column, group identical addresses and count them, put the biggest counts first, keep three. A pipe connects each step's output to the next step's input.

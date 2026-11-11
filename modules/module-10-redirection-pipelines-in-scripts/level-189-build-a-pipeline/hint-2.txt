@@ -1,0 +1,7 @@
+`a | b | c` runs all three at once and feeds a's stdout into b's stdin. The counting idiom is:
+
+  cut -d' ' -f1 file | sort | uniq -c | sort -rn | head -n 3
+
+`uniq -c` only merges neighbours, so `sort` must come first. Its output is "  <count> <value>" with padding, so finish with `awk '{ print $2 ": " $1 }'`.
+
+To select 404 responses without hitting a 404 in a path or size, match the status with its quote and spaces: `grep -E '" 404 '`.

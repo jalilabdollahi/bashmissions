@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Fake ship-lines for BashMissions: stores stdin in shipped.txt, reports the count, exits with SHIP_RC.
+n=0
+: > shipped.txt
+while IFS= read -r line; do
+  printf '%s\n' "$line" >> shipped.txt
+  n=$((n + 1))
+done
+echo "shipped $n lines"
+exit "${SHIP_RC:-0}"

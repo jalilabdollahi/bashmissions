@@ -1,0 +1,84 @@
+id: 190
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Who Failed in the Pipe?
+difficulty: advanced
+xp: 170
+story: |
+  Priya's nightly log shipment is a three-stage pipeline: fetch the logs,
+  scrub personal data, ship the result. Last Tuesday the job reported success
+  and the archive was empty, because the fetch had failed and the later
+  stages happily processed nothing. A pipeline's exit status is only the
+  LAST command's. Mara wants the script to say exactly which stage broke.
+objective: |
+  Write solution.sh (no arguments) that runs this pipeline:
+
+    fetch-logs | scrub-pii | ship-lines
+
+  and then reports each stage's own exit status, using the PIPESTATUS array
+  (do not use `set -o pipefail`).
+
+  After the pipeline, print one line to stdout:
+
+    fetch=<A> scrub=<B> ship=<C>
+
+  If all three are 0, exit 0. Otherwise print
+  `pipeline failed at stage <K> (<name>)` to stderr, where K is the number
+  (1, 2 or 3) of the FIRST stage with a non-zero status and <name> is
+  fetch-logs, scrub-pii or ship-lines, and exit with status 1.
+  PIPESTATUS is overwritten by the very next command, so copy it right away.
+concepts:
+  - "${PIPESTATUS[@]} holds one exit status per pipeline stage"
+  - "copy PIPESTATUS immediately"
+required_patterns:
+  - pattern: 'PIPESTATUS'
+    message: "Read the per-stage exit codes from the PIPESTATUS array."
+forbidden_patterns:
+  - pattern: 'pipefail'
+    message: "pipefail only tells you that SOMETHING failed; use PIPESTATUS."
+test_cases:
+  - name: everything works
+    expected_stdout: |-
+      shipped 4 lines
+      fetch=0 scrub=0 ship=0
+    expected_stderr: ""
+    expected_files:
+      shipped.txt: |-
+        x.x.x.x login ok user=*
+        x.x.x.x login failed user=*
+        x.x.x.x export started
+        x.x.x.x export finished
+  - name: first stage fails
+    env:
+      FETCH_RC: "7"
+    expected_stdout: |-
+      shipped 4 lines
+      fetch=7 scrub=0 ship=0
+    expected_stderr: "pipeline failed at stage 1 (fetch-logs)"
+    expected_exit: 1
+  - name: middle stage fails but the last one succeeds
+    env:
+      SCRUB_RC: "3"
+    expected_stdout: |-
+      shipped 4 lines
+      fetch=0 scrub=3 ship=0
+    expected_stderr: "pipeline failed at stage 2 (scrub-pii)"
+    expected_exit: 1
+  - name: last stage fails
+    env:
+      SHIP_RC: "5"
+    expected_stdout: |-
+      shipped 4 lines
+      fetch=0 scrub=0 ship=5
+    expected_stderr: "pipeline failed at stage 3 (ship-lines)"
+    expected_exit: 1
+  - name: two stages fail, the first one is reported
+    env:
+      SCRUB_RC: "2"
+      SHIP_RC: "9"
+    expected_stdout: |-
+      shipped 4 lines
+      fetch=0 scrub=2 ship=9
+    expected_stderr: "pipeline failed at stage 2 (scrub-pii)"
+    expected_exit: 1

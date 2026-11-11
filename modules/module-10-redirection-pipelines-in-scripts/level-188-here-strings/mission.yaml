@@ -1,0 +1,53 @@
+id: 188
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Here-Strings
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie is triaging the support queue and keeps pasting a customer's one-line
+  complaint into a little script that counts its words (long tickets go to
+  Mara) and shows it in capitals for the wallboard. His script does
+  `echo "$text" | wc -w`, and Priya points out that an `echo` just to feed a
+  command is one process too many. "The shell can hand a string to stdin
+  directly," she says.
+objective: |
+  Write solution.sh that takes one argument, a ticket TEXT (possibly empty).
+  Print two lines:
+
+    words=<N>
+    LOUD: <the text in capitals>
+
+  N is the number of words in the text (0 for an empty text). Use `wc -w`
+  and `tr` to do the work, and feed each of them the text with the
+  here-string operator `<<<`.
+  Do not use a pipe to supply the text. (`wc -w` pads its
+  result on macOS: wrap it in $(( ... )).)
+concepts:
+  - "<<< word feeds a string to stdin"
+required_patterns:
+  - pattern: '<<<'
+    message: "Feed the text to the commands with the here-string operator <<<."
+forbidden_patterns:
+  - pattern: '\|'
+    message: "No pipes: <<< replaces echo | command."
+test_cases:
+  - name: short complaint
+    args: ["the website is down"]
+    expected_stdout: |-
+      words=4
+      LOUD: THE WEBSITE IS DOWN
+  - name: extra spaces do not count as words
+    args: ["  email   bounced again"]
+    expected_stdout: |-
+      words=3
+      LOUD:   EMAIL   BOUNCED AGAIN
+  - name: empty text
+    args: [""]
+    expected_stdout: "words=0\nLOUD: "
+  - name: punctuation and digits
+    args: ["Invoice #2231 missing, please help!"]
+    expected_stdout: |-
+      words=5
+      LOUD: INVOICE #2231 MISSING, PLEASE HELP!
