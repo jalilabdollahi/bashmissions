@@ -1,1 +1,0 @@
-Use this curriculum concept: assert_eq, assert_true.

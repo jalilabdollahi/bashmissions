@@ -1,0 +1,46 @@
+id: 298
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Where Was This Defined?
+difficulty: advanced
+xp: 160
+story: |
+  Theo copied `host_label` into three scripts, then into a shared library, and
+  now the nightly report prints labels with a different format than the
+  dashboard. Which copy is running? Mara's answer is a script that can be
+  both things at once: a library other scripts can `source`, and a command you
+  can run, and that knows the name of the file it was defined in.
+objective: |
+  Write solution.sh that works both when run and when sourced. Use `set -u`.
+  Define:
+    host_label()  prints:  host: NAME (defined in FILE)
+      where NAME is its first argument and FILE is the base name (no
+      directories) of the file the function was defined in, taken from
+      `${BASH_SOURCE[0]}`.
+    main()  takes the script's arguments; with no arguments it prints
+      `usage: solution.sh HOSTNAME` to stderr and exits 2, otherwise it calls
+      `host_label "$1"`.
+  Call `main "$@"` only when the file is being run directly
+  (`${BASH_SOURCE[0]}` equals `$0`). When another script sources
+  solution.sh, nothing may run or print, and afterwards `host_label eel`
+  must work and say `defined in solution.sh`.
+concepts:
+  - "BASH_SOURCE[0] is the file the current code was read from"
+  - "$0 is the script that was started; they differ when sourced"
+  - "the main guard: run only when executed, not when sourced"
+required_patterns:
+  - pattern: 'BASH_SOURCE'
+    message: "Use ${BASH_SOURCE[0]} to learn which file the code lives in."
+test_cases:
+  - name: run directly
+    args: [anchovy]
+    expected_stdout: "host: anchovy (defined in solution.sh)"
+  - name: another host
+    args: [marlin]
+    expected_stdout: "host: marlin (defined in solution.sh)"
+  - name: no argument
+    args: []
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh HOSTNAME"
+    expected_exit: 2

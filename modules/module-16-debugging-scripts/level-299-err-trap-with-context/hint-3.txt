@@ -1,0 +1,5 @@
+Change line 2 to `set -eE`, and put this just above `publish "$1"`:
+
+  trap 'status=$?; echo "failed: $BASH_COMMAND (status $status) at line $LINENO" >&2' ERR
+
+Keep set -e: after the handler finishes, it ends the script with the same status as the failing command.

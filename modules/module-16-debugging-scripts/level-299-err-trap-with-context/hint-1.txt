@@ -1,0 +1,1 @@
+Bash can run a piece of code of your choosing at the moment any command fails. While that code runs, the shell still remembers which command failed, on which line, and what it returned. Collect those three facts into one message. One catch: functions do not inherit this behaviour unless you ask for it.

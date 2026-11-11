@@ -1,0 +1,11 @@
+  assert_eq() {
+    local expected=$1 actual=$2 label=$3
+    if [[ $actual == "$expected" ]]; then
+      echo "PASS: $label"
+      return 0
+    fi
+    echo "FAIL: ...: expected '...' but got '...'" >&2     # fill in with the three variables
+    return 1
+  }
+
+Put it above the final `assert_eq "$1" "$2" "$3"` line.

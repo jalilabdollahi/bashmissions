@@ -1,0 +1,72 @@
+id: 304
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Find the Failing Step
+difficulty: expert
+xp: 220
+story: |
+  The release plan has twenty steps and, since last night's change, it fails
+  somewhere. Each full rehearsal takes ten minutes on the scratch machine, and
+  Theo has been running them one step at a time since lunch. "You are
+  doing a linear search," Mara sighs. "Whatever breaks is in the first K steps
+  or it is not. That is a question you can halve."
+objective: |
+  Write solution.sh, called as `solution.sh STEPS_FILE`. STEPS_FILE lists the
+  release steps, one name per line, in order. The command `try-steps K`
+  rehearses the first K steps and exits 0 if they all work, non-zero if one of
+  them is broken (it also chatters on both streams: discard its output). One step is
+  broken (or none), and every rehearsal that includes it fails.
+  Find the FIRST failing step using as few rehearsals as you can (binary
+  search; a linear scan is rejected by the tests):
+    - if `try-steps N` (all N steps) passes, print `all N steps pass`
+    - otherwise print `first failing step: K NAME` where K is its position
+      (counting from 1) and NAME its name in the file
+  Both lines go to stdout, nothing to stderr, exit status 0. The number of
+  `try-steps` calls must be at most 1 + ceil(log2 N).
+concepts:
+  - "bisecting: halve the search range with each test"
+  - "an if on a command's status, output discarded"
+  - "integer midpoint arithmetic (lo + hi) / 2"
+required_patterns:
+  - pattern: 'try-steps'
+    message: "Use try-steps K to rehearse the first K steps."
+test_cases:
+  - name: broken in the middle of eight
+    args: [steps.txt]
+    env:
+      BAD_AT: "5"
+    files:
+      steps.txt: "fetch-source\nrun-lint\nbuild-image\nrun-unit-tests\nmigrate-db\nwarm-cache\nswitch-traffic\nannounce\n"
+    expected_stdout: "first failing step: 5 migrate-db"
+    expected_stderr: ""
+  - name: twenty steps, broken late
+    args: [steps.txt]
+    env:
+      BAD_AT: "17"
+    files:
+      steps.txt: "s01-checkout\ns02-deps\ns03-lint\ns04-types\ns05-unit\ns06-build\ns07-image\ns08-scan\ns09-sign\ns10-push\ns11-stage\ns12-smoke\ns13-backup\ns14-migrate\ns15-seed\ns16-canary\ns17-rollout\ns18-verify\ns19-notify\ns20-tag\n"
+    expected_stdout: "first failing step: 17 s17-rollout"
+    expected_stderr: ""
+  - name: the very first step is broken
+    args: [steps.txt]
+    env:
+      BAD_AT: "1"
+    files:
+      steps.txt: "unlock-vault\nreadconfig\nstart\nstop\n"
+    expected_stdout: "first failing step: 1 unlock-vault"
+    expected_stderr: ""
+  - name: the very last step is broken
+    args: [steps.txt]
+    env:
+      BAD_AT: "9"
+    files:
+      steps.txt: "a1\nb2\nc3\nd4\ne5\nf6\ng7\nh8\ni9\n"
+    expected_stdout: "first failing step: 9 i9"
+    expected_stderr: ""
+  - name: nothing is broken
+    args: [steps.txt]
+    files:
+      steps.txt: "pull\ncompile\npackage\nship\nverify\nclean\n"
+    expected_stdout: "all 6 steps pass"
+    expected_stderr: ""

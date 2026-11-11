@@ -1,0 +1,61 @@
+id: 303
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Fix the Off-by-One
+difficulty: expert
+xp: 200
+story: |
+  Noor is on the phone with Harbour Bakery: the backup from Tuesday is gone, and
+  the owner needs it. The retention script is supposed to keep the newest three
+  backups. Somebody counted, and it keeps only two. Theo swears he "just
+  tidied the loop". Mara hands you his version: "Don't rewrite it. Find the one
+  character that is wrong."
+objective: |
+  solution.sh (the starter) is Theo's retention script. It is called as
+  `solution.sh KEEP` and reads backup names from stdin, one per line, oldest
+  first. It must print `delete: NAME` for every backup except the newest KEEP
+  (oldest first), then `kept: N` where N is how many backups are left.
+  Example with KEEP=2 and the input a, b, c, d:
+    delete: a
+    delete: b
+    kept: 2
+  The starter has a bug: it deletes one backup too many. Find it (run it,
+  trace it with `bash -x`, print the loop numbers) and fix it with a minimal
+  change. The
+  script must also work for KEEP=0 (delete everything), for fewer backups than
+  KEEP (delete nothing) and for empty input.
+concepts:
+  - "off-by-one: < versus <= in a counting loop"
+  - "reproduce, narrow down, fix"
+  - "mapfile -t reads lines into an array"
+required_patterns:
+  - pattern: 'mapfile'
+    message: "Keep the script's structure: it reads the names with mapfile."
+test_cases:
+  - name: five backups keep three
+    args: ["3"]
+    stdin: "mon\ntue\nwed\nthu\nfri\n"
+    expected_stdout: |-
+      delete: mon
+      delete: tue
+      kept: 3
+  - name: exactly as many as KEEP
+    args: ["3"]
+    stdin: "tue\nwed\nthu\n"
+    expected_stdout: "kept: 3"
+  - name: fewer than KEEP
+    args: ["5"]
+    stdin: "wed\nthu\n"
+    expected_stdout: "kept: 2"
+  - name: keep nothing
+    args: ["0"]
+    stdin: "sat\nsun\n"
+    expected_stdout: |-
+      delete: sat
+      delete: sun
+      kept: 0
+  - name: empty input
+    args: ["2"]
+    stdin: ""
+    expected_stdout: "kept: 0"

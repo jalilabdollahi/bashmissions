@@ -1,0 +1,58 @@
+id: 295
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: A DEBUG Switch
+difficulty: advanced
+xp: 150
+story: |
+  The port-reservation script is quiet in production, and that is how Priya wants
+  it. But when a customer's site lands on the wrong port, Theo needs to see the
+  numbers behind the answer without editing the file on a live server. "Add a
+  switch," Mara says. "Silent by default, chatty when asked."
+objective: |
+  Write solution.sh that takes a SERVER name and a SITES count and reserves two
+  ports per site, starting at 8000. Use `set -euo pipefail`. Steps:
+    first=8000
+    last=$(( first + 2 * $2 - 1 ))
+    echo "$1 uses ports $first-$last"
+  Define a function `debug` that prints its arguments, prefixed with
+  `debug: `, to stderr, but only when the environment variable DEBUG is exactly
+  `1`. When DEBUG is unset, empty or anything else it prints nothing and must
+  not fail. Call `debug "sites=$2"` before the arithmetic and
+  `debug "last=$last"` after it. Stdout is the one `... uses ports ...` line
+  in every case; the debug lines appear on stderr only in debug mode.
+concepts:
+  - "an environment variable as a debug switch"
+  - "${DEBUG:-} survives set -u"
+  - "if instead of && keeps the function's status 0 under set -e"
+required_patterns:
+  - pattern: '(^|\s)debug\s*\(\)'
+    message: "Define a function named debug."
+  - pattern: 'DEBUG'
+    message: "Read the DEBUG environment variable."
+test_cases:
+  - name: quiet by default
+    args: [eel, "3"]
+    expected_stdout: "eel uses ports 8000-8005"
+    expected_stderr: ""
+  - name: DEBUG=1 explains itself
+    args: [marlin, "2"]
+    env:
+      DEBUG: "1"
+    expected_stdout: "marlin uses ports 8000-8003"
+    expected_stderr: |-
+      debug: sites=2
+      debug: last=8003
+  - name: DEBUG=0 means off
+    args: [dory, "1"]
+    env:
+      DEBUG: "0"
+    expected_stdout: "dory uses ports 8000-8001"
+    expected_stderr: ""
+  - name: empty DEBUG is off too
+    args: [anchovy, "5"]
+    env:
+      DEBUG: ""
+    expected_stdout: "anchovy uses ports 8000-8009"
+    expected_stderr: ""

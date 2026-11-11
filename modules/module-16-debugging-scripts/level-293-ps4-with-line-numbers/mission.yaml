@@ -1,0 +1,62 @@
+id: 293
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: PS4 with Line Numbers
+difficulty: intermediate
+xp: 140
+story: |
+  Theo's 200-line deploy script failed overnight and the trace says
+  `+ [[ -e /srv/app ]]`. Which of the nine `[[ -e` tests in the file is that?
+  Nobody knows. Priya suggests the cheapest fix in the world: teach the trace to
+  print the line number in front of every command.
+objective: |
+  Write solution.sh that takes any number of arguments (file names) and, for
+  each one, prints `found: NAME` to stdout if a file or directory with that
+  name exists, or `missing: NAME` if not. Write the loop with the check and the
+  two echos each on their own lines, for example:
+    for f in "$@"; do
+      if [[ -e $f ]]; then
+        echo "found: $f"
+      else
+        echo "missing: $f"
+      fi
+    done
+  Turn on tracing with `set -x` above the loop and set the trace prefix
+  variable PS4 before that so every trace line looks like
+    + L12: [[ -e notes.txt ]]
+  that is: `+ L`, the line number of that command in solution.sh, then `: `.
+  Single-quote the PS4 value so Bash fills in the line number at every trace
+  line, not once when PS4 is assigned.
+concepts:
+  - "PS4 is the prefix of every trace line"
+  - "PS4 is expanded for each trace line, so quote it"
+  - "$LINENO inside PS4 gives the line number"
+required_patterns:
+  - pattern: "PS4='[^']*\\$\\{?LINENO"
+    message: "Assign PS4 in single quotes and include $LINENO, e.g. PS4='+ L${LINENO}: '."
+  - pattern: 'set\s+-[a-zA-Z]*x'
+    message: "Turn the trace on with set -x."
+test_cases:
+  - name: two files exist
+    args: [a.txt, notes]
+    files:
+      a.txt: "x\n"
+      notes/.keep: ""
+    expected_stdout: |-
+      found: a.txt
+      found: notes
+  - name: mixed
+    args: [report.csv, ghost.log, report.csv]
+    files:
+      report.csv: "1,2\n"
+    expected_stdout: |-
+      found: report.csv
+      missing: ghost.log
+      found: report.csv
+  - name: nothing to check
+    args: []
+    expected_stdout: ""
+  - name: one missing file
+    args: [nowhere]
+    expected_stdout: "missing: nowhere"

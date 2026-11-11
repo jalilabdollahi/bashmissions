@@ -1,0 +1,11 @@
+Inside a function, name the arguments, test with `[[ ]]`, and use `return` for the status. In `[[ a == b ]]` an unquoted right side is a pattern, so quote it to compare literally:
+
+  check() {
+    local want=$1 got=$2
+    if [[ $got == "$want" ]]; then
+      echo "ok"
+      return 0
+    fi
+    echo "bad: wanted '$want', got '$got'" >&2
+    return 1
+  }

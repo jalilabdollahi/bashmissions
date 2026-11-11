@@ -1,0 +1,8 @@
+Replace the first TODO with `set -x` and the second with `set +x`:
+
+  set -x
+  elapsed=$(( $2 - $1 ))
+  minutes=$(( elapsed / 60 ))
+  set +x
+
+Keep both echo lines outside this block, as in the starter.

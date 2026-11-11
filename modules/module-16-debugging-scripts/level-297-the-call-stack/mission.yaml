@@ -1,0 +1,55 @@
+id: 297
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: The Call Stack
+difficulty: advanced
+xp: 160
+story: |
+  The log rotation script died deep inside `compress`, and the error says only
+  "disk full". Ollie stares at a file with eleven functions that call each
+  other like a game of pass-the-parcel. "Who called whom?" Ollie asks. Bash
+  actually keeps that list; you only have to read it.
+objective: |
+  solution.sh already contains the functions `compress`, `rotate_logs` and
+  `nightly` (each calls the next, see the starter), plus a mode argument.
+  Add a function `stack` and call it from the places the starter marks.
+  `stack` prints, to stderr, one line for every function that is currently
+  running ABOVE itself (so `stack` itself is not listed), innermost first:
+    "  at FUNCTION, called from line N"
+  (two leading spaces). N is the line of solution.sh from which FUNCTION was
+  called: use the arrays FUNCNAME and BASH_LINENO. The bottom pseudo-entry
+  "main" that Bash adds for the top level must not be printed.
+  Modes (argument 1): `deep` calls `stack` from inside `compress`,
+  `shallow` calls it from `rotate_logs`, and `top` calls it from the top level
+  of the script, where it prints nothing. Afterwards the script prints
+  `rotation finished` to stdout.
+concepts:
+  - "FUNCNAME is the stack of running function names, innermost first"
+  - "BASH_LINENO[i] is the line where FUNCNAME[i] was called"
+  - "looping over array indexes"
+required_patterns:
+  - pattern: 'FUNCNAME'
+    message: "Read the function names from the FUNCNAME array."
+  - pattern: 'BASH_LINENO'
+    message: "Read the call lines from the BASH_LINENO array."
+test_cases:
+  - name: three functions deep
+    args: [deep]
+    expected_stdout: "rotation finished"
+    stderr_comparison: regex
+    expected_stderr: |-
+      \x20\x20at compress, called from line [0-9]+
+        at rotate_logs, called from line [0-9]+
+        at nightly, called from line [0-9]+
+  - name: two functions deep
+    args: [shallow]
+    expected_stdout: "rotation finished"
+    stderr_comparison: regex
+    expected_stderr: |-
+      \x20\x20at rotate_logs, called from line [0-9]+
+        at nightly, called from line [0-9]+
+  - name: called from the top level
+    args: [top]
+    expected_stdout: "rotation finished"
+    expected_stderr: ""

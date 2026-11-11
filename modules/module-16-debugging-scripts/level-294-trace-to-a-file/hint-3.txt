@@ -1,0 +1,6 @@
+Replace the two TODOs with:
+
+  exec 3>trace.log
+  BASH_XTRACEFD=3
+
+Both must come before `set -x`. Keep the rest as it is: the `+ set +x` line ends up in the file too, because the file receives everything the trace would have printed.

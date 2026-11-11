@@ -1,0 +1,6 @@
+Replace the two TODOs with these two lines, in this order:
+
+  PS4='+ L${LINENO}: '
+  set -x
+
+Then run `./solution.sh a b` and compare the numbers in the trace with the line numbers in your editor.

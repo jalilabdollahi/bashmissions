@@ -1,0 +1,9 @@
+`set -x` switches tracing on, `set +x` switches it off again. Only what runs in between is printed:
+
+  echo "not traced"
+  set -x
+  total=$(( 2 + 3 ))
+  set +x
+  echo "not traced either"
+
+Heads-up: the `set +x` command itself is still printed, as the last trace line.

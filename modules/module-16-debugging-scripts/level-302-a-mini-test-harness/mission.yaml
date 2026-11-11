@@ -1,0 +1,81 @@
+id: 302
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: A Mini Test Harness
+difficulty: expert
+xp: 190
+story: |
+  Theo has written eleven little check functions for the billing helpers, all
+  named `test_something`, and runs them by pasting their names into the
+  terminal one at a time. Mara has seen enough. "A test harness is just a loop
+  that finds the tests, runs each one safely, and counts. Build us a small one
+  and we will never paste names again."
+objective: |
+  Write solution.sh, called as `solution.sh TESTFILE`. TESTFILE is a Bash file
+  that defines functions; some are tests (names starting with `test_`), others
+  are helpers. Your script must:
+    1. `source` the file.
+    2. Find every function whose name starts with `test_` (`compgen -A function
+       test_`), sorted alphabetically.
+    3. Run each test in a subshell `( ... )`, so an `exit` or a crash inside one
+       cannot stop the harness, and throw away the test's own output. A test
+       passes when its status is 0.
+    4. Print one line per test to stdout: `PASS name` or `FAIL name`.
+    5. Finally print `N passed, M failed` (counts) and exit with status 1 if any
+       test failed, otherwise 0.
+  With no test functions it prints `0 passed, 0 failed` and exits 0.
+concepts:
+  - "compgen -A function lists function names"
+  - "run each test in a subshell with its status as the verdict"
+  - "count passes and failures, exit non-zero on any failure"
+required_patterns:
+  - pattern: 'compgen\s+-A\s+function'
+    message: "Discover the tests with compgen -A function test_."
+  - pattern: '\(\s*"?\$\{?[A-Za-z_]+\}?"?\s*\)'
+    message: "Run each test inside a subshell: ( \"$name\" )."
+test_cases:
+  - name: all green
+    args: [suite.sh]
+    files:
+      suite.sh: |
+        price() { echo 40; }
+        test_price_is_forty() { [[ $(price) == 40 ]]; }
+        test_math() { (( 6 * 7 == 42 )); }
+    expected_stdout: |-
+      PASS test_math
+      PASS test_price_is_forty
+      2 passed, 0 failed
+  - name: failures and a rude test
+    args: [suite.sh]
+    files:
+      suite.sh: |
+        helper_not_a_test() { false; }
+        test_zebra() { true; }
+        test_noisy() { echo "chatter"; echo "more" >&2; false; }
+        test_quits() { exit 5; }
+        test_alpha() { [[ -z "" ]]; }
+    expected_stdout: |-
+      PASS test_alpha
+      FAIL test_noisy
+      FAIL test_quits
+      PASS test_zebra
+      2 passed, 2 failed
+    expected_exit: 1
+  - name: no tests at all
+    args: [suite.sh]
+    files:
+      suite.sh: |
+        helper() { echo "nothing to see"; }
+    expected_stdout: "0 passed, 0 failed"
+  - name: tests cannot change the harness
+    args: [suite.sh]
+    files:
+      suite.sh: |
+        count=100
+        test_changes_state() { count=0; }
+        test_state_untouched() { [[ $count == 100 ]]; }
+    expected_stdout: |-
+      PASS test_changes_state
+      PASS test_state_untouched
+      2 passed, 0 failed

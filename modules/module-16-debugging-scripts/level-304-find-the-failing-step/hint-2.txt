@@ -1,0 +1,9 @@
+Binary search: keep `lo` and `hi` (positions counted from 1), ask about the middle, move one marker, repeat while `lo < hi`:
+
+  lo=1; hi=$n
+  while (( lo < hi )); do
+    mid=$(( (lo + hi) / 2 ))
+    if some-check "$mid" > /dev/null 2>&1; then lo=$(( mid + 1 )); else hi=$mid; fi
+  done
+
+Using the command in an `if` means its failure is an answer, not an error. First check the whole list: if all N steps pass, nobody is broken.

@@ -1,0 +1,14 @@
+  run() {
+    if (( dry_run )); then
+      printf 'would run:'
+      printf ' %q' "$@"
+      printf '\n'
+    else
+      "$@"
+    fi
+  }
+
+  run mkdir -p "sites/$site/logs"
+  ...                          # the other two commands get the same prefix
+
+Finish with an if on `dry_run` choosing between the two closing messages.

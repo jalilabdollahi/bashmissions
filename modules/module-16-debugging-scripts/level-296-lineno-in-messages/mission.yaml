@@ -1,0 +1,52 @@
+id: 296
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: LINENO in Messages
+difficulty: advanced
+xp: 150
+story: |
+  Ollie's error message at 03:40 was "something is wrong with the config".
+  Which check said so? The script has four of them. Noor asks for a promise: from
+  now on every error says where in the script it was raised, so whoever reads the
+  log can open the file and go straight to it.
+objective: |
+  Write solution.sh that checks a config file given as its only argument. Use
+  `set -u`. Perform these two checks, each on its own lines, in this order:
+    1. If the file does not exist, print
+         error (line N): file not found: NAME
+       to stderr and exit with status 1.
+    2. If the file exists but is empty (size 0), print
+         error (line N): file is empty: NAME
+       to stderr and exit with status 2.
+  N is the line number, in solution.sh, of the `echo` that prints the message:
+  take it from `$LINENO` inside that very command, do not type a number. If
+  both checks pass, print `config ok: NAME` to stdout and exit 0.
+concepts:
+  - "$LINENO is the line number of the command being executed"
+  - "messages that name their own origin"
+  - "[[ -e ]] and [[ -s ]] file tests"
+required_patterns:
+  - pattern: '\$\{?LINENO'
+    message: "Ask Bash for the line number with $LINENO instead of typing it."
+test_cases:
+  - name: all good
+    args: [web.conf]
+    files:
+      web.conf: "listen=8080\n"
+    expected_stdout: "config ok: web.conf"
+    expected_stderr: ""
+  - name: file missing
+    args: [ghost.conf]
+    expected_stdout: ""
+    stderr_comparison: regex
+    expected_stderr: 'error \(line [0-9]+\): file not found: ghost.conf'
+    expected_exit: 1
+  - name: file empty
+    args: [blank.conf]
+    files:
+      blank.conf: ""
+    expected_stdout: ""
+    stderr_comparison: regex
+    expected_stderr: 'error \(line [0-9]+\): file is empty: blank.conf'
+    expected_exit: 2

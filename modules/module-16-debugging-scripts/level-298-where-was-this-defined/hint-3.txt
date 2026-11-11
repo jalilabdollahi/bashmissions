@@ -1,0 +1,13 @@
+Two pieces:
+
+  host_label() {
+    echo "host: $1 (defined in $(basename "${BASH_SOURCE[0]}"))"
+  }
+
+and at the very bottom, instead of the TODO:
+
+  if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    main "$@"
+  fi
+
+Do not call `main` unconditionally, or sourcing the file would print a usage error and exit the caller.

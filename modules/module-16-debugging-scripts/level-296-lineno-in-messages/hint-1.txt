@@ -1,0 +1,1 @@
+You do not need to count lines by hand, and you should not: the moment you add a line above, a typed number becomes a lie. Bash keeps a variable that always holds the number of the line it is executing right now.

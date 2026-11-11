@@ -1,0 +1,52 @@
+id: 301
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Assertions
+difficulty: advanced
+xp: 170
+story: |
+  Gus checks the quarterly price list by eye and has twice missed a typo that cost
+  real money. Theo's answer: let the script check itself. A tiny helper that
+  compares what you got with what you expected and complains loudly when they
+  differ turns "looks fine to me" into a sentence the computer can verify.
+objective: |
+  Write solution.sh, called as `solution.sh EXPECTED ACTUAL LABEL`. It defines
+  a function `assert_eq` that takes the same three values and compares them as
+  strings:
+    - equal: print `PASS: LABEL` to stdout and return 0
+    - different: print
+        FAIL: LABEL: expected 'EXPECTED' but got 'ACTUAL'
+      to stderr (the values wrapped in single quotes) and return 1
+  The script then calls `assert_eq "$1" "$2" "$3"` as its last command, so its
+  exit status is the function's: 0 when the values match, 1 when they do not.
+  Use `set -euo pipefail`, and compare inside `[[ ]]` with both sides quoted so
+  values with spaces or glob characters are compared literally.
+concepts:
+  - "an assertion compares expected to actual and reports both"
+  - "return status of a function becomes the script's status"
+  - "quoted right-hand side in [[ == ]] is a literal match"
+required_patterns:
+  - pattern: '(^|\s)assert_eq\s*\(\)'
+    message: "Define a function named assert_eq."
+test_cases:
+  - name: equal numbers
+    args: ["42", "42", "answer"]
+    expected_stdout: "PASS: answer"
+    expected_stderr: ""
+  - name: different values report both
+    args: ["8080", "8081", "web port"]
+    expected_stdout: ""
+    expected_stderr: "FAIL: web port: expected '8080' but got '8081'"
+    expected_exit: 1
+  - name: values with spaces
+    args: ["two words", "two words", "label with space"]
+    expected_stdout: "PASS: label with space"
+  - name: glob characters are not patterns
+    args: ["a*", "abc", "star is literal"]
+    expected_stdout: ""
+    expected_stderr: "FAIL: star is literal: expected 'a*' but got 'abc'"
+    expected_exit: 1
+  - name: two empty strings are equal
+    args: ["", "", "empty"]
+    expected_stdout: "PASS: empty"

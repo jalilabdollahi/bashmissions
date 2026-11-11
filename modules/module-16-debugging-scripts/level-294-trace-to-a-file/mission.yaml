@@ -1,0 +1,65 @@
+id: 294
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Trace to a File
+difficulty: advanced
+xp: 150
+story: |
+  Noor's inbox is filling up: the cron job that counts customer pages mails its
+  stderr to the support desk, and since Ollie turned on `set -x` every morning
+  brings forty lines of trace to people who just want to know if anything is
+  wrong. "Keep the trace," Mara says, "but give it its own room."
+objective: |
+  Write solution.sh that takes two arguments, a SITE name and a PAGES number,
+  and does the following:
+    1. Open file descriptor 3 onto the file trace.log (`exec 3>trace.log`) and
+       point `BASH_XTRACEFD` at it, so that tracing goes to the file instead
+       of stderr.
+    2. Turn on `set -x`, then run exactly these two commands:
+         count=$(( $2 + 1 ))
+         echo "site $1 has $count pages"
+       and turn tracing off with `set +x`.
+    3. Afterwards print `warning: SITE is slow` to stderr (a normal message,
+       not part of the trace).
+  Result: stdout is the `site ...` line, stderr holds only the warning, and
+  trace.log holds three lines: the trace of the two commands and of `set +x`.
+concepts:
+  - "BASH_XTRACEFD names the file descriptor that receives the trace"
+  - "exec N>file opens a descriptor for the whole script"
+  - "stderr stays free for real messages"
+required_patterns:
+  - pattern: 'BASH_XTRACEFD='
+    message: "Send the trace to a file descriptor with BASH_XTRACEFD=<fd>."
+  - pattern: 'exec\s+[0-9]+>'
+    message: "Open the descriptor first, for example exec 3>trace.log."
+test_cases:
+  - name: trace lands in the file
+    args: [eel, "4"]
+    expected_stdout: "site eel has 5 pages"
+    expected_stderr: "warning: eel is slow"
+    expected_files:
+      trace.log: |-
+        + count=5
+        + echo 'site eel has 5 pages'
+        + set +x
+  - name: a site name with spaces
+    args: ["Gull & Anchor", "11"]
+    expected_stdout: "site Gull & Anchor has 12 pages"
+    expected_stderr: "warning: Gull & Anchor is slow"
+    expected_files:
+      trace.log: |-
+        + count=12
+        + echo 'site Gull & Anchor has 12 pages'
+        + set +x
+  - name: an old trace is replaced
+    args: [dory, "0"]
+    files:
+      trace.log: "stale line from last night\n"
+    expected_stdout: "site dory has 1 pages"
+    expected_stderr: "warning: dory is slow"
+    expected_files:
+      trace.log: |-
+        + count=1
+        + echo 'site dory has 1 pages'
+        + set +x

@@ -1,0 +1,1 @@
+An assertion is a tiny judge. It receives what you wanted, what you got and a name for the check, and it says only two things: "PASS" or "FAIL" plus both values, so you do not have to rerun anything to see the difference. The verdict must also be visible to other code, as an exit status.

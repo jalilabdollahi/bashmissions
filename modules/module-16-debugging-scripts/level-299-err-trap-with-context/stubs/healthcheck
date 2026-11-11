@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Fake health probe: healthcheck SITE. Exit status comes from HC_RC (default 0).
+if [[ $# -ne 1 ]]; then
+  echo "healthcheck: usage: healthcheck SITE" >&2
+  exit 2
+fi
+exit "${HC_RC:-0}"

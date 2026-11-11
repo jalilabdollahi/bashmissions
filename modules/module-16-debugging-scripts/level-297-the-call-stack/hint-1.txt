@@ -1,0 +1,1 @@
+Bash records every function that is currently running, in order, and also where each one was called from. Both lists are ordinary arrays that exist only while a function is active. Your job is to walk them side by side.

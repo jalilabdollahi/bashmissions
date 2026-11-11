@@ -1,0 +1,1 @@
+If the first K steps fail, the broken step is among them; if they pass, it is somewhere after. Every rehearsal therefore lets you discard half of the remaining candidates. Keep two markers for "the culprit is between here and here" and move one of them after each rehearsal.

@@ -1,0 +1,6 @@
+The variable is PS4, the "prompt" used for trace lines. Bash expands it every time it prints one, and `$LINENO` is the line number of the command being run. Use single quotes so the expansion waits:
+
+  PS4='>> ${LINENO}: '
+  set -x
+
+With double quotes the line number would be frozen at the value it had on the PS4 line.

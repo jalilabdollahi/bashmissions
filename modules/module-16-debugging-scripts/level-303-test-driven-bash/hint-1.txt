@@ -1,1 +1,0 @@
-Use this curriculum concept: write tests for your function.

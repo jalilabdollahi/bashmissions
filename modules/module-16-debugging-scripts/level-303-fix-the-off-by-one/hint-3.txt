@@ -1,0 +1,5 @@
+Here n is `total - keep`. The header of the loop
+
+  for (( i = 0; i <= total - keep; i++ )); do
+
+visits one index too many. Change the comparison operator in that single line so the last index visited is `total - keep - 1`. Nothing else in the script is wrong.

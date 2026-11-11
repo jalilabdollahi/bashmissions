@@ -1,0 +1,5 @@
+`$LINENO` expands to the line number, in the script file, of the command that is running. Put it inside the message:
+
+  echo "problem at line $LINENO" >&2
+
+Use double quotes so the variable is expanded, and `>&2` so the text goes to stderr.

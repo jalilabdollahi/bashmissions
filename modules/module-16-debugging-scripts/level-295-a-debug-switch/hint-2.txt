@@ -1,0 +1,9 @@
+Callers switch it on with `DEBUG=1 ./solution.sh ...`. Inside the script read it with a default so `set -u` is happy, and use a full `if` so the function returns 0 when it prints nothing:
+
+  say() {
+    if [[ ${VERBOSE:-} == yes ]]; then
+      echo "say: $*" >&2
+    fi
+  }
+
+`${VERBOSE:-}` means "the value, or empty if unset". `$*` joins all the arguments.

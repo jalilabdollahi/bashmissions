@@ -1,0 +1,1 @@
+You do not have to trace the whole script. Tracing is a switch you can flip on and off while the script runs: on before the lines you are curious about, off again right after them.

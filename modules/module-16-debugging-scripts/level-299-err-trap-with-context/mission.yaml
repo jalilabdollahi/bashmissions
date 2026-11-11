@@ -1,0 +1,60 @@
+id: 299
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: ERR Trap with Context
+difficulty: advanced
+xp: 170
+story: |
+  The 03:00 restart job for the customer sites exited with status 7 and left
+  one word in the log: "failed". Seven what? Which command? Priya wants the
+  next failure to leave a full statement: what ran, what it returned and where
+  in the script it happened, written by the script itself, in the moment.
+objective: |
+  solution.sh takes a SITE name and runs the function `publish`, given in the
+  starter (it calls the commands `healthcheck "$1"` and `restart-site "$1"`,
+  and prints a line after each). Make the script explain a failure:
+    - start with `set -eE` (the E makes the trap also work inside functions)
+    - register an ERR trap, before `publish` is called, whose handler writes ONE
+      line to stderr in this exact shape:
+        failed: COMMAND (status S) at line N
+      COMMAND is `$BASH_COMMAND`, S is the exit status of the failing command
+      and N is `$LINENO`; for example
+        failed: healthcheck "$1" (status 3) at line 8
+  Use single quotes around the trap text so the variables are read when the
+  trap fires. The script must still stop with the failing command's status.
+  When nothing fails there is no stderr output.
+concepts:
+  - "trap '...' ERR runs when a command fails"
+  - "$BASH_COMMAND, $LINENO and $? describe the failure"
+  - "set -E lets functions inherit the ERR trap"
+required_patterns:
+  - pattern: 'trap\s+.*\bERR\b'
+    message: "Register the handler with trap '...' ERR."
+  - pattern: '\$\{?BASH_COMMAND'
+    message: "Report the failing command with $BASH_COMMAND."
+  - pattern: 'set\s+-[a-zA-Z]*E'
+    message: "Use set -eE (capital E) so the ERR trap also fires inside publish()."
+test_cases:
+  - name: everything healthy
+    args: [eel]
+    expected_stdout: |-
+      healthy: eel
+      restarted: eel
+    expected_stderr: ""
+  - name: the health check fails with 3
+    args: [eel]
+    env:
+      HC_RC: "3"
+    expected_stdout: ""
+    stderr_comparison: regex
+    expected_stderr: 'failed: healthcheck "\$1" \(status 3\) at line [0-9]+'
+    expected_exit: 3
+  - name: the restart fails with 7
+    args: [marlin]
+    env:
+      RS_RC: "7"
+    expected_stdout: "healthy: marlin"
+    stderr_comparison: regex
+    expected_stderr: 'failed: restart-site "\$1" \(status 7\) at line [0-9]+'
+    expected_exit: 7

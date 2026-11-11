@@ -1,0 +1,10 @@
+Define it above the other functions:
+
+  stack() {
+    local i
+    for (( i = 1; i < ${#FUNCNAME[@]} - 1; i++ )); do
+      echo "  at ${FUNCNAME[i]}, called from line ..." >&2    # BASH_LINENO[i] here
+    done
+  }
+
+Start at 1 because index 0 is `stack` itself, and end one before the last index so `main` is skipped.
