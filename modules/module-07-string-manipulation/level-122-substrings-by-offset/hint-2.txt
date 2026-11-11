@@ -1,0 +1,8 @@
+Bash slices a variable with an offset and a length:
+
+  ${name:OFFSET:LENGTH}
+
+  code="ABCDEFGH"
+  echo "${code:2:3}"     # CDE   (start at 2, take 3)
+
+The first character is offset 0, not 1.

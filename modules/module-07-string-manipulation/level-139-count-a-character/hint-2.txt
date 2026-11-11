@@ -1,0 +1,7 @@
+A bracket expression with a caret at the front means "any character NOT in this list". Used in a replace-all with an empty replacement, it deletes everything else:
+
+  word="b-a-n-a-n-a"
+  dashes=${word//[^-]/}     # "-----"
+  echo "${#dashes}"         # 5
+
+You can only apply one expansion at a time, so store the intermediate result in a variable.

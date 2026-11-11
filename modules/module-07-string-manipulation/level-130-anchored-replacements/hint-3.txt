@@ -1,0 +1,7 @@
+  while IFS= read -r path || [[ -n $path ]]; do
+    path=${path/#\/var\/log\/legacy\//\/var\/log\/lanternfish\/}
+    path=${path/%.log/.log.gz}
+    echo "$path"
+  done
+
+If all the backslashes look ugly, store the strings first: old=/var/log/legacy/  new=/var/log/lanternfish/  and write ${path/#"$old"/$new}.

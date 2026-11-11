@@ -1,0 +1,10 @@
+  sep=$1
+  shift
+  hosts=("$@")
+  joined=""
+  for host in "${hosts[@]}"; do
+    joined+="${joined:+$sep}$host"
+  done
+  echo "$joined"
+
+Try it with an empty host list and with a separator of ", ".

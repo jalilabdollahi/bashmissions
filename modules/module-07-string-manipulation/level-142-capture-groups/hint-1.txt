@@ -1,0 +1,1 @@
+Checking that a line has the right shape is not enough here: you also need three pieces of it. A regular expression can mark the parts it should remember, and after a successful match Bash keeps them for you in a special array. First write the shape of the request part of the line, then decide which three parts to mark.

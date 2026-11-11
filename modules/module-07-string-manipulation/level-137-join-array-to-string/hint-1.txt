@@ -1,1 +1,0 @@
-`${array[*]}` joins using the first character of `IFS` when quoted.

@@ -1,0 +1,7 @@
+Inside a parameter expansion, two carets make everything upper case and two commas make everything lower case:
+
+  name="Gull & Anchor"
+  echo "${name^^}"     # GULL & ANCHOR
+  echo "${name,,}"     # gull & anchor
+
+The variable itself keeps its original value; you only get a converted copy.

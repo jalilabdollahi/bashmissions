@@ -1,0 +1,52 @@
+id: 123
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Counting from the End
+difficulty: beginner
+xp: 90
+story: |
+  Priya found API keys pasted in full into a support ticket and has declared war
+  on it. From now on, anything that echoes a key must show only the last four
+  characters, enough for a human to recognise which key it was and nothing a
+  thief could use. Keys come in different lengths, so counting from the front
+  will not work.
+objective: |
+  Write solution.sh that takes one argument, an API key. Print one line:
+
+    masked=****<last 4 characters of the key>
+
+  If the key has fewer than 4 characters it is not a real key: print
+  "key too short" to stderr and exit with status 1 (print nothing to stdout).
+  Take the tail with a negative offset in a substring expansion.
+concepts:
+  - "${var: -N} takes the last N characters"
+  - "the space before the minus sign matters"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*:\s*\(?-[0-9]+\)?\}'
+    message: 'Take the tail with a negative offset such as ${key: -4} (note the space before the minus).'
+forbidden_patterns:
+  - pattern: '\b(rev|cut|awk|sed|tail)\b'
+    message: "Use a negative offset in the substring expansion instead of an external tool."
+test_cases:
+  - name: typical key
+    args: [lf_live_9f3a7c21]
+    expected_stdout: |-
+      masked=****7c21
+  - name: different length
+    args: [sk-QWERTY-0042]
+    expected_stdout: |-
+      masked=****0042
+  - name: exactly four characters
+    args: [abcd]
+    expected_stdout: |-
+      masked=****abcd
+  - name: key with a dash at the end
+    args: [token-12-]
+    expected_stdout: |-
+      masked=****-12-
+  - name: too short is rejected
+    args: [xyz]
+    expected_stdout: ""
+    expected_stderr: "key too short"
+    expected_exit: 1

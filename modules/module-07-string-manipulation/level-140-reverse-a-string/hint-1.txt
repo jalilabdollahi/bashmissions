@@ -1,0 +1,1 @@
+Reversing means reading the characters from the end to the beginning. You already know how to ask for the length of a string and how to pick one character by its position. A loop that starts at the last position and counts down to the first one lets you collect the characters in the new order.

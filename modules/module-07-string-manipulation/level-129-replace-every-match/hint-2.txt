@@ -1,0 +1,8 @@
+A doubled slash after the variable name means "replace all":
+
+  title="red red red"
+  echo "${title// /-}"        # red-red-red   (every space)
+  echo "${title//red/blue}"   # blue blue blue
+
+When the character to find is itself a slash, put a backslash in front of it so Bash does not read it as the divider: ${path//\//:}
+You can assign the result back to the same variable and do the next replacement on it.

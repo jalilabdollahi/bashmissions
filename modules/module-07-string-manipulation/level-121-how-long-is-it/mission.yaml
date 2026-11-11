@@ -1,0 +1,62 @@
+id: 121
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: How Long Is It?
+difficulty: beginner
+xp: 80
+story: |
+  Theo is adding a signup form to the Lanternfish customer portal. The database
+  column for usernames holds at most 12 characters, and he is tired of the
+  cryptic "value too long" crash on the server. He asks for a tiny pre-check
+  that counts characters in a username and says whether it will fit.
+objective: |
+  Write solution.sh that takes one argument, a proposed username (it may be
+  empty and it may contain spaces). Print exactly two lines:
+
+    length=<number of characters>
+    status=<ok|too-short|too-long>
+
+  A username is "too-short" with fewer than 3 characters, "too-long" with more
+  than 12, and "ok" otherwise (3 to 12 inclusive). Count the characters with
+  Bash's own length expansion, not with an external command.
+concepts:
+  - "${#var} is the length of the value"
+  - "the length of an empty string is 0"
+required_patterns:
+  - pattern: '\$\{#[A-Za-z_0-9@*]+\}'
+    message: 'Use the length expansion ${#name} to count the characters.'
+forbidden_patterns:
+  - pattern: '\bwc\b|\bawk\b|\bexpr\b'
+    message: "Bash can count its own strings: use ${#name} instead of wc, awk or expr."
+test_cases:
+  - name: comfortable length
+    args: [marlin42]
+    expected_stdout: |-
+      length=8
+      status=ok
+  - name: too short
+    args: [al]
+    expected_stdout: |-
+      length=2
+      status=too-short
+  - name: too long
+    args: [harbourbakery01]
+    expected_stdout: |-
+      length=15
+      status=too-long
+  - name: exactly twelve is fine
+    args: [abcdefghijkl]
+    expected_stdout: |-
+      length=12
+      status=ok
+  - name: spaces count as characters
+    args: ["gull anchor"]
+    expected_stdout: |-
+      length=11
+      status=ok
+  - name: empty username
+    args: [""]
+    expected_stdout: |-
+      length=0
+      status=too-short

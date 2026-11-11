@@ -1,0 +1,53 @@
+id: 125
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Strip the Longest Prefix
+difficulty: intermediate
+xp: 110
+story: |
+  Ollie is building a dashboard of the largest log files and has a column of
+  full paths such as /var/log/nginx/error.log. The dashboard only has room for
+  the file name. He tried a quick one-liner but it kept trimming just the first
+  slash. Mara says it is time he met the greedy version of the trick.
+objective: |
+  Write solution.sh that takes any number of paths as arguments. For each one,
+  print a line in this exact form:
+
+    <path> -> <file name>
+
+  where the file name is everything after the LAST "/" (the whole path when it
+  has no slash, and an empty name when the path ends with a slash). Use the
+  remove-longest-prefix expansion; do not call basename, sed or awk.
+concepts:
+  - "${var##pattern} removes the longest matching prefix"
+  - "${var##*/} leaves the last path component"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*##'
+    message: 'Strip the longest prefix with ${name##pattern}, for example ${path##*/}.'
+forbidden_patterns:
+  - pattern: '\b(basename|sed|awk|cut|rev)\b'
+    message: "The point of this level is ${name##*/}: no basename, sed, awk, cut or rev."
+test_cases:
+  - name: one deep path
+    args: [/var/log/nginx/error.log]
+    expected_stdout: |-
+      /var/log/nginx/error.log -> error.log
+  - name: several paths
+    args: [/etc/hosts, /srv/shop/uploads/2024/11/menu.pdf, /home/ollie/notes.txt]
+    expected_stdout: |-
+      /etc/hosts -> hosts
+      /srv/shop/uploads/2024/11/menu.pdf -> menu.pdf
+      /home/ollie/notes.txt -> notes.txt
+  - name: relative path with no slash
+    args: [readme.md]
+    expected_stdout: |-
+      readme.md -> readme.md
+  - name: trailing slash leaves nothing
+    args: [/var/backups/]
+    expected_stdout: |-
+      /var/backups/ -> 
+  - name: file names with spaces
+    args: ["/srv/tidewater books/Q3 report.pdf"]
+    expected_stdout: |-
+      /srv/tidewater books/Q3 report.pdf -> Q3 report.pdf

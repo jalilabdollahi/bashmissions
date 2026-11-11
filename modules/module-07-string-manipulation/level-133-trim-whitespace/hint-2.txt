@@ -1,0 +1,8 @@
+Switch on extended patterns, then use +( ... ) for "one or more of":
+
+  shopt -s extglob
+  s="   lantern   "
+  s=${s##+([[:space:]])}     # removes leading blanks   -> "lantern   "
+  s=${s%%+([[:space:]])}     # removes trailing blanks  -> "lantern"
+
+[[:space:]] is the class for spaces, tabs and newlines. Use "IFS= read -r line" to read lines untouched.

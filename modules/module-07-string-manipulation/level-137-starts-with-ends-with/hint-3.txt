@@ -1,0 +1,13 @@
+  for name in "$@"; do
+    if [[ $name == .* ]]; then
+      label=hidden
+    elif [[ $name == *.pem ]]; then
+      label=...
+    elif ...
+    else
+      label=accept
+    fi
+    echo "$name: $label"
+  done
+
+Write the two missing branches (backup- prefix and the default is already there).

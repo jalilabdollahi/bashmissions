@@ -1,0 +1,53 @@
+id: 134
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Pad and Truncate
+difficulty: intermediate
+xp: 130
+story: |
+  Gus prints the monthly plan summary on a line printer that dislikes surprises:
+  the customer column must be exactly 14 characters wide and the plan column
+  exactly 8, however long the names are. "Gull & Anchor Pub" must be cut, "Dory
+  Bikes" must be padded. A report whose columns wobble gets sent back.
+objective: |
+  Write solution.sh that reads lines of the form  NAME,PLAN  from standard input
+  (one comma, no quotes) and prints one row per line:
+
+    |<NAME padded or cut to 14, left-aligned>|<PLAN padded or cut to 8, right-aligned>|
+
+  A shorter NAME is padded with spaces on the right, a longer one is cut at 14
+  characters. PLAN is right-aligned in 8 characters and cut at 8 if longer.
+  Use a single printf format with width and precision (for example %-10.10s); do
+  not use cut, awk or column.
+concepts:
+  - "printf %-14.14s pads and truncates"
+  - "%-N left-aligns, %N right-aligns, .N cuts at N characters"
+required_patterns:
+  - pattern: '%-[0-9]+\.[0-9]+s'
+    message: 'Use a width and precision together, for example %-14.14s.'
+forbidden_patterns:
+  - pattern: '\b(cut|awk|column)\b|\$\{[A-Za-z_][A-Za-z0-9_]*:[0-9]+:[0-9]+\}'
+    message: "Let printf do the padding and cutting with a format like %-14.14s."
+test_cases:
+  - name: short names get padded
+    stdin: "Dory Bikes,basic\nHarbour Bakery,pro\n"
+    expected_stdout: |-
+      |Dory Bikes    |   basic|
+      |Harbour Bakery|     pro|
+  - name: long name is cut
+    stdin: "Gull & Anchor Pub,business\n"
+    expected_stdout: |-
+      |Gull & Anchor |business|
+  - name: exactly the width
+    stdin: "North Pier Den,starter1\n"
+    expected_stdout: |-
+      |North Pier Den|starter1|
+  - name: plan longer than eight is cut
+    stdin: "Tidewater Books,enterprise\n"
+    expected_stdout: |-
+      |Tidewater Book|enterpri|
+  - name: empty fields still fill the width
+    stdin: ",\n"
+    expected_stdout: |-
+      |              |        |

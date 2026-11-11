@@ -1,1 +1,0 @@
-`${#str}` expands to the length of the string.

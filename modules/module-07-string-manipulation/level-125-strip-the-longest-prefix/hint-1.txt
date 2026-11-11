@@ -1,0 +1,1 @@
+Last level you removed the front of a string up to the first landmark. Here the landmark is a slash, but a path has many of them and you want to keep what comes after the last one. There is a greedy variant of the same expansion that swallows as much as it can.

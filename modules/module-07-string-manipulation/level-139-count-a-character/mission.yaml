@@ -1,0 +1,60 @@
+id: 139
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Count a Character
+difficulty: advanced
+xp: 140
+story: |
+  Gus's finance team imports invoices from a CSV export and the importer chokes
+  on malformed rows. Every valid row has exactly four fields, which means exactly
+  three commas. Some rows have extra commas from a typo, others lost a field.
+  Gus needs a quick report that tells him which rows to send back, without
+  opening each one by hand.
+objective: |
+  Write solution.sh that reads CSV rows from standard input. For every row
+  print one line, numbering the rows from 1:
+
+    row <N>: ok            when the row contains exactly 3 commas
+    row <N>: bad (<K>)     otherwise, where K is the number of commas found
+
+  Count the commas in Bash: delete everything that is not a comma from a copy of
+  the row, then take the length of what is left. Do not use tr, grep, awk, sed or wc.
+concepts:
+  - "${row//[^,]/} deletes everything except commas"
+  - "${#...} then gives the count"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*//\[\^[^]]+\]/\}'
+    message: 'Delete everything that is not a comma with ${row//[^,]/}.'
+  - pattern: '\$\{#[A-Za-z_][A-Za-z0-9_]*\}'
+    message: 'Then count what is left with ${#commas}.'
+forbidden_patterns:
+  - pattern: '\b(tr|grep|awk|sed|wc)\b'
+    message: "Count with ${#var} after deleting the other characters; no tr, grep, awk, sed or wc."
+test_cases:
+  - name: good and bad rows
+    stdin: "INV-1001,Harbour Bakery,2024-11-03,420.00\nINV-1002,Tidewater Books,2024-11-04\nINV-1003,Gull, Anchor Pub,2024-11-05,99.50\n"
+    expected_stdout: |-
+      row 1: ok
+      row 2: bad (2)
+      row 3: bad (4)
+  - name: all good
+    stdin: "a,b,c,d\n,,,\nx,,z,w\n"
+    expected_stdout: |-
+      row 1: ok
+      row 2: ok
+      row 3: ok
+  - name: no commas and an empty line
+    stdin: "just one field\n\n"
+    expected_stdout: |-
+      row 1: bad (0)
+      row 2: bad (0)
+  - name: other punctuation is ignored
+    stdin: "a;b;c;d\n1.5,2.5,3.5,4.5\n"
+    expected_stdout: |-
+      row 1: bad (0)
+      row 2: ok
+  - name: many commas
+    stdin: "1,2,3,4,5,6,7,8,9,10\n"
+    expected_stdout: |-
+      row 1: bad (9)

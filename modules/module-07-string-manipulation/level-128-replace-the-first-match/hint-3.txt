@@ -1,0 +1,6 @@
+  list=$1
+  old=$2
+  new=$3
+  echo "${list/"$old"/$new}"
+
+The quotes belong around "$old" inside the braces. Test it with the bracket case: ./solution.sh "db[1]:1,db[1]:2" "db[1]" x

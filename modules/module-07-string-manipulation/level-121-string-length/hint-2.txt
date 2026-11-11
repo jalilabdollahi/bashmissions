@@ -1,1 +1,0 @@
-Store `$1` in a variable named `str` or use the expansion directly.

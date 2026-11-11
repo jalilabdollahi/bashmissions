@@ -1,1 +1,0 @@
-Internal spaces should remain untouched.

@@ -1,0 +1,6 @@
+The whole script is two lines:
+
+  url=$1
+  echo "${url#*://}"
+
+The pattern is "anything, then ://". Make sure you use ONE hash: the shortest match is what protects the redirect address.

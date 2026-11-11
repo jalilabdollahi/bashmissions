@@ -1,0 +1,1 @@
+Plain replace finds a match anywhere in the string, which is exactly what you must avoid here: "legacy" may appear in the middle of a path and ".log" may appear before the real ending. You need a replacement that only counts if the text sits at the very beginning, and another that only counts at the very end.

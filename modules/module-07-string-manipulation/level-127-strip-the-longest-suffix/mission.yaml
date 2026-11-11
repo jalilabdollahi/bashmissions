@@ -1,0 +1,52 @@
+id: 127
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Strip the Longest Suffix
+difficulty: intermediate
+xp: 115
+story: |
+  Lanternfish servers have long fully qualified names such as
+  web-03.eu-west.prod.lanternfish.example, but the paging tool only has room for
+  the short name, "web-03". Priya's on-call rota is full of these, and some
+  entries are already short (a bare "localhost"). One expansion can cut a name
+  down to its first label whatever its length.
+objective: |
+  Write solution.sh that reads host names from standard input, one per line, and
+  prints for each line:
+
+    <full name>  =>  <short name>
+
+  (two spaces on each side of the arrow). The short name is the part before the
+  FIRST dot, or the whole line if there is no dot. Use the remove-longest-suffix
+  expansion. Do not use cut, sed, awk or tr.
+concepts:
+  - "${var%%pattern} removes the longest matching suffix"
+  - "${fqdn%%.*} is the first label of a dotted name"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*%%'
+    message: 'Cut from the first dot with the greedy suffix remover ${name%%.*}.'
+forbidden_patterns:
+  - pattern: '\b(cut|sed|awk|tr)\b'
+    message: "Use ${name%%.*} instead of an external command."
+test_cases:
+  - name: three full names
+    stdin: "web-03.eu-west.prod.lanternfish.example\ndb-01.prod.lanternfish.example\ncache.lanternfish.example\n"
+    expected_stdout: |-
+      web-03.eu-west.prod.lanternfish.example  =>  web-03
+      db-01.prod.lanternfish.example  =>  db-01
+      cache.lanternfish.example  =>  cache
+  - name: already short
+    stdin: "localhost\n"
+    expected_stdout: |-
+      localhost  =>  localhost
+  - name: mixed with a trailing dot
+    stdin: "barracuda.example.\nmarlin\n"
+    expected_stdout: |-
+      barracuda.example.  =>  barracuda
+      marlin  =>  marlin
+  - name: last line without newline
+    stdin: "dory.eu.example\neel.us.example"
+    expected_stdout: |-
+      dory.eu.example  =>  dory
+      eel.us.example  =>  eel

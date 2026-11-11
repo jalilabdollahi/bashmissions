@@ -1,0 +1,69 @@
+id: 142
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Capture Groups
+difficulty: advanced
+xp: 150
+story: |
+  The reverse proxy in front of every Lanternfish site writes one access-log line
+  per request, and Gus wants a tidy digest for the quarterly report: which
+  method, which URL and what status each visitor got. Checking that a line looks
+  right is not enough this time; the digest needs the pieces. The log also holds
+  noise lines from other tools that must be reported and skipped, not crash the
+  script.
+objective: |
+  Write solution.sh that reads access-log lines from standard input. A request
+  line looks like
+    203.0.113.7 - [07/Nov/2024:09:30:15] "GET /shop/cart HTTP/1.1" 502 1432
+  i.e. a quoted request "METHOD PATH HTTP/x.y", followed by a 3-digit status.
+  For each line that matches, print
+
+    <status> <METHOD> <PATH>
+
+  (for the example: 502 GET /shop/cart). For each line that does not match, print
+  "skipped: <the line>". Extract the pieces with capture groups in a [[ =~ ]]
+  test and read them from the BASH_REMATCH array. No grep, sed or awk.
+concepts:
+  - "( ) in a regex captures a group"
+  - "${BASH_REMATCH[1]} is the first group; [0] is the whole match"
+required_patterns:
+  - pattern: '=~'
+    message: 'Match each line with [[ $line =~ regex ]].'
+  - pattern: 'BASH_REMATCH\[[1-9]\]'
+    message: 'Read the captured pieces from ${BASH_REMATCH[1]}, ${BASH_REMATCH[2]}, ...'
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|cut)\b'
+    message: "Use capture groups with =~ and BASH_REMATCH instead of an external tool."
+test_cases:
+  - name: ordinary requests
+    stdin: |
+      203.0.113.7 - [07/Nov/2024:09:30:15] "GET /shop/cart HTTP/1.1" 502 1432
+      198.51.100.4 - [07/Nov/2024:09:30:16] "POST /api/orders HTTP/2.0" 201 87
+    expected_stdout: |-
+      502 GET /shop/cart
+      201 POST /api/orders
+  - name: noise lines are skipped
+    stdin: |
+      # rotated by logger at midnight
+      192.0.2.9 - [08/Nov/2024:00:00:01] "DELETE /old/file.txt HTTP/1.1" 204 0
+      -- end of file --
+    expected_stdout: |-
+      skipped: # rotated by logger at midnight
+      204 DELETE /old/file.txt
+      skipped: -- end of file --
+  - name: path with a query string
+    stdin: |
+      203.0.113.7 - [07/Nov/2024:10:01:00] "GET /search?q=blue+boat&page=2 HTTP/1.1" 200 9120
+    expected_stdout: |-
+      200 GET /search?q=blue+boat&page=2
+  - name: malformed status or request is skipped
+    stdin: |
+      203.0.113.7 - [07/Nov/2024:10:02:00] "GET /index.html HTTP/1.1" 20 5
+      203.0.113.7 - [07/Nov/2024:10:03:00] "GET /index.html" 200 5
+    expected_stdout: |-
+      skipped: 203.0.113.7 - [07/Nov/2024:10:02:00] "GET /index.html HTTP/1.1" 20 5
+      skipped: 203.0.113.7 - [07/Nov/2024:10:03:00] "GET /index.html" 200 5
+  - name: empty input prints nothing
+    stdin: ""
+    expected_stdout: ""

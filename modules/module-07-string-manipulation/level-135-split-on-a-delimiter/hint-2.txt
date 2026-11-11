@@ -1,0 +1,8 @@
+`read -a` stores the pieces in an indexed array, and setting IFS just for that command picks the delimiter:
+
+  row="north:pier:dental"
+  IFS=: read -ra part <<< "$row"
+  echo "${part[0]}"     # north
+  echo "${part[2]}"     # dental
+
+`<<<` (here-string) feeds the text to read. Count the fields of the passwd line and subtract one to get the index.

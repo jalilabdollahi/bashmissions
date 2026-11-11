@@ -1,0 +1,57 @@
+id: 132
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Capitalize Words
+difficulty: intermediate
+xp: 125
+story: |
+  Gus is printing invoices and the customer names coming out of the signup form
+  are a mess: "harbour bakery", "NORTH PIER DENTAL", "gull  &  anchor pub". He
+  wants Title Case on every invoice, whatever the customer typed. Capitalising
+  the whole string is easy; doing it word by word, and lowering the rest of each
+  word, takes a small loop.
+objective: |
+  Write solution.sh that takes one argument, a customer name, and prints it in
+  Title Case: every word starts with a capital letter and the rest of the word
+  is lowercase. Words are separated by one or more spaces; in the output they
+  are separated by exactly one space (and there are no spaces at the start or
+  end). An empty name prints an empty line.
+    ./solution.sh "NORTH PIER dental"   prints  North Pier Dental
+  Process the words one at a time. Use ${word,,} and ${word^}; no tr, sed or awk.
+concepts:
+  - "${word^} capitalizes the first letter only"
+  - "${word,,} lowers the rest first"
+  - "for word in $name splits on whitespace"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*\^\}'
+    message: 'Capitalise the first letter of each word with ${word^}.'
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*,,\}'
+    message: 'Lower the rest of the word first with ${word,,}.'
+forbidden_patterns:
+  - pattern: '\b(tr|sed|awk)\b'
+    message: "Use the ${word^} and ${word,,} expansions instead of an external tool."
+test_cases:
+  - name: all lower case
+    args: ["harbour bakery"]
+    expected_stdout: |-
+      Harbour Bakery
+  - name: all upper case
+    args: ["NORTH PIER DENTAL"]
+    expected_stdout: |-
+      North Pier Dental
+  - name: ampersand and repeated spaces
+    args: ["gull  &  anchor pub"]
+    expected_stdout: |-
+      Gull & Anchor Pub
+  - name: single word
+    args: [tIDEWATER]
+    expected_stdout: |-
+      Tidewater
+  - name: surrounding spaces are dropped
+    args: ["  old harbour  books "]
+    expected_stdout: |-
+      Old Harbour Books
+  - name: empty name
+    args: [""]
+    expected_stdout: ""

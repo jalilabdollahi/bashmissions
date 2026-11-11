@@ -1,0 +1,52 @@
+id: 122
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Substrings by Offset
+difficulty: beginner
+xp: 90
+story: |
+  The backup robot at Lanternfish stamps every snapshot with a compact
+  timestamp like 20241107T093015, and Gus cannot read them at a glance. He
+  wants a friendly version for the monthly report. Because the stamp is
+  fixed-width, every piece sits at the same position, which is exactly what
+  offsets are for.
+objective: |
+  Write solution.sh that takes one argument, a timestamp in the exact form
+  YYYYMMDDThhmmss (15 characters, for example 20241107T093015). Print:
+
+    date=YYYY-MM-DD
+    time=hh:mm:ss
+
+  Cut the pieces out with substring expansion (offset and length). Do not use
+  cut, awk, sed, or date.
+concepts:
+  - "${var:offset:length} extracts part of a value"
+  - "offsets start counting at 0"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*:[0-9]+:[0-9]+\}'
+    message: 'Cut each piece with ${name:offset:length}, for example ${stamp:4:2}.'
+forbidden_patterns:
+  - pattern: '\b(cut|awk|sed)\b|\$\(\s*date'
+    message: "The stamp is fixed-width: slice it with ${name:offset:length} instead of an external tool."
+test_cases:
+  - name: morning backup
+    args: [20241107T093015]
+    expected_stdout: |-
+      date=2024-11-07
+      time=09:30:15
+  - name: midnight on new year
+    args: [20250101T000000]
+    expected_stdout: |-
+      date=2025-01-01
+      time=00:00:00
+  - name: end of year
+    args: [20231231T235959]
+    expected_stdout: |-
+      date=2023-12-31
+      time=23:59:59
+  - name: leading zeros survive
+    args: [20300209T050607]
+    expected_stdout: |-
+      date=2030-02-09
+      time=05:06:07

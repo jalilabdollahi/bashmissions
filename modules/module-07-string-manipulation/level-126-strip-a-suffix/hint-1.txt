@@ -1,0 +1,1 @@
+Previously you trimmed text off the front of a value. Now the unwanted part is at the back, and it starts with a dot. The catch is that the names can contain several dots, so think about which dot your pattern should stop at: you want to cut at the last one only.

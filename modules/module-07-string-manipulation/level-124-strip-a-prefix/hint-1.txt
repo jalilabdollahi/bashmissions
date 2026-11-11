@@ -1,0 +1,1 @@
+You are not looking for a position this time, you are looking for a landmark: the first "://". Bash can delete text from the front of a value up to a pattern you describe. The question is which match it should stop at, because a URL can contain more than one "://".

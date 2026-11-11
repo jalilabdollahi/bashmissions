@@ -1,1 +1,0 @@
-`${str%pattern}` removes the shortest matching suffix.

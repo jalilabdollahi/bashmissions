@@ -1,0 +1,62 @@
+id: 133
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Trim Whitespace
+difficulty: intermediate
+xp: 130
+story: |
+  Noor exports the contact list from the old ticketing system, and every field
+  is padded with spaces and the odd tab: "   Tidewater Books  ". Those blanks
+  break joins in the billing database. The spaces inside a name are real, though,
+  and "Harbour  Bakery" must stay as typed. You need a trim that only touches the
+  two ends.
+objective: |
+  Write solution.sh that reads lines from standard input and prints each one
+  between square brackets after removing ALL leading and trailing whitespace
+  (spaces and tabs). Whitespace inside the line is kept exactly.
+
+    "  Tidewater  Books \t"   prints   [Tidewater  Books]
+
+  A line that is empty or only whitespace prints []. Do the trimming with
+  parameter expansion and an extended glob pattern (shopt -s extglob). Do not
+  use sed, awk, tr or xargs.
+concepts:
+  - "shopt -s extglob enables +( ) patterns"
+  - "${var##+([[:space:]])} trims the front, ${var%%+([[:space:]])} the back"
+required_patterns:
+  - pattern: 'extglob'
+    message: "Turn on extended patterns first: shopt -s extglob."
+  - pattern: '\+\(\[\[:space:\]\]\)|\+\(\s*\)|\+\(\[ \]\)'
+    message: 'Match a run of blanks with +([[:space:]]) inside ${var##...} and ${var%%...}.'
+forbidden_patterns:
+  - pattern: '\b(sed|awk|tr|xargs)\b'
+    message: "Trim with ${var##+([[:space:]])} and ${var%%+([[:space:]])} instead."
+test_cases:
+  - name: padded on both sides
+    stdin: "   Tidewater Books   \n"
+    expected_stdout: |-
+      [Tidewater Books]
+  - name: inner spaces survive
+    stdin: "  Harbour    Bakery \n"
+    expected_stdout: |-
+      [Harbour    Bakery]
+  - name: tabs are whitespace too
+    stdin: "\t\tNorth Pier Dental\t \n"
+    expected_stdout: |-
+      [North Pier Dental]
+  - name: nothing to trim
+    stdin: "gull-anchor\n"
+    expected_stdout: |-
+      [gull-anchor]
+  - name: only blanks and an empty line
+    stdin: "     \n\n"
+    expected_stdout: |-
+      []
+      []
+  - name: several lines mixed
+    stdin: " a \nb  \n  c\n"
+    expected_stdout: |-
+      [a]
+      [b]
+      [c]

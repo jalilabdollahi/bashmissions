@@ -1,1 +1,0 @@
-The pattern `*/` means up to the first slash for shortest-prefix removal.

@@ -1,0 +1,1 @@
+You want to keep the beginning of each name and throw away everything from the first dot onward. The dot you care about is the first one, but the unwanted part runs to the very end, so you need the suffix remover that is greedy and starts matching as early in the string as it can.

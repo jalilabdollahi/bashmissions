@@ -1,0 +1,9 @@
+A single caret upper-cases only the first character; two commas lower-case everything. A loop over an UNQUOTED variable hands you one word per turn, splitting on any run of spaces:
+
+  w="sHELL"
+  w=${w,,}
+  echo "${w^}"           # Shell
+
+  for word in $title; do ...; done
+
+To join with a space but avoid a leading one, add the space only when the result already has content: ${result:+ }.

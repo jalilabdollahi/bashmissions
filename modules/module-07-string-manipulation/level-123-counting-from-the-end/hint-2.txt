@@ -1,0 +1,7 @@
+A negative offset counts from the end. It needs a space (or parentheses) before the minus, otherwise Bash thinks you wrote a different expansion, the "default value" one:
+
+  id="invoice-2024-117"
+  echo "${id: -3}"      # 117
+  echo "${id:(-3)}"     # 117, same thing
+
+If the offset reaches back further than the start of the string, you get an empty result, which is why the short keys need their own check.

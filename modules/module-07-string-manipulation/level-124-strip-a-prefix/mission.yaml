@@ -1,0 +1,54 @@
+id: 124
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Strip a Prefix
+difficulty: intermediate
+xp: 110
+story: |
+  Noor pastes customer links into tickets, and the link checker only wants the
+  part after the scheme: no "https://", no "ftp://". Some of the links are
+  sign-in redirects that carry a second full address in their query, and Noor
+  warns that those must keep that second address intact. Only the very first
+  scheme marker should go.
+objective: |
+  Write solution.sh that takes one argument, a URL, and prints it without its
+  scheme: everything up to and including the FIRST "://" is removed, and nothing
+  else.
+
+    ./solution.sh https://shop.example/menu      prints  shop.example/menu
+
+  A URL with a second "://" later on (in a redirect) must keep it. A string with
+  no "://" at all is printed unchanged. Use the remove-shortest-prefix
+  expansion with a pattern; do not use sed, cut or awk.
+concepts:
+  - "${var#pattern} removes the shortest matching prefix"
+  - "* in a pattern matches any run of characters"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*#[^#]'
+    message: 'Remove the prefix with ${name#pattern}, for example ${url#*://}.'
+forbidden_patterns:
+  - pattern: '\b(sed|cut|awk)\b'
+    message: "This level is about the # expansion: strip the prefix in Bash itself."
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*##'
+    message: "Use a single # here: it stops at the first match, so a second :// later in the URL survives."
+test_cases:
+  - name: plain https link
+    args: ["https://shop.harbourbakery.example/menu"]
+    expected_stdout: |-
+      shop.harbourbakery.example/menu
+  - name: ftp scheme
+    args: ["ftp://files.tidewater.example/pub/readme.txt"]
+    expected_stdout: |-
+      files.tidewater.example/pub/readme.txt
+  - name: redirect keeps its second address
+    args: ["https://login.example/go?next=http://tidewater.example/books"]
+    expected_stdout: |-
+      login.example/go?next=http://tidewater.example/books
+  - name: no scheme at all
+    args: ["gull-anchor.example/pub"]
+    expected_stdout: |-
+      gull-anchor.example/pub
+  - name: scheme only
+    args: ["https://"]
+    expected_stdout: ""

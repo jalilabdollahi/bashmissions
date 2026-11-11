@@ -1,0 +1,1 @@
+Last level replaced only the first match. This job needs every match handled: any number of spaces and any number of slashes. Bash has a variant of find-and-replace for that. You will apply it twice, once per kind of character. One of the two characters is also the separator Bash uses inside the expansion, so it needs special care.

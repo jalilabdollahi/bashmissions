@@ -1,0 +1,7 @@
+An array can be filled from the arguments, and "${array[@]}" expands to all its elements, one per word, spaces preserved:
+
+  shift                      # drop the first argument
+  items=("$@")               # array of whatever is left
+  for item in "${items[@]}"; do ... ; done
+
+${text:+SEP} expands to SEP only when $text is not empty, which is exactly "a separator unless this is the first item".

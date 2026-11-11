@@ -1,0 +1,1 @@
+The keys have different lengths, so "start at character 10" is useless. What stays constant is the end: you always want the last four characters. Bash can count backwards from the end of a value. Remember the length check from earlier in this module for the too-short case.

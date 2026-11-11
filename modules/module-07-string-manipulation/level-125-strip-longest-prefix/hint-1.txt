@@ -1,1 +1,0 @@
-`${str##pattern}` removes the longest matching prefix.

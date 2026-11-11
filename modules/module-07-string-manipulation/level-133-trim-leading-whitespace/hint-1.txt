@@ -1,1 +1,0 @@
-Enable extended globs with `shopt -s extglob`.

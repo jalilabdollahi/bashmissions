@@ -1,0 +1,5 @@
+  mac=$1
+  echo "dhcp=${mac^^}"
+  echo "inventory=${mac,,}"
+
+Three lines. If you pass an empty argument, both lines should simply end after the equals sign.

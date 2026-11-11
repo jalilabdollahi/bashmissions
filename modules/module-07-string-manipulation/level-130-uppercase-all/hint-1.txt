@@ -1,1 +1,0 @@
-`${str^^}` uppercases all lowercase letters.

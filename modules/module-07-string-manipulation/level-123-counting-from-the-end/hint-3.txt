@@ -1,0 +1,9 @@
+  key=$1
+  if (( ${#key} < 4 )); then
+    echo "key too short" >&2
+    exit 1
+  fi
+  last4=${key: -4}
+  echo "masked=****$last4"
+
+Check that the message goes to stderr (>&2) and the exit status is 1.

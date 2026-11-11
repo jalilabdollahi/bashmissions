@@ -1,0 +1,7 @@
+Doubling the hash makes the match greedy: the LONGEST prefix that fits is removed.
+
+  tag="release-2024-11-07"
+  echo "${tag#*-}"     # 2024-11-07   (shortest: up to the first dash)
+  echo "${tag##*-}"    # 07           (longest: up to the last dash)
+
+Loop over the arguments with  for path in "$@"  and keep the quotes, because some paths contain spaces.

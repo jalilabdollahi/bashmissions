@@ -1,0 +1,7 @@
+Inside braces, put the variable, a slash, the text to find, another slash, and the replacement. One slash replaces only the first match:
+
+  line="red,red,blue"
+  echo "${line/red/green}"        # green,red,blue
+  echo "${line/"$what"/$with}"    # quote the search variable to make it literal
+
+Without the quotes around the search variable, characters like * and [ are treated as a pattern.

@@ -1,0 +1,1 @@
+This is a search-and-replace on a value you already hold in a variable, the way an editor's "replace" button works. Bash has it built into parameter expansion. The important question is which of the matches gets replaced, and what happens if the text you are looking for contains characters that look like wildcards.

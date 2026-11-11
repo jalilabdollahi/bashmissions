@@ -1,1 +1,0 @@
-`.*` matches from a dot to the end.

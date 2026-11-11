@@ -1,0 +1,9 @@
+  name=${1-}
+  result=""
+  for word in $name; do
+    word=${word,,}
+    result+="${result:+ }${word^}"
+  done
+  echo "$result"
+
+The piece ${result:+ } expands to a space only when $result is not empty, so the first word gets no leading space.

@@ -1,0 +1,13 @@
+  n=0
+  while IFS= read -r row || [[ -n $row ]]; do
+    n=$((n + 1))
+    commas=${row//[^,]/}
+    count=${#commas}
+    if (( count == 3 )); then
+      echo "row $n: ok"
+    else
+      echo "row $n: bad ($count)"
+    fi
+  done
+
+The only thing to adapt is nothing: check that you understand each line, then run it on a row with no commas.

@@ -1,0 +1,1 @@
+Checking that a line CONTAINS a word means the word may sit anywhere: at the start, in the middle, or at the end. The pattern comparison you used for "starts with" and "ends with" can be opened on both sides. The extra twist is that the word is data typed by a person, so special characters in it must not be treated as wildcards.

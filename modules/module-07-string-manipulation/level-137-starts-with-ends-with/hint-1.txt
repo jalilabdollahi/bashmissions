@@ -1,0 +1,1 @@
+Each rule asks about one end of the file name: how it begins or how it finishes. You do not need to cut the string up to answer that. Bash can compare a variable against a pattern inside an if, and the star in the pattern marks which end is allowed to be anything. Mind the order of your if/elif chain: the first rule that fits wins.

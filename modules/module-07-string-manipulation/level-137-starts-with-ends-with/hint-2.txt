@@ -1,0 +1,6 @@
+Inside double square brackets, == compares against a glob pattern. Leave the pattern unquoted so the star works:
+
+  if [[ $file == tmp-* ]]; then echo "starts with tmp-"; fi
+  if [[ $file == *.log ]]; then echo "ends with .log"; fi
+
+Quoted text on the right side is matched literally instead, so don't put quotes around the star.

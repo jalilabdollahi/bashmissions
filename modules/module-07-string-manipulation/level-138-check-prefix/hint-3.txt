@@ -1,1 +1,0 @@
-Do not quote the pattern side when you want glob matching.

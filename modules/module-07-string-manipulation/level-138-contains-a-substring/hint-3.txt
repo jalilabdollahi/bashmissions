@@ -1,0 +1,13 @@
+  word=$1
+  lineno=0
+  matches=0
+  while IFS= read -r line || [[ -n $line ]]; do
+    lineno=$((lineno + 1))
+    if [[ $line == *"$word"* ]]; then
+      echo "line $lineno: $line"
+      ...                       # count it
+    fi
+  done
+  echo "matches=$matches"
+
+Fill in the counter update.

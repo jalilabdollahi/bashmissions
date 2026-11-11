@@ -1,0 +1,1 @@
+Joining means putting a separator between neighbours, never before the first or after the last. The easy way to get that right is to build the string one item at a time and only add a separator if you have already written something. Put the host names into an array first so you can loop over them.

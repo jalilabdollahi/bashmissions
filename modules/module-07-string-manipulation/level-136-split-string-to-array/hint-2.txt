@@ -1,1 +1,0 @@
-`read -a parts` fills an indexed array.

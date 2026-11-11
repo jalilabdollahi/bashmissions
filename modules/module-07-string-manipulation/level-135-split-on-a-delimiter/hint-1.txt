@@ -1,0 +1,1 @@
+You know `read` splits a line into variables. If you give it one variable per field it works, but there is a neater way for "N pieces": have read put all the pieces into a single list-like variable and then ask for the pieces by position. Remember that computers number positions from zero.

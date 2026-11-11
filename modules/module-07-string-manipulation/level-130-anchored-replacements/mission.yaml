@@ -1,0 +1,58 @@
+id: 130
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Anchored Replacements
+difficulty: intermediate
+xp: 125
+story: |
+  Lanternfish is moving its logs from /var/log/legacy to /var/log/lanternfish and
+  switching the rotated files from ".log" to ".log.gz". The migration list is
+  full of tricky paths: some mention "legacy" twice, some live elsewhere and only
+  look similar. Mara insists that only the true start of a path and the true
+  end of a name be touched.
+objective: |
+  Write solution.sh that reads paths from standard input, one per line, and
+  prints each one after two anchored changes:
+    1. if the path BEGINS with "/var/log/legacy/", replace that beginning with
+       "/var/log/lanternfish/"
+    2. if the path ENDS with ".log", replace that ending with ".log.gz"
+  Matches in the middle of a path must not change. Use the anchored forms
+  ${var/#old/new} (start) and ${var/%old/new} (end). No sed or awk.
+concepts:
+  - "${var/#old/new} replaces only at the start"
+  - "${var/%old/new} replaces only at the end"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*/#'
+    message: 'Replace the beginning with ${name/#old/new}.'
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*/%'
+    message: 'Replace the ending with ${name/%old/new}.'
+forbidden_patterns:
+  - pattern: '\b(sed|awk|tr)\b'
+    message: "Use the anchored expansions ${name/#old/new} and ${name/%old/new}."
+test_cases:
+  - name: both ends change
+    stdin: "/var/log/legacy/nginx/access.log\n"
+    expected_stdout: |-
+      /var/log/lanternfish/nginx/access.log.gz
+  - name: only the prefix applies
+    stdin: "/var/log/legacy/app.out\n"
+    expected_stdout: |-
+      /var/log/lanternfish/app.out
+  - name: only the suffix applies
+    stdin: "/srv/shop/error.log\n"
+    expected_stdout: |-
+      /srv/shop/error.log.gz
+  - name: legacy in the middle is left alone
+    stdin: "/backup/var/log/legacy/db.txt\n/var/log/legacy/legacy/x.log\n"
+    expected_stdout: |-
+      /backup/var/log/legacy/db.txt
+      /var/log/lanternfish/legacy/x.log.gz
+  - name: log in the middle is left alone
+    stdin: "/var/log/legacy/audit.log.old\n.log\n"
+    expected_stdout: |-
+      /var/log/lanternfish/audit.log.old
+      .log.gz
+  - name: empty line
+    stdin: "\n"
+    expected_stdout: ""

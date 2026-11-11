@@ -1,31 +1,72 @@
 id: 141
 module: 7
 module_name: string-manipulation
-module_display: String Manipulation
+module_display: String Surgery
 title: Regex Match
-difficulty: intermediate
-xp: 135
-objective: Use a regex to check whether the first argument is exactly three digits.
-  Print `match` or `no match`.
-expected_script_name: solution.sh
-test_cases:
-- args:
-  - '123'
-  expected_stdout: match
-  expected_exit: 0
-  comparison: exact
-- args:
-  - 12a
-  expected_stdout: no match
-  expected_exit: 0
-  comparison: exact
-- args:
-  - '1234'
-  expected_stdout: no match
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+difficulty: advanced
+xp: 145
+story: |
+  Release day at Lanternfish. The deploy tool accepts only tags that look like
+  versions: three numbers separated by dots, with an optional leading "v".
+  Theo's pipeline keeps shipping oddities like "1.4", "1.4.2-rc1" and "v1.x.0"
+  and the deploy fails halfway through. Mara asks for a gatekeeper that checks
+  the shape of a tag before the pipeline goes anywhere near the servers.
+objective: |
+  Write solution.sh that reads release tags from standard input, one per line.
+  For each tag print
+
+    <tag>: valid       or       <tag>: invalid
+
+  A valid tag is an optional "v", then MAJOR.MINOR.PATCH where each part is one or
+  more digits, and NOTHING else before or after. So v2.0.10 and 1.4.2 are valid;
+  1.4, 1.4.2-rc1, v1.x.0, 01.2 3.4 and an empty line are not. Test the tag
+  with the regex operator [[ $tag =~ regex ]], anchored at both ends. No grep, expr,
+  sed or awk.
 concepts:
-- '`[[ $str =~ regex ]]`'
-scaffold: true
+  - "[[ $s =~ regex ]] matches an extended regular expression"
+  - "^ and $ anchor the regex to both ends"
+required_patterns:
+  - pattern: '=~'
+    message: 'Test the tag with [[ $tag =~ regex ]].'
+  - pattern: '\^.*\$'
+    message: 'Anchor the regex with ^ at the start and $ at the end, or "1.4.2-rc1" would pass.'
+forbidden_patterns:
+  - pattern: '\b(grep|expr|sed|awk)\b'
+    message: "Use [[ $tag =~ regex ]] instead of an external tool."
+test_cases:
+  - name: normal versions
+    stdin: "1.4.2\nv2.0.10\n0.0.1\n"
+    expected_stdout: |-
+      1.4.2: valid
+      v2.0.10: valid
+      0.0.1: valid
+  - name: missing a part
+    stdin: "1.4\nv3\n"
+    expected_stdout: |-
+      1.4: invalid
+      v3: invalid
+  - name: extra text is rejected
+    stdin: "1.4.2-rc1\nrelease-1.4.2\n1.4.2 \n"
+    expected_stdout: |-
+      1.4.2-rc1: invalid
+      release-1.4.2: invalid
+      1.4.2 : invalid
+  - name: letters instead of numbers
+    stdin: "v1.x.0\n1.2.three\n"
+    expected_stdout: |-
+      v1.x.0: invalid
+      1.2.three: invalid
+  - name: dots are real dots
+    stdin: "1-4-2\n1a4b2\n"
+    expected_stdout: |-
+      1-4-2: invalid
+      1a4b2: invalid
+  - name: empty line and a double v
+    stdin: "\nvv1.0.0\n"
+    expected_stdout: |-
+      : invalid
+      vv1.0.0: invalid
+  - name: big numbers are fine
+    stdin: "10.200.3000\n"
+    expected_stdout: |-
+      10.200.3000: valid

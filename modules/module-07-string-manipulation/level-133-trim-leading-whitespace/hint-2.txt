@@ -1,1 +1,0 @@
-`+([[:space:]])` matches one or more whitespace characters.

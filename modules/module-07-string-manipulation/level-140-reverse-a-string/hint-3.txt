@@ -1,0 +1,8 @@
+  token=${1-}
+  decoded=""
+  for (( i = ${#token} - 1; i >= 0; i-- )); do
+    decoded+=${token:i:1}
+  done
+  echo "$decoded"
+
+If you get an off-by-one (a missing or extra character), print $i inside the loop and check the first and last values.

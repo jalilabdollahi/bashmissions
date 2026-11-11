@@ -1,1 +1,0 @@
-Use `[[ ]]` for glob-style string matching.

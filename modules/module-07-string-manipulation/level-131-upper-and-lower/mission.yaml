@@ -1,0 +1,59 @@
+id: 131
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: UPPER and lower
+difficulty: intermediate
+xp: 115
+story: |
+  Two systems at Lanternfish disagree about MAC addresses. The DHCP server wants
+  them in capitals, like AA:BB:0C:1D:2E:3F, while the inventory database stores
+  them in lowercase and compares strings exactly. Ollie pastes addresses in
+  whatever mix of cases the network card vendor used, and the two tools keep
+  rejecting them.
+objective: |
+  Write solution.sh that takes one argument, a MAC address in any mix of upper and
+  lower case. Print two lines:
+
+    dhcp=<the address in UPPERCASE>
+    inventory=<the address in lowercase>
+
+  Digits and colons stay as they are. Use the case-changing parameter expansions;
+  do not use tr, awk or sed. (The tests use plain ASCII letters.)
+concepts:
+  - "${var^^} converts every letter to uppercase"
+  - "${var,,} converts every letter to lowercase"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*\^\^\}'
+    message: 'Make the DHCP form with ${name^^}.'
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*,,\}'
+    message: 'Make the inventory form with ${name,,}.'
+forbidden_patterns:
+  - pattern: '\b(tr|awk|sed)\b'
+    message: "Bash can change case itself: ${name^^} and ${name,,}."
+test_cases:
+  - name: mixed case address
+    args: ["aA:Bb:0c:1D:2e:3F"]
+    expected_stdout: |-
+      dhcp=AA:BB:0C:1D:2E:3F
+      inventory=aa:bb:0c:1d:2e:3f
+  - name: already lowercase
+    args: ["de:ad:be:ef:00:42"]
+    expected_stdout: |-
+      dhcp=DE:AD:BE:EF:00:42
+      inventory=de:ad:be:ef:00:42
+  - name: already uppercase
+    args: ["FA:CE:B0:0C:99:7A"]
+    expected_stdout: |-
+      dhcp=FA:CE:B0:0C:99:7A
+      inventory=fa:ce:b0:0c:99:7a
+  - name: digits only
+    args: ["00:11:22:33:44:55"]
+    expected_stdout: |-
+      dhcp=00:11:22:33:44:55
+      inventory=00:11:22:33:44:55
+  - name: empty argument
+    args: [""]
+    expected_stdout: |-
+      dhcp=
+      inventory=

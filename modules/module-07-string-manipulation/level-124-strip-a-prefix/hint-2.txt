@@ -1,0 +1,7 @@
+In a parameter expansion, a single hash removes the shortest prefix that matches a pattern. The star matches any run of characters:
+
+  file="backup-2024-final.tar"
+  echo "${file#*-}"      # 2024-final.tar   (stops at the FIRST dash)
+  echo "${file#backup-}" # 2024-final.tar   (a literal prefix works too)
+
+If nothing matches, the value comes back unchanged.

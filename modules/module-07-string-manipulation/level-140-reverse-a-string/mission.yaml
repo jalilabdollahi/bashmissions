@@ -1,0 +1,58 @@
+id: 140
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Reverse a String
+difficulty: advanced
+xp: 140
+story: |
+  The old support tool stored customer access tokens backwards as a cheap kind of
+  obfuscation, and Priya is retiring it. Before the migration she has to decode a
+  few thousand of them, with no extra tools installed on the isolated migration
+  host. A token is just a short string, so a loop that walks from its last
+  character to its first will do. It will also be a nice exercise in indexing.
+objective: |
+  Write solution.sh that takes one argument, a stored (reversed) token, and
+  prints the decoded token: the same characters in the opposite order. Spaces
+  and punctuation are characters like any other, and an empty argument prints
+  an empty line.
+
+    ./solution.sh 321cba      prints  abc123
+
+  Build the result with a loop over the character positions (C-style for loop
+  and ${var:index:1}). Do not use rev, tac, awk, sed or tr.
+concepts:
+  - "${var:i:1} is the character at position i"
+  - "a C-style for loop can count downwards"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*:[^:}]+:1\}'
+    message: 'Take one character at position i with ${token:i:1}.'
+  - pattern: '\bfor\s*\(\('
+    message: 'Walk the positions with a C-style loop: for (( i = ...; ...; i-- )).'
+forbidden_patterns:
+  - pattern: '\b(rev|tac|awk|sed|tr)\b'
+    message: "Reverse the string with a loop in Bash, not with rev, tac, awk, sed or tr."
+test_cases:
+  - name: simple token
+    args: [321cba]
+    expected_stdout: |-
+      abc123
+  - name: realistic token
+    args: [2f9a-xe4G_lf]
+    expected_stdout: |-
+      fl_G4ex-a9f2
+  - name: single character
+    args: [Z]
+    expected_stdout: |-
+      Z
+  - name: palindrome stays the same
+    args: [level]
+    expected_stdout: |-
+      level
+  - name: spaces and punctuation
+    args: ["!dlrow olleh"]
+    expected_stdout: |-
+      hello world!
+  - name: empty token
+    args: [""]
+    expected_stdout: ""
