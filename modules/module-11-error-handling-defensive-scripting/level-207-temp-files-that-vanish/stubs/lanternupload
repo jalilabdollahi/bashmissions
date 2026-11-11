@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Fake uploader: "lanternupload FILE" pretends to send FILE to the archive host.
+# Records the path it was given in .calls.log. FAKE_UPLOAD_FAIL=1 -> "server busy", status 7.
+if [[ $# -ne 1 ]]; then
+  echo "usage: lanternupload FILE" >&2
+  exit 2
+fi
+echo "path=$1" >> .calls.log
+if [[ ! -r $1 ]]; then
+  echo "lanternupload: cannot read $1" >&2
+  exit 2
+fi
+if [[ ${FAKE_UPLOAD_FAIL:-0} == 1 ]]; then
+  echo "lanternupload: server busy" >&2
+  exit 7
+fi
+echo "received $(( $(wc -l < "$1") )) lines"

@@ -1,0 +1,11 @@
+A command can be the condition of an `if`, so a failure just takes the else branch instead of stopping the script. A counted loop gives you the ceiling for free:
+
+  for (( try = 1; try <= limit; try++ )); do
+    if some_command; then
+      echo "worked"; exit 0
+    fi
+    sleep 0.1
+  done
+  echo "giving up" >&2; exit 1
+
+Check the argument first: `[[ $max =~ ^[0-9]+$ ]]` accepts only digits.

@@ -1,0 +1,10 @@
+A trap handler can just set a variable. The main code reads that variable at a safe point:
+
+  stop=0
+  trap 'stop=1' TERM
+  for item in a b c; do
+    (( stop )) && break
+    ...work...
+  done
+
+Bash runs the handler as soon as the current command finishes, so the flag flips while a job is in progress and the loop sees it before the next one.

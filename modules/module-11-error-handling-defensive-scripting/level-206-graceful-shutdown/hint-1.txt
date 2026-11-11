@@ -1,0 +1,1 @@
+This is not the Ctrl-C story. A TERM means "please stop when convenient", and a half-finished job is the worst way to stop. So the signal handler should not end the script; it should only leave a note for the loop, which then stops at a moment when nothing is half done.

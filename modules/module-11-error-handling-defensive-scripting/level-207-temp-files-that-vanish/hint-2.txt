@@ -1,0 +1,7 @@
+`mktemp TEMPLATE` creates an empty file whose name replaces the X characters of the template with random ones, and prints its path:
+
+  scratch=$(mktemp "${TMPDIR:-/tmp}/notes.XXXXXX")
+  trap 'rm -f "$scratch"' EXIT
+  echo data > "$scratch"
+
+Register the trap on the line after mktemp, with single quotes so the variable is read when the trap runs. `rm -f` stays quiet if the file is already gone.

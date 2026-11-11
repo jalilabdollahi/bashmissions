@@ -1,0 +1,9 @@
+In the first pass, don't exit at the first bad item; count them, so you can report all of them and then decide:
+
+  bad=0
+  for item in "$@"; do
+    [[ -f $item ]] || { echo "problem: $item" >&2; bad=$(( bad + 1 )); }
+  done
+  (( bad == 0 )) || exit 1
+
+Only after that, start the second loop that changes things.

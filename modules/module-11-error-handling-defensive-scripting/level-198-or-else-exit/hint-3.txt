@@ -1,0 +1,5 @@
+The whole fix is the first command (2>/dev/null hides the cd error bash would print itself):
+
+  cd "$1" 2>/dev/null || { echo "deploy: cannot enter $1" >&2; exit 1; }
+
+Keep the rm and the final echo exactly as they are, after that line. Check your work by running it once with a folder that does not exist while some .old file sits in the current directory.

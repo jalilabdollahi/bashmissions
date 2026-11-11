@@ -1,0 +1,8 @@
+There is a shell option for exactly this:
+
+  set -o pipefail
+
+With it, a pipeline's status is that of the last (right-most) command that failed, or 0 if all succeeded. Quick experiment at the prompt:
+
+  false | true; echo $?                    # 0 (the failure is hidden)
+  set -o pipefail; false | true; echo $?   # 1

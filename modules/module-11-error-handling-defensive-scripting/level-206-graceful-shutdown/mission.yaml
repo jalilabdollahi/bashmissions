@@ -1,0 +1,77 @@
+id: 206
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Graceful Shutdown
+difficulty: advanced
+xp: 160
+story: |
+  When the harbour-side server `halibut` is rebooted for patching, the system sends
+  every process a polite TERM and, a few seconds later, an impolite KILL. The
+  night-queue worker used to die in the middle of a job and leave a half-written
+  invoice. Mara wants the worker to do the decent thing: finish the job it is
+  doing, refuse to start another, and hand back whatever is still waiting.
+objective: |
+  solution.sh is a queue worker. It reads job names from queue.txt (one per
+  line) and runs them one at a time. The loop is in the starter, together with a
+  line that makes the script send itself SIGTERM in the middle of one job (when
+  the environment variable TERM_DURING equals that job's name).
+  Add a TERM trap whose handler ONLY sets a flag, `stopping=1`: it must not
+  exit, the running job has to finish. Then:
+    - at the top of every iteration, if stopping is set, leave the loop
+    - after the loop, if stopping is set: print
+        shutdown: N done, M left
+      write the names of the jobs that never started, one per line, to the
+      file queue.left (create it even if nothing is left), and exit 0
+    - otherwise print
+        drained: N done
+  N is the number of finished jobs, M the number of waiting ones.
+concepts:
+  - "trap 'stopping=1' TERM: handler sets a flag"
+  - "finish the current unit of work, then stop at a safe point"
+  - "the flag is checked between jobs, not during"
+required_patterns:
+  - pattern: 'trap\s+.*\bTERM\b'
+    message: "Catch the shutdown request with trap ... TERM."
+  - pattern: 'stopping=1'
+    message: "The handler should set stopping=1 and let the current job finish."
+test_cases:
+  - name: queue drains without interruption
+    files:
+      queue.txt: "backup-db\nthumbnails\nrotate-logs\n"
+    expected_stdout: |-
+      working on backup-db
+      finished backup-db
+      working on thumbnails
+      finished thumbnails
+      working on rotate-logs
+      finished rotate-logs
+      drained: 3 done
+    expected_files:
+      queue.left: null
+  - name: TERM arrives during the second job
+    env:
+      TERM_DURING: thumbnails
+    files:
+      queue.txt: "backup-db\nthumbnails\nsend-invoices\nrotate-logs\n"
+    expected_stdout: |-
+      working on backup-db
+      finished backup-db
+      working on thumbnails
+      finished thumbnails
+      shutdown: 2 done, 2 left
+    expected_files:
+      queue.left: "send-invoices\nrotate-logs"
+  - name: TERM during the very last job
+    env:
+      TERM_DURING: send-invoices
+    files:
+      queue.txt: "backup-db\nsend-invoices\n"
+    expected_stdout: |-
+      working on backup-db
+      finished backup-db
+      working on send-invoices
+      finished send-invoices
+      shutdown: 2 done, 0 left
+    expected_files:
+      queue.left: ""

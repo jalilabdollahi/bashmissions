@@ -1,0 +1,1 @@
+Write down the failures first (usage, missing file, bad content, service down) and give each one a different number. Then arrange the script as a ladder: check the cheapest problem first, and leave through `exit` with that problem's number as soon as you find it.

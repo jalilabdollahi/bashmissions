@@ -1,0 +1,6 @@
+`trap 'command' EXIT` registers a command to run when the shell exits: normal end, `exit`, or death by `set -e`. A function name works too and reads better:
+
+  tidy() { rm -f scratch.txt; echo "bye"; }
+  trap tidy EXIT
+
+Register it right after you create the thing it cleans up.

@@ -1,1 +1,0 @@
-Capture exit codes immediately after the command you care about; later commands overwrite `$?`.

@@ -1,0 +1,10 @@
+Inside a function, `return N` sets its exit status (a function's status is what the caller sees in `$?`). Right after a pipeline, `${PIPESTATUS[0]}` holds the status of its first command, or turn on `set -o pipefail` so the pipeline fails when any stage does.
+
+  step() {
+    producer | tee out.log
+    code=${PIPESTATUS[0]}
+    (( code == 0 )) || return "$code"
+  }
+  step || exit $?
+
+`|| exit $?` runs only when `step` failed, and `$?` is then step's status.

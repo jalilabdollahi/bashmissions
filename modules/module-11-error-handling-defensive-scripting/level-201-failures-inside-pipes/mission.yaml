@@ -1,0 +1,59 @@
+id: 201
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Failures Inside Pipes
+difficulty: intermediate
+xp: 140
+story: |
+  Priya's weekly traffic summary has been reporting "success" for days, yet
+  the numbers are strangely small. The cause: the log download from the
+  server drops its connection half-way, but the pipeline that sorts and saves
+  the result ends with a command that is perfectly happy, and a pipeline only
+  reports the status of its last command. The failure is swallowed by the pipe.
+objective: |
+  solution.sh takes a site name and builds a summary of its distinct request lines:
+    fetchlog SITE | sort -u > summary.txt
+  After the pipeline, if it succeeded print
+    summary ready: N distinct lines
+  where N is the number of lines in summary.txt. If the pipeline failed anywhere,
+  print
+    fetch failed for SITE
+  to stderr and exit with status 3.
+  The starter already contains the pipeline and the check, and today it reports
+  success even when fetchlog fails. Make the pipeline's status reflect the
+  failure of ANY stage, using `set -o pipefail`. Do not use `set -e`.
+concepts:
+  - "a pipeline's status is its last command's by default"
+  - "set -o pipefail: first failing stage decides"
+required_patterns:
+  - pattern: 'pipefail'
+    message: "Turn on set -o pipefail so a failure anywhere in the pipe counts."
+forbidden_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*e'
+    message: "Keep set -e out of this level: the script checks the pipeline itself."
+test_cases:
+  - name: healthy download
+    args: [harbour-bakery]
+    expected_stdout: "summary ready: 3 distinct lines"
+    expected_files:
+      summary.txt: "GET /cart\nGET /menu\nPOST /order"
+  - name: another site
+    args: [gull-anchor]
+    expected_stdout: "summary ready: 4 distinct lines"
+  - name: dropped connection is reported
+    args: [harbour-bakery]
+    env:
+      FAKE_FETCH_FAIL: "1"
+    expected_stdout: ""
+    expected_stderr: "fetch failed for harbour-bakery"
+    stderr_comparison: contains
+    expected_exit: 3
+  - name: dropped connection on a quiet site
+    args: [tidewater-books]
+    env:
+      FAKE_FETCH_FAIL: "1"
+    expected_stdout: ""
+    expected_stderr: "fetch failed for tidewater-books"
+    stderr_comparison: contains
+    expected_exit: 3

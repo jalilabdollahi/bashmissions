@@ -1,0 +1,1 @@
+You want Bash to speak up at the moment a command fails, and to know two things then: where in the file it is, and what it was trying to run. Both are available as special variables; you only need a hook that runs on failure.

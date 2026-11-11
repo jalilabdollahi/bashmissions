@@ -1,0 +1,9 @@
+Inside run_stage, directly after the lanternci pipeline:
+
+  status=${PIPESTATUS[0]}
+  if (( status != 0 )); then
+    echo "[$1] failed with status $status" >&2
+    return "$status"
+  fi
+
+(read PIPESTATUS before any other command). Then the main part is three lines of the form `run_stage build || exit $?`.

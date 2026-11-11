@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Fake CI stage runner: "lanternci STAGE" with STAGE = build, test or ship.
+# The stage named in FAKE_CI_FAIL_STAGE fails with status FAKE_CI_CODE (default 1).
+case ${1:-} in
+  build|test|ship) ;;
+  *) echo "usage: lanternci build|test|ship" >&2; exit 2 ;;
+esac
+echo "ci: $1 running"
+if [[ ${FAKE_CI_FAIL_STAGE:-} == "$1" ]]; then
+  echo "ci: $1 FAILED"
+  exit "${FAKE_CI_CODE:-1}"
+fi
+echo "ci: $1 ok"

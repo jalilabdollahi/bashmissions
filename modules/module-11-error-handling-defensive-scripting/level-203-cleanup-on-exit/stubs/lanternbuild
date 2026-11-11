@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Fake build tool. Reports whether the lock file exists while it runs.
+# FAKE_BUILD_STATUS=N makes the build finish with exit status N (default 0).
+if [[ -e deploy.lock ]]; then lock=held; else lock=absent; fi
+echo "building (lock: $lock)"
+exit "${FAKE_BUILD_STATUS:-0}"

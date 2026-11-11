@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake TCP probe: "probe PORT" succeeds silently, unless FAKE_PROBE_DOWN=1
+# (then "connection refused" and status 1).
+if [[ $# -ne 1 || ! $1 =~ ^[0-9]+$ ]]; then
+  echo "usage: probe PORT" >&2
+  exit 2
+fi
+if [[ ${FAKE_PROBE_DOWN:-0} == 1 ]]; then
+  echo "probe: connection refused on port $1" >&2
+  exit 1
+fi
+exit 0

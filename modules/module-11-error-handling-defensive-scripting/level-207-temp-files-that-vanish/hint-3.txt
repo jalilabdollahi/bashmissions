@@ -1,0 +1,10 @@
+Replace the three lines of work with:
+
+  set -e
+  tmp=$(mktemp "${TMPDIR:-/tmp}/list.XXXXXX")
+  trap 'rm -f "$tmp"' EXIT
+  sort -u "$1" > "$tmp"
+  lanternupload "$tmp"
+  echo "sent clean copy of $1"
+
+If the list file does not exist, sort fails, set -e stops the script, and the trap still deletes the scratch file.

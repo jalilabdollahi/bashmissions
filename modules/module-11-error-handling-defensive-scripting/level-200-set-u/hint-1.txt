@@ -1,1 +1,0 @@
-Use the defensive scripting concept from the curriculum: abort on unset variable.

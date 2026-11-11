@@ -1,0 +1,86 @@
+id: 210
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Retry a Flaky Command
+difficulty: advanced
+xp: 170
+story: |
+  The CDN upload at Lanternfish fails about one time in ten with "connection
+  reset", and succeeds if you simply try again a moment later. Right now a
+  person does the trying again, usually at 4 a.m. Ollie suggests an infinite loop
+  that retries until it works, and Mara asks what happens on the night the CDN is
+  really down. Right: your script would never stop. Retries need a ceiling.
+objective: |
+  Write solution.sh that takes one argument, MAX, the maximum number of attempts
+  (a whole number of at least 1). If MAX is missing, not made of digits, or zero,
+  print
+    usage: solution.sh MAX
+  to stderr and exit 2.
+  Run `lanternpush` (silence it with `> /dev/null 2>&1`) up to MAX times:
+    - after each attempt that fails print "attempt K failed" (K = 1, 2, ...)
+      and, when there are attempts left, `sleep 0.1` before the next one
+    - on the first success print "pushed on attempt K" and exit 0
+    - when all MAX attempts have failed print
+        giving up after MAX attempts
+      to stderr and exit 1. No sleep after the last failure.
+  The command must never be run more than MAX times.
+concepts:
+  - "bounded retry loop"
+  - "a counter plus a ceiling"
+  - "pause between attempts, and stop after the last"
+required_patterns:
+  - pattern: '\bsleep\b'
+    message: "Pause briefly between attempts with sleep 0.1."
+  - pattern: '\b(for|while|until)\b'
+    message: "Use a loop for the attempts."
+test_cases:
+  - name: works at once
+    args: ["3"]
+    expected_stdout: "pushed on attempt 1"
+    expected_files:
+      .push-count: "1"
+  - name: succeeds on the third try
+    args: ["5"]
+    env:
+      FAKE_FAILS: "2"
+    expected_stdout: |-
+      attempt 1 failed
+      attempt 2 failed
+      pushed on attempt 3
+    expected_files:
+      .push-count: "3"
+  - name: gives up after the limit
+    args: ["3"]
+    env:
+      FAKE_FAILS: "99"
+    expected_stdout: |-
+      attempt 1 failed
+      attempt 2 failed
+      attempt 3 failed
+    expected_stderr: "giving up after 3 attempts"
+    expected_exit: 1
+    expected_files:
+      .push-count: "3"
+  - name: a single attempt is a single attempt
+    args: ["1"]
+    env:
+      FAKE_FAILS: "1"
+    expected_stdout: "attempt 1 failed"
+    expected_stderr: "giving up after 1 attempts"
+    expected_exit: 1
+    expected_files:
+      .push-count: "1"
+  - name: nonsense limit
+    args: ["lots"]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh MAX"
+    expected_exit: 2
+    expected_files:
+      .push-count: null
+  - name: zero is not a limit
+    args: ["0"]
+    expected_stderr: "usage: solution.sh MAX"
+    expected_exit: 2
+    expected_files:
+      .push-count: null

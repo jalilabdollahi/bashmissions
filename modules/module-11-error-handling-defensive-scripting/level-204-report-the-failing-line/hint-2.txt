@@ -1,0 +1,5 @@
+`trap 'commands' ERR` runs the commands whenever a command fails (with the same exceptions as set -e). Inside it, `$LINENO` is the line number of the failing command and `$BASH_COMMAND` is its text. Use single quotes so they are read late:
+
+  trap 'echo "oops at line $LINENO: $BASH_COMMAND" >&2' ERR
+
+Add set -e too, so the script stops after reporting.

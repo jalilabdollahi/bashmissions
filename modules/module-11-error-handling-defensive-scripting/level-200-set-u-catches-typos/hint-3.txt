@@ -1,0 +1,5 @@
+Add `set -u` as line 2, correct the spelling of DEPLOY_ROOT in the target line, and use the default form for the tag:
+
+  target="$DEPLOY_ROOT/releases/${RELEASE_TAG:-latest}"
+
+Test the three situations by hand: both set, only the root set, and the root missing.

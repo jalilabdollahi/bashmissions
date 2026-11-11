@@ -1,0 +1,7 @@
+The special variable is `$?`. It is overwritten by every command, even `echo`, so save it at once:
+
+  ls /some/folder
+  code=$?
+  echo "ls said $code"
+
+grep has three outcomes: 0 found, 1 not found, 2 trouble. A `case $status in 0) ... ;; 1) ... ;; *) ... ;; esac` fits that shape nicely.

@@ -1,0 +1,93 @@
+id: 214
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Exit Codes Through Layers
+difficulty: expert
+xp: 200
+story: |
+  The deploy pipeline is three stages: build, test, ship. Theo wrapped each stage
+  in a function that also saves its output to a log with `tee`. Since then the
+  pipeline has "succeeded" every night, including the night the tests failed and
+  the broken release was shipped anyway. The failure was real; it just got lost
+  on the way up through the function, the pipe and the main script. Today you make
+  the number arrive at the top, exactly as it left the bottom. It is the last
+  mission of the module: everything so far is in play.
+objective: |
+  Write solution.sh with a function `run_stage NAME` and a main part.
+  run_stage NAME must:
+    - print "[NAME] start" on stdout
+    - run `lanternci NAME 2>&1 | tee NAME.log` (so the stage's output appears
+      on stdout and is saved in NAME.log)
+    - if lanternci's exit status is not 0, print
+        [NAME] failed with status N
+      to stderr and `return N` with that same status.
+  The status that matters is lanternci's, not tee's: either `set -o pipefail`
+  or `${PIPESTATUS[0]}` gets it.
+  The main part runs run_stage for build, then test, then ship, in this order,
+  stops at the first stage that fails and exits with that stage's status (later
+  stages must not run, and must not leave a log). If all three succeed it prints
+  "deployed" and exits 0.
+concepts:
+  - "exit status travels: command -> pipe -> function -> script"
+  - "return N in a function, exit $? in the caller"
+  - "PIPESTATUS / pipefail so tee does not mask the status"
+required_patterns:
+  - pattern: 'PIPESTATUS|pipefail'
+    message: "tee would hide lanternci's status: use set -o pipefail or ${PIPESTATUS[0]}."
+  - pattern: '\breturn\b'
+    message: "Pass the status up from the function with return."
+test_cases:
+  - name: all stages pass
+    expected_stdout: |-
+      [build] start
+      ci: build running
+      ci: build ok
+      [test] start
+      ci: test running
+      ci: test ok
+      [ship] start
+      ci: ship running
+      ci: ship ok
+      deployed
+    expected_files:
+      build.log: "ci: build running\nci: build ok"
+      test.log: true
+      ship.log: true
+  - name: tests fail with status 42
+    env:
+      FAKE_CI_FAIL_STAGE: test
+      FAKE_CI_CODE: "42"
+    expected_stdout: |-
+      [build] start
+      ci: build running
+      ci: build ok
+      [test] start
+      ci: test running
+      ci: test FAILED
+    expected_stderr: "[test] failed with status 42"
+    expected_exit: 42
+    expected_files:
+      test.log: "ci: test running\nci: test FAILED"
+      ship.log: null
+  - name: build fails with status 3
+    env:
+      FAKE_CI_FAIL_STAGE: build
+      FAKE_CI_CODE: "3"
+    expected_stdout: |-
+      [build] start
+      ci: build running
+      ci: build FAILED
+    expected_stderr: "[build] failed with status 3"
+    expected_exit: 3
+    expected_files:
+      test.log: null
+      ship.log: null
+  - name: shipping fails with status 17
+    env:
+      FAKE_CI_FAIL_STAGE: ship
+      FAKE_CI_CODE: "17"
+    expected_stderr: "[ship] failed with status 17"
+    expected_exit: 17
+    expected_files:
+      ship.log: true

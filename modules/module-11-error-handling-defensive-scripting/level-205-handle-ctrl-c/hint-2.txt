@@ -1,0 +1,9 @@
+`trap handler INT` runs `handler` when SIGINT arrives (the signal Ctrl-C sends). After a handler runs, the script continues unless the handler itself exits. A generic shape:
+
+  stop_now() {
+    echo "stopping at step $step"
+    exit 130
+  }
+  trap stop_now INT
+
+Exit status 130 is 128 + 2, the number of SIGINT.

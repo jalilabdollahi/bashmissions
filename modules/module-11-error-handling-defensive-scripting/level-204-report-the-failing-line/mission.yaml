@@ -1,0 +1,61 @@
+id: 204
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Report the Failing Line
+difficulty: advanced
+xp: 150
+story: |
+  Ollie ran the release packager at 02:00 and found only "exit status 1" in the
+  morning log. Which of the three steps died? Ollie has no idea, and is too polite
+  to say so. A script that stops without saying where is almost as bad as one
+  that does not stop. Bash can tell you the line number and the exact command at
+  the moment of failure; you only need to ask it to.
+objective: |
+  solution.sh packages a release. It has no arguments and runs these three
+  commands, in this order and spelled exactly like this:
+    mkdir -p out
+    cp release/app.tar out/
+    grep -q ^version= release/app.version
+  followed by `echo "packaged"`.
+  Start with `set -e`, then register an ERR trap whose handler writes ONE line to
+  stderr in exactly this shape:
+    error: line N: COMMAND
+  where N is the line number of the failing command in solution.sh (`$LINENO`)
+  and COMMAND is the text of that command (`$BASH_COMMAND`), for example
+    error: line 9: cp release/app.tar out/
+  Register the trap before the first command. If all steps succeed, print
+  "packaged" and exit 0; on failure the script exits with the failing command's
+  status and prints nothing on stdout.
+concepts:
+  - "trap '...' ERR runs when a command fails"
+  - "$LINENO and $BASH_COMMAND describe the failing command"
+  - "single quotes keep $LINENO from expanding too early"
+required_patterns:
+  - pattern: 'trap\s+.*\bERR\b'
+    message: "Register the handler with trap ... ERR."
+  - pattern: '\$\{?LINENO'
+    message: "Report the line with $LINENO."
+  - pattern: '\$\{?BASH_COMMAND'
+    message: "Report the command text with $BASH_COMMAND."
+  - pattern: 'set\s+-[a-zA-Z]*e'
+    message: "Use set -e so the script stops after the trap reports."
+test_cases:
+  - name: release packages cleanly
+    files:
+      release/app.tar: "tar-bytes\n"
+      release/app.version: "version=2.4.1\n"
+    expected_stdout: "packaged"
+    expected_files:
+      out/app.tar: "tar-bytes\n"
+  - name: the copy fails
+    files:
+      release/app.version: "version=2.4.1\n"
+    expected_stdout: ""
+    expected_exit: 1
+  - name: the version check fails
+    files:
+      release/app.tar: "tar-bytes\n"
+      release/app.version: "build=77\n"
+    expected_stdout: ""
+    expected_exit: 1

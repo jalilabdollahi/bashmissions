@@ -1,0 +1,1 @@
+Every command finishes with a number: 0 for "all good", something else otherwise. Bash keeps the number of the most recent command in a special variable. Run grep, then look at that number instead of at grep's output.

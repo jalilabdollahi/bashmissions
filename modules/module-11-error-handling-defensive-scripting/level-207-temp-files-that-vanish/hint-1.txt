@@ -1,0 +1,1 @@
+Two separate problems: the fixed name (two runs can collide) and the cleanup (a crash leaves the file). One tool picks a unique name for you, and a trap on exit makes the removal happen on every path.

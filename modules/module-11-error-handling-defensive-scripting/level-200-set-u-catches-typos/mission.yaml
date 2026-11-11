@@ -1,0 +1,53 @@
+id: 200
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: set -u Catches Typos
+difficulty: intermediate
+xp: 130
+story: |
+  Priya found the second half of Theo's accident. His script said
+  `rm -rf "$BUILD_DIR/"*`, but earlier he had typed the variable as BUILD_DRI.
+  Bash saw an unset name, quietly turned it into an empty string, and the command
+  became `rm -rf "/"*`. Priya wants every Lanternfish script to refuse to run
+  on a variable that does not exist. Here is the "clear old releases" planner,
+  typo included. Make it safe, then make it honest.
+objective: |
+  solution.sh is a dry-run planner. It reads two environment variables:
+    DEPLOY_ROOT   required: the folder holding the releases
+    RELEASE_TAG   optional: defaults to "latest" when it is not set
+  and prints one line (it only prints, it deletes nothing):
+    would clear DEPLOY_ROOT/releases/TAG
+  Turn on `set -u` so that using an unset variable aborts the script. The
+  starter has a typo in a variable name: find it and fix it. Give RELEASE_TAG its
+  default with `${RELEASE_TAG:-latest}`, because `set -u` would otherwise stop
+  the script when it is missing.
+  If DEPLOY_ROOT is unset, bash's own error must appear on stderr (it names the
+  variable, "DEPLOY_ROOT: unbound variable"), nothing is printed on stdout,
+  and the exit status is 1.
+concepts:
+  - "set -u (nounset)"
+  - "an unset variable is silently empty without it"
+  - "${var:-default} for variables that may legitimately be unset"
+required_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*u'
+    message: "Turn on nounset with set -u."
+  - pattern: '\$\{RELEASE_TAG:-'
+    message: "Give the optional RELEASE_TAG a default with ${RELEASE_TAG:-latest}."
+test_cases:
+  - name: both variables set
+    env:
+      DEPLOY_ROOT: /srv/sites/harbour-bakery
+      RELEASE_TAG: v12
+    expected_stdout: "would clear /srv/sites/harbour-bakery/releases/v12"
+  - name: tag falls back to latest
+    env:
+      DEPLOY_ROOT: /srv/sites/tidewater-books
+    expected_stdout: "would clear /srv/sites/tidewater-books/releases/latest"
+  - name: root missing is a hard stop
+    env:
+      RELEASE_TAG: v3
+    expected_stdout: ""
+    expected_stderr: "DEPLOY_ROOT: unbound variable"
+    stderr_comparison: contains
+    expected_exit: 1

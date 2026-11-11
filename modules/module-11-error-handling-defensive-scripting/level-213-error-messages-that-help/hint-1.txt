@@ -1,0 +1,1 @@
+Compare the starter's messages with the three questions: what went wrong, where exactly, and what the reader should do. "bad config" answers none of them. Rewrite each message so a stranger could fix the problem without asking you, and make sure they go to stderr.

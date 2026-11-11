@@ -1,0 +1,72 @@
+id: 211
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: A Time Limit by Hand
+difficulty: advanced
+xp: 175
+story: |
+  The nightly malware scan on `grouper` normally takes a minute. Once a month it
+  hangs forever, holds the backup lock, and Priya finds out at breakfast. A
+  `timeout` command exists on some systems, but not on the Mac you are developing
+  on, and not on the minimal image the server runs. Mara shrugs: "Then build it. A
+  time limit is just a background job, a sleep, and a kill."
+objective: |
+  Write solution.sh that takes one argument, LIMIT: the number of seconds
+  (may be fractional, like 0.5) the scan may run. Do not use the `timeout`
+  command.
+    1. Start `lanternscan` in the background with `&` and keep its PID (`$!`).
+    2. `sleep` for LIMIT seconds.
+    3. If the scan is still running (test with `kill -0 PID 2>/dev/null`), stop it
+       with `kill PID`, collect it with `wait PID` (ignore its status) and
+       print
+         scan timed out after LIMIT seconds
+       to stderr, then exit 124 (the status `timeout` itself uses).
+    4. Otherwise the scan already ended: `wait PID` to get its exit status.
+       Status 0: exit 0 (the scan prints "scan complete" itself).
+       Any other status N: print "scan failed with status N" to stderr and exit N.
+  Every case must end within a second or so.
+concepts:
+  - "command & runs in the background; $! is its PID"
+  - "kill -0 PID asks 'is it still alive?'"
+  - "kill PID sends TERM; wait PID collects the status"
+required_patterns:
+  - pattern: 'lanternscan[^\n]*&'
+    message: "Start lanternscan in the background with &."
+  - pattern: '\$!'
+    message: "Remember the background job's PID with $!."
+  - pattern: '\bkill\b'
+    message: "Stop a scan that overstays with kill."
+  - pattern: '\bwait\b'
+    message: "Collect the job with wait so you can read its status."
+forbidden_patterns:
+  - pattern: '\btimeout\b'
+    message: "No timeout command here: build the limit by hand with &, sleep and kill."
+timeout: 8
+test_cases:
+  - name: scan finishes in time
+    args: ["0.5"]
+    env:
+      SCAN_SECONDS: "0.1"
+    expected_stdout: "scan complete"
+  - name: scan hangs and is killed
+    args: ["0.5"]
+    env:
+      SCAN_SECONDS: "5"
+    expected_stdout: ""
+    expected_stderr: "scan timed out after 0.5 seconds"
+    expected_exit: 124
+  - name: scan fails quickly
+    args: ["0.5"]
+    env:
+      SCAN_SECONDS: "0.1"
+      SCAN_STATUS: "3"
+    expected_stdout: "scan complete"
+    expected_stderr: "scan failed with status 3"
+    expected_exit: 3
+  - name: a different limit
+    args: ["0.3"]
+    env:
+      SCAN_SECONDS: "3"
+    expected_stderr: "scan timed out after 0.3 seconds"
+    expected_exit: 124

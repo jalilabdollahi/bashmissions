@@ -1,0 +1,7 @@
+`set -e` (errexit) ends the script as soon as a simple command returns non-zero. It deliberately ignores failures in tested positions, such as the condition of an if:
+
+  set -e
+  if grep -q needle haystack.txt; then echo yes; else echo no; fi   # safe
+  grep -q needle haystack.txt                                       # would exit here
+
+The same holds for the left side of `&&` and `||`.

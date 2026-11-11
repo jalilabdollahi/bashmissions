@@ -1,0 +1,69 @@
+id: 202
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Strict Mode
+difficulty: intermediate
+xp: 145
+story: |
+  Mara pins a sticky note to your monitor: "set -euo pipefail. First line after
+  the shebang. Always." Today's script archives a customer site's stats and its
+  config into a backup folder, three steps that can each go wrong in a different
+  way: a variable nobody set, a command that fails, and a pipe whose first stage
+  dies. One line of strict mode covers all three.
+objective: |
+  Write solution.sh that takes one site name and uses the environment variable
+  BACKUP_DIR (the backup root; it is required). It must start with the
+  strict-mode line `set -euo pipefail` and then do, in order:
+    1. mkdir -p "$BACKUP_DIR/SITE"
+    2. pullstats SITE | sort > "$BACKUP_DIR/SITE/stats.txt"
+    3. cp "sites/SITE.conf" "$BACKUP_DIR/SITE/site.conf"
+    4. print "archived SITE: N lines" where N is the number of lines in stats.txt
+  Any failure must stop the script right there with a non-zero status (exit 1 in
+  these tests), so step 4 never runs after a failed step. In particular:
+  an unset BACKUP_DIR must produce bash's "unbound variable" error, and a
+  crash inside the pullstats pipe must not be hidden by sort.
+concepts:
+  - "set -e + set -u + pipefail as one habit"
+  - "each flag covers a different kind of silent failure"
+required_patterns:
+  - pattern: 'set\s+-euo\s+pipefail'
+    message: "Start with the strict-mode line: set -euo pipefail"
+test_cases:
+  - name: everything works
+    args: [dory]
+    env:
+      BACKUP_DIR: "{RUN_DIR}/backups"
+    files:
+      sites/dory.conf: "port=8080\n"
+    expected_stdout: "archived dory: 3 lines"
+    expected_files:
+      backups/dory/stats.txt: "errors=0\norders=9\nvisits=412"
+      backups/dory/site.conf: "port=8080\n"
+  - name: unset BACKUP_DIR stops the script
+    args: [dory]
+    files:
+      sites/dory.conf: "port=8080\n"
+    expected_stdout: ""
+    expected_stderr: "BACKUP_DIR: unbound variable"
+    stderr_comparison: contains
+    expected_exit: 1
+  - name: crash inside the pipe is not hidden
+    args: [eel]
+    env:
+      BACKUP_DIR: "{RUN_DIR}/backups"
+      FAKE_STATS_FAIL: "1"
+    files:
+      sites/eel.conf: "port=8081\n"
+    expected_stdout: ""
+    expected_exit: 1
+    expected_files:
+      backups/eel/site.conf: null
+  - name: missing config stops before the summary
+    args: [eel]
+    env:
+      BACKUP_DIR: "{RUN_DIR}/backups"
+    expected_stdout: ""
+    expected_exit: 1
+    expected_files:
+      backups/eel/stats.txt: true

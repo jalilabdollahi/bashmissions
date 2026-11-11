@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake flaky "push to the CDN" command. The first FAKE_FAILS calls fail (status 1),
+# later calls succeed. The number of calls so far lives in .push-count.
+n=0
+[[ -f .push-count ]] && n=$(cat .push-count)
+n=$(( n + 1 ))
+echo "$n" > .push-count
+if (( n <= ${FAKE_FAILS:-0} )); then
+  echo "lanternpush: connection reset" >&2
+  exit 1
+fi
+echo "lanternpush: ok"

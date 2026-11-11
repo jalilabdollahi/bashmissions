@@ -1,0 +1,57 @@
+id: 212
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Dependency Check
+difficulty: advanced
+xp: 175
+story: |
+  Ollie's first solo deploy failed at step 4 with "tidepool: command not found".
+  Ollie installed it and tried again. It failed at step 9: "lanternctl: command
+  not found". Three more rounds of this and it was lunchtime. Mara sighs: "A
+  script should know what it needs before it starts, and when something is
+  missing it should name everything that is missing in one go." That is the job.
+objective: |
+  Write solution.sh. Its arguments are the names of the programs the deploy needs.
+  With no arguments print
+    usage: solution.sh TOOL...
+  to stderr and exit 2.
+  Otherwise check every tool with `command -v` (hide its output with
+  `> /dev/null 2>&1`). Do NOT stop at the first missing one. At the end:
+    - if every tool exists, print "all N tools found" (N = number of arguments)
+      on stdout and exit 0
+    - otherwise print on stderr one line
+        missing: A B C
+      listing the missing tools, space-separated, in the order they were given,
+      and exit 1
+  Do not use `which`; `command -v` is the portable built-in check.
+concepts:
+  - "command -v NAME: is this tool available?"
+  - "collect every problem in an array, report once"
+  - "check dependencies at the top, before any work starts"
+required_patterns:
+  - pattern: 'command\s+-v'
+    message: "Test for a tool with command -v."
+forbidden_patterns:
+  - pattern: '\bwhich\b'
+    message: "`which` is not portable; use command -v."
+test_cases:
+  - name: everything is installed
+    args: [lanternctl, tidepool, ls]
+    expected_stdout: "all 3 tools found"
+  - name: several tools missing, order kept
+    args: [lanternctl, gorgonzola, ls, fishmonger]
+    expected_stdout: ""
+    expected_stderr: "missing: gorgonzola fishmonger"
+    expected_exit: 1
+  - name: only the last one is missing
+    args: [tidepool, lanternctl, anglerfish]
+    expected_stderr: "missing: anglerfish"
+    expected_exit: 1
+  - name: nothing is installed
+    args: [kraken, leviathan]
+    expected_stderr: "missing: kraken leviathan"
+    expected_exit: 1
+  - name: no arguments
+    expected_stderr: "usage: solution.sh TOOL..."
+    expected_exit: 2

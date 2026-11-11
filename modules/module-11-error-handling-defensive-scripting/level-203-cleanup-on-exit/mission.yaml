@@ -1,0 +1,59 @@
+id: 203
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Cleanup on Exit
+difficulty: intermediate
+xp: 145
+story: |
+  Last Tuesday Theo's deploy crashed half-way and left a deploy.lock file
+  behind. Every deploy after that politely refused to start ("someone else is
+  deploying"), and nobody was. Mara's fix is a promise the script keeps no matter
+  how it ends: the lock is released at the very end, whether the deploy
+  succeeded, failed, or was killed by its own set -e.
+objective: |
+  Write solution.sh, a deploy wrapper with no arguments:
+    1. start with `set -e` so a failing command stops the script
+    2. create the lock file with `touch deploy.lock`
+    3. register cleanup with `trap`, on the EXIT pseudo-signal: a function (or
+       command) that removes deploy.lock and prints "lock released"
+    4. run `lanternbuild` (it prints a line and may fail)
+    5. print "deploy finished"
+  Set the trap right after creating the lock, before running the build.
+  "lock released" must be printed exactly once, always as the very last line, and
+  deploy.lock must be gone afterwards, even when lanternbuild fails (the script
+  then exits with lanternbuild's status and never prints "deploy finished").
+concepts:
+  - "trap 'commands' EXIT runs when the script ends, however it ends"
+  - "cleanup registered once, close to what it cleans"
+required_patterns:
+  - pattern: 'trap\s+.*\bEXIT\b'
+    message: "Register the cleanup with trap ... EXIT."
+  - pattern: 'set\s+-[a-zA-Z]*e'
+    message: "Start with set -e."
+test_cases:
+  - name: successful deploy
+    expected_stdout: |-
+      building (lock: held)
+      deploy finished
+      lock released
+    expected_files:
+      deploy.lock: null
+  - name: build fails with status 4
+    env:
+      FAKE_BUILD_STATUS: "4"
+    expected_stdout: |-
+      building (lock: held)
+      lock released
+    expected_exit: 4
+    expected_files:
+      deploy.lock: null
+  - name: build fails with status 1
+    env:
+      FAKE_BUILD_STATUS: "1"
+    expected_stdout: |-
+      building (lock: held)
+      lock released
+    expected_exit: 1
+    expected_files:
+      deploy.lock: null

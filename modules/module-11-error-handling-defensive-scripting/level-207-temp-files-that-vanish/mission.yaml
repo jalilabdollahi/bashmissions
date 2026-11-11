@@ -1,0 +1,62 @@
+id: 207
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Temp Files That Vanish
+difficulty: advanced
+xp: 160
+story: |
+  Priya ran `df` on the backup server and found 11 GB of files named
+  `/tmp/upload.tmp`, `/tmp/upload.tmp2`, `/tmp/upload.tmp.old`... all left over
+  from crashed uploads. Worse, two jobs once wrote to the same fixed name at the
+  same time and swapped each other's data. Scratch files need two things: a name
+  nobody else can pick, and a funeral that always happens.
+objective: |
+  Write solution.sh. It takes one argument, a customer's list file, and
+    1. starts with `set -e`
+    2. creates a scratch file with `mktemp` and stores its path in a variable:
+         tmp=$(mktemp "${TMPDIR:-/tmp}/list.XXXXXX")
+       (the XXXXXX are replaced by random characters; naming TMPDIR keeps the
+       file in the right folder on both macOS and Linux)
+    3. registers `trap ... EXIT` immediately, removing that scratch file with `rm -f`
+    4. writes the sorted, de-duplicated list into the scratch file: `sort -u "$1" > "$tmp"`
+    5. runs `lanternupload "$tmp"` (it prints what it received)
+    6. prints "sent clean copy of FILE" where FILE is the argument
+  Whatever happens, success, a failed upload (the script then exits with
+  lanternupload's status) or an unreadable list file, the scratch file must not
+  exist afterwards. The tests check that the temporary folder is empty at the
+  end, and that the upload was given a path inside it.
+concepts:
+  - "mktemp creates a unique file and returns its path"
+  - "trap ... EXIT removes it on every way out"
+  - "register the trap right after creating the file"
+required_patterns:
+  - pattern: '\bmktemp\b'
+    message: "Create the scratch file with mktemp."
+  - pattern: 'trap\s+.*\bEXIT\b'
+    message: "Remove it with a trap ... EXIT handler."
+  - pattern: 'set\s+-[a-zA-Z]*e'
+    message: "Start with set -e."
+forbidden_patterns:
+  - pattern: '/tmp/'
+    message: "Do not invent a fixed /tmp name; mktemp chooses a unique one."
+test_cases:
+  - name: upload succeeds
+    args: [customers.txt]
+    files:
+      customers.txt: "pub\nbakery\npub\nbooks\n"
+    expected_stdout: |-
+      received 3 lines
+      sent clean copy of customers.txt
+  - name: upload fails
+    args: [customers.txt]
+    env:
+      FAKE_UPLOAD_FAIL: "1"
+    files:
+      customers.txt: "pub\nbakery\n"
+    expected_stdout: ""
+    expected_exit: 7
+  - name: list file is missing
+    args: [nothere.txt]
+    expected_stdout: ""
+    expected_exit: 2

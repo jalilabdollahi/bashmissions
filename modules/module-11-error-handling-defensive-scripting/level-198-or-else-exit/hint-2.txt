@@ -1,0 +1,5 @@
+`||` runs the command on its right only when the command on its left failed. To run more than one thing, put them in a group with braces (note the space after `{` and the `;` before `}`):
+
+  mkdir /srv/data || { echo "cannot create" >&2; exit 1; }
+
+`>&2` sends the echo to stderr.

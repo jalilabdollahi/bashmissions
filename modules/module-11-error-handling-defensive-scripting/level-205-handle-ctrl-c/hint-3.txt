@@ -1,0 +1,10 @@
+Before the loop:
+
+  on_interrupt() {
+    echo "interrupted after batch $last"
+    echo "$last" > import.state
+    exit 130
+  }
+  trap on_interrupt INT
+
+The handler reads the variable `last`, which the loop keeps updating, at the moment the signal arrives.

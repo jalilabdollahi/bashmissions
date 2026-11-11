@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Fake log downloader for BashMissions: "fetchlog SITE" prints the site's log lines.
+# Set FAKE_FETCH_FAIL=1 and the connection drops half-way: some lines, then status 1.
+if [[ $# -ne 1 ]]; then
+  echo "usage: fetchlog SITE" >&2
+  exit 2
+fi
+case $1 in
+  harbour-bakery) lines=("GET /menu" "GET /cart" "GET /menu" "POST /order") ;;
+  tidewater-books) lines=("GET /shelf" "GET /shelf" "GET /shelf") ;;
+  gull-anchor) lines=("GET /booking" "POST /booking" "GET /booking" "GET /map" "GET /map" "GET /gallery") ;;
+  *) echo "fetchlog: unknown site '$1'" >&2; exit 2 ;;
+esac
+printf '%s\n' "${lines[0]}" "${lines[1]}"
+if [[ ${FAKE_FETCH_FAIL:-0} == 1 ]]; then
+  echo "fetchlog: connection reset by peer" >&2
+  exit 1
+fi
+printf '%s\n' "${lines[@]:2}"

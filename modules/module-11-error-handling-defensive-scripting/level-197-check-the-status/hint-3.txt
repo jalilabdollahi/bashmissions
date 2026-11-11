@@ -1,0 +1,11 @@
+Skeleton:
+
+  grep -qx 'maintenance=on' "$file" 2>/dev/null
+  status=$?
+  case $status in
+    0) echo "maintenance: ON" ;;
+    1) ...
+    *) echo "cannot read $file (grep status $status)" >&2; exit 2 ;;
+  esac
+
+Fill in the status-1 branch. Do not put any command between grep and status=$?.

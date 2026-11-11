@@ -1,0 +1,5 @@
+Short options can be bundled, and the pipefail option goes with `-o`:
+
+  set -euo pipefail
+
+That is -e (errexit), -u (nounset) and -o pipefail together. After that line, write the steps as plain commands; no manual `|| exit` checks are needed.

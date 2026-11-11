@@ -1,0 +1,1 @@
+You need a loop with two ways out: the command works (leave with success) or the counter runs past the limit (leave with failure). Decide where the counter starts, where it ends, and where the pause goes so you do not wait pointlessly after the final failure.
