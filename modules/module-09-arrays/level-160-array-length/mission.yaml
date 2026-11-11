@@ -1,19 +1,53 @@
 id: 160
 module: 9
 module_name: arrays
-module_display: Arrays
+module_display: Arrays & Maps
 title: Array Length
-difficulty: intermediate
-xp: 155
-objective: Store four server names in an array and print the number of elements as
-  count=<number>.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: count=4
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+difficulty: beginner
+xp: 110
+story: |
+  The harbour office has bought a label printer. Each server gets a sticky tag,
+  and the printer needs to know two numbers before it warms up: how many tags
+  to load, and how wide the first one will be. Theo wrote a draft, but his
+  "length" printed the number of letters in one name, not the number of
+  servers. Everyone ended up with one tag, very long.
+objective: |
+  Write solution.sh. Its arguments are server names. Store them in an array
+  and print exactly two lines:
+    servers: <number of elements in the array>
+    first tag width: <number of characters in the first element>
+  With no arguments both numbers are 0. A name may contain spaces and counts
+  as one element. Use the array length expansion ${#name[@]} for the first
+  number.
 concepts:
-- '`${#arr[@]}`'
-scaffold: true
+  - "${#arr[@]} counts the elements"
+  - "${#arr[0]} counts the characters of one element"
+required_patterns:
+  - pattern: '\$\{#\w+\[@\]\}'
+    message: "Count the elements with ${#fleet[@]}."
+test_cases:
+  - name: three servers
+    args: [anchovy, barracuda, cuttlefish]
+    expected_stdout: |-
+      servers: 3
+      first tag width: 7
+  - name: a long first name and a spaced one
+    args: ["giant grouper", "eel", "old dory"]
+    expected_stdout: |-
+      servers: 3
+      first tag width: 13
+  - name: just one
+    args: [halibut]
+    expected_stdout: |-
+      servers: 1
+      first tag width: 7
+  - name: empty fleet
+    args: []
+    expected_stdout: |-
+      servers: 0
+      first tag width: 0
+  - name: eight short names
+    args: [a, b, c, d, e, f, g, h]
+    expected_stdout: |-
+      servers: 8
+      first tag width: 1

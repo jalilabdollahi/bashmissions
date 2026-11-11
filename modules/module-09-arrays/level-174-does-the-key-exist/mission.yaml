@@ -1,0 +1,67 @@
+id: 174
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Does the Key Exist?
+difficulty: advanced
+xp: 150
+story: |
+  Theo's deployment tool reads a settings file full of key=value lines. His
+  script treated "I got an empty string" as "the setting is missing" and
+  happily applied a default timeout over the top of a setting someone had
+  deliberately left blank to mean "no timeout at all". Priya wants a checker
+  that tells the three situations apart: a setting with a value, a setting
+  that is set but blank, and a setting that is not there at all.
+objective: |
+  Write solution.sh. The first argument is a settings file with lines of the
+  form key=value (split at the first equals sign; the value may be empty or
+  contain more equals signs). Lines that are blank, start with "#", or contain
+  no "=" are ignored. A key that appears twice takes the later value.
+  Load the file into an associative array, then for each remaining argument
+  (a key to check) print one line:
+    <key>: <value>        when the key is set to a non-empty value
+    <key>: (empty)        when the key is set, but its value is empty
+    <key>: (not set)      when the key does not appear in the file
+  Decide "set or not" with the -v test: [[ -v settings[$key] ]]
+  If no file argument is given, print "usage: solution.sh FILE [KEY...]" to
+  stderr and exit with status 2.
+concepts:
+  - "[[ -v map[key] ]] tests whether a key exists"
+  - "empty value versus missing key"
+required_patterns:
+  - pattern: '-v\s+\w+\['
+    message: "Test existence with [[ -v settings[$key] ]]; ${settings[$key]:-} cannot tell empty from missing."
+test_cases:
+  - name: value, empty and missing
+    files:
+      "app.conf": "timeout=30\nmotd=\nregion=eu-west\n"
+    args: ["app.conf", timeout, motd, colour]
+    expected_stdout: |-
+      timeout: 30
+      motd: (empty)
+      colour: (not set)
+  - name: comments, blanks and equals signs in values
+    files:
+      "s.conf": "# deployment settings\n\ndsn=db=primary;ssl=on\nflag\n#debug=1\nname=Gull & Anchor\n"
+    args: ["s.conf", dsn, flag, debug, name]
+    expected_stdout: |-
+      dsn: db=primary;ssl=on
+      flag: (not set)
+      debug: (not set)
+      name: Gull & Anchor
+  - name: later value wins, even to empty
+    files:
+      "twice.conf": "retries=5\nretries=\nbackoff=2\nbackoff=9\n"
+    args: ["twice.conf", retries, backoff]
+    expected_stdout: |-
+      retries: (empty)
+      backoff: 9
+  - name: no keys asked
+    files:
+      "one.conf": "a=1\n"
+    args: ["one.conf"]
+    expected_stdout: ""
+  - name: no file argument
+    args: []
+    expected_stderr: "usage: solution.sh FILE [KEY...]"
+    expected_exit: 2

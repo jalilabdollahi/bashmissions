@@ -1,0 +1,1 @@
+Inside a loop, colours+=("$x") appends one new element holding the text of $x. The round brackets are essential: colours+="$x" without them glues the text onto the end of the FIRST element instead. To keep spaces and backslashes in a line, read with IFS= read -r line.

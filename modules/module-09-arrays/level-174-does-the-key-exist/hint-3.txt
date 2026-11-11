@@ -1,0 +1,9 @@
+for key in "$@"; do
+  if [[ ! -v settings[$key] ]]; then
+    echo "$key: (not set)"
+  elif [[ -z ${settings[$key]} ]]; then
+    # the key exists but holds nothing
+  else
+    # print the value
+  fi
+done

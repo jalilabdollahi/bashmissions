@@ -1,0 +1,63 @@
+id: 173
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Iterate Keys in Order
+difficulty: advanced
+xp: 150
+story: |
+  The machine room has numbered rack units, and Mara's cabling sheet has to be
+  printed from the top of the rack down: unit 2, unit 10, unit 14. The first
+  draft of the sheet came out as 10, 14, 2 because the keys were sorted as
+  text. Ollie also wants a "bottom-up" version for the technician who works
+  from the floor. The data arrives as unit=device pairs and some devices have
+  spaces and even equals signs in their descriptions.
+objective: |
+  Write solution.sh. Each argument is a pair "UNIT=DEVICE", where UNIT is a
+  whole number and DEVICE is everything after the FIRST equals sign. The first
+  argument may instead be the single word "--reverse"; it is not a pair and
+  only changes the order.
+  Store the pairs in an associative array (unit as key; if a unit appears
+  twice, the later pair wins). Then print one line per unit:
+    U<unit>: <device>
+  Normally in ascending numeric order of unit; with --reverse in descending
+  numeric order. No pairs prints nothing. Sort the keys with sort -n
+  (and -r for reverse); map order itself is unspecified.
+concepts:
+  - "iterate map keys in a chosen order"
+  - "printf '%s\\n' \"${!map[@]}\" | sort -n"
+  - "splitting key=value with ${arg%%=*} and ${arg#*=}"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Store the pairs in an associative array: declare -A rack."
+  - pattern: 'sort\s+-r?n'
+    message: "Keys are numbers: sort them with sort -n (not as text)."
+test_cases:
+  - name: numeric, not alphabetical
+    args: ["10=switch", "2=patch panel", "14=ups", "3=anchovy"]
+    expected_stdout: |-
+      U2: patch panel
+      U3: anchovy
+      U10: switch
+      U14: ups
+  - name: reverse order
+    args: ["--reverse", "1=barracuda", "20=cuttlefish", "5=dory"]
+    expected_stdout: |-
+      U20: cuttlefish
+      U5: dory
+      U1: barracuda
+  - name: later pair wins and = inside the device
+    args: ["7=eel", "7=eel (replaced)", "9=console cable=blue"]
+    expected_stdout: |-
+      U7: eel (replaced)
+      U9: console cable=blue
+  - name: a single pair
+    args: ["42=flounder"]
+    expected_stdout: |-
+      U42: flounder
+  - name: no pairs
+    args: []
+    expected_stdout: ""
+  - name: reverse with no pairs
+    args: ["--reverse"]
+    expected_stdout: ""

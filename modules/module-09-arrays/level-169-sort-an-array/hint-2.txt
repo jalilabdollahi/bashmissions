@@ -1,1 +1,1 @@
-Quote array expansions with double quotes so elements that contain spaces stay intact.
+printf '%s\n' "${arr[@]}" prints one element per line, which can be piped into sort (add -n for numeric order). Collect the output with mapfile -t sorted < <( ... ). Watch out: printf '%s\n' with an empty array still prints one empty line, so handle the no-items case before the pipe.

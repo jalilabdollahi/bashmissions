@@ -1,0 +1,1 @@
+Blanking a value is not the same as deleting the entry: the key would still be there and still show up in every loop over the keys. There is a command for removing a key outright. Counting only the real removals needs the test from the previous level.

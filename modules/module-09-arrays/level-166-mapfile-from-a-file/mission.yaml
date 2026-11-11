@@ -1,0 +1,83 @@
+id: 166
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: mapfile from a File
+difficulty: intermediate
+xp: 130
+story: |
+  Marlin is Lanternfish's busiest web box, and its host list lives in a plain
+  text file, one hostname per line, edited by three different people. Theo has
+  been loading it with `for h in $(cat hosts.txt)`, which falls over the day
+  someone writes "old dory" on a line, and quietly drops the blank line that
+  marks a section break. He asks you to load the file the proper way.
+objective: |
+  Write solution.sh. Its one argument is the path of a text file with one entry
+  per line. Load every line into an array with `mapfile -t`, reading the file
+  directly (`< "$file"`). Then print exactly:
+    loaded: <number of lines>
+    first: <first line>
+    last: <last line>
+  Every line counts, including blank ones, and spaces inside a line are kept.
+  An empty file prints loaded: 0 and "first: (none)" and "last: (none)".
+  If no argument is given print "usage: solution.sh FILE" to stderr and exit
+  with status 2. If the file is not readable print "no such file: <path>" to
+  stderr and exit with status 1.
+concepts:
+  - "mapfile -t arr < file reads lines into an array"
+  - "-t strips the trailing newline from each element"
+required_patterns:
+  - pattern: 'mapfile\s+-t\b'
+    message: 'Load the file with mapfile -t hosts < "$file".'
+forbidden_patterns:
+  - pattern: '\$\(\s*cat\b|\bwhile\b'
+    message: "Let mapfile read the file itself: no cat, no read loop."
+test_cases:
+  - name: plain host list
+    files:
+      "hosts.txt": "anchovy\nbarracuda\ncuttlefish\ndory\n"
+    args: ["hosts.txt"]
+    expected_stdout: |-
+      loaded: 4
+      first: anchovy
+      last: dory
+  - name: spaces and a blank line are kept
+    files:
+      "marlin.txt": "marlin-1\n\nold dory\neel (spare)\n"
+    args: ["marlin.txt"]
+    expected_stdout: |-
+      loaded: 4
+      first: marlin-1
+      last: eel (spare)
+  - name: no newline at the end
+    files:
+      "tail.txt": "flounder\ngrouper"
+    args: ["tail.txt"]
+    expected_stdout: |-
+      loaded: 2
+      first: flounder
+      last: grouper
+  - name: a single line
+    files:
+      "one.txt": "halibut\n"
+    args: ["one.txt"]
+    expected_stdout: |-
+      loaded: 1
+      first: halibut
+      last: halibut
+  - name: empty file
+    files:
+      "empty.txt": ""
+    args: ["empty.txt"]
+    expected_stdout: |-
+      loaded: 0
+      first: (none)
+      last: (none)
+  - name: file is missing
+    args: ["ghost.txt"]
+    expected_stderr: "no such file: ghost.txt"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh FILE"
+    expected_exit: 2

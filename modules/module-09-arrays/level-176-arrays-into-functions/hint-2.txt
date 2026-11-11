@@ -1,0 +1,1 @@
+Inside a function, local -n alias=$1 makes alias a name reference: another name for the variable whose name is in $1. After that ${alias[@]}, ${#alias[@]} and ${alias[0]} read the caller's array. Call the function as summarize web (no dollar sign, no brackets). Do not give the reference the same name as the array you pass, or the name points at itself.

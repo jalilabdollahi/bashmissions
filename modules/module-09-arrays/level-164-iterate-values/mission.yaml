@@ -1,0 +1,56 @@
+id: 164
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Iterate Values
+difficulty: intermediate
+xp: 120
+story: |
+  It is the last Friday of the month and Gus is staring at a column of invoice
+  amounts he copied from the billing system. He needs two numbers for the board
+  meeting: the total billed, and how many invoices were "large" (100 dollars or
+  more) because those are the ones the accountant checks by hand. He has
+  promised the board a script, not a calculator.
+objective: |
+  Write solution.sh. Its arguments are invoice amounts, whole dollars. Store
+  them in an array, then walk through the VALUES with a for loop over
+  "${amounts[@]}" and compute:
+    total: <sum of all amounts>
+    large: <how many amounts are 100 or more>
+  Print exactly those two lines. With no arguments both are 0.
+  You only need the values, not their positions.
+concepts:
+  - "for x in \"${arr[@]}\" visits each value"
+  - "accumulating a total and a counter while looping"
+required_patterns:
+  - pattern: 'for\s+\w+\s+in\s+"\$\{\w+\[@\]\}"'
+    message: 'Loop over the values with: for amount in "${amounts[@]}"; do'
+forbidden_patterns:
+  - pattern: '\$\{!'
+    message: "This level iterates the values themselves; ${!arr[@]} (the indexes) is for the next level."
+test_cases:
+  - name: mixed invoices
+    args: ["120", "40", "99", "100", "15"]
+    expected_stdout: |-
+      total: 374
+      large: 2
+  - name: all small
+    args: ["5", "10", "20"]
+    expected_stdout: |-
+      total: 35
+      large: 0
+  - name: one huge one
+    args: ["2500"]
+    expected_stdout: |-
+      total: 2500
+      large: 1
+  - name: nothing invoiced
+    args: []
+    expected_stdout: |-
+      total: 0
+      large: 0
+  - name: boundary is inclusive
+    args: ["100", "100", "99"]
+    expected_stdout: |-
+      total: 299
+      large: 2

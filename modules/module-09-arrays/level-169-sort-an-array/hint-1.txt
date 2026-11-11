@@ -1,1 +1,1 @@
-Use the array concept from the curriculum for this level: `readarray` + `sort`.
+Bash cannot sort an array by itself, but sort can sort lines. Send the array out as one item per line, let sort do the work, and bring the lines back into an array. The "bring back" step is something you did in the previous two levels.

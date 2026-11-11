@@ -1,0 +1,75 @@
+id: 172
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Counting with a Map
+difficulty: advanced
+xp: 150
+story: |
+  Gus is drawing the pricing slide for the investors: how many customers are on
+  each plan? The billing export is a stream with one plan name per customer,
+  hundreds of lines, in no useful order. He does not want to know who is on a
+  plan, only how many, and he wants the plans listed alphabetically so the
+  slide is the same every month.
+objective: |
+  Write solution.sh. Read plan names from standard input, one per line (a name
+  may contain spaces; empty lines are skipped). Count how many times each
+  name occurs using an associative array (`declare -A count`), where the plan
+  name is the key and the number of customers is the value.
+  After the input ends, print one line per distinct plan, sorted by plan name
+  in byte order, in this format:
+    <plan>: <count>
+  Empty input prints nothing. Do not use uniq or sort|uniq -c; the point is to
+  count with the map. (You may use sort on the keys to get the order.)
+concepts:
+  - "count[$key]=$(( ${count[$key]:-0} + 1 ))"
+  - "a map where the value is a counter"
+  - "keys are unordered: sort them for output"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Count with an associative array: declare -A count."
+forbidden_patterns:
+  - pattern: '\buniq\b'
+    message: "Do the counting with the map, not uniq -c."
+test_cases:
+  - name: three plans
+    stdin: |
+      basic
+      pro
+      basic
+      basic
+      starter
+      pro
+    expected_stdout: |-
+      basic: 3
+      pro: 2
+      starter: 1
+  - name: names with spaces and blank lines
+    stdin: "pro plus\n\npro\npro plus\n\nstarter\n"
+    expected_stdout: "pro: 1\npro plus: 2\nstarter: 1"
+  - name: one plan only
+    stdin: |
+      enterprise
+      enterprise
+      enterprise
+    expected_stdout: "enterprise: 3"
+  - name: byte order, not first-seen order
+    stdin: |
+      Zeta
+      alpha
+      Zeta
+      Beta
+      alpha
+      alpha
+    expected_stdout: |-
+      Beta: 1
+      Zeta: 2
+      alpha: 3
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""
+  - name: counts above nine
+    stdin: "x\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\ny\n"
+    expected_stdout: |-
+      x: 11
+      y: 1

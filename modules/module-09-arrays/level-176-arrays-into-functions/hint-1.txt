@@ -1,0 +1,1 @@
+Passing "${web[@]}" to a function turns the array into loose words, and the function can no longer tell where one list ends. A better idea is to pass the array's name as a plain string and let the function reach back and look at the variable with that name. Bash has a feature for exactly this.

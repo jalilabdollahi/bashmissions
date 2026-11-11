@@ -1,0 +1,89 @@
+id: 177
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Two Lists into One Map
+difficulty: advanced
+xp: 160
+story: |
+  The network team handed over two files that were meant to travel together:
+  hosts.txt with server names and ips.txt with their addresses, line 1 matched
+  to line 1, line 2 to line 2. Nobody ever merged them, so DNS has been guessing.
+  Ollie volunteers to build the lookup table, and Mara asks you to make sure the
+  script refuses to guess when the two files do not have the same number of
+  lines, because a table that is shifted by one line is worse than no table.
+objective: |
+  Write solution.sh with two arguments, HOSTFILE and IPFILE. Load each file's
+  lines into its own array with mapfile -t. If the arrays have different
+  lengths print
+    lists differ in length: <hosts> hosts, <ips> addresses
+  to stderr and exit with status 1. Otherwise zip them: build an associative
+  array that maps each host (line N of the first file) to the address on line N
+  of the second. If a host appears twice, the later line wins.
+  Print one line per distinct host as
+    <host>=<ip>
+  sorted by host name in byte order (sort the keys, not the finished lines).
+  Two empty files print nothing. With fewer than two arguments print
+  "usage: solution.sh HOSTFILE IPFILE" to stderr and exit with status 2.
+concepts:
+  - "walk two arrays with one shared index"
+  - "map[${keys[i]}]=${values[i]}"
+  - "check the lengths before you zip"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Build the table as an associative array: declare -A."
+  - pattern: 'mapfile\s+-t\b'
+    message: "Load each file with mapfile -t."
+test_cases:
+  - name: three hosts
+    files:
+      "hosts.txt": "anchovy\nbarracuda\ncuttlefish\n"
+      "ips.txt": "10.0.0.11\n10.0.0.12\n10.0.0.13\n"
+    args: ["hosts.txt", "ips.txt"]
+    expected_stdout: |-
+      anchovy=10.0.0.11
+      barracuda=10.0.0.12
+      cuttlefish=10.0.0.13
+  - name: output is sorted by host, not by file order
+    files:
+      "h.txt": "marlin\ndory2\noctopus\ndory\n"
+      "i.txt": "192.168.1.4\n192.168.1.2\n192.168.1.9\n192.168.1.1\n"
+    args: ["h.txt", "i.txt"]
+    expected_stdout: |-
+      dory=192.168.1.1
+      dory2=192.168.1.2
+      marlin=192.168.1.4
+      octopus=192.168.1.9
+  - name: repeated host, later wins
+    files:
+      "h.txt": "eel\nflounder\neel\n"
+      "i.txt": "172.16.0.5\n172.16.0.6\n172.16.0.7\n"
+    args: ["h.txt", "i.txt"]
+    expected_stdout: |-
+      eel=172.16.0.7
+      flounder=172.16.0.6
+  - name: names with spaces are kept whole
+    files:
+      "h.txt": "old grouper\nhalibut\n"
+      "i.txt": "10.1.1.1\n10.1.1.2\n"
+    args: ["h.txt", "i.txt"]
+    expected_stdout: |-
+      halibut=10.1.1.2
+      old grouper=10.1.1.1
+  - name: more hosts than addresses
+    files:
+      "h.txt": "a\nb\nc\n"
+      "i.txt": "1.1.1.1\n2.2.2.2\n"
+    args: ["h.txt", "i.txt"]
+    expected_stderr: "lists differ in length: 3 hosts, 2 addresses"
+    expected_exit: 1
+  - name: two empty files
+    files:
+      "h.txt": ""
+      "i.txt": ""
+    args: ["h.txt", "i.txt"]
+    expected_stdout: ""
+  - name: one argument
+    args: ["h.txt"]
+    expected_stderr: "usage: solution.sh HOSTFILE IPFILE"
+    expected_exit: 2

@@ -1,0 +1,59 @@
+id: 161
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Append Items
+difficulty: beginner
+xp: 110
+story: |
+  Lanternfish's web pool starts every morning with two machines, anchovy and
+  barracuda. During the day, Mara's provisioning tool prints the names of new
+  machines that have joined, one per line. Theo needs a script that reads
+  that stream and keeps the growing pool in one array, ready for the load
+  balancer config generator he is still writing.
+objective: |
+  Write solution.sh. Start with an array named `pool` containing exactly the
+  two elements `anchovy` and `barracuda`. Read the new machines from standard
+  input, one name per line, and add each of them to the END of the array
+  (keep any spaces inside a line; do not skip blank lines).
+  After the input ends, print one line per element of the pool, in order, and
+  finally the line
+    total: <number of elements>
+  With no input at all the output is just anchovy, barracuda and total: 2.
+  Append with `pool+=(...)`.
+concepts:
+  - "arr+=(item) appends to the end"
+  - "reading lines in a loop and growing a list"
+required_patterns:
+  - pattern: '\bpool\+=\('
+    message: 'Append with pool+=("$line") - round brackets, otherwise += adds text to element 0.'
+test_cases:
+  - name: three newcomers
+    stdin: |
+      cuttlefish
+      dory
+      eel
+    expected_stdout: |-
+      anchovy
+      barracuda
+      cuttlefish
+      dory
+      eel
+      total: 5
+  - name: nobody joined
+    stdin: ""
+    expected_stdout: |-
+      anchovy
+      barracuda
+      total: 2
+  - name: names with spaces and a blank line
+    stdin: "flounder two\n\ngrouper  (spare)\n"
+    expected_stdout: "anchovy\nbarracuda\nflounder two\n\ngrouper  (spare)\ntotal: 5"
+  - name: last line without a newline
+    stdin: "halibut\nmarlin"
+    expected_stdout: |-
+      anchovy
+      barracuda
+      halibut
+      marlin
+      total: 4

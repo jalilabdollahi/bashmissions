@@ -1,0 +1,9 @@
+summarize() {
+  local -n list=$1
+  if (( ${#list[@]} == 0 )); then
+    echo "$1: 0 hosts"
+  else
+    echo "$1: ${#list[@]} hosts (first=${list[0]}, last=${list[-1]})"
+  fi
+}
+You only need to complete the "else" line, which is half-written above.

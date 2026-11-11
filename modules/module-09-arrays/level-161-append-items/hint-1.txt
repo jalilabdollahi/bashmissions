@@ -1,0 +1,1 @@
+You do not need to know how long the array is, or compute the next index. Bash has an "add to the end" assignment for arrays. Combine it with a loop that reads stdin line by line, the way you did in the loops module.

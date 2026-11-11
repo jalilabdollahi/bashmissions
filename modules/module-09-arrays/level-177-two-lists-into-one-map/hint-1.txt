@@ -1,0 +1,1 @@
+Two parallel lists are linked only by position: element 3 of one belongs with element 3 of the other. So walk one shared position through both, and store each pair in a map. Before zipping, check that the lists are even the same length.

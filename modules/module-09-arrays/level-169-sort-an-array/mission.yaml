@@ -1,22 +1,71 @@
 id: 169
 module: 9
 module_name: arrays
-module_display: Arrays
+module_display: Arrays & Maps
 title: Sort an Array
 difficulty: intermediate
-xp: 145
-objective: Sort an array alphabetically by piping its elements through sort and reading
-  the result into a new array.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    apple
-    banana
-    cherry
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 130
+story: |
+  Theo has two lists to tidy before they go in the weekly status mail: the
+  hostnames that threw alerts, and the public ports they listen on. The
+  hostnames should be alphabetical and the ports should be in numeric order
+  (22 before 443, not after it). Both lists arrive in random order from the
+  monitoring tool, and he wants a single script that handles either.
+objective: |
+  Write solution.sh. The first argument is the MODE, either "alpha" or "num".
+  Every other argument is one item. Put the items into an array, sort them,
+  and load the sorted result back into an array; then print the sorted items,
+  one per line.
+    alpha: plain byte order (LC_ALL=C is set, so uppercase letters sort before
+           lowercase)
+    num:   numeric order, smallest first
+  Items may contain spaces. With no items print nothing. If the mode is
+  missing or is neither alpha nor num, print
+  "usage: solution.sh alpha|num ITEM..." to stderr and exit with status 2.
+  Round-trip with: mapfile -t sorted < <(printf '%s\n' "${items[@]}" | sort ...)
 concepts:
-- '`readarray` + `sort`'
-scaffold: true
+  - "send an array to sort: printf '%s\\n' \"${arr[@]}\" | sort"
+  - "bring it back: mapfile -t arr < <(...)"
+  - "sort -n for numbers"
+required_patterns:
+  - pattern: 'mapfile\s+-t\s+\w+\s*<\s*<\('
+    message: 'Load the sorted list back with mapfile -t sorted < <( ... | sort )'
+  - pattern: '\bsort\b'
+    message: "Use the sort command for the ordering."
+test_cases:
+  - name: alphabetical hostnames
+    args: [alpha, flounder, anchovy, eel, dory]
+    expected_stdout: |-
+      anchovy
+      dory
+      eel
+      flounder
+  - name: numeric ports
+    args: [num, "8080", "443", "22", "3306", "80"]
+    expected_stdout: |-
+      22
+      80
+      443
+      3306
+      8080
+  - name: alpha order is not numeric order
+    args: [alpha, "8080", "443", "22", "80"]
+    expected_stdout: |-
+      22
+      443
+      80
+      8080
+  - name: uppercase first, spaces kept
+    args: [alpha, "grouper b", Eel, "grouper a", dory]
+    expected_stdout: |-
+      Eel
+      dory
+      grouper a
+      grouper b
+  - name: no items
+    args: [alpha]
+    expected_stdout: ""
+  - name: unknown mode
+    args: [reverse, a, b]
+    expected_stderr: "usage: solution.sh alpha|num ITEM..."
+    expected_exit: 2

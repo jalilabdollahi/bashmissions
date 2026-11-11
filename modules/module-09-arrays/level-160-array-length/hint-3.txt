@@ -1,1 +1,3 @@
-Build the array first, then print the exact lines shown in the mission tests.
+echo "servers: ${#fleet[@]}"
+echo "first tag width: ${#fleet[0]}"
+The starter's first line leaves out the [@]; that is the whole bug. Fix it and replace the fixed 0 in the second line.

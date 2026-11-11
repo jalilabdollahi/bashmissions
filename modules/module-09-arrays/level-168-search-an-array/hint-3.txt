@@ -1,0 +1,6 @@
+for entry in "${allowed[@]}"; do
+  if [[ $entry == "$name" ]]; then
+    # print "<name>: allowed" and leave with status 0
+  fi
+done
+# only reached when nothing matched: print "<name>: denied" and exit 1

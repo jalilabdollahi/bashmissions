@@ -1,0 +1,1 @@
+[[ -v map[$key] ]] is true when the key exists, even if its value is empty, and false when it does not. Use it first to separate "not set" from the rest, and then test the value with [[ -z ${map[$key]} ]] to separate "empty" from a real value. ${map[$key]:-x} cannot do this: it substitutes x for empty and missing alike.

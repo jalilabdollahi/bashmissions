@@ -1,0 +1,1 @@
+unset 'colours[1]' deletes element 1 of colours and leaves the others where they are. With a variable index write unset 'colours[$i]', in single quotes so that the shell does not try to match colours[$i] against file names. declare -p colours shows the gap.

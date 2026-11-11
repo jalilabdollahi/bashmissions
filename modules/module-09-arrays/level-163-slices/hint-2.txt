@@ -1,0 +1,1 @@
+${colours[@]:1:2} gives two elements starting at index 1. Variables can be used for both numbers: ${colours[@]:$start:$count}. A negative start counts from the end of the array. Keep the quotes around the whole thing so elements with spaces stay whole, and store the result in a new array if you want to test whether it is empty.

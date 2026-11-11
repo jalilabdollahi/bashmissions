@@ -1,0 +1,1 @@
+An associative array only has one "slot name" per entry, but nothing stops that name from being built out of two numbers. Write the row and the column into one string such as "2,3" and use it as the key. Then both the filling loop and the flipping loop are just two nested counters.

@@ -1,0 +1,8 @@
+declare -A owners=()
+while read -r server owner; do
+  owners[$server]=$owner
+done < "$file"
+for s in "$@"; do
+  echo "$s -> ${owners[$s]:-unassigned}"
+done
+The starter has the same loops but never declares the map as associative; fix that and the default.

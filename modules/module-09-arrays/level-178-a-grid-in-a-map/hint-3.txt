@@ -1,0 +1,11 @@
+while read -r -a cells || (( ${#cells[@]} > 0 )); do
+  (( ${#cells[@]} == 0 )) && continue
+  for c in "${!cells[@]}"; do
+    # grid[$rows,$c] = cell number c of this row
+  done
+  cols=${#cells[@]}
+  rows=$(( rows + 1 ))
+done
+for (( c = 0; c < cols; c++ )); do
+  # build one output line from grid[$r,$c] for r = 0 .. rows-1 and print it
+done

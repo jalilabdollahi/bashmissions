@@ -1,0 +1,1 @@
+"${!map[@]}" lists the keys. printf '%s\n' "${!map[@]}" | sort -n sorts them as numbers (add -r for the reverse) and mapfile -t keys < <( ... ) brings them back as an array you can loop over. To split "10=switch" use ${pair%%=*} for the part before the first equals sign and ${pair#*=} for the part after it. Assign with map[$key]=$value.

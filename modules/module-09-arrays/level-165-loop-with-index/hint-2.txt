@@ -1,1 +1,0 @@
-Quote array expansions with double quotes so elements that contain spaces stay intact.

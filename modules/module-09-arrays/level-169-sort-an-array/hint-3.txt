@@ -1,1 +1,7 @@
-Build the array first, then print the exact lines shown in the mission tests.
+if (( ${#items[@]} == 0 )); then exit 0; fi
+if [[ $mode == num ]]; then
+  mapfile -t sorted < <(printf '%s\n' "${items[@]}" | sort -n)
+else
+  mapfile -t sorted < <(# same idea without -n)
+fi
+printf '%s\n' "${sorted[@]}"

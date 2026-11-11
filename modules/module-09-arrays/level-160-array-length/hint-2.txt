@@ -1,1 +1,1 @@
-Quote array expansions with double quotes so elements that contain spaces stay intact.
+${#colours[@]} is the number of elements in the array colours. ${#colours[0]} (or plain ${#colours}) is the number of characters in the first element. For colours=(red "dark blue") the first gives 2 and the second gives 3.

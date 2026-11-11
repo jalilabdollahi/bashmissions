@@ -1,0 +1,71 @@
+id: 167
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: mapfile from a Command
+difficulty: intermediate
+xp: 130
+story: |
+  Each customer site at Lanternfish gets a config file ending in .conf, kept in
+  one directory per environment. Priya is auditing them and wants the list of
+  configs in a stable, sorted order, with a count on top, so that two audits can
+  be compared line for line. The directory listing has to come from a command,
+  because there is no ready-made list file for her to read.
+objective: |
+  Write solution.sh. Its one argument is a directory. Collect the paths of the
+  `*.conf` files directly inside it (not in subdirectories), in sorted order,
+  into an array with `mapfile -t`, fed from a command with process
+  substitution: `mapfile -t confs < <(find ... | sort)`.
+  Print:
+    found: <number of files>
+  followed by one line per file with just its file name (no directory part).
+  File names may contain spaces. Other files (such as notes.txt) are ignored.
+  If the argument is missing print "usage: solution.sh DIR" to stderr and exit
+  with status 2; if it is not a directory print "not a directory: <arg>" to
+  stderr and exit with status 1.
+concepts:
+  - "mapfile -t arr < <(command) loads a command's output"
+  - "process substitution keeps the array in the current shell"
+required_patterns:
+  - pattern: 'mapfile\s+-t\s+\w+\s*<\s*<\('
+    message: "Feed mapfile from the command with process substitution: mapfile -t confs < <(find ... | sort)"
+forbidden_patterns:
+  - pattern: '\|\s*mapfile'
+    message: "Piping into mapfile fills the array in a subshell and loses it. Use < <(command)."
+test_cases:
+  - name: three configs and a text file
+    files:
+      "site/b-harbour.conf": "x\n"
+      "site/a-tidewater.conf": "x\n"
+      "site/notes.txt": "not a config\n"
+      "site/c-pub.conf": "x\n"
+    args: ["site"]
+    expected_stdout: |-
+      found: 3
+      a-tidewater.conf
+      b-harbour.conf
+      c-pub.conf
+  - name: a space in a file name and a nested one that must be ignored
+    files:
+      "etc/old pier.conf": "x\n"
+      "etc/dental.conf": "x\n"
+      "etc/archive/ancient.conf": "x\n"
+    args: ["etc"]
+    expected_stdout: |-
+      found: 2
+      dental.conf
+      old pier.conf
+  - name: no configs at all
+    files:
+      "bare/readme.md": "hi\n"
+    args: ["bare"]
+    expected_stdout: |-
+      found: 0
+  - name: not a directory
+    args: ["nowhere"]
+    expected_stderr: "not a directory: nowhere"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

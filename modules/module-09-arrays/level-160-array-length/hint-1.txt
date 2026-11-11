@@ -1,1 +1,1 @@
-Use the array concept from the curriculum for this level: `${#arr[@]}`.
+The hash sign in front of a name asks "how long?". The trick is what you point it at: the whole list of elements, or one single element. These give two completely different numbers, and the starter prints the wrong one.

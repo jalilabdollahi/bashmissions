@@ -1,0 +1,1 @@
+declare -A ages creates an associative array. Then ages[alice]=30 stores a value under the key "alice" and ${ages[alice]} reads it. Assigning to the same key again replaces the value. For a key that was never set, ${ages[bob]:-unknown} gives a default. read -r first rest puts the first word in $first and everything else in $rest.

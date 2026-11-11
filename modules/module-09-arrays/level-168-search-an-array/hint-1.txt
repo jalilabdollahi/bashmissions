@@ -1,0 +1,1 @@
+Bash has no built-in "is this in the array?" operator, so you build it: look at the elements one by one and stop as soon as one is exactly equal to the name. Decide what you do when the loop finishes without a match.

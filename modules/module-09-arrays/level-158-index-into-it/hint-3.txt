@@ -1,0 +1,4 @@
+rack=("$@")
+echo "top: ${rack[0]}"
+echo "third: ${rack[2]}"      # index 2 is the third element
+echo "bottom: ${rack[-1]}"   # fill in the last line with a negative index

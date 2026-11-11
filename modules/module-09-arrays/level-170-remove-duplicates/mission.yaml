@@ -1,0 +1,59 @@
+id: 170
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Remove Duplicates
+difficulty: intermediate
+xp: 140
+story: |
+  Noor's desk gets a ticket every time a customer's monitor trips, and a flapping
+  server can generate a dozen identical tickets in an hour. She wants a daily
+  digest that mentions each server once, listed in the order it first
+  misbehaved, because that order tells her which fire started first. Sorting
+  would shuffle that story, so sort -u is out.
+objective: |
+  Write solution.sh. Its arguments are the server names from the day's tickets,
+  oldest first, possibly with repeats. Print each distinct name once, in the
+  order of its FIRST appearance, one per line, then a final line
+    removed: <number of repeats dropped>
+  Names are compared exactly (case-sensitive; spaces matter).
+  Build the answer in a second array using `+=`; check each item against that
+  array before appending. No sort, uniq, awk or associative arrays: those
+  come later. With no arguments print only "removed: 0".
+concepts:
+  - "build a result array and append only unseen items"
+  - "order-preserving de-duplication"
+  - "a search loop inside a loop"
+required_patterns:
+  - pattern: '\w+\+=\('
+    message: 'Collect the unique names in a second array with unique+=("$name").'
+forbidden_patterns:
+  - pattern: '\bsort\b|\buniq\b|\bawk\b|declare\s+-A|typeset\s+-A|local\s+-A'
+    message: "Keep it to a plain array and loops: sort/uniq lose the order, and maps come in a later level."
+test_cases:
+  - name: repeats in the middle
+    args: [eel, dory, eel, anchovy, dory, eel]
+    expected_stdout: |-
+      eel
+      dory
+      anchovy
+      removed: 3
+  - name: all different
+    args: [marlin, octopus, pike]
+    expected_stdout: |-
+      marlin
+      octopus
+      pike
+      removed: 0
+  - name: all the same
+    args: [halibut, halibut, halibut, halibut]
+    expected_stdout: |-
+      halibut
+      removed: 3
+  - name: case and spaces make names different
+    args: [Eel, eel, "eel ", "eel", " eel"]
+    expected_stdout: "Eel\neel\neel \n eel\nremoved: 1"
+  - name: no tickets today
+    args: []
+    expected_stdout: |-
+      removed: 0

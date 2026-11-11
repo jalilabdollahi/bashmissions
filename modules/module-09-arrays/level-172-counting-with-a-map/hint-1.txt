@@ -1,0 +1,1 @@
+You want a variable that remembers, for each plan name, how many times you have met it. That is a map whose values are numbers. Each line of input either starts a new counter at 1 or adds one to an existing counter. Mind that map keys come out in no particular order.

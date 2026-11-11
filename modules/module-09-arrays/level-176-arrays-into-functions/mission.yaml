@@ -1,0 +1,62 @@
+id: 176
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Arrays into Functions
+difficulty: advanced
+xp: 160
+story: |
+  Lanternfish runs two pools, the web servers and the database servers, and
+  Mara wants a one-glance health summary for each in the morning mail. She
+  has written the argument parsing, but the summary function is a stub: it
+  needs to look at an array, and a function cannot simply be handed one. Passing
+  "${web[@]}" to it would flatten both pools into one soup of words. The
+  function must receive the array's name and work on the real thing.
+objective: |
+  Write solution.sh. The arguments are the web servers, then the word "--",
+  then the database servers (the "--" and the database part may be missing;
+  then the db pool is empty). The starter already splits them into two arrays,
+  `web` and `db`.
+  Define a function `summarize` that takes the NAME of an array as its only
+  argument and prints one line:
+    <name>: <count> hosts (first=<first element>, last=<last element>)
+  or, for an empty array:
+    <name>: 0 hosts
+  Inside the function, bind a local name reference with `local -n` to the
+  array whose name was passed. Call it twice, for web and then db:
+    summarize web
+    summarize db
+  Element names may contain spaces.
+concepts:
+  - "local -n ref=$1 : a name reference to a caller's array"
+  - "pass the NAME, not the expanded elements"
+  - "a function sees the real array through the reference"
+required_patterns:
+  - pattern: 'local\s+-n\s+\w+=\$\{?1\}?'
+    message: 'Bind the name inside the function: local -n list=$1'
+test_cases:
+  - name: two pools
+    args: [anchovy, barracuda, cuttlefish, "--", dory, eel]
+    expected_stdout: |-
+      web: 3 hosts (first=anchovy, last=cuttlefish)
+      db: 2 hosts (first=dory, last=eel)
+  - name: no database part
+    args: [marlin, octopus]
+    expected_stdout: |-
+      web: 2 hosts (first=marlin, last=octopus)
+      db: 0 hosts
+  - name: only databases
+    args: ["--", "pike one", "pike two", "quahog"]
+    expected_stdout: |-
+      web: 0 hosts
+      db: 3 hosts (first=pike one, last=quahog)
+  - name: one host each
+    args: [halibut, "--", ray]
+    expected_stdout: |-
+      web: 1 hosts (first=halibut, last=halibut)
+      db: 1 hosts (first=ray, last=ray)
+  - name: nothing at all
+    args: []
+    expected_stdout: |-
+      web: 0 hosts
+      db: 0 hosts

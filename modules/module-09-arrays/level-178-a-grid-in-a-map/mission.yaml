@@ -1,0 +1,80 @@
+id: 178
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: A Grid in a Map
+difficulty: expert
+xp: 180
+story: |
+  Ollie has sketched the east machine room as a grid: one text line per rack
+  row, each cell the name of the machine in that rack, or "." for an empty
+  position. The cabling technician, though, walks the room column by column,
+  and the sketch is the wrong way round for her. Bash has no two-dimensional
+  arrays, but one associative array whose keys look like "2,3" can hold a whole
+  grid. Flip the sketch so she can read it down the columns.
+objective: |
+  Write solution.sh. Read the grid from standard input: one row per line,
+  cells separated by whitespace, no cell contains spaces. Skip empty lines.
+  Every row has the same number of cells. Store each cell in ONE associative
+  array under the key "<row>,<col>" (both counted from 0), for example
+  grid[$r,$c]. Then print the TRANSPOSED grid: one output line per original
+  column, containing that column's cells from the top row down, separated by
+  single spaces (no trailing space). Empty input prints nothing.
+  Example: the input
+    anchovy dory .
+    barracuda eel flounder
+  prints
+    anchovy barracuda
+    dory eel
+    . flounder
+concepts:
+  - "composite keys: grid[$row,$col]"
+  - "one map as a 2D table"
+  - "read -a splits a row into cells"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Use one associative array for the whole grid: declare -A grid."
+  - pattern: '\[\$\{?\w+\}?,\$\{?\w+\}?\]'
+    message: 'Use a composite key such as grid[$r,$c].'
+test_cases:
+  - name: two rows, three columns
+    stdin: |
+      anchovy dory .
+      barracuda eel flounder
+    expected_stdout: |-
+      anchovy barracuda
+      dory eel
+      . flounder
+  - name: three rows, two columns
+    stdin: |
+      a1 a2
+      b1 b2
+      c1 c2
+    expected_stdout: |-
+      a1 b1 c1
+      a2 b2 c2
+  - name: one row becomes one column
+    stdin: "grouper halibut marlin\n"
+    expected_stdout: |-
+      grouper
+      halibut
+      marlin
+  - name: one column becomes one row
+    stdin: |
+      octopus
+      pike
+      quahog
+    expected_stdout: "octopus pike quahog"
+  - name: blank lines and a missing final newline
+    stdin: "r0c0 r0c1\n\nr1c0 r1c1"
+    expected_stdout: |-
+      r0c0 r1c0
+      r0c1 r1c1
+  - name: more than ten rows keep their places
+    stdin: "a b\nc d\ne f\ng h\ni j\nk l\nm n\no p\nq r\ns t\nu v\nw x\n"
+    expected_stdout: |-
+      a c e g i k m o q s u w
+      b d f h j l n p r t v x
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""
