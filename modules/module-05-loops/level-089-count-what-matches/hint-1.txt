@@ -1,0 +1,1 @@
+You need two numbers that start at zero: one that grows for every line, and one that grows only for the lines you care about. The report is printed once, after all input has been read.

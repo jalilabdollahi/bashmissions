@@ -1,0 +1,6 @@
+sum=0
+while read -r customer gb; do
+  sum=$(( sum + gb ))
+  echo "$customer +$gb = $sum"
+done
+echo "total=$sum"

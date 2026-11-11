@@ -1,1 +1,0 @@
-This level simulates repeated input by walking through the arguments.

@@ -1,0 +1,36 @@
+id: 79
+module: 5
+module_name: loops
+module_display: Loops
+title: Loop over a List
+difficulty: beginner
+xp: 80
+story: |
+  Monday morning, and Mara slides a sticky note across the desk: five servers
+  need their welcome banner refreshed. "You could type five commands," she
+  says, "or you could write the list once and let Bash walk down it." The
+  note lists anchovy, barracuda, cuttlefish, dory and eel, in that order.
+objective: |
+  Write solution.sh so that it loops over the five server names above, in
+  that order, and prints one line per server:
+    refreshing banner on <name>
+  After the loop, print a final line:
+    all banners refreshed
+  Put the names directly in a `for name in ...; do ... done` loop and write
+  the echo (or printf) only once.
+concepts:
+  - "for name in a b c; do ... done"
+  - "the loop variable holds one item per round"
+required_patterns:
+  - pattern: '\bfor\s+[A-Za-z_][A-Za-z0-9_]*\s+in\b'
+    message: "Use a for loop: for name in anchovy barracuda ...; do ... done."
+single_case: true
+test_cases:
+  - name: five servers in order
+    expected_stdout: |-
+      refreshing banner on anchovy
+      refreshing banner on barracuda
+      refreshing banner on cuttlefish
+      refreshing banner on dory
+      refreshing banner on eel
+      all banners refreshed

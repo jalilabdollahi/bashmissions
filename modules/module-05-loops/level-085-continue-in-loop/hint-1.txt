@@ -1,1 +1,0 @@
-`continue` skips the rest of the current iteration.

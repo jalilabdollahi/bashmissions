@@ -1,1 +1,8 @@
-Print row plus column with no separator.
+for (( s=1; s<=servers; s++ )); do
+  printf 'servers %d:' "$s"
+  for (( m=1; m<=months; m++ )); do
+    printf '%6d' $(( s * m * 12 ))
+  done
+  printf '\n'
+done
+Set servers=$1 and months=$2 first, after checking that two arguments were given.

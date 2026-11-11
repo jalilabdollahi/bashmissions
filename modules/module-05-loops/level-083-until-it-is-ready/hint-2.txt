@@ -1,0 +1,1 @@
+until COMMAND; do BODY; done runs BODY repeatedly as long as COMMAND fails, and stops the first time COMMAND succeeds (exit status 0). Example: until grep -q ready status.txt; do echo "waiting"; done. It is the mirror image of while.

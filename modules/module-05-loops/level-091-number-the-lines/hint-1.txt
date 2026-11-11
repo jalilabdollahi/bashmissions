@@ -1,0 +1,1 @@
+You need to know where you are in the list, not only what the current item is. A counter that goes 0, 1, 2, ... can pick both the person and the day. The week has only seven days, so the position for the day must come back to the start after the seventh.

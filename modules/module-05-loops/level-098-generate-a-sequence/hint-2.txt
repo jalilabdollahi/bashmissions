@@ -1,1 +1,0 @@
-Command substitution can provide the list for a `for` loop.

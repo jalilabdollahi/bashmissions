@@ -1,1 +1,0 @@
-Nothing after `STOP` should appear in the output.

@@ -1,0 +1,1 @@
+A command ending in & runs in the background and the script carries on immediately: sleep 1 & starts a sleeper. wait with no arguments blocks until all background jobs of the script are done. Give each job its own file: probe-host "$host" > "$dir/$i" &, with dir=$(mktemp -d) and a counter i. Afterwards read the files back in order with cat or $(<file).

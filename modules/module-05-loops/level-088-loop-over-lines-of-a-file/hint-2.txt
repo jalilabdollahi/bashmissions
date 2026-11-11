@@ -1,1 +1,0 @@
-Redirect the file into the loop with `done < "$1"`.

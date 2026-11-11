@@ -1,1 +1,0 @@
-The menu is printed to stderr; stdout should contain only the selected line.

@@ -1,0 +1,1 @@
+A while loop repeats as long as its condition holds: i=1; while (( i <= 3 )); do echo "round $i"; i=$(( i + 1 )); done prints three rounds. Set the counter before the loop and change it inside; Bash will not do it for you.

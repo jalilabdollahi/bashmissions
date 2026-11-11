@@ -1,1 +1,6 @@
-The `.log` fixture should not be printed.
+shopt -s nullglob
+for file in logs/*.log; do
+  lines=$(( $(wc -l < "$file") ))
+  echo "${file##*/}: $lines"
+done
+Quote "$file" everywhere you use it, because names may contain spaces.

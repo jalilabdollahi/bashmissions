@@ -1,0 +1,58 @@
+id: 88
+module: 5
+module_name: loops
+module_display: Loops
+title: Line by Line
+difficulty: beginner
+xp: 110
+story: |
+  Priya audits the firewall notes, and she is picky: a line with leading
+  spaces must not lose them, and a Windows path with backslashes must not be
+  "helpfully" rewritten. Before she will trust your tool, she wants to see
+  that it can read a file line by line and hand each line back exactly as it
+  was, fenced in by bars so trailing spaces become visible too.
+objective: |
+  Write solution.sh that takes one argument, the path of a text file, and
+  prints every line of that file wrapped in vertical bars:
+    |<line exactly as in the file>|
+  Leading and trailing spaces and backslashes must survive unchanged.
+  An empty file prints nothing. If the file is not readable, print
+  "cannot read <path>" to stderr and exit with status 1. With no argument
+  print "usage: solution.sh FILE" to stderr and exit with status 2.
+  Read with `while IFS= read -r line; do ... done < "$file"`.
+concepts:
+  - "while IFS= read -r line; do ... done < file"
+  - "IFS= keeps spaces, -r keeps backslashes"
+required_patterns:
+  - pattern: 'IFS=(""|\x27\x27)?\s+read\s+-r\b'
+    message: "Read each line with: while IFS= read -r line; do"
+test_cases:
+  - name: spaces and backslashes survive
+    files:
+      "notes.txt": "allow 10.0.0.5\n   indented rule  \nC:\\temp\\new\n"
+    args: ["notes.txt"]
+    expected_stdout: |-
+      |allow 10.0.0.5|
+      |   indented rule  |
+      |C:\temp\new|
+  - name: empty lines are lines too
+    files:
+      "gap.txt": "first\n\nthird\n"
+    args: ["gap.txt"]
+    expected_stdout: |-
+      |first|
+      ||
+      |third|
+  - name: empty file
+    files:
+      "nothing.txt": ""
+    args: ["nothing.txt"]
+    expected_stdout: ""
+  - name: file does not exist
+    args: ["missing.txt"]
+    expected_stderr: "cannot read missing.txt"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh FILE"
+    expected_exit: 2

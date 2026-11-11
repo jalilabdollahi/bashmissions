@@ -1,0 +1,1 @@
+You do not want five echo lines. You want one echo that runs five times, each time about a different server. Bash has a loop that takes a list of words and hands them to you one at a time.

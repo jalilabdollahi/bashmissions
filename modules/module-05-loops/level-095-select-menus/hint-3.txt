@@ -1,0 +1,9 @@
+select server in anchovy barracuda cuttlefish quit; do
+  case $server in
+    quit) break ;;
+    "")   echo "unknown choice: $REPLY" ;;
+    *)    echo "restarting $server" ;;
+  esac
+done
+Optionally set PS3 first to change the prompt text.
+After the loop add: exit 0. (select ends with status 1 at end of input, and the objective wants 0.)

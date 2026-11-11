@@ -1,1 +1,0 @@
-Keep the counter and line on the same output line.

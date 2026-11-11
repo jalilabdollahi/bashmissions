@@ -1,1 +1,0 @@
-C-style loops have initialization, condition, and update sections.

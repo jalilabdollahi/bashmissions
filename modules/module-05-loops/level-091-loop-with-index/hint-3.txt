@@ -1,1 +1,0 @@
-Use the index both in the output and to access the array element.

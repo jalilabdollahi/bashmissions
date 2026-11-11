@@ -1,0 +1,1 @@
+You are not looping over a list or a number, you are waiting for something to become true. Bash has a loop that keeps repeating until a command succeeds. Keep your own count of how many checks you have made.

@@ -1,0 +1,1 @@
+A loop with no condition of its own is while true; do ...; done, and break leaves it. read returns a failure status at end of input, so if ! read -r answer; then ...; exit 1; fi catches EOF. To validate: [[ $answer =~ ^[0-9]+$ ]] checks digits only, then (( answer >= 1 && answer <= 65535 )) checks the range. Do the digit check first.

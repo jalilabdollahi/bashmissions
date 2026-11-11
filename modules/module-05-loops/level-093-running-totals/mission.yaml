@@ -1,0 +1,59 @@
+id: 93
+module: 5
+module_name: loops
+module_display: Loops
+title: Running Totals
+difficulty: intermediate
+xp: 120
+story: |
+  Gus is reviewing the bandwidth bill. The upstream provider charges by the
+  gigabyte, and he wants to watch the bill grow customer by customer, like a
+  taxi meter, so he can spot the moment it jumps. The usage report arrives on
+  standard input, one customer per line, with the gigabytes used last month.
+objective: |
+  Write solution.sh that reads lines of the form "<customer> <gigabytes>" from
+  standard input (the customer is a single word, the gigabytes a whole number).
+  For each line print the usage and the running total so far:
+    <customer> +<gigabytes> = <running total>
+  When the input ends print:
+    total=<sum of all gigabytes>
+  With no input only "total=0" is printed.
+  Keep the sum in one variable that grows inside a `while read` loop.
+concepts:
+  - "accumulating: sum=$(( sum + value ))"
+  - "a variable carries state from round to round"
+required_patterns:
+  - pattern: '\bwhile\b[^\n]*\bread\b'
+    message: "Read the report with a while read loop."
+  - pattern: '\+=|\+\s*\$?\{?\w+|\w+\s*\+'
+    message: "Add each line's gigabytes to a running sum."
+test_cases:
+  - name: three customers
+    stdin: |
+      harbour-bakery 120
+      tidewater-books 45
+      gull-anchor-pub 300
+    expected_stdout: |-
+      harbour-bakery +120 = 120
+      tidewater-books +45 = 165
+      gull-anchor-pub +300 = 465
+      total=465
+  - name: one customer
+    stdin: |
+      north-pier-dental 8
+    expected_stdout: |-
+      north-pier-dental +8 = 8
+      total=8
+  - name: zero usage mixed in
+    stdin: |
+      a 10
+      b 0
+      c 5
+    expected_stdout: |-
+      a +10 = 10
+      b +0 = 10
+      c +5 = 15
+      total=15
+  - name: empty report
+    stdin: ""
+    expected_stdout: "total=0"

@@ -1,0 +1,7 @@
+check=1
+until replica-status; do
+  echo "check $check: not ready"
+  check=$(( check + 1 ))
+done
+echo "replica ready after $check check(s)"
+The body only runs for failed checks, so the counter always points at the check that finally succeeded.

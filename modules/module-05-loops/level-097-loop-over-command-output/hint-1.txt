@@ -1,1 +1,1 @@
-Process substitution lets a loop read from a command without using a pipeline subshell.
+You want to read the lines a command prints, and keep a few variables after the loop is over. Remember what happened with a pipe in front of a loop. There is a way to give a loop the output of a command as if it were a file.

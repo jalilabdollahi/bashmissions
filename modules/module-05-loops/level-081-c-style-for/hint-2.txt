@@ -1,0 +1,1 @@
+The C-style loop has three parts separated by semicolons: for (( i=0; i<3; i++ )); do echo "$i"; done prints 0 1 2. The first part runs once, the second is checked before every round, the third runs after every round. i-- moves the counter down by one.

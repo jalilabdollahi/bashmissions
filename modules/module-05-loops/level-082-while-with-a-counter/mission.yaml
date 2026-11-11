@@ -1,0 +1,56 @@
+id: 82
+module: 5
+module_name: loops
+module_display: Loops
+title: while with a Counter
+difficulty: beginner
+xp: 90
+story: |
+  Gus wants to know when the backup volume will fill up. It holds 100 GB today
+  and grows by 25 GB every week, and he would like a week-by-week forecast
+  rather than a lecture on exponential curves. "Just show me the numbers for
+  the next N weeks," he says, "and put them on one line each."
+objective: |
+  Write solution.sh that takes one argument, N, the number of weeks to
+  forecast. The volume starts at 100 GB and grows 25 GB per week. For every
+  week from 1 to N print:
+    week <W>: <SIZE> GB
+  where SIZE is the size at the end of that week, so week 1 is 125 GB.
+  With N=0 print nothing. If no argument is given, print
+  "usage: solution.sh WEEKS" to stderr and exit with status 2.
+  Build the loop with `while (( ... ))` and update the counter yourself
+  inside the loop body.
+concepts:
+  - "while (( week <= n )); do ... done"
+  - "initialise a counter before the loop and change it inside"
+required_patterns:
+  - pattern: '\bwhile\s*\(\('
+    message: "Use a while loop with an arithmetic test: while (( week <= n )); do"
+forbidden_patterns:
+  - pattern: 'for\s*\(\(|\bfor\b.*\bin\b'
+    message: "Use while here, not for. The point is to manage the counter yourself."
+test_cases:
+  - name: three weeks
+    args: ["3"]
+    expected_stdout: |-
+      week 1: 125 GB
+      week 2: 150 GB
+      week 3: 175 GB
+  - name: five weeks
+    args: ["5"]
+    expected_stdout: |-
+      week 1: 125 GB
+      week 2: 150 GB
+      week 3: 175 GB
+      week 4: 200 GB
+      week 5: 225 GB
+  - name: one week
+    args: ["1"]
+    expected_stdout: "week 1: 125 GB"
+  - name: zero weeks prints nothing
+    args: ["0"]
+    expected_stdout: ""
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh WEEKS"
+    expected_exit: 2

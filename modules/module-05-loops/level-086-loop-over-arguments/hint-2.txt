@@ -1,1 +1,1 @@
-Print one line per argument.
+for item in "$@"; do ... done visits each argument once. With the quotes, an argument containing spaces stays a single item; without them it is split. Also quote the item wherever you use it: "reports/$item.txt". Create the folder once, before the loop, with mkdir -p.

@@ -1,1 +1,1 @@
-Use `basename` to remove the directory prefix.
+for f in logs/*.log; do ... done loops over every match, sorted. If nothing matches, Bash leaves the pattern as plain text, unless you first run shopt -s nullglob, which makes it expand to nothing. To print the name without the folder use ${f##*/}; to count lines use wc -l < "$f".

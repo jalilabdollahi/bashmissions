@@ -1,1 +1,0 @@
-`select` reads a number and maps it to an option.

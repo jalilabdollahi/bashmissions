@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake "is the database replica caught up?" probe.
+# Succeeds (exit 0) on the Nth call, fails (exit 1) before that.
+# N comes from FAKE_READY_AFTER (default 3). The call count lives in
+# .replica-count in the current directory, so every test run starts fresh.
+if [[ $# -ne 0 ]]; then
+  echo "replica-status: takes no arguments" >&2
+  exit 2
+fi
+ready_after=${FAKE_READY_AFTER:-3}
+calls=0
+[[ -f .replica-count ]] && calls=$(<.replica-count)
+calls=$(( calls + 1 ))
+echo "$calls" > .replica-count
+(( calls >= ready_after ))

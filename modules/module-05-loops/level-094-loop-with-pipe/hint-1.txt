@@ -1,1 +1,0 @@
-A command before a pipe can feed lines into a `while read` loop.

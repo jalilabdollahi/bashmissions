@@ -1,0 +1,65 @@
+id: 95
+module: 5
+module_name: loops
+module_display: Loops
+title: select Menus
+difficulty: intermediate
+xp: 130
+story: |
+  The night shift is not made of Bash experts. Ollie, on his first solo night,
+  has a laminated card with the restart commands for three servers, and he
+  keeps picking the wrong line. Mara wants a tiny menu: type a number, the
+  right restart happens. No typing of server names, no typos. Bash has a
+  built-in for exactly this.
+objective: |
+  Write solution.sh that shows a numbered menu with these four entries, in
+  this order:
+    1) anchovy   2) barracuda   3) cuttlefish   4) quit
+  and reads the choices from standard input, one per line.
+  - A valid server choice prints "restarting <server>" to stdout and the menu
+    comes back for the next choice.
+  - Choosing quit ends the script (exit 0).
+  - Anything that is not a menu number prints "unknown choice: <what was typed>"
+    to stdout and the menu comes back.
+  - When the input ends, the script ends too. Whatever way it ends, the exit
+    status must be 0.
+  Use the `select` built-in; it prints the menu itself, on stderr.
+concepts:
+  - "select name in a b c; do ... done"
+  - "$REPLY holds what the user typed"
+  - "select repeats until break or end of input"
+required_patterns:
+  - pattern: '\bselect\s+\w+\s+in\b'
+    message: "Use the select built-in: select server in anchovy barracuda ...; do"
+test_cases:
+  - name: restart one then quit
+    stdin: |
+      2
+      4
+    expected_stdout: "restarting barracuda"
+  - name: several restarts
+    stdin: |
+      3
+      1
+      3
+      4
+    expected_stdout: |-
+      restarting cuttlefish
+      restarting anchovy
+      restarting cuttlefish
+  - name: bad choices are reported
+    stdin: |
+      9
+      abc
+      1
+    expected_stdout: |-
+      unknown choice: 9
+      unknown choice: abc
+      restarting anchovy
+  - name: quit straight away
+    stdin: |
+      4
+    expected_stdout: ""
+  - name: nothing typed
+    stdin: ""
+    expected_stdout: ""

@@ -1,0 +1,1 @@
+The shape is: for VAR in word1 word2 word3; do COMMANDS; done. Inside the commands, $VAR is the current word. For example: for color in red green blue; do echo "paint it $color"; done prints three lines.

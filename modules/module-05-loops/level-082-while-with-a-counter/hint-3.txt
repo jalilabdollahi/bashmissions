@@ -1,0 +1,7 @@
+Before the loop: weeks=$1, week=1, size=100.
+while (( week <= weeks )); do
+  size=$(( size + 25 ))
+  echo "week $week: $size GB"
+  week=$(( week + 1 ))
+done
+Do not forget the usage check at the top for a missing argument.

@@ -1,1 +1,0 @@
-Backoff usually doubles the wait after each failed attempt.

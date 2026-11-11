@@ -1,0 +1,51 @@
+id: 83
+module: 5
+module_name: loops
+module_display: Loops
+title: until It Is Ready
+difficulty: beginner
+xp: 100
+story: |
+  Theo restarts the database replica and immediately starts the migration.
+  The migration fails, because the replica needs a few seconds to catch up.
+  Priya looks over his shoulder and sighs. "Ask the replica if it is ready.
+  If it says no, ask again." Lanternfish already has a small probe for that,
+  called replica-status. It exits 0 when the replica is ready and 1 when it is not.
+objective: |
+  Write solution.sh that calls the command `replica-status` (no arguments)
+  again and again until it succeeds. Count your checks starting from 1.
+  For every check that fails, print:
+    check <N>: not ready
+  When a check finally succeeds, print:
+    replica ready after <N> check(s)
+  where N is the number of the successful check. If the very first check
+  succeeds, only the final line is printed.
+  Use an `until` loop whose condition is the command itself. Do not call
+  sleep; the probe answers instantly.
+concepts:
+  - "until COMMAND; do ... done"
+  - "a loop condition can be any command, judged by its exit status"
+required_patterns:
+  - pattern: '\buntil\b'
+    message: "Use an until loop: until replica-status; do ... done"
+forbidden_patterns:
+  - pattern: '\bwhile\b'
+    message: "This level is about until. Let the loop run until the command succeeds."
+test_cases:
+  - name: ready on the third check
+    env: {FAKE_READY_AFTER: "3"}
+    expected_stdout: |-
+      check 1: not ready
+      check 2: not ready
+      replica ready after 3 check(s)
+  - name: ready immediately
+    env: {FAKE_READY_AFTER: "1"}
+    expected_stdout: "replica ready after 1 check(s)"
+  - name: slow replica
+    env: {FAKE_READY_AFTER: "5"}
+    expected_stdout: |-
+      check 1: not ready
+      check 2: not ready
+      check 3: not ready
+      check 4: not ready
+      replica ready after 5 check(s)

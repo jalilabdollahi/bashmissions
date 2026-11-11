@@ -1,0 +1,1 @@
+Compare: cat file | while read -r x; do n=$(( n + 1 )); done leaves n unchanged in your script, while while read -r x; do n=$(( n + 1 )); done < file changes it. Redirecting a file into the loop keeps the loop in your own shell, so what it sets is still there after done.

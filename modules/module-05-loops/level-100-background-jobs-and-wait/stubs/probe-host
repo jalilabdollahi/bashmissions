@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Fake health probe: takes one hostname, needs one second to answer, then
+# prints "up" or "down" on stdout. Hosts listed in FAKE_DOWN (space separated)
+# answer "down". Always exits 0, so only the output matters.
+if [[ $# -ne 1 ]]; then
+  echo "usage: probe-host HOST" >&2
+  exit 2
+fi
+sleep 1
+for bad in ${FAKE_DOWN:-}; do
+  if [[ $bad == "$1" ]]; then
+    echo down
+    exit 0
+  fi
+done
+echo up

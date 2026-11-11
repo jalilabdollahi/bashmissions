@@ -1,0 +1,50 @@
+id: 80
+module: 5
+module_name: loops
+module_display: Loops
+title: Brace Ranges
+difficulty: beginner
+xp: 80
+story: |
+  The data centre just took delivery of five new racks, numbered 08 through 12,
+  and Ollie has to label every one in the inventory sheet. He started typing
+  "rack-08, rack-09..." and gave up at rack-09. "There must be a way to say
+  'eight to twelve' without typing it," he mutters. There is.
+objective: |
+  Write solution.sh that takes one argument, a name prefix, and prints one
+  line per new rack, from 08 up to 12, keeping the leading zero:
+    <prefix>-08
+    <prefix>-09
+    <prefix>-10
+    <prefix>-11
+    <prefix>-12
+  Generate the numbers with a brace range inside a for loop, not by typing
+  them. If no argument is given, print "usage: solution.sh PREFIX" to stderr
+  and exit with status 2.
+concepts:
+  - "{08..12} expands to 08 09 10 11 12"
+  - "a leading zero on the start keeps the padding"
+required_patterns:
+  - pattern: '\{0?\d+\.\.\d+\}'
+    message: "Use a brace range such as {08..12} as the list of the for loop."
+test_cases:
+  - name: web racks
+    args: [web]
+    expected_stdout: |-
+      web-08
+      web-09
+      web-10
+      web-11
+      web-12
+  - name: prefix with a dash
+    args: [db-eu]
+    expected_stdout: |-
+      db-eu-08
+      db-eu-09
+      db-eu-10
+      db-eu-11
+      db-eu-12
+  - name: missing prefix
+    args: []
+    expected_stderr: "usage: solution.sh PREFIX"
+    expected_exit: 2

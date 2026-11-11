@@ -1,0 +1,1 @@
+Plain "read" in a loop already gives you one line per round, but it quietly cleans each line up: it trims spaces at the ends and treats backslashes as special. Two small settings turn that cleaning off.

@@ -1,0 +1,1 @@
+read -r a b c splits a line into three variables on whitespace; the last variable gets whatever is left. Counting pattern: n=0; while read -r word; do if [[ $word == x* ]]; then n=$(( n + 1 )); fi; done. The status starts with 5 when [[ $status == 5* ]] is true.

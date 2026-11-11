@@ -1,0 +1,1 @@
+select item in one two three; do ...; done prints "1) one 2) two 3) three", reads a line, and sets $item to the matching word. If the line is not a valid number, $item is empty and $REPLY holds what was typed. The loop repeats until you run break. A case statement on $item keeps the branches tidy.

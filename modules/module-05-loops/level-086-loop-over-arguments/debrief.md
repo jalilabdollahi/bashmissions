@@ -1,7 +1,16 @@
-# Loop over Arguments
+# Debrief: Loop over Arguments
 
-This mission practices `for arg in "$@"` from Module 5 of the curriculum.
+Loops and arguments fit together: the arguments are the list. The one thing to get right is how that list is split into words.
 
-Loops let Bash scripts repeat work over fixed lists, numeric ranges, files, command output, and user input. The key habits are choosing the right loop shape, preserving input with quotes or `read -r`, and making the stopping condition clear.
+## How it works
+Bash has two ways to expand all arguments. `"$@"` produces one word per argument, preserving each exactly. `$@` and `$*` without quotes are subject to word splitting and filename expansion, which tears "Gull & Anchor Pub" into three words and may even turn a `*` into a list of files. The quoted form is the one you almost always want.
 
-The reference solution keeps the loop pattern visible so the level's focus stays easy to spot.
+The same rule applies to the loop variable. `$name` unquoted in the body is split again, so write `"$name"` wherever you use it as one thing: in a path, an argument to another command, a test.
+
+`$#` tells you how many arguments came in. Checking it before the loop lets you print a helpful usage message instead of silently doing nothing.
+
+## In real work
+Scripts that take a list of hosts, files, users or tickets all follow this skeleton: validate, then `for x in "$@"`. It is the entry point of most command-line tools.
+
+## Going further
+Instead of names that the user types, you may want to act on files that are already on disk. Level 87 loops over file names found by a glob.

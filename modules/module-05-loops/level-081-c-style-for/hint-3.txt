@@ -1,0 +1,4 @@
+Guard first: if [[ $# -lt 1 ]]; then echo "usage: solution.sh SECONDS" >&2; exit 2; fi
+Then start the counter at the argument and stop below 1:
+for (( i=$1; i>=1; i-- )); do echo "T-$i"; done
+The closing echo "deploy!" goes after done. For 0 the condition is false at once, so nothing is printed inside the loop.

@@ -1,0 +1,66 @@
+id: 96
+module: 5
+module_name: loops
+module_display: Loops
+title: Doubling Delays
+difficulty: intermediate
+xp: 130
+story: |
+  When the payment gateway hiccups, Theo's retry code hammers it every second
+  and makes the hiccup worse. Priya has a rule for that: each retry waits
+  twice as long as the one before, up to a ceiling. Before anyone changes the
+  real code, she wants to see the schedule on paper: how long would we wait,
+  attempt by attempt, and how much time does it add up to?
+objective: |
+  Write solution.sh that takes three whole numbers: BASE (seconds to wait
+  before the first retry), ATTEMPTS (how many retries) and CAP (the longest
+  single wait). The wait for attempt 1 is BASE; every later wait is double the
+  previous one, but never more than CAP. Print one line per attempt:
+    attempt <k>: wait <seconds>s
+  and finally:
+    total wait: <sum>s
+  With ATTEMPTS=0 only the total line (0s) is printed. If fewer than three
+  arguments are given, print "usage: solution.sh BASE ATTEMPTS CAP" to stderr
+  and exit with status 2. Only compute and print the schedule: do not call sleep.
+concepts:
+  - "doubling inside a loop: delay=$(( delay * 2 ))"
+  - "capping a value with a comparison"
+  - "state carried between rounds (delay and total)"
+required_patterns:
+  - pattern: '\*\s*2|\*=\s*2|<<\s*1|<<='
+    message: "Double the delay each round, for example delay=$(( delay * 2 ))."
+forbidden_patterns:
+  - pattern: '\bsleep\b'
+    message: "Do not actually sleep: this level only prints the schedule."
+test_cases:
+  - name: cap reached on the last attempt
+    args: ["1", "5", "10"]
+    expected_stdout: |-
+      attempt 1: wait 1s
+      attempt 2: wait 2s
+      attempt 3: wait 4s
+      attempt 4: wait 8s
+      attempt 5: wait 10s
+      total wait: 25s
+  - name: cap never reached
+    args: ["2", "4", "100"]
+    expected_stdout: |-
+      attempt 1: wait 2s
+      attempt 2: wait 4s
+      attempt 3: wait 8s
+      attempt 4: wait 16s
+      total wait: 30s
+  - name: base equals cap
+    args: ["5", "3", "5"]
+    expected_stdout: |-
+      attempt 1: wait 5s
+      attempt 2: wait 5s
+      attempt 3: wait 5s
+      total wait: 15s
+  - name: no retries
+    args: ["3", "0", "60"]
+    expected_stdout: "total wait: 0s"
+  - name: missing arguments
+    args: ["1", "5"]
+    expected_stderr: "usage: solution.sh BASE ATTEMPTS CAP"
+    expected_exit: 2

@@ -1,0 +1,1 @@
+Brace ranges cannot take their size from a variable, and counting by hand is clumsy when the numbers jump by a step. There is a small command that prints a sequence with a start, a step and an end. Convert minutes to hours and minutes at the end.
