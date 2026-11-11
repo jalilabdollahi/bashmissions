@@ -1,0 +1,7 @@
+An associative array can keep, for each event, a space-separated string of function names. Append with `+=`; walk it with a loop (function names contain no spaces, so splitting is fine here):
+
+  declare -A listeners=()
+  listeners[boot]+=" say_hi"            # the leading space is harmless in a for loop
+  for fn in ${listeners[boot]:-}; do "$fn" "$@"; done
+
+`declare -F "$fn" > /dev/null` is true only for real functions. `read -ra words` splits a line into an array, and `"${words[@]:2}"` is "everything after the first two".

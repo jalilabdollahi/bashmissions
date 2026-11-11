@@ -1,0 +1,1 @@
+A memo is a notebook next to the function. Before doing the slow work, look in the notebook; if the answer is there, use it. If not, do the work and write the answer down. One catch: whatever you write must survive until the next call.

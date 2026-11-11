@@ -1,0 +1,1 @@
+You need a function that writes functions. Bash can turn a piece of text into code and run it. Since the generated function's name and its label depend on the level, build the text from the level; and because that text becomes code, make sure the level can never contain anything but harmless letters.

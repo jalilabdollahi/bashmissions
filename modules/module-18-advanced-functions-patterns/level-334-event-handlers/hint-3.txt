@@ -1,0 +1,15 @@
+  declare -A handlers=(); problems=0
+  on() {
+    local event=$1 fn=$2
+    # if ! declare -F "$fn" > /dev/null: message, problems=1, return 0
+    handlers[$event]+="${handlers[$event]:+ }$fn"
+  }
+  emit() {
+    local event=$1 fn; shift
+    # empty ${handlers[$event]:-}: message, problems=1, return 0
+    for fn in ${handlers[$event]}; do "$fn" "$@"; done
+  }
+  while read -ra words; do
+    # skip empty; case ${words[0]} in on) ... ;; emit) ... "${words[@]:2}" ;; *) unknown ;; esac
+  done
+  exit "$problems"

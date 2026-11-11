@@ -1,0 +1,11 @@
+An array holds the allowed words; a loop with `==` compares exactly (inside `[[ ]]`, quote the right side or it becomes a pattern):
+
+  allowed=(start stop)
+  is_ok() {
+    local x
+    for x in "${allowed[@]}"; do [[ $x == "$1" ]] && return 0; done
+    return 1
+  }
+  if is_ok "$word"; then "act_$word" "$arg"; else echo "refused" >&2; fi
+
+`while read -r a b; do ... done` reads two words per line from stdin.

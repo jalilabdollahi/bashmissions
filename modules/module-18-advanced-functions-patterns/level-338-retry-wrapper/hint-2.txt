@@ -1,0 +1,15 @@
+`shift` removes `$1` so that `"$@"` is the command. To capture a failing status without exiting:
+
+  tries() {
+    local n=$1 i=1 rc
+    shift
+    while true; do
+      rc=0
+      "$@" || rc=$?            # runs the command; a failure just fills rc
+      (( rc == 0 )) && return 0
+      (( i >= n )) && return "$rc"
+      i=$(( i + 1 ))
+    done
+  }
+
+Validate the count with `[[ $1 =~ ^[0-9]+$ ]]` before using it in arithmetic.

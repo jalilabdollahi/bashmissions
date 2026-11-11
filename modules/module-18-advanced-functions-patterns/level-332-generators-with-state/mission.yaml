@@ -1,0 +1,93 @@
+id: 332
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Generators with State
+difficulty: advanced
+xp: 220
+story: |
+  Gus wants numbered paperwork: invoices as INV-0001, support tickets as
+  TCK-001, and each series counts on its own. Today the numbers come from a
+  text file that two scripts race to update, and last month two customers
+  received the same invoice number. Mara draws a box on the whiteboard
+  with a counter inside. "Ask the box for the next one. The box remembers."
+objective: |
+  Write solution.sh. It reads commands from standard input, one per line:
+    invoice        -> print the next invoice number, formatted INV-0001, INV-0002, ...
+    ticket         -> print the next ticket number, formatted TCK-001, TCK-002, ...
+    reset KIND     -> restart that series (the next one printed will be number 1 again);
+                      prints nothing
+  Each series counts independently and starts at 1.
+  Write a function `gen_next KIND` that advances the counter of that kind and
+  stores the formatted number in the variable `REPLY` (it prints nothing).
+  Keep all counters in one associative array.
+  An unknown KIND (in a command, or in `reset`) prints
+  "gen_next: unknown kind 'KIND'" to stderr and exits 2. Blank lines are ignored.
+  Do not call `gen_next` inside `$( )`: the counter would be advanced in a
+  copy of the shell and forgotten.
+concepts:
+  - "state kept in a global associative array between calls"
+  - "returning a value through REPLY (printf -v REPLY)"
+  - "$(...) runs in a subshell: updates to counters are lost there"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Keep the counters in an associative array (declare -A)."
+  - pattern: '\bREPLY\b'
+    message: "Hand the number back through the variable REPLY."
+forbidden_patterns:
+  - pattern: '\$\(\s*gen_next'
+    message: "Calling gen_next inside $( ) runs it in a subshell, so its counter is lost. Call it directly and read REPLY."
+test_cases:
+  - name: invoices count up
+    stdin: |
+      invoice
+      invoice
+      invoice
+    expected_stdout: |-
+      INV-0001
+      INV-0002
+      INV-0003
+  - name: two series, independent counters
+    stdin: |
+      invoice
+      ticket
+      ticket
+      invoice
+      ticket
+    expected_stdout: |-
+      INV-0001
+      TCK-001
+      TCK-002
+      INV-0002
+      TCK-003
+  - name: reset restarts one series only
+    stdin: |
+      ticket
+      invoice
+      invoice
+      reset invoice
+      invoice
+      ticket
+    expected_stdout: |-
+      TCK-001
+      INV-0001
+      INV-0002
+      INV-0001
+      TCK-002
+  - name: an unknown kind stops the run
+    stdin: |
+      invoice
+
+      receipt
+      invoice
+    expected_stdout: "INV-0001"
+    expected_stderr: "gen_next: unknown kind 'receipt'"
+    expected_exit: 2
+  - name: reset of an unknown kind
+    stdin: |
+      reset refund
+    expected_stderr: "gen_next: unknown kind 'refund'"
+    expected_exit: 2
+  - name: no input at all
+    stdin: ""
+    expected_stdout: ""

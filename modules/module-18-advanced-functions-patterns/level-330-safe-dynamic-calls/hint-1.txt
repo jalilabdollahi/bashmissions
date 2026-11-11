@@ -1,0 +1,1 @@
+Building the function name from the input is convenient, and dangerous if the input decides everything. Write down what is allowed, check the input against that list first, and only then build the name.

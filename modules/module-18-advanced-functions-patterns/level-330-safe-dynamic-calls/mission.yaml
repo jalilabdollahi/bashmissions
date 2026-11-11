@@ -1,0 +1,82 @@
+id: 330
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Safe Dynamic Calls
+difficulty: advanced
+xp: 230
+story: |
+  Noor's support desk pastes requests from a web form into the operations
+  bot: one per line, "ACTION SERVER". Mara is happy to build the function
+  name from the action, but Priya has stopped her mid-sentence. "The form is
+  open to the internet. Somebody will type `wipe`. Somebody will type
+  `restart; something-nasty`. Whatever the bot may do must be written down
+  in the bot, not decided by the visitor."
+objective: |
+  Write solution.sh. It reads lines from standard input, each "ACTION TARGET"
+  (two words; blank lines are ignored), and handles them in order.
+  The script defines these functions, each taking the target as `$1`:
+    do_restart   prints "restarting TARGET"
+    do_reload    prints "reloading TARGET"
+    do_status    prints "TARGET is up"
+    do_wipe      prints "wiping TARGET"      (exists, but is NOT allowed)
+  Only the actions in this allow-list may be called: restart, reload, status.
+  Keep the list in a variable in your script and compare the ACTION against it
+  exactly; then call "do_$action" "$target".
+  For any other ACTION, print "refused: 'ACTION' is not an allowed action"
+  to stderr, skip the line, and carry on. After the last line exit 3 if any
+  line was refused, otherwise 0.
+concepts:
+  - "an allow-list array and an exact-match test"
+  - "building a function name only after the value is approved"
+  - "existence is not permission"
+required_patterns:
+  - pattern: '"?do_\$\{?action\}?"?'
+    message: "Build the call as \"do_$action\" after the check (keep the variable name 'action')."
+forbidden_patterns:
+  - pattern: '\beval\b'
+    message: "No eval: a checked name and a plain call are enough."
+test_cases:
+  - name: three allowed actions
+    stdin: |
+      status marlin
+      restart dory
+      reload eel
+    expected_stdout: |-
+      marlin is up
+      restarting dory
+      reloading eel
+  - name: wipe exists as a function but is refused
+    stdin: |
+      status anchovy
+      wipe anchovy
+      reload anchovy
+    expected_stdout: |-
+      anchovy is up
+      reloading anchovy
+    expected_stderr: "refused: 'wipe' is not an allowed action"
+    expected_exit: 3
+  - name: injection attempts are just unknown actions
+    stdin: |
+      restart; touch pwned grouper
+      do_restart grouper
+      status halibut
+    expected_stdout: "halibut is up"
+    expected_stderr: |-
+      refused: 'restart;' is not an allowed action
+      refused: 'do_restart' is not an allowed action
+    expected_exit: 3
+    expected_files:
+      pwned: null
+  - name: blank lines and a prefix of an allowed name
+    stdin: |
+
+      stat octopus
+
+      restart octopus
+    expected_stdout: "restarting octopus"
+    expected_stderr: "refused: 'stat' is not an allowed action"
+    expected_exit: 3
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

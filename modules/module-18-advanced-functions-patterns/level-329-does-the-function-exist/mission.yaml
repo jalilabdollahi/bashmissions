@@ -1,0 +1,60 @@
+id: 329
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Does the Function Exist?
+difficulty: advanced
+xp: 190
+story: |
+  The morning health run takes a list of check names from the on-call sheet:
+  `disk mail cert`. Last Tuesday someone typed `dsik`, the script died with
+  "command not found" after half the checks, and nobody noticed until lunch.
+  Noor wants it gentler: unknown names get reported, everything else still
+  runs.
+objective: |
+  Write solution.sh, called as `solution.sh NAME...`.
+  The script defines three check functions:
+    check_disk   prints "disk ok"
+    check_mail   prints "mail ok"
+    check_cert   prints "cert ok"
+  For each NAME, in order, call `check_NAME` if a function with that name
+  exists. If it does not, print "skip: no check named NAME" to stderr and go
+  on with the next one. When all names are processed, exit 1 if anything was
+  skipped, otherwise 0.
+  Test for the function itself with `declare -F`: a variable, a program on
+  the PATH or a builtin that happens to match does not count.
+concepts:
+  - "declare -F NAME: succeeds only for shell functions"
+  - "redirecting declare -F output away and using its status"
+  - "skip-and-report instead of aborting"
+required_patterns:
+  - pattern: 'declare\s+-F\b'
+    message: "Ask declare -F whether check_NAME is a function."
+test_cases:
+  - name: all three checks exist
+    args: [disk, mail, cert]
+    expected_stdout: |-
+      disk ok
+      mail ok
+      cert ok
+  - name: a typo is reported, the rest still runs
+    args: [disk, dsik, cert]
+    expected_stdout: |-
+      disk ok
+      cert ok
+    expected_stderr: "skip: no check named dsik"
+    expected_exit: 1
+  - name: a variable with that name is not a function
+    args: [backup, mail]
+    env:
+      check_backup: "yes"
+    expected_stdout: "mail ok"
+    expected_stderr: "skip: no check named backup"
+    expected_exit: 1
+  - name: a program on the PATH is not a function
+    args: [pier, disk]
+    expected_stdout: "disk ok"
+    expected_stderr: "skip: no check named pier"
+    expected_exit: 1
+  - name: nothing to check
+    expected_stdout: ""

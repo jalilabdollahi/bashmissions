@@ -1,1 +1,17 @@
-Print only the expected result lines so stdout comparison stays exact.
+  mw_trim() {
+    local s=$1
+    s=${s#"${s%%[![:space:]]*}"}
+    s=${s%"${s##*[![:space:]]}"}
+    printf '%s' "$s"
+  }
+  mw_lower() { printf '%s' "${1,,}"; }
+  mw_squeeze() { ...while the text contains two spaces, replace "  " by " " with ${s//  / }... }
+  mw_mask() { ... }   mw_clip() { ... }
+
+  chain=("$@")
+  for step in "${chain[@]}"; do   # declare -F "mw_$step" or: unknown middleware, exit 2
+  done
+  while IFS= read -r line; do
+    value=$line
+    # run the chain, then: echo "[$value]"
+  done

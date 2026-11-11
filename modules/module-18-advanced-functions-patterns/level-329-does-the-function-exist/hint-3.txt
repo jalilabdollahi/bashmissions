@@ -1,0 +1,10 @@
+  skipped=0
+  for name in "$@"; do
+    if declare -F "check_$name" > /dev/null; then
+      "check_$name"
+    else
+      echo "skip: no check named $name" >&2
+      # remember that something was skipped
+    fi
+  done
+  exit "$skipped"

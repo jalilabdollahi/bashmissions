@@ -1,1 +1,8 @@
-Keep the example deterministic and clean up any processes or temporary resources you create.
+An associative array maps text keys to values, and a value can be the name of a function:
+
+  declare -A handlers=([greet]=do_greet [leave]=do_leave)
+  key=greet
+  fn=${handlers[$key]:-}      # empty if the key is missing
+  [[ -n $fn ]] && "$fn" Ollie  # calls do_greet Ollie
+
+Check for the empty result first, so unknown commands get their error message.

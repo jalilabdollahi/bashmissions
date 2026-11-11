@@ -1,0 +1,1 @@
+The core script should not know any customer's name. Let the folder decide: walk over the files that are there, load each one so that the functions it contains become available, then call the function you expect from that file's name.

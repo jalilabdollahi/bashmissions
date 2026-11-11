@@ -1,0 +1,71 @@
+id: 324
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Plugin Loader
+difficulty: advanced
+xp: 190
+story: |
+  Harbour Bakery wants its own welcome banner in the provisioning tool.
+  Tidewater Books wants a different one, and by Friday three more customers
+  will ask. Theo does not want to edit the main script for each of them.
+  "Give every customer a file in a folder," Mara says. "The tool loads whatever
+  it finds there. Nobody touches the core again."
+objective: |
+  Write solution.sh, called as `solution.sh PLUGIN_DIR`.
+  A plugin is a file `NAME.sh` inside PLUGIN_DIR that defines one function
+  called `plugin_NAME`. Load every `*.sh` file in the directory, in the
+  order the shell's glob lists them, and for each one:
+    1. source it,
+    2. print "loaded NAME" (NAME is the file name without ".sh"),
+    3. call the function `plugin_NAME`, which prints its own output.
+  Files that do not end in ".sh" are ignored.
+  If PLUGIN_DIR has no `.sh` files, print "no plugins found".
+  If PLUGIN_DIR does not exist, print "lf: plugin directory 'PLUGIN_DIR' not found"
+  to stderr and exit 1.
+  Use a loop with `source`; do not name the plugins in your script.
+concepts:
+  - "for f in dir/*.sh; do source \"$f\"; done"
+  - "an unmatched glob stays literal (nullglob or an -e test)"
+  - "${f##*/} and ${name%.sh} to get the plugin name"
+required_patterns:
+  - pattern: '\b(source|\.)\s+"?\$'
+    message: "Load each plugin with source \"$file\" inside the loop."
+  - pattern: '\bfor\b.*\bin\b.*\*\.sh'
+    message: "Loop over the *.sh files of the directory."
+test_cases:
+  - name: two customer plugins
+    args: [plugins]
+    files:
+      plugins/harbour_bakery.sh: |
+        plugin_harbour_bakery() { echo "Welcome to Harbour Bakery, fresh from the harbour"; }
+      plugins/tidewater_books.sh: |
+        plugin_tidewater_books() {
+          echo "Tidewater Books: page 1 of your new server"
+          echo "quota=40GB"
+        }
+    expected_stdout: |-
+      loaded harbour_bakery
+      Welcome to Harbour Bakery, fresh from the harbour
+      loaded tidewater_books
+      Tidewater Books: page 1 of your new server
+      quota=40GB
+  - name: other files in the folder are ignored
+    args: [plugins]
+    files:
+      plugins/README.txt: "drop customer plugins here\n"
+      plugins/gull_anchor.sh: |
+        plugin_gull_anchor() { echo "Gull and Anchor: pub menu module enabled"; }
+      plugins/notes.sh.bak: "plugin_notes() { echo SHOULD NOT RUN; }\n"
+    expected_stdout: |-
+      loaded gull_anchor
+      Gull and Anchor: pub menu module enabled
+  - name: an empty folder
+    args: [plugins]
+    files:
+      "plugins/": ""
+    expected_stdout: "no plugins found"
+  - name: a folder that does not exist
+    args: [nowhere]
+    expected_stderr: "lf: plugin directory 'nowhere' not found"
+    expected_exit: 1

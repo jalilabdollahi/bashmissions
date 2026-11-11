@@ -1,0 +1,90 @@
+id: 334
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Event Handlers
+difficulty: advanced
+xp: 230
+story: |
+  When something happens at Lanternfish, several people want to know:
+  a deploy should go to the log and to #ops, a full disk should page whoever
+  is on call. Today each alert script calls the others by name, and adding a
+  listener means editing the sender. Mara wants it the other way round. "The
+  sender shouts the event. Whoever signed up for it hears it."
+objective: |
+  Write solution.sh. It reads commands from standard input, one per line:
+    on EVENT HANDLER        register the function HANDLER for EVENT
+    emit EVENT WORD...      call every handler registered for EVENT, in
+                            registration order, passing the WORDs as arguments
+  The script defines three handler functions:
+    h_log    prints "log: " followed by its arguments joined with spaces
+    h_mail   prints "mail to ops: " followed by its arguments
+    h_page   prints "paging on-call: " followed by its arguments
+  Keep the registrations in an associative array keyed by event name.
+  Problems are reported on stderr, the run continues, and the exit status is 1
+  at the end if any problem happened:
+    on with a HANDLER that is not a function:  "on: no such handler 'HANDLER'"
+    emit for an event nobody registered for:   "emit: nobody listens to 'EVENT'"
+    any other command word:                    "unknown command 'WORD'"
+  Blank lines are ignored.
+concepts:
+  - "declare -A handlers: event -> list of function names"
+  - "appending to a map entry: handlers[$event]+=\" $fn\""
+  - "emit loops over the registered names and forwards the arguments"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Keep the registry in an associative array."
+  - pattern: 'declare\s+-F\b'
+    message: "Check that a handler is a function with declare -F before registering it."
+test_cases:
+  - name: one event, two listeners
+    stdin: |
+      on deploy h_log
+      on deploy h_mail
+      emit deploy harbour-bakery v2
+    expected_stdout: |-
+      log: harbour-bakery v2
+      mail to ops: harbour-bakery v2
+  - name: events are independent, nobody listens to one
+    stdin: |
+      on disk_full h_page
+      emit deploy tidewater-books v7
+      emit disk_full barracuda 95%
+    expected_stdout: "paging on-call: barracuda 95%"
+    expected_stderr: "emit: nobody listens to 'deploy'"
+    expected_exit: 1
+  - name: registration order and repeated emits
+    stdin: |
+      on backup h_mail
+      on backup h_log
+      emit backup nightly ok
+      emit backup weekly ok
+    expected_stdout: |-
+      mail to ops: nightly ok
+      log: nightly ok
+      mail to ops: weekly ok
+      log: weekly ok
+  - name: late registration does not replay
+    stdin: |
+      emit deploy early
+      on deploy h_log
+      emit deploy late
+    expected_stdout: "log: late"
+    expected_stderr: "emit: nobody listens to 'deploy'"
+    expected_exit: 1
+  - name: a handler that does not exist, and a bad command
+    stdin: |
+      on deploy h_nothing
+
+      shout deploy now
+      emit deploy x
+    expected_stderr: |-
+      on: no such handler 'h_nothing'
+      unknown command 'shout'
+      emit: nobody listens to 'deploy'
+    expected_exit: 1
+  - name: arguments with a star stay literal
+    stdin: |
+      on alert h_log
+      emit alert * everywhere
+    expected_stdout: "log: * everywhere"

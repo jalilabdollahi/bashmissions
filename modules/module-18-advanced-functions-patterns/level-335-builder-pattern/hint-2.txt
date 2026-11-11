@@ -1,1 +1,10 @@
-Keep the example deterministic and clean up any processes or temporary resources you create.
+An associative array can hold the whole description, and a function can replace all of it at once:
+
+  declare -A box=()
+  box_new()  { box=([name]=$1 [size]=small); }
+  with_size() {
+    case $1 in small|large) box[size]=$1 ;; *) echo "with_size: invalid value '$1'" >&2; return 1 ;; esac
+  }
+  with_size huge || exit 2
+
+Split `key=value` with `${arg%%=*}` (before the first =) and `${arg#*=}` (after it). A number test: `[[ $x =~ ^[0-9]+$ ]] && (( x >= 1 && x <= 16 ))`.

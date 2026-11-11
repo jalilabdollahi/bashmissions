@@ -1,18 +1,60 @@
 id: 323
 module: 18
 module_name: advanced-functions-patterns
-module_display: Advanced Functions & Patterns
+module_display: Function Patterns
 title: Dispatch Table
 difficulty: advanced
-xp: 175
-objective: Dispatch a command through an associative array of function names.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: hello=bash
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 180
+story: |
+  Lanternfish's operations scripts have multiplied: one for status, one for
+  restarts, one for backups. Mara wants a single front door called `lf`. "A
+  script with three subcommands is fine as an if-ladder," she says, sliding
+  a sticky note across. "A script with thirty is not. Build the front door so
+  that adding a command means adding one line."
+objective: |
+  Write solution.sh, a tiny CLI called as `solution.sh COMMAND [HOST]`.
+  Write one function per command and a lookup table (an associative array)
+  that maps the command name to its function name:
+    status HOST    ->  prints "HOST: running"
+    restart HOST   ->  prints "restarting HOST"
+    backup HOST    ->  prints "backup of HOST queued"
+    hosts          ->  prints the three lines  anchovy, barracuda, cuttlefish
+  The dispatcher looks the command up in the table and calls the function,
+  passing the remaining arguments along.
+  With no COMMAND, print "usage: lf COMMAND [HOST]" to stderr and exit 2.
+  With a COMMAND that is not in the table, print
+  "lf: unknown command 'NAME'" to stderr and exit 2.
+  Do not use `case` or an if-ladder: the table is the point.
 concepts:
-- assoc array of function names
-scaffold: true
+  - "declare -A: associative array"
+  - "a map from a name to a function name"
+  - "calling a function through a variable: \"$fn\" \"$@\""
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Declare the lookup table with declare -A."
+forbidden_patterns:
+  - pattern: '\bcase\b'
+    message: "No case statement here: look the command up in the table instead."
+test_cases:
+  - name: status goes through the table
+    args: [status, marlin]
+    expected_stdout: "marlin: running"
+  - name: restart
+    args: [restart, dory]
+    expected_stdout: "restarting dory"
+  - name: backup
+    args: [backup, eel]
+    expected_stdout: "backup of eel queued"
+  - name: a command without a host argument
+    args: [hosts]
+    expected_stdout: |-
+      anchovy
+      barracuda
+      cuttlefish
+  - name: unknown command is refused
+    args: [frobnicate, dory]
+    expected_stderr: "lf: unknown command 'frobnicate'"
+    expected_exit: 2
+  - name: no command at all
+    expected_stderr: "usage: lf COMMAND [HOST]"
+    expected_exit: 2

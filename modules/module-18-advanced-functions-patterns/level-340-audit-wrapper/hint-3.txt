@@ -1,0 +1,14 @@
+  log=${AUDIT_LOG:-audit.log}
+  audited() {
+    local rc=0 words
+    "$@" || rc=$?
+    printf -v words '%q ' "$@"
+    printf '%s: %s status=%d\n' "${USER:-unknown}" "${words% }" "$rc" >> "$log"
+    return "$rc"
+  }
+  failed=0
+  while read -ra words; do
+    # skip when ${#words[@]} is 0
+    audited "${words[@]}" || failed=1
+  done
+  exit "$failed"

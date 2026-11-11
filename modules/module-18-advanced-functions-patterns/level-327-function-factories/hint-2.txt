@@ -1,0 +1,9 @@
+`eval` re-reads its text as shell code, so a function definition can be built in a string:
+
+  make_greeter() {
+    eval "greet_$1() { echo 'hello from $1:' \"\$*\"; }"
+  }
+  make_greeter ollie
+  greet_ollie and welcome       # hello from ollie: and welcome
+
+`$1` is substituted when the string is built; `\$*` is escaped so it is expanded later, when the generated function runs. Check names with `[[ $name =~ ^[a-z]+$ ]]` first.

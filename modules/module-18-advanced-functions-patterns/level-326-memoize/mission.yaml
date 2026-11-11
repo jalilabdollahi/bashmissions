@@ -1,0 +1,58 @@
+id: 326
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Memoize
+difficulty: advanced
+xp: 210
+story: |
+  Gus is building the quarterly domain report. It lists every customer site,
+  and many customers own several sites at the same registrar, so the same
+  question is asked again and again. Each `whois-lookup` takes two seconds
+  and the registrar has started to complain about the traffic. "Never ask the
+  same question twice," Mara says. "Make the function remember."
+objective: |
+  Write solution.sh, called as `solution.sh DOMAIN...`.
+  The command `whois-lookup DOMAIN` prints the registrar of a domain. It is
+  slow, so each distinct DOMAIN may be looked up at most once per run.
+  Write a function `registrar_of DOMAIN` that stores the registrar in the
+  global variable `registrar` (it prints nothing itself). It asks
+  `whois-lookup` the first time and reuses a cached answer afterwards; keep
+  the cache in an associative array.
+  For every DOMAIN argument, in order, print:
+    DOMAIN -> REGISTRAR
+  With no arguments print "usage: solution.sh DOMAIN..." to stderr and exit 2.
+concepts:
+  - "declare -A cache: key -> remembered result"
+  - "${cache[$key]+x} tests whether a key exists"
+  - "a function that fills a variable, so its work stays in the main shell"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Keep the cache in an associative array (declare -A)."
+  - pattern: 'whois-lookup'
+    message: "Ask whois-lookup on a cache miss."
+test_cases:
+  - name: all different
+    args: [harbourbakery.example, tidewaterbooks.example, northpierdental.example]
+    expected_stdout: |-
+      harbourbakery.example -> Reef Registry
+      tidewaterbooks.example -> Kelp Names
+      northpierdental.example -> Pelican Domains
+  - name: repeats are served from the cache
+    args: [gullanchor.example, harbourbakery.example, gullanchor.example, gullanchor.example, harbourbakery.example]
+    expected_stdout: |-
+      gullanchor.example -> Reef Registry
+      harbourbakery.example -> Reef Registry
+      gullanchor.example -> Reef Registry
+      gullanchor.example -> Reef Registry
+      harbourbakery.example -> Reef Registry
+  - name: unknown domains are cached too
+    args: [mystery.example, mystery.example, tidewaterbooks.example, mystery.example]
+    expected_stdout: |-
+      mystery.example -> unknown
+      mystery.example -> unknown
+      tidewaterbooks.example -> Kelp Names
+      mystery.example -> unknown
+  - name: nothing to look up
+    expected_stderr: "usage: solution.sh DOMAIN..."
+    expected_exit: 2

@@ -1,0 +1,73 @@
+id: 333
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: An Iterator over Lines
+difficulty: advanced
+xp: 220
+story: |
+  The sales team keeps new customers in a "queue file" that is not a table.
+  Each customer takes three lines in a row: the name, the plan, the monthly
+  price. Gus wants a clean one-line-per-customer list for the invoice
+  run. "A `while read` loop gives you one line per turn," Mara says, "and you
+  need three. Build something you can ask for the next line from anywhere in
+  the loop."
+objective: |
+  Write solution.sh, called as `solution.sh QUEUE_FILE`.
+  Write an iterator function `next_line`: each call stores the next unread
+  line of QUEUE_FILE in the variable `LINE` and returns 0; when there are no
+  lines left it returns 1 and leaves `LINE` alone. Keep the position in a
+  variable named `cursor`.
+  Use it to walk the file three lines at a time: name, plan, price. For each
+  complete record print:
+    NAME: PLAN plan, PRICE EUR/month
+  If the file ends in the middle of a record, print
+  "incomplete record starting at line N" to stderr (N counts from 1 and is the
+  line of that record's name) and exit 1; records before it have already
+  been printed.
+  If QUEUE_FILE cannot be read print "lines: cannot read 'QUEUE_FILE'" to
+  stderr and exit 1. An empty file prints nothing.
+concepts:
+  - "an iterator: a function plus a cursor variable"
+  - "mapfile -t into an array, indexing with the cursor"
+  - "pulling several items per loop turn; end-of-data as status 1"
+required_patterns:
+  - pattern: 'next_line\s*\(\)'
+    message: "Define the iterator as a function called next_line."
+  - pattern: '\bcursor\b'
+    message: "Keep the position in a variable named cursor."
+test_cases:
+  - name: two customers
+    args: [queue.txt]
+    files:
+      queue.txt: "Harbour Bakery\nbasic\n9\nTidewater Books\npro\n24\n"
+    expected_stdout: |-
+      Harbour Bakery: basic plan, 9 EUR/month
+      Tidewater Books: pro plan, 24 EUR/month
+  - name: names with spaces and one customer
+    args: [queue.txt]
+    files:
+      queue.txt: "Gull & Anchor Pub\nstarter plus\n14\n"
+    expected_stdout: "Gull & Anchor Pub: starter plus plan, 14 EUR/month"
+  - name: five lines is one record too few
+    args: [queue.txt]
+    files:
+      queue.txt: "North Pier Dental\nbusiness\n39\nSeaweed Spa\nbasic\n"
+    expected_stdout: "North Pier Dental: business plan, 39 EUR/month"
+    expected_stderr: "incomplete record starting at line 4"
+    expected_exit: 1
+  - name: a file that ends after the name
+    args: [queue.txt]
+    files:
+      queue.txt: "Lighthouse Cafe\n"
+    expected_stderr: "incomplete record starting at line 1"
+    expected_exit: 1
+  - name: empty queue
+    args: [queue.txt]
+    files:
+      queue.txt: ""
+    expected_stdout: ""
+  - name: missing file
+    args: [absent.txt]
+    expected_stderr: "lines: cannot read 'absent.txt'"
+    expected_exit: 1

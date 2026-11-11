@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Fake ticket tracker client. Shows exactly which arguments arrived, one per line.
+echo "args=$#"
+i=0
+for a in "$@"; do
+  i=$(( i + 1 ))
+  echo "$i=[$a]"
+done

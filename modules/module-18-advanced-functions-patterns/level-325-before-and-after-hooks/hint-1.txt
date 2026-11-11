@@ -1,0 +1,1 @@
+Do not put the extras inside the deploy step. Keep two lists of "things to call": one for before, one for after. Registering a step is just adding a name to a list; the deploy step walks the lists.

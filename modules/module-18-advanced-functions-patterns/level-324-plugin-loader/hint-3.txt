@@ -1,0 +1,12 @@
+  dir=$1
+  [[ -d $dir ]] || { echo "lf: plugin directory '$dir' not found" >&2; exit 1; }
+  shopt -s nullglob
+  count=0
+  for file in "$dir"/*.sh; do
+    name=${file##*/}; name=${name%.sh}
+    source "$file"
+    echo "loaded $name"
+    "plugin_$name"
+    count=$(( count + 1 ))
+  done
+  # if count is still 0: print "no plugins found"

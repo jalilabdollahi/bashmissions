@@ -1,0 +1,4 @@
+  ticket() {
+    tracker-cli new --source=cli "$@"
+  }
+  ticket "$@"

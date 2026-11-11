@@ -1,0 +1,65 @@
+id: 325
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Before and After Hooks
+difficulty: advanced
+xp: 200
+story: |
+  Every site deploy at Lanternfish needs the same ceremony, but never the same
+  one: Priya wants a lock and a snapshot first, Noor wants a Slack note
+  afterwards, and the bakery's site also needs its cache warmed. Theo's
+  deploy function has grown an `if` for each of them. "Make the function
+  boring again," Mara says. "Let people hang their own steps on it."
+objective: |
+  Write solution.sh, called as `solution.sh SITE [SPEC...]`.
+  Keep two global arrays, `before_hooks` and `after_hooks`, each holding the
+  names of functions to call. Write these four hook functions; each receives
+  the site name as `$1`:
+    hook_lock      prints "locking SITE"
+    hook_snapshot  prints "snapshotting SITE"
+    hook_notify    prints "telling #ops about SITE"
+    hook_cache     prints "warming cache for SITE"
+  Each SPEC is `before:NAME` or `after:NAME`, where NAME is one of lock,
+  snapshot, notify, cache. Register it by appending `hook_NAME` to the
+  matching array, in the order the SPECs are given.
+  Then deploy: call every before-hook in order, print "deploying SITE", then
+  call every after-hook in order.
+  A SPEC that is not of that form, or names an unknown hook, prints
+  "bad hook spec: SPEC" to stderr and exits 2 before anything is deployed.
+concepts:
+  - "arrays of function names: hooks+=(fn)"
+  - "iterating \"${hooks[@]}\" and calling \"$h\" args"
+  - "registering first, running later"
+required_patterns:
+  - pattern: 'before_hooks\+=\('
+    message: "Register hooks by appending to before_hooks (and after_hooks) with +=( )."
+  - pattern: '"\$\{(before|after)_hooks\[@\]\}"'
+    message: "Run the hooks by looping over \"${before_hooks[@]}\"."
+test_cases:
+  - name: no hooks, plain deploy
+    args: [harbour-bakery]
+    expected_stdout: "deploying harbour-bakery"
+  - name: lock and snapshot before, notify after
+    args: [tidewater-books, "before:lock", "before:snapshot", "after:notify"]
+    expected_stdout: |-
+      locking tidewater-books
+      snapshotting tidewater-books
+      deploying tidewater-books
+      telling #ops about tidewater-books
+  - name: registration order is run order
+    args: [gull-anchor, "after:cache", "before:snapshot", "after:notify", "before:lock"]
+    expected_stdout: |-
+      snapshotting gull-anchor
+      locking gull-anchor
+      deploying gull-anchor
+      warming cache for gull-anchor
+      telling #ops about gull-anchor
+  - name: an unknown hook stops everything
+    args: [dental, "before:lock", "after:email"]
+    expected_stderr: "bad hook spec: after:email"
+    expected_exit: 2
+  - name: a spec with no phase
+    args: [dental, "lock"]
+    expected_stderr: "bad hook spec: lock"
+    expected_exit: 2

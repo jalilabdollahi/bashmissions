@@ -1,0 +1,1 @@
+Think of a notice board: one section per event name, and under each a list of who wants to hear about it. Registering adds a name to a section; emitting walks the section and calls everyone on it with the same news.

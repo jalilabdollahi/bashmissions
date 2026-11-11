@@ -1,1 +1,1 @@
-Use this curriculum concept: pipeline of functions.
+Each tidy-up is a small function from text to text. Run a line through a list of them: feed the line to the first, feed its result to the second, and so on. Mind how you read the lines: the default `read` already strips padding, and that would make `trim` meaningless.

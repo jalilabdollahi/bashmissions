@@ -1,0 +1,11 @@
+An associative array is the notebook. Test whether a key is present with `${arr[$key]+x}` (it expands to x only if the key exists):
+
+  declare -A seen=()
+  slow_square() {
+    if [[ -z ${seen[$1]+x} ]]; then
+      seen[$1]=$(expensive-command "$1")     # miss: compute and remember
+    fi
+    result=${seen[$1]}                      # hit or miss: hand the value back
+  }
+
+Assignments made inside `$( )` happen in a subshell and are lost, so let the function fill a variable and call it directly.

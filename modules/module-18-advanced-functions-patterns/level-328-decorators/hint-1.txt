@@ -1,0 +1,1 @@
+You cannot edit the function, but you can move it. Keep the original under a second name, then define a new function with the old name that does its extra work and calls the renamed original in the middle.

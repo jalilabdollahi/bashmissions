@@ -1,1 +1,8 @@
-Keep the example deterministic and clean up any processes or temporary resources you create.
+A variable can hold a function name, and quoting it calls it:
+
+  shout() { echo "${1^^}"; }
+  whisper() { echo "${1,,}"; }
+  style=shout                    # pick once
+  echo "$("$style" Hello)"       # HELLO
+
+Integer rounding trick: adding half of the divisor before dividing rounds to nearest (`(c + 50) / 100`); adding divisor minus one rounds up. Plain `c / 100` rounds down. Validate numbers with `[[ $x =~ ^[0-9]+$ ]]`.

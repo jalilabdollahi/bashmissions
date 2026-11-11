@@ -1,0 +1,62 @@
+id: 327
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Function Factories
+difficulty: advanced
+xp: 220
+story: |
+  Theo's script has `log_info`, `log_warn` and `log_error`: three functions
+  that are the same except for one word, copied and pasted. Last week someone
+  fixed the format in two of them. Priya wants a `log_audit` as well. "Write
+  the function once," Mara says. "Then write a function that writes it for
+  any level."
+objective: |
+  Write solution.sh, called as `solution.sh MESSAGE LEVEL...`.
+  Write a factory function `make_logger LEVEL` that defines a new function
+  named `log_LEVEL`. When called with words, `log_LEVEL` prints one line:
+    [LEVEL] words...
+  where LEVEL is shown in UPPERCASE and the words are joined with spaces.
+  Create a logger for every LEVEL argument, then call each created logger, in
+  the order given, with MESSAGE.
+  A LEVEL is valid only if it consists of lowercase letters (a-z) and nothing
+  else. For an invalid one, `make_logger` prints
+  "make_logger: bad level name 'LEVEL'" to stderr and the script exits 2,
+  before any logger has printed.
+  Generating the function with `eval` is acceptable here, but only after the
+  name has been validated.
+concepts:
+  - "eval \"name() { body; }\" builds a function from text"
+  - "validate the name before eval ([[ $x =~ ^[a-z]+$ ]])"
+  - "values baked into the generated body"
+required_patterns:
+  - pattern: '\beval\b'
+    message: "Generate the function with eval \"log_$level() { ...; }\"."
+  - pattern: '\^?\[a-z\]\+\$?|\[\[:lower:\]\]'
+    message: "Validate the level name against lowercase letters before using eval."
+test_cases:
+  - name: three loggers from one factory
+    args: ["disk almost full", warn, error, info]
+    expected_stdout: |-
+      [WARN] disk almost full
+      [ERROR] disk almost full
+      [INFO] disk almost full
+  - name: a level nobody planned for
+    args: [backup done, audit]
+    expected_stdout: "[AUDIT] backup done"
+  - name: a hostile level name is refused and runs nothing
+    args: ["hi", "info", "x;touch pwned"]
+    expected_stderr: "make_logger: bad level name 'x;touch pwned'"
+    expected_exit: 2
+    expected_files:
+      pwned: null
+  - name: capitals are not allowed
+    args: ["hi", "Warn"]
+    expected_stderr: "make_logger: bad level name 'Warn'"
+    expected_exit: 2
+  - name: a name with a command substitution
+    args: ["hi", 'a$(touch pwned)']
+    expected_stderr: "make_logger: bad level name 'a$(touch pwned)'"
+    expected_exit: 2
+    expected_files:
+      pwned: null
