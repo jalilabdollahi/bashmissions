@@ -190,6 +190,9 @@ def _write_test_files(run_dir: Path, files: dict | None) -> None:
             target.mkdir(parents=True, exist_ok=True)
             continue
         target.parent.mkdir(parents=True, exist_ok=True)
+        if isinstance(content, dict) and "symlink" in content:  # {symlink: "target/path"}
+            os.symlink(str(content["symlink"]), target)
+            continue
         if isinstance(content, dict):  # {content: str, mode: "0644", mtime: epoch}
             target.write_text(str(content.get("content", "")), encoding="utf-8")
             if "mode" in content:
