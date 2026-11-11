@@ -1,0 +1,1 @@
+Build the list of places to look, in priority order, then walk through it and stop at the first file that exists. The only subtle part is the first entry: its base folder depends on one environment variable that may be unset, empty, or set to something that is not allowed.

@@ -1,0 +1,95 @@
+id: 349
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Secrets from Files
+difficulty: advanced
+xp: 260
+story: |
+  Theo moves the storefront into containers, and the platform mounts each secret
+  as a file under `/run/secrets/` rather than putting it in the environment,
+  where every child process and every crash dump can see it. The convention is
+  simple: if `DB_PASSWORD_FILE` is set, the secret is in that file; otherwise
+  `DB_PASSWORD` may hold it directly. Priya wants the startup script to follow it
+  without ever echoing a secret.
+objective: |
+  Write solution.sh, called as `solution.sh NAME [NAME...]`. For each NAME, find
+  the secret like this:
+    - If the variable `NAME_FILE` is set and not empty, the secret is the content
+      of the file it names, without its trailing newline(s).
+    - Otherwise, if the variable `NAME` is set and not empty, that is the secret.
+  Never print a secret. Print one line per resolved NAME on stdout:
+    NAME: <N> chars from file      (or: from env)
+  where N is the length of the secret. The problems below are reported on stderr
+  (one line each) and make the script exit with status 1 once all NAMEs have been
+  handled; the other names are still processed:
+    NAME: set NAME or NAME_FILE, not both     (both variables are non-empty)
+    NAME: cannot read FILE                    (FILE is not a readable file)
+    NAME: secret file is empty                (the file has no content)
+    NAME: missing                             (neither variable is set)
+  Process the names in the order given. Without any argument print
+  `usage: solution.sh NAME...` to stderr and exit 2. Do not use `eval`.
+concepts:
+  - "*_FILE convention for secrets"
+  - "indirect expansion ${!var}"
+  - "$(<file) reads a file without cat and drops trailing newlines"
+forbidden_patterns:
+  - pattern: '\beval\b'
+    message: "Use indirect expansion ${!name} to read a variable by name; eval is not needed."
+test_cases:
+  - name: one from the environment, one from a file
+    args: [DB_PASSWORD, API_TOKEN]
+    env:
+      DB_PASSWORD: hunter2
+      API_TOKEN_FILE: secrets/token
+    files:
+      secrets/token: "sk_live_abc\n"
+    expected_stdout: |-
+      DB_PASSWORD: 7 chars from env
+      API_TOKEN: 11 chars from file
+  - name: spaces inside, newlines at the end
+    args: [PASSPHRASE]
+    env:
+      PASSPHRASE_FILE: secrets/phrase
+    files:
+      secrets/phrase: "pass phrase here\n\n\n"
+    expected_stdout: "PASSPHRASE: 16 chars from file"
+  - name: both forms at once is an error, the rest continues
+    args: [DB_PASSWORD, API_TOKEN, SMTP_PASSWORD]
+    env:
+      DB_PASSWORD: aaaa
+      DB_PASSWORD_FILE: secrets/db
+      API_TOKEN: abcdefgh
+      SMTP_PASSWORD_FILE: secrets/smtp
+    files:
+      secrets/db: "from-the-file\n"
+      secrets/smtp: "mail-pass\n"
+    expected_stdout: |-
+      API_TOKEN: 8 chars from env
+      SMTP_PASSWORD: 9 chars from file
+    expected_stderr: "DB_PASSWORD: set DB_PASSWORD or DB_PASSWORD_FILE, not both"
+    expected_exit: 1
+  - name: missing, unreadable and empty
+    args: [A_SECRET, B_SECRET, C_SECRET, D_SECRET]
+    env:
+      B_SECRET_FILE: secrets/not-there
+      C_SECRET_FILE: secrets/blank
+      D_SECRET: ok
+    files:
+      secrets/blank: "\n"
+    expected_stdout: "D_SECRET: 2 chars from env"
+    expected_stderr: |-
+      A_SECRET: missing
+      B_SECRET: cannot read secrets/not-there
+      C_SECRET: secret file is empty
+    expected_exit: 1
+  - name: an empty variable counts as unset
+    args: [LICENSE_KEY]
+    env:
+      LICENSE_KEY: ""
+      LICENSE_KEY_FILE: ""
+    expected_stderr: "LICENSE_KEY: missing"
+    expected_exit: 1
+  - name: no names
+    expected_stderr: "usage: solution.sh NAME..."
+    expected_exit: 2

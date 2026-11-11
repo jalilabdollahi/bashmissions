@@ -1,0 +1,100 @@
+id: 346
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Find the Project Config
+difficulty: advanced
+xp: 250
+story: |
+  Theo keeps all of Lanternfish's web projects in one monorepo, and each project
+  can carry a `.lanternrc` with its own settings. Engineers run the `lantern`
+  tool from wherever they happen to be, often six folders deep inside `src/`.
+  "Same trick as git," Mara says. "Look here. Not here? Look in the parent. Keep
+  climbing, but stop at the repository root; we never want to read some stranger's
+  file from above it."
+objective: |
+  Write solution.sh, called as `solution.sh START_DIR ROOT_DIR`. Starting in
+  START_DIR and going up one parent folder at a time, find the nearest folder that
+  contains a regular file named `.lanternrc`. Never look above ROOT_DIR (ROOT_DIR
+  itself is searched; START_DIR is inside ROOT_DIR or equal to it).
+  On success print two lines:
+    config: ./<folder relative to ROOT_DIR>/.lanternrc
+    project: <value of the project key>
+  Example: a file in ROOT_DIR/apps/web gives `config: ./apps/web/.lanternrc`;
+  one directly in ROOT_DIR gives `config: ./.lanternrc`.
+  The file holds `name=value` lines; ignore comments (`#`) and blank lines and
+  blanks around names and values. If there is no `project` key, print
+  `project: (none)`.
+  Errors, all on stderr:
+    - an argument that is not a directory: `not a directory: ARG`, exit 2
+    - START_DIR not inside ROOT_DIR: `START_DIR is not inside ROOT_DIR` (with the
+      arguments as given), exit 2
+    - nothing found: `no .lanternrc between START_DIR and ROOT_DIR` (with the
+      arguments as given), exit 1
+  Compare real paths: resolve both arguments with `cd ... && pwd -P` first, so
+  that `..` and relative spellings work.
+concepts:
+  - "walk up with dirname until a boundary"
+  - "canonical paths with cd + pwd -P"
+  - "stop conditions so a loop cannot run forever"
+test_cases:
+  - name: the nearest file wins
+    args: [work/apps/web/src, work]
+    files:
+      "work/.lanternrc": "project = monorepo\n"
+      "work/apps/web/.lanternrc": "# web\nproject = harbour-web\n"
+      "work/apps/web/src/": ""
+    expected_stdout: |-
+      config: ./apps/web/.lanternrc
+      project: harbour-web
+  - name: found at the root itself
+    args: [work/apps/api/handlers, work]
+    files:
+      "work/.lanternrc": "colour=teal\nproject=lanternfish=main\n"
+      "work/apps/api/handlers/": ""
+    expected_stdout: |-
+      config: ./.lanternrc
+      project: lanternfish=main
+  - name: found in the start folder, spelled with ..
+    args: [work/apps/../apps/web, work]
+    files:
+      "work/apps/web/.lanternrc": "\n\n  project=tidewater  \n"
+    expected_stdout: |-
+      config: ./apps/web/.lanternrc
+      project: tidewater
+  - name: no project key
+    args: [work/a/b, work]
+    files:
+      "work/a/.lanternrc": "theme=dark\n"
+      "work/a/b/": ""
+    expected_stdout: |-
+      config: ./a/.lanternrc
+      project: (none)
+  - name: files above the root are never read
+    args: [work/apps/web, work]
+    files:
+      ".lanternrc": "project=intruder\n"
+      "work/apps/web/": ""
+    expected_stderr: "no .lanternrc between work/apps/web and work"
+    expected_exit: 1
+  - name: a directory named .lanternrc does not count
+    args: [work/x, work]
+    files:
+      "work/x/.lanternrc/": ""
+      "work/.lanternrc": "project=outer\n"
+    expected_stdout: |-
+      config: ./.lanternrc
+      project: outer
+  - name: start outside the root
+    args: [elsewhere, work]
+    files:
+      "elsewhere/": ""
+      "work/": ""
+    expected_stderr: "elsewhere is not inside work"
+    expected_exit: 2
+  - name: start does not exist
+    args: [ghost, work]
+    files:
+      "work/": ""
+    expected_stderr: "not a directory: ghost"
+    expected_exit: 2

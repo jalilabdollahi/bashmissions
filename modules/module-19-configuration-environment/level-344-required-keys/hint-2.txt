@@ -1,0 +1,8 @@
+An associative array answers "value of this key?" in one step:
+
+  declare -A seen
+  seen[color]=blue
+  echo "${seen[color]:-none}"        # blue
+  echo "${seen[shape]:-none}"        # none (absent) - an empty value gives none too
+
+`shift` drops the file name from `$@` so the remaining arguments are exactly the required keys, and `$#` is their count. `count=$(( count + 1 ))` is safe under `set -e`.

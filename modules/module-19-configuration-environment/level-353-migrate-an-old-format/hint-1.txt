@@ -1,0 +1,1 @@
+Treat the job as a small translation pipeline with guards in front: check the situation first (is the input readable, is it already converted, would the output overwrite something), convert next, and only at the very end touch the disk. Keep the converted lines in memory until everything has gone through without trouble.

@@ -1,0 +1,87 @@
+id: 345
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: XDG Config Paths
+difficulty: advanced
+xp: 240
+story: |
+  Lanternfish's little CLI `pelican` keeps its settings in `~/.pelicanrc`, and
+  the home directories of the support desk are starting to look like attics.
+  Ollie suggests `~/.config/pelican/`. "That is the right idea," says Mara,
+  "but the standard says the base folder is `$XDG_CONFIG_HOME` when the user
+  has set it, and only then `~/.config`. And the old file must keep working
+  for people who have not moved."
+objective: |
+  Write solution.sh, called as `solution.sh APP`. Find the config file of the
+  application APP and print its location as one line:
+    config: <path>
+  The candidates, in order, are:
+    1. <BASE>/APP/config.ini, where BASE is `$XDG_CONFIG_HOME` if that
+       variable is set, not empty and an absolute path (starts with `/`),
+       otherwise `$HOME/.config`. Only that one base is consulted, never both.
+    2. the legacy file `$HOME/.APPrc` (for APP=pelican: `.pelicanrc`)
+  Print the first candidate that exists as a regular file. When the path
+  starts with `$HOME`, print `~` instead of the home directory, for example
+  `config: ~/.config/pelican/config.ini`.
+  If neither candidate exists, print `no config found for APP` to stderr and
+  exit 1. Without an APP argument print `usage: solution.sh APP` to stderr and
+  exit 2.
+concepts:
+  - "XDG_CONFIG_HOME with a $HOME/.config fallback"
+  - "${VAR:-fallback} and testing for an absolute path"
+  - "replace a $HOME prefix with ~ for display"
+test_cases:
+  - name: the default location
+    args: [pelican]
+    files:
+      ".home/.config/pelican/config.ini": "colour=blue\n"
+    expected_stdout: "config: ~/.config/pelican/config.ini"
+  - name: XDG_CONFIG_HOME wins when set
+    args: [pelican]
+    env:
+      XDG_CONFIG_HOME: "{HOME}/cfg"
+    files:
+      ".home/cfg/pelican/config.ini": "colour=green\n"
+      ".home/.config/pelican/config.ini": "colour=red\n"
+    expected_stdout: "config: ~/cfg/pelican/config.ini"
+  - name: empty XDG_CONFIG_HOME is the same as unset
+    args: [anglerfish]
+    env:
+      XDG_CONFIG_HOME: ""
+    files:
+      ".home/.config/anglerfish/config.ini": "x=1\n"
+    expected_stdout: "config: ~/.config/anglerfish/config.ini"
+  - name: a relative XDG_CONFIG_HOME is ignored
+    args: [pelican]
+    env:
+      XDG_CONFIG_HOME: "relative/dir"
+    files:
+      "relative/dir/pelican/config.ini": "colour=wrong\n"
+      ".home/.config/pelican/config.ini": "colour=right\n"
+    expected_stdout: "config: ~/.config/pelican/config.ini"
+  - name: only the XDG base is consulted, then the legacy file
+    args: [pelican]
+    env:
+      XDG_CONFIG_HOME: "{HOME}/cfg"
+    files:
+      ".home/.config/pelican/config.ini": "ignored=1\n"
+      ".home/.pelicanrc": "old=1\n"
+    expected_stdout: "config: ~/.pelicanrc"
+  - name: nothing found
+    args: [pelican]
+    env:
+      XDG_CONFIG_HOME: "{HOME}/cfg"
+    files:
+      ".home/.config/pelican/config.ini": "ignored=1\n"
+    expected_stderr: "no config found for pelican"
+    expected_exit: 1
+  - name: a directory is not a config file
+    args: [pelican]
+    files:
+      ".home/.config/pelican/config.ini/": ""
+      ".home/.pelicanrc": "old=1\n"
+    expected_stdout: "config: ~/.pelicanrc"
+  - name: missing app name
+    expected_stderr: "usage: solution.sh APP"
+    expected_exit: 2

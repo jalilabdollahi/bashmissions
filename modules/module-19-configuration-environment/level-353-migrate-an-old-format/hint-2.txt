@@ -1,0 +1,7 @@
+Split `Name: value` at the first colon with two expansions: `${line%%:*}` (before it) and `${line#*:}` (after it, colons included). `case $name in Listen) ... ;; *) ... ;;` maps names. Accumulate results in an array and print them one per line:
+
+  out=()
+  out+=("port=80")
+  printf '%s\n' "${out[@]}"
+
+`${value%s}` removes one trailing `s` if present, `${value,,}` lowercases. `[[ -e $path ]]` tests existence. An empty array under `set -u` needs care: print the header separately.

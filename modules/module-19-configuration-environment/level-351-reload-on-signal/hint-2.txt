@@ -1,0 +1,7 @@
+`trap handler_name SIGNAL` registers a function (or command string) for a signal:
+
+  on_usr1() { echo "got it"; }
+  trap on_usr1 USR1
+  kill -USR1 $$          # $$ is this script's own process id
+
+A function can print a value and signal failure with `return 1`, which lets you write `if fresh=$(read_level); then ... fi`. Keep the new value in a separate variable until it has been validated.

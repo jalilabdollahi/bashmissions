@@ -1,0 +1,7 @@
+Indirect expansion reads a variable whose name is in another variable:
+
+  var=HOME
+  echo "${!var}"            # prints the value of HOME
+  echo "${!var:-nothing}"   # same, with a default (safe under set -u)
+
+Build the second name with `file_var="${name}_FILE"`. `$(<file)` reads a whole file into a string and drops trailing newlines. `${#text}` is the length. `continue` jumps to the next name.

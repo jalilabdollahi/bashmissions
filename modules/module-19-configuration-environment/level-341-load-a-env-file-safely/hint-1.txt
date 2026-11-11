@@ -1,0 +1,1 @@
+Think of the file as text, not as a script. Read it one line at a time and decide what each line is: nothing (blank or comment), a setting, or garbage. Only a setting changes anything, and the only thing you do with it is store it in the environment.

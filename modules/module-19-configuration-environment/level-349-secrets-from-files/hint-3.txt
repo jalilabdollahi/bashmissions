@@ -1,0 +1,19 @@
+  problems=0
+  for name in "$@"; do
+    file_var="${name}_FILE"
+    direct=${!name:-}
+    path=${!file_var:-}
+    if [[ -n $direct && -n $path ]]; then
+      echo "$name: set $name or $file_var, not both" >&2
+      problems=$(( problems + 1 )); continue
+    fi
+    if [[ -n $path ]]; then
+      # unreadable -> error + continue; secret=$(<"$path"); where=file
+    elif [[ -n $direct ]]; then
+      secret=$direct; where=env
+    else
+      # missing
+    fi
+    # empty secret -> error; otherwise echo "$name: ${#secret} chars from $where"
+  done
+  (( problems == 0 )) || exit 1

@@ -1,0 +1,12 @@
+The classic argument loop:
+
+  while (( $# )); do
+    case $1 in
+      --size) size=$2; shift 2 ;;
+      --size=*) size=${1#*=}; shift ;;
+      --quiet) quiet=yes; shift ;;
+      -*) echo "unknown option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+An associative array (`declare -A flag`) lets you store values by name, and `${!var}` reads the variable whose name is in `var` (handy for TIDE_${name^^}).

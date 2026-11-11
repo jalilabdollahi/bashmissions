@@ -1,0 +1,1 @@
+Decide per setting what kind it is: a secret by its name, a URL that carries a password inside it, or a harmless value. Secrets are never printed in full, but a few trailing characters help a human tell two secrets apart. Compare names in one fixed case so `api_token` and `API_TOKEN` are treated alike.

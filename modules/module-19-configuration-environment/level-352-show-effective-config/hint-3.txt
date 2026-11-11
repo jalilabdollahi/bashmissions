@@ -1,0 +1,14 @@
+  declare -A value source
+  # defaults: value[bind]=127.0.0.1 source[bind]=default ... for the four
+  # file (if $1): read key/val trimmed; if the key matches ^[a-z_][a-z0-9_]*$ and val is not empty:
+  #   value[$key]=$val; source[$key]=file
+  for var in $(compgen -v LF_ || true); do
+    if [[ $var =~ ^LF_[A-Z0-9_]+$ && -n ${!var} ]]; then
+      key=${var#LF_}; key=${key,,}
+      # value[$key]=${!var}; source[$key]=env
+    fi
+  done
+  width=0     # loop over "${!value[@]}" and keep the maximum ${#key}
+  while IFS= read -r key; do
+    printf '%-*s = %s [%s]\n' "$width" "$key" "${value[$key]}" "${source[$key]}"
+  done < <(printf '%s\n' "${!value[@]}" | sort)

@@ -1,1 +1,0 @@
-Keep the example deterministic and clean up any processes or temporary resources you create.

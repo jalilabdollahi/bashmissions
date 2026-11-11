@@ -1,0 +1,84 @@
+id: 348
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Mask Secrets
+difficulty: advanced
+xp: 260
+story: |
+  Noor pasted the output of `show-config` into a public support ticket, and with
+  it the pub's database password. Priya has rotated every key since, and now
+  makes one rule: the config printer may show everything a human needs to debug
+  a problem and nothing an attacker needs to break in. "Show that a secret
+  exists," she says, "and maybe its last four characters. That is enough to
+  tell two keys apart."
+objective: |
+  Write solution.sh, called as `solution.sh CONFIG_FILE`. The file holds
+  `NAME=VALUE` lines; skip blank lines and `#` comments, and ignore blanks around
+  the name and the value. A value may contain `=`. Print one line per setting,
+  in file order, as `NAME=VALUE` (name and value trimmed), with these masks:
+    - If the name, compared case-insensitively, ends in `_KEY`, `_TOKEN`,
+      `_SECRET` or `_PASSWORD`, the value is a secret. A secret with 12 or more
+      characters prints as `****` followed by its last 4 characters; a shorter
+      non-empty secret prints as `****`; an empty one stays empty.
+    - Any other value that contains a URL with a password, that is
+      `://USER:PASSWORD@` (USER may be empty, PASSWORD contains no `@` or `/`),
+      keeps everything except the password, which becomes `****`.
+    - Everything else is printed unchanged.
+  Names such as `MONKEY` or `KEYBOARD` do not end in `_KEY`, so they are not
+  secrets. An unreadable file prints `cannot read CONFIG_FILE` to stderr, exit 1.
+concepts:
+  - "redact secrets in output"
+  - "suffix match on ${name^^} with a glob"
+  - "BASH_REMATCH to rebuild a URL around a masked password"
+test_cases:
+  - name: passwords, tokens and plain settings
+    args: [app.env]
+    files:
+      app.env: |
+        # Gull & Anchor Pub
+        SITE_NAME=Gull & Anchor
+        DB_PASSWORD=hunter2
+        API_TOKEN = sk_live_abcdef123456
+        PORT=8080
+    expected_stdout: |-
+      SITE_NAME=Gull & Anchor
+      DB_PASSWORD=****
+      API_TOKEN=****3456
+      PORT=8080
+  - name: urls with passwords
+    args: [app.env]
+    files:
+      app.env: |
+        DATABASE_URL=postgres://bakery:s3cr=t@db.example:5432/shop
+        CACHE_URL=redis://:pw@cache.lan
+        PUBLIC_URL=http://harbour.example:8080/x@y
+        DOCS_URL=https://docs.example/guide
+    expected_stdout: |-
+      DATABASE_URL=postgres://bakery:****@db.example:5432/shop
+      CACHE_URL=redis://:****@cache.lan
+      PUBLIC_URL=http://harbour.example:8080/x@y
+      DOCS_URL=https://docs.example/guide
+  - name: case, length boundary, empty secret and look-alike names
+    args: [app.env]
+    files:
+      app.env: |
+        stripe_secret=whsec_12ab34cd56
+        SIGNING_KEY=abcdefghijkl
+        OLD_KEY=abcdefghijk
+        MAIL_PASSWORD=
+        MONKEY=banana
+        KEYBOARD=us
+        JWT_SECRET=ab==cd==ef==gh==
+    expected_stdout: |-
+      stripe_secret=****cd56
+      SIGNING_KEY=****ijkl
+      OLD_KEY=****
+      MAIL_PASSWORD=
+      MONKEY=banana
+      KEYBOARD=us
+      JWT_SECRET=****gh==
+  - name: unreadable file
+    args: [none.env]
+    expected_stderr: "cannot read none.env"
+    expected_exit: 1

@@ -1,0 +1,12 @@
+  app=${1:-}
+  [[ -n $app ]] || { echo "usage: solution.sh APP" >&2; exit 2; }
+  base=${XDG_CONFIG_HOME:-}
+  if [[ $base != /* ]]; then base=$HOME/.config; fi
+  for path in "$base/$app/config.ini" "$HOME/.${app}rc"; do
+    if [[ -f $path ]]; then
+      # if $path starts with "$HOME"/ then path="~${path#"$HOME"}"
+      echo "config: $path"
+      exit 0
+    fi
+  done
+  # nothing matched: message on stderr, exit 1

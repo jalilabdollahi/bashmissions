@@ -1,0 +1,12 @@
+  start=$(cd "$1" 2>/dev/null && pwd -P) || { echo "not a directory: $1" >&2; exit 2; }
+  root=...                                  # same for $2
+  # exit 2 unless start is root or starts with "$root"/
+  found=; dir=$start
+  while true; do
+    if [[ -f $dir/.lanternrc ]]; then found=$dir; break; fi
+    if [[ $dir == "$root" ]]; then break; fi
+    dir=$(dirname "$dir")
+  done
+  # empty found -> stderr message, exit 1
+  # read "project" from "$found/.lanternrc" with IFS='=' read -r key value
+  echo "config: .${found#"$root"}/.lanternrc"

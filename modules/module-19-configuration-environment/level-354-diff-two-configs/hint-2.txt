@@ -1,0 +1,6 @@
+`${table[$key]+set}` expands to `set` when the key exists (even with an empty value) and to nothing otherwise, which separates "absent" from "empty". A function can fill an array chosen by its caller with a nameref:
+
+  fill() { local -n out=$1; out[a]=1; }
+  declare -A t; fill t
+
+All the names of both tables, each once and sorted: `printf '%s\n' "${!one[@]}" "${!two[@]}" | sort -u`. For a status that tells "differences exist", finish with `exit 1`.

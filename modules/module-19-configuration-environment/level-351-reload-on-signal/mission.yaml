@@ -1,0 +1,99 @@
+id: 351
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Reload on Signal
+difficulty: expert
+xp: 280
+story: |
+  The log shipper on `halibut` runs for weeks, and changing its log level used to
+  mean restarting it and losing the buffered lines. Mara's rule for daemons:
+  "Edit the file, send `kill -HUP`, and the process re-reads its config without
+  dropping anything. And if the new file is garbage, it keeps running on the old
+  settings and says so." You will build the skeleton of that behaviour and, to keep
+  the exercise deterministic, let the script play the administrator itself.
+objective: |
+  Write solution.sh, called as `solution.sh CONFIG NEWLEVEL`. CONFIG holds
+  `name=value` lines (ignore blank lines, `#` comments, unknown names, and
+  blanks around names and values). The setting `level` must be one of `debug`,
+  `info`, `warn`, `error`; if it appears more than once, the last line counts.
+  Do these steps in order:
+    1. Read the level from CONFIG and print `loaded: level=<level>`.
+       If there is no valid level, print `no valid level in CONFIG` to stderr
+       and exit 1.
+    2. Install a handler for the HUP signal (use `trap`). On HUP the handler
+       re-reads CONFIG. If the level is valid, it becomes the active level and the
+       handler prints `reloaded: level=<level>`. If it is not valid, the active
+       level is unchanged and the handler prints
+       `reload rejected: keeping level=<active level>` to stderr.
+    3. Pretend to be the administrator: append the line `level=NEWLEVEL` to
+       CONFIG, then send HUP to yourself with `kill -HUP $$`.
+    4. Print `done: level=<active level>` and exit 0.
+  Both the initial load and the reload must use the same function for reading
+  the level. Without exactly two arguments print `usage: solution.sh CONFIG
+  NEWLEVEL` to stderr and exit 2.
+concepts:
+  - "trap handler HUP: re-read configuration on signal"
+  - "kill -HUP $$ sends a signal to the script itself"
+  - "keep the old config when the new one is invalid"
+required_patterns:
+  - pattern: 'trap\s.*HUP'
+    message: "Install the handler with `trap name HUP`."
+  - pattern: 'kill\s+(-HUP|-s\s+HUP|-1)\s+\$\$'
+    message: "Send the signal to yourself with `kill -HUP $$`."
+test_cases:
+  - name: raise the level to debug
+    args: [shipper.conf, debug]
+    files:
+      shipper.conf: |
+        # log shipper on halibut
+        name = tidewater
+        level = info
+    expected_stdout: |-
+      loaded: level=info
+      reloaded: level=debug
+      done: level=debug
+    expected_files:
+      shipper.conf: |
+        # log shipper on halibut
+        name = tidewater
+        level = info
+        level=debug
+  - name: the last level line wins at load time
+    args: [shipper.conf, warn]
+    files:
+      shipper.conf: |
+        level=debug
+
+        level=error
+        colour=teal
+    expected_stdout: |-
+      loaded: level=error
+      reloaded: level=warn
+      done: level=warn
+  - name: a broken reload keeps the old level
+    args: [shipper.conf, loud]
+    files:
+      shipper.conf: "level=info\n"
+    expected_stdout: |-
+      loaded: level=info
+      done: level=info
+    expected_stderr: "reload rejected: keeping level=info"
+    expected_files:
+      shipper.conf: "level=info\nlevel=loud\n"
+  - name: nothing valid to start with
+    args: [shipper.conf, info]
+    files:
+      shipper.conf: "level=chatty\n"
+    expected_stderr: "no valid level in shipper.conf"
+    expected_exit: 1
+  - name: missing level
+    args: [shipper.conf, info]
+    files:
+      shipper.conf: "# empty config\n"
+    expected_stderr: "no valid level in shipper.conf"
+    expected_exit: 1
+  - name: wrong number of arguments
+    args: [shipper.conf]
+    expected_stderr: "usage: solution.sh CONFIG NEWLEVEL"
+    expected_exit: 2

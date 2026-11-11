@@ -1,0 +1,1 @@
+Read all three settings as raw text first. Then ask a separate question of each: is it a whole number in range, is it one of the accepted truth words, is it one of the four level names? Collect complaints instead of stopping at the first, and print results only when there were none.

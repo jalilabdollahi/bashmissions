@@ -1,0 +1,11 @@
+`dirname /a/b/c` prints `/a/b`, so `dir=$(dirname "$dir")` moves up one level. To compare folders reliably, turn them into absolute paths first:
+
+  here=$(cd "$1" && pwd -P)
+
+A loop that must always stop has an explicit exit condition:
+
+  while true; do
+    [[ -f $dir/marker ]] && break
+    [[ $dir == "$top" ]] && break
+    dir=$(dirname "$dir")
+  done
