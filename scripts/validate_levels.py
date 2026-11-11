@@ -52,6 +52,7 @@ CASE_KEYS = {"name", "args", "stdin", "env", "files", "expected_stdout",
 
 # (regex, explanation) - commands that behave differently on macOS and Linux.
 # A line can opt out with a trailing comment containing "portable-ok".
+CMD = r"(?:^\s*|[;&|({]\s*|\$\(\s*|\b(?:if|elif|while|until|then|do|else|time|!)\s+)"  # command position
 PORTABILITY_RULES = [
     (r"\bsed\s+(-[a-zA-Z]+\s+)*-i(\s+-|\s+'|\s+\"|\s*$)", "sed -i without a backup suffix (use sed -i.bak)"),
     (r"\bgrep\s+(-[a-zA-Z]*\s+)*-[a-zA-Z]*P", "grep -P (not on macOS)"),
@@ -71,10 +72,9 @@ PORTABILITY_RULES = [
     (r"\bmktemp\s+(-[a-zA-Z]+\s+)*--", "mktemp long options (GNU only)"),
     (r"\bawk\b[^|;]*\b(gensub|strftime|asort|asorti|systime)\b", "gawk-only awk functions"),
     (r"\b(gsed|gawk|ggrep|gdate)\b", "GNU-prefixed tools"),
-    (r"\bfree\b\s+-", "free (Linux only)"),
-    (r"\b(ip|ss|netstat|ifconfig|systemctl|service|journalctl|iptables)\s", "host-specific system tools (use a stub)"),
-    (r"\b(curl|wget|nc|dig|nslookup|docker|kubectl|git|ssh|scp|rsync|logger)\s", "network/host tool without a stub (provide stubs/<tool>)"),
-    (r"\bps\s+-[a-zA-Z]*[eo]", "ps options differ (prefer $! / kill -0 / jobs)"),
+    (CMD + r"(ip|ss|netstat|ifconfig|systemctl|service|journalctl|iptables)\s", "host-specific system tools (use a stub)"),
+    (CMD + r"(curl|wget|nc|dig|nslookup|docker|kubectl|git|ssh|scp|rsync|logger|df|uptime|free|openssl|useradd|userdel|usermod|crontab)(\s|$)", "network/host tool without a stub (provide stubs/<tool>)"),
+    (CMD + r"ps\s+-[a-zA-Z]*[eo]", "ps options differ (prefer $! / kill -0 / jobs)"),
 ]
 
 
@@ -180,8 +180,8 @@ def portability_problems(level: dict) -> list[str]:
         code = strip_comments(f.read_text(encoding="utf-8", errors="replace"))
         for pattern, why in PORTABILITY_RULES:
             for m in re.finditer(pattern, code, re.MULTILINE):
-                tool = re.match(r"\w+", m.group(0).strip())
-                if tool and tool.group(0) in stub_names:
+                words = re.findall(r"[\w.-]+", m.group(0))
+                if any(w in stub_names for w in words):
                     continue
                 line_start = code.rfind("\n", 0, m.start()) + 1
                 line_end = code.find("\n", m.end())
