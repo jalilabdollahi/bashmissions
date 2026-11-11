@@ -1,0 +1,70 @@
+id: 252
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Sort Lines
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie has been asked to print shelf labels for the server room, one per rack
+  position, and the label printer wants them in alphabetical order. He has the
+  list, in whatever order people typed it, and he has found out the hard way
+  that the labels for rack 10 end up in front of rack 2. Time to find out why.
+objective: |
+  Write solution.sh. It reads lines from standard input (no arguments) and
+  prints the same lines in ascending order, using the plain character order
+  that `sort` gives under `LC_ALL=C`: digits first, then capital letters, then
+  lowercase letters, comparing character by character. So `rack10-dory` comes
+  before `rack2-eel`, and `Eel` comes before `anchovy`.
+  Do not remove duplicates: a line that appears twice must be printed twice.
+  Empty input prints nothing. Use the sort command.
+concepts:
+  - "sort reads lines and writes them in order"
+  - "default order is by characters, not by numeric value"
+required_patterns:
+  - pattern: '\bsort\b'
+    message: "Use the sort command."
+forbidden_patterns:
+  - pattern: 'sort\s+(-\w*u|--unique)'
+    message: "Keep duplicate lines; plain sort is enough here."
+test_cases:
+  - name: rack labels, ten before two
+    stdin: |
+      rack9-eel
+      rack10-dory
+      rack2-anchovy
+      rack10-cuttlefish
+    expected_stdout: |-
+      rack10-cuttlefish
+      rack10-dory
+      rack2-anchovy
+      rack9-eel
+  - name: capitals sort before lowercase
+    stdin: |
+      marlin
+      Eel
+      octopus
+      Barracuda
+      dory
+    expected_stdout: |-
+      Barracuda
+      Eel
+      dory
+      marlin
+      octopus
+  - name: duplicates are kept
+    stdin: |
+      shelf-b
+      shelf-a
+      shelf-b
+      shelf-a
+      shelf-b
+    expected_stdout: |-
+      shelf-a
+      shelf-a
+      shelf-b
+      shelf-b
+      shelf-b
+  - name: nothing in, nothing out
+    stdin: ""
+    expected_stdout: ""

@@ -1,0 +1,82 @@
+id: 265
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: sed Line Ranges
+difficulty: advanced
+xp: 170
+story: |
+  The nightly job log on cuttlefish is a long soup: cleanup, rotation, metrics,
+  and somewhere inside it two or three backup runs, each wrapped between a
+  BEGIN line and an END line. After last night's scare, Priya wants only the
+  backup stretches pasted into the incident report, markers included.
+objective: |
+  Write solution.sh that takes one argument, a job log. Print every block that
+  starts at a line containing `BEGIN backup` and ends at the next line
+  containing `END backup`, including both marker lines and everything between
+  them, in file order. Lines outside such blocks are not printed. If there are
+  several blocks, print all of them; if a block has no END before the file
+  ends, print through the last line; if the file has no block, print nothing.
+  Use sed -n with a range address: /start/,/end/p.
+concepts:
+  - "sed -n turns off the automatic printing"
+  - "address range /start/,/end/ selects a block of lines"
+  - "p prints the selected lines"
+required_patterns:
+  - pattern: '\bsed\s+(-\w*n\w*)\b'
+    message: "Start with sed -n so sed prints only what you ask for."
+  - pattern: '/[^/]+/\s*,\s*/[^/]+/\s*p'
+    message: "Select the block with a range: '/BEGIN backup/,/END backup/p'."
+test_cases:
+  - name: two backup runs
+    args: [night.log]
+    files:
+      night.log: |
+        01:00 rotating logs
+        01:05 BEGIN backup users
+        01:06 copying 120 files
+        01:09 END backup users
+        01:10 metrics flushed
+        02:00 BEGIN backup billing
+        02:02 copying 4 files
+        02:03 END backup billing
+        02:10 done
+    expected_stdout: |-
+      01:05 BEGIN backup users
+      01:06 copying 120 files
+      01:09 END backup users
+      02:00 BEGIN backup billing
+      02:02 copying 4 files
+      02:03 END backup billing
+  - name: block never closed
+    args: [crash.log]
+    files:
+      crash.log: |
+        startup
+        BEGIN backup web
+        copying
+        disk full
+    expected_stdout: |-
+      BEGIN backup web
+      copying
+      disk full
+  - name: no backups tonight
+    args: [quiet.log]
+    files:
+      quiet.log: |
+        01:00 nothing happened
+        02:00 still nothing
+    expected_stdout: ""
+  - name: markers inside a sentence
+    args: [words.log]
+    files:
+      words.log: |
+        noise
+        job=7 BEGIN backup mail (full)
+        mail dir ok
+        job=7 END backup mail rc=0
+        noise again
+    expected_stdout: |-
+      job=7 BEGIN backup mail (full)
+      mail dir ok
+      job=7 END backup mail rc=0

@@ -1,0 +1,5 @@
+The whole script is one command that you already have the name of:
+
+  sort
+
+Nothing else is needed: no loop, no read. Standard input flows into sort, and sorted lines flow out to standard output. Check that your script does not use -u, because duplicates must be kept.

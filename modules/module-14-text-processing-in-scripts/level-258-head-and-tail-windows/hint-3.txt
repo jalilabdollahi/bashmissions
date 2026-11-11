@@ -1,0 +1,5 @@
+Use the arguments directly:
+
+  head -n "$3" "$1" | tail -n +"$2"
+
+head keeps lines 1 through LAST, then tail starts at line FIRST. If you like readable names, copy the arguments to variables first (file=$1 first=$2 last=$3).

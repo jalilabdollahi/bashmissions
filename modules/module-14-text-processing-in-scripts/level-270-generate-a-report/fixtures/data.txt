@@ -1,4 +1,0 @@
-service,region,cpu
-api,east,80
-web,west,30
-worker,east,95

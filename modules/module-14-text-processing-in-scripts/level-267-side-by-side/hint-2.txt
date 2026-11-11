@@ -1,0 +1,8 @@
+The tool is paste:
+
+  paste a.txt b.txt            # a1<TAB>b1, a2<TAB>b2 ...
+  paste -d, a.txt b.txt c.txt  # a1,b1,c1 ...   -d sets the delimiter
+  paste -d' ' a b              # space-separated
+  paste -sd, a.txt             # -s: ONE line, all of a.txt joined with commas
+
+If a file is shorter, paste leaves its field empty rather than stopping.

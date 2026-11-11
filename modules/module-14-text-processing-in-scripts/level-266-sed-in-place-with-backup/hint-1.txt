@@ -1,0 +1,1 @@
+You already know how to substitute with sed, and that only prints the edited text. There is an option that makes sed write the result back into the file, and the same option can keep the original under a second name. Careful: the way you write that option is exactly where macOS and Linux differ.

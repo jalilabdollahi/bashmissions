@@ -1,0 +1,5 @@
+The script only needs the file argument handed to the filter:
+
+  uniq "$1"
+
+If you added sort in front, the output would be DOWN, OK, SLOW and the timeline would be gone.

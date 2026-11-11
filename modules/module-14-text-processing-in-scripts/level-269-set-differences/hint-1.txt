@@ -1,0 +1,1 @@
+You are comparing two lists as sets: what is in one but not the other, and the other way round. Unix has a comparison tool that prints three groups at once (only in the first, only in the second, in both), and lets you hide the ones you do not want. It insists on sorted input, so sort both lists first.

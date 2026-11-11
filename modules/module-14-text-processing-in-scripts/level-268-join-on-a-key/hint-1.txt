@@ -1,0 +1,1 @@
+This is a lookup between two tables that share a key column, like a spreadsheet VLOOKUP or a database JOIN. Unix has a command for it. It is picky: it expects both inputs already ordered by the key, and it will quietly give wrong or missing rows if they are not. So sort first.

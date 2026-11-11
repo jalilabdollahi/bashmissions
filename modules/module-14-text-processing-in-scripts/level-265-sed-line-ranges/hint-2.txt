@@ -1,0 +1,7 @@
+A range is two addresses separated by a comma, and p prints:
+
+  sed -n '/START/,/STOP/p' file       # print blocks from START to STOP
+  sed -n '3,5p' file                  # numbers work too: lines 3 to 5
+  sed -n '/x/p' file                  # only lines containing x
+
+-n suppresses the automatic printing, so each selected line is printed once, by p.

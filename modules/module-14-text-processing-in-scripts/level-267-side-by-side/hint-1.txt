@@ -1,0 +1,1 @@
+This is the opposite of cat. cat puts files one after another; you want the files next to each other, line 1 with line 1, line 2 with line 2, like columns of a table. There is a small classic tool for exactly that, and it joins the pieces with a tab unless you choose a different delimiter.

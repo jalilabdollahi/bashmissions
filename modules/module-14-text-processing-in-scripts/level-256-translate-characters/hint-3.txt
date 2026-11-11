@@ -1,1 +1,6 @@
-Print only the expected result lines so the checker can compare stdout exactly.
+Build the two sets side by side:
+
+  first set  : a-z   .   -
+  second set : A-Z   _   _
+
+So the command is tr 'a-z.-' 'A-Z__'. The dash goes last in the first set so that tr does not mistake it for a range. The script is just that one command reading standard input.

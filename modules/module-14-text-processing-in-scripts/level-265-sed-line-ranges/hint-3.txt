@@ -1,0 +1,5 @@
+The whole script is one sed command:
+
+  sed -n '/BEGIN backup/,/END backup/p' "$1"
+
+Both patterns are ordinary regular expressions, so they match anywhere in the line, which is what you need for lines such as `01:05 BEGIN backup users`.

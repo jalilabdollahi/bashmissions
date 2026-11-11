@@ -1,1 +1,7 @@
-Use the requested text-processing tool in the pipeline, then shape the output exactly.
+The delete command is d, and a /regex/ in front of it chooses the lines:
+
+  sed '/^#/d' file                      # delete lines starting with #
+  sed -e '/foo/d' -e '/bar/d' file      # two rules: delete foo lines and bar lines
+  sed '/^$/d' file                      # delete empty lines
+
+[[:space:]]* means "any number of spaces or tabs", so '^[[:space:]]*#' is "a # after optional blanks".

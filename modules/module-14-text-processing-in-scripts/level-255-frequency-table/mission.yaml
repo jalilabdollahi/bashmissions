@@ -1,0 +1,86 @@
+id: 255
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Frequency Table
+difficulty: intermediate
+xp: 150
+story: |
+  Noor has a theory that customers only ever visit three pages of the Lanternfish
+  website and that the rest of the site is decoration. Nobody has proof. The web
+  server log has every request, so a quick tally of the most requested pages
+  would settle the argument over lunch.
+objective: |
+  Write solution.sh that takes one argument, an access log. Each line has four
+  space-separated fields:
+    <ip> <method> <path> <status>
+  for example `10.0.0.5 GET /menu 200`. Print one line per distinct path, in
+  the format
+    <count> <path>
+  with a single space between them and no leading spaces, ordered by count from
+  the largest to the smallest. Paths with the same count are ordered
+  alphabetically (plain character order). An empty log prints nothing.
+  Build it as a pipeline: extract the path, group equal lines with sort,
+  count them with uniq -c, and order the result by count.
+concepts:
+  - "sort | uniq -c turns repeated lines into counts"
+  - "sort -rn orders the counts, biggest first"
+  - "uniq -c pads its counts; normalise before comparing"
+required_patterns:
+  - pattern: 'uniq\s+-c'
+    message: "Count the repeats with uniq -c (after a sort, so equal lines are neighbours)."
+  - pattern: '(-[a-zA-Z]*n|-k\S*n)'
+    message: "Order the counts numerically (sort -n...), otherwise 9 beats 11."
+test_cases:
+  - name: three popular pages
+    args: [access.log]
+    files:
+      access.log: |
+        10.0.0.5 GET /menu 200
+        10.0.0.9 GET /book 200
+        10.0.0.5 GET /menu 200
+        10.0.0.7 GET /contact 404
+        10.0.0.9 GET /menu 200
+        10.0.0.5 GET /book 200
+    expected_stdout: |-
+      3 /menu
+      2 /book
+      1 /contact
+  - name: ties are alphabetical
+    args: [tie.log]
+    files:
+      tie.log: |
+        192.0.2.1 GET /b 200
+        192.0.2.2 GET /a 200
+        192.0.2.3 GET /c 200
+        192.0.2.4 GET /b 200
+        192.0.2.5 GET /a 200
+    expected_stdout: |-
+      2 /a
+      2 /b
+      1 /c
+  - name: counts above nine are numbers
+    args: [busy.log]
+    files:
+      busy.log: |
+        10.1.1.1 GET /home 200
+        10.1.1.2 GET /home 200
+        10.1.1.3 GET /faq 200
+        10.1.1.4 GET /home 200
+        10.1.1.5 GET /home 200
+        10.1.1.6 GET /home 200
+        10.1.1.7 GET /home 200
+        10.1.1.8 GET /faq 200
+        10.1.1.9 GET /home 200
+        10.1.1.1 GET /home 200
+        10.1.1.2 GET /home 200
+        10.1.1.3 GET /home 200
+        10.1.1.4 GET /home 200
+    expected_stdout: |-
+      11 /home
+      2 /faq
+  - name: empty log
+    args: [none.log]
+    files:
+      none.log: ""
+    expected_stdout: ""

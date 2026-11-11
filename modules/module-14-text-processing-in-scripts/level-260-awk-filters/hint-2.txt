@@ -1,0 +1,8 @@
+The shape of an awk program is  pattern { action }:
+
+  awk '$3 == "open" { print $1 }' file            # text equality
+  awk '$2 > 100 { print $1, $2 }' file            # numeric comparison
+  awk '$1 == "a" && $2 >= 5 { print }' file       # both must hold
+  awk '$1 == "a" || $1 == "b" { print $2 }' file  # either
+
+Strings go in double quotes; numbers do not. awk compares fields that look like numbers numerically.

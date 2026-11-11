@@ -1,0 +1,5 @@
+The whole script:
+
+  join -t, <(sort -t, -k1,1 "$1") <(sort -t, -k1,1 "$2")
+
+Each sort puts its file in key order; join then walks the two sorted streams together and prints the code, the name, and the amount for the codes that exist in both.

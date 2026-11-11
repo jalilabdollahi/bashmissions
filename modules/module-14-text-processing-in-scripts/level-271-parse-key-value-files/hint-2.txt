@@ -1,0 +1,9 @@
+Setting IFS in front of read changes it only for that command:
+
+  while IFS='=' read -r key value; do
+    echo "key=[$key] value=[$value]"
+  done < settings.conf
+
+For a line "url=a=b" you get key=url and value=a=b: the last variable takes the rest of the line.
+
+read fails on a final line with no newline even though it filled the variables. Accept that case with:  while read ... || [[ -n $key ]]; do

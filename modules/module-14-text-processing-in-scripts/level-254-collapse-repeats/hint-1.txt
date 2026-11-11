@@ -1,0 +1,1 @@
+You want to keep a line only when it differs from the line right before it. There is a classic filter for "same as the previous line, skip it". Notice that it only ever looks at neighbours, so it works on data in time order.

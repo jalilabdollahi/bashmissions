@@ -1,0 +1,11 @@
+Skeleton:
+
+  awk '
+    { total += $3 }
+    END {
+      avg = (NR > 0) ? total / NR : 0
+      printf "count=%d total=%.2f avg=%.2f\n", NR, total, avg
+    }
+  ' "$1"
+
+An empty file runs only the END block, with NR equal to 0 and total never set, which prints as 0.

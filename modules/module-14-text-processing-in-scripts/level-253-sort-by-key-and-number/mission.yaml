@@ -1,0 +1,78 @@
+id: 253
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Sort by Key and Number
+difficulty: intermediate
+xp: 140
+story: |
+  The nightly capacity check wrote one line per mounted volume, and Mara wants
+  the fullest disks at the top of her screen when she arrives. The first draft
+  of the report put a 95 GB volume above a 120 GB one, which made her
+  eyebrow do the thing. The report needs to understand that used space is a
+  number and that the host name is only a tie-breaker.
+objective: |
+  Write solution.sh that takes one argument, a file of comma-separated lines:
+    host,mount,used_gb
+  for example `dory,/data,430` (used_gb may have decimals, e.g. 7.5). There
+  is no header line. Print the same lines, sorted by used_gb from the largest
+  to the smallest. When two volumes have the same used_gb, the one whose host
+  name comes first alphabetically goes first (plain character order).
+  Print the lines unchanged. Use `sort` with -t to set the separator, -k to
+  choose the key fields, and the n flag for numeric comparison.
+concepts:
+  - "sort -t sets the field separator"
+  - "sort -k picks the key field(s)"
+  - "n and r flags on a key: numeric and reversed"
+required_patterns:
+  - pattern: 'sort\s+.*-t\s*[,"'']'
+    message: "Tell sort the separator with -t, because the fields are comma-separated."
+  - pattern: '-k\s*\d'
+    message: "Pick the sort key with -k, e.g. -k3,3."
+  - pattern: '(-k\s*\S*n|\s-[a-zA-Z]*n)'
+    message: "Compare the key as a number (n flag), otherwise 95 sorts after 120."
+test_cases:
+  - name: numbers not text, ties by host
+    args: [disks.csv]
+    files:
+      disks.csv: |
+        anchovy,/var,120
+        dory,/data,430
+        eel,/var,95
+        flounder,/data,430
+        grouper,/home,8
+    expected_stdout: |-
+      dory,/data,430
+      flounder,/data,430
+      anchovy,/var,120
+      eel,/var,95
+      grouper,/home,8
+  - name: decimals
+    args: [srv.csv]
+    files:
+      srv.csv: |
+        halibut,/srv,7.5
+        marlin,/srv,10.25
+        octopus,/srv,100
+        barracuda,/srv,9
+    expected_stdout: |-
+      octopus,/srv,100
+      marlin,/srv,10.25
+      barracuda,/srv,9
+      halibut,/srv,7.5
+  - name: everything tied
+    args: [flat.csv]
+    files:
+      flat.csv: |
+        cuttlefish,/b,50
+        barracuda,/a,50
+        anchovy,/c,50
+    expected_stdout: |-
+      anchovy,/c,50
+      barracuda,/a,50
+      cuttlefish,/b,50
+  - name: empty report
+    args: [none.csv]
+    files:
+      none.csv: ""
+    expected_stdout: ""

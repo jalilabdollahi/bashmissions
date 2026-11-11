@@ -1,0 +1,1 @@
+sort can look at just one column instead of the whole line, and it can treat that column as a number. You also have two sorting rules at once: the size decides first, and only when sizes are equal does the host name get a say. Think of listing the rules in order of importance.

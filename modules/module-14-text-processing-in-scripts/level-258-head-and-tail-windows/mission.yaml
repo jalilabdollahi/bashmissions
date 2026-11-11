@@ -1,0 +1,88 @@
+id: 258
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Head and Tail Windows
+difficulty: intermediate
+xp: 150
+story: |
+  Something odd happened on dory at 03:12, and Priya has narrowed it down to a few
+  lines in the middle of a log that has forty thousand of them. She does not
+  want to open the file in an editor and scroll; she wants a little tool that
+  prints a window of it. Ollie suggests she could just ask for "lines 3 to 5".
+objective: |
+  Write solution.sh that takes three arguments: a file, FIRST and LAST (both
+  positive integers). Print lines FIRST through LAST of the file, inclusive,
+  counting from 1:
+    ./solution.sh app.log 3 5     prints lines 3, 4 and 5
+  If the file has fewer than LAST lines, print whatever is available from FIRST
+  on; if FIRST is past the end, print nothing. Build it from head and
+  tail, not sed or awk.
+concepts:
+  - "head -n N prints the first N lines"
+  - "tail -n +N starts printing at line N"
+  - "pipe head into tail to cut out a window"
+required_patterns:
+  - pattern: '\bhead\b'
+    message: "Use head to stop after line LAST."
+  - pattern: '\btail\s+(-n\s*|-)\+'
+    message: "Use tail -n +FIRST to start printing at line FIRST."
+forbidden_patterns:
+  - pattern: '\b(sed|awk)\b'
+    message: "Use head and tail here; sed ranges come in a later level."
+test_cases:
+  - name: lines 3 to 5
+    args: [dory.log, "3", "5"]
+    files:
+      dory.log: |
+        03:10 cron started
+        03:11 cron finished
+        03:12 kernel: oom-killer invoked
+        03:12 kernel: killed process 4411
+        03:13 nginx restarted
+        03:14 disk ok
+        03:15 backup started
+        03:16 backup finished
+    expected_stdout: |-
+      03:12 kernel: oom-killer invoked
+      03:12 kernel: killed process 4411
+      03:13 nginx restarted
+  - name: from the very first line
+    args: [a.txt, "1", "2"]
+    files:
+      a.txt: |
+        alpha
+        bravo
+        charlie
+    expected_stdout: |-
+      alpha
+      bravo
+  - name: window runs past the end
+    args: [short.log, "3", "10"]
+    files:
+      short.log: |
+        one
+        two
+        three
+        four
+    expected_stdout: |-
+      three
+      four
+  - name: a single line
+    args: [one.txt, "4", "4"]
+    files:
+      one.txt: |
+        l1
+        l2
+        l3
+        l4
+        l5
+    expected_stdout: |-
+      l4
+  - name: start beyond the end
+    args: [tiny.txt, "9", "12"]
+    files:
+      tiny.txt: |
+        x
+        y
+    expected_stdout: ""

@@ -1,0 +1,9 @@
+The finished shape, one stage per line:
+
+  cut -d' ' -f3 "$1" |
+    sort |
+    uniq -c |
+    sed 's/^ *//' |
+    sort -k1,1nr -k2,2
+
+Each | at the end of a line lets the pipeline continue on the next one.

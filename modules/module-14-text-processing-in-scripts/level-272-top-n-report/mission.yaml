@@ -1,0 +1,115 @@
+id: 272
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Top-N Report
+difficulty: expert
+xp: 220
+story: |
+  The DNS resolver on eel logs every query, and Priya has noticed that people
+  keep asking for names that do not exist: typos, retired hosts, one very
+  stubborn printer. She wants a weekly leaderboard of the worst offenders so she
+  can fix the typos at the source. This is the module's final exam: no new
+  tool, but you must wire the old ones together.
+objective: |
+  Write solution.sh that takes two arguments: a resolver log and a number N.
+  Each log line has four space-separated fields:
+    <time> <client_ip> <name> <rcode>
+  for example `10:01:02 10.0.0.5 wwww.harbourbakery.example NXDOMAIN`. Only
+  lines whose rcode is exactly NXDOMAIN count. Print a title line and then the
+  N most-queried names among them:
+    Top N NXDOMAIN names
+    1. <name> (<count>)
+    2. <name> (<count>)
+  Rank 1 is the name with the most queries; names with equal counts are ordered
+  alphabetically (plain character order). If there are fewer than N
+  names, print all of them. If there are no NXDOMAIN lines, print just the title.
+  Build one pipeline: filter and pick the name column, group and count, order,
+  take the first N, and number the lines with awk. uniq -c pads its count
+  differently on macOS and Linux, so normalise it.
+concepts:
+  - "combining filters: awk | sort | uniq -c | sort | head | awk"
+  - "normalising uniq -c output"
+  - "numbering lines with NR"
+required_patterns:
+  - pattern: 'uniq\s+-c'
+    message: "Count the repeats with sort | uniq -c."
+  - pattern: '\bhead\b'
+    message: "Take the first N lines with head -n."
+  - pattern: '\bNR\b'
+    message: "Use awk's NR to number the ranked lines."
+  - pattern: '\bawk\b'
+    message: "Use awk to select the NXDOMAIN lines and to number the result."
+test_cases:
+  - name: ordinary week
+    args: [resolver.log, "3"]
+    files:
+      resolver.log: |
+        10:01:02 10.0.0.5 wwww.harbourbakery.example NXDOMAIN
+        10:01:05 10.0.0.9 www.harbourbakery.example NOERROR
+        10:02:11 10.0.0.5 wwww.harbourbakery.example NXDOMAIN
+        10:03:40 10.0.0.7 printer.old.example NXDOMAIN
+        10:03:41 10.0.0.7 printer.old.example NXDOMAIN
+        10:03:42 10.0.0.7 printer.old.example NXDOMAIN
+        10:04:00 10.0.0.2 tidewater.exmaple NXDOMAIN
+        10:05:12 10.0.0.5 wwww.harbourbakery.example NXDOMAIN
+        10:06:00 10.0.0.2 mail.example SERVFAIL
+        10:06:30 10.0.0.2 tidewater.exmaple NXDOMAIN
+    expected_stdout: |-
+      Top 3 NXDOMAIN names
+      1. printer.old.example (3)
+      2. wwww.harbourbakery.example (3)
+      3. tidewater.exmaple (2)
+  - name: fewer names than N
+    args: [small.log, "5"]
+    files:
+      small.log: |
+        09:00:00 192.0.2.8 b.example NXDOMAIN
+        09:00:01 192.0.2.8 a.example NXDOMAIN
+        09:00:02 192.0.2.9 b.example NXDOMAIN
+        09:00:03 192.0.2.9 c.example NOERROR
+    expected_stdout: |-
+      Top 5 NXDOMAIN names
+      1. b.example (2)
+      2. a.example (1)
+  - name: top one, with a tie on count
+    args: [tie.log, "1"]
+    files:
+      tie.log: |
+        11:00:00 10.1.1.1 zulu.example NXDOMAIN
+        11:00:01 10.1.1.1 alpha.example NXDOMAIN
+        11:00:02 10.1.1.2 zulu.example NXDOMAIN
+        11:00:03 10.1.1.2 alpha.example NXDOMAIN
+    expected_stdout: |-
+      Top 1 NXDOMAIN names
+      1. alpha.example (2)
+  - name: counts above nine rank numerically
+    args: [big.log, "2"]
+    files:
+      big.log: |
+        12:00:00 10.2.2.2 many.example NXDOMAIN
+        12:00:01 10.2.2.2 many.example NXDOMAIN
+        12:00:02 10.2.2.2 many.example NXDOMAIN
+        12:00:03 10.2.2.2 many.example NXDOMAIN
+        12:00:04 10.2.2.2 many.example NXDOMAIN
+        12:00:05 10.2.2.2 many.example NXDOMAIN
+        12:00:06 10.2.2.2 many.example NXDOMAIN
+        12:00:07 10.2.2.2 many.example NXDOMAIN
+        12:00:08 10.2.2.2 many.example NXDOMAIN
+        12:00:09 10.2.2.2 many.example NXDOMAIN
+        12:00:10 10.2.2.2 many.example NXDOMAIN
+        12:00:11 10.2.2.3 few.example NXDOMAIN
+        12:00:12 10.2.2.3 few.example NXDOMAIN
+        12:00:13 10.2.2.3 few.example NXDOMAIN
+    expected_stdout: |-
+      Top 2 NXDOMAIN names
+      1. many.example (11)
+      2. few.example (3)
+  - name: no failures at all
+    args: [ok.log, "3"]
+    files:
+      ok.log: |
+        08:00:00 10.3.3.3 fine.example NOERROR
+        08:00:01 10.3.3.3 fine.example NOERROR
+    expected_stdout: |-
+      Top 3 NXDOMAIN names

@@ -1,22 +1,69 @@
 id: 251
 module: 14
 module_name: text-processing-in-scripts
-module_display: Text Processing in Scripts
+module_display: Text Processing
 title: Cut Columns
 difficulty: intermediate
-xp: 125
-objective: Use `cut` to print the second CSV column.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    name
-    alice
-    bob
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 130
+story: |
+  Gus has opened the quarterly billing export and gone quiet. It has six columns,
+  most of which he does not care about, and his spreadsheet import chokes on
+  anything wider than two. He wants a trimmed copy with just who owes what, and
+  he wants it before the harbour café closes.
+objective: |
+  Write solution.sh that takes one argument, the path of a billing export.
+  Every line is comma-separated with six fields:
+    invoice,customer,plan,seats,amount,status
+  (the first line is a header with the same six names). Print only the
+  customer (field 2) and the amount (field 5) of every line, header
+  included, still separated by a comma:
+    customer,amount
+    Harbour Bakery,120.00
+  Customer names may contain spaces but never commas. Use the cut command.
 concepts:
-- '`cut -d, -f2`'
-scaffold: true
+  - "cut -d sets the delimiter"
+  - "cut -f picks fields by number"
+required_patterns:
+  - pattern: '\bcut\b'
+    message: "Use cut to pull the columns out."
+  - pattern: 'cut\s+.*-d\s*[,"'']'
+    message: "Tell cut the delimiter with -d, (the fields are comma-separated)."
+  - pattern: 'cut\s+.*-f\s*\d'
+    message: "Choose the fields with -f, for example -f2,5."
+test_cases:
+  - name: small export with header
+    args: [billing.csv]
+    files:
+      billing.csv: |
+        invoice,customer,plan,seats,amount,status
+        INV-1001,Harbour Bakery,standard,4,120.00,paid
+        INV-1002,Tidewater Books,premium,12,340.50,open
+        INV-1003,North Pier Dental,standard,6,180.00,paid
+    expected_stdout: |-
+      customer,amount
+      Harbour Bakery,120.00
+      Tidewater Books,340.50
+      North Pier Dental,180.00
+  - name: names with spaces and ampersands
+    args: [q3.csv]
+    files:
+      q3.csv: |
+        invoice,customer,plan,seats,amount,status
+        INV-2040,Gull & Anchor Pub,premium,9,799.99,overdue
+        INV-2041,Old Mill Cycles,basic,2,45.00,paid
+    expected_stdout: |-
+      customer,amount
+      Gull & Anchor Pub,799.99
+      Old Mill Cycles,45.00
+  - name: header only
+    args: [empty.csv]
+    files:
+      empty.csv: |
+        invoice,customer,plan,seats,amount,status
+    expected_stdout: |-
+      customer,amount
+  - name: completely empty file
+    args: [none.csv]
+    files:
+      none.csv: ""
+    expected_stdout: ""

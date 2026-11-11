@@ -1,1 +1,1 @@
-Use the curriculum concept for this level: `cut -d, -f2`.
+You are not transforming anything, only choosing columns. Unix has a small tool built for exactly this: it splits every line at a delimiter character and keeps the pieces you name. You have to tell it which character separates the fields, and which pieces to keep.

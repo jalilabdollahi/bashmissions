@@ -1,0 +1,5 @@
+Fields: 1 invoice, 2 customer, 3 date, 4 amount. You want 2, 1, 4.
+
+  awk -F';' -v OFS=',' '{ print $2, $1, $4 }' "$1"
+
+The semicolons in the quotes keep the shell from treating them as command separators.

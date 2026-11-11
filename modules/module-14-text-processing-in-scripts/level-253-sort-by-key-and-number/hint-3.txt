@@ -1,0 +1,8 @@
+The rules, most important first:
+
+  1. field 3, numeric, descending   ->  -k3,3nr
+  2. field 1, plain text ascending  ->  -k1,1
+
+Put them together with the separator and the file:
+
+  sort -t, -k3,3nr -k1,1 "$1"

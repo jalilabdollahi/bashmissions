@@ -1,1 +1,5 @@
-Print only the expected result lines so the checker can compare stdout exactly.
+One line does the whole job:
+
+  cut -d, -f2,5 "$1"
+
+Count the fields in the header: invoice=1, customer=2, plan=3, seats=4, amount=5, status=6. The header line is just another line, so it is trimmed together with the rest.

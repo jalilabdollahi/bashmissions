@@ -1,0 +1,6 @@
+The filter is uniq. It reads a file (or standard input) and drops every line that equals the one before:
+
+  printf 'a\na\nb\na\n' | uniq      # a, b, a
+  uniq events.txt
+
+It is often paired with sort, because sorting makes equal lines neighbours. Here you must not do that: the order of events matters.

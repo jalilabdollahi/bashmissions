@@ -1,3 +1,0 @@
-name,email,role
-alice,a@example.com,admin
-bob,b@example.com,user

@@ -1,0 +1,6 @@
+Run comm twice, once per group, and prefix each result:
+
+  comm -13 <(sort "$old") <(sort "$new") | sed 's/^/+ /'
+  comm -23 <(sort "$old") <(sort "$new") | sed 's/^/- /'
+
+-13 leaves only column 2 (new only); -23 leaves only column 1 (old only). With one column left, comm prints plain lines with no tab.

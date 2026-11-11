@@ -1,0 +1,11 @@
+comm takes two sorted files and prints three tab-separated columns. You switch columns off with -1, -2, -3:
+
+  comm -12 a b      # lines in both
+  comm -23 a b      # lines only in a
+  comm -13 a b      # lines only in b
+
+Sort on the fly with process substitution:
+
+  comm -23 <(sort a) <(sort b)
+
+To add a prefix to every line: sed 's/^/+ /'

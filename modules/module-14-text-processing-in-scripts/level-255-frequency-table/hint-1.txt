@@ -1,0 +1,1 @@
+Counting how often each value appears is a pipeline of four small steps: pick the column you care about, put equal values next to each other, count each run, then order the runs by how big they are. The counting tool only counts neighbours, so one of the steps is about making that work.

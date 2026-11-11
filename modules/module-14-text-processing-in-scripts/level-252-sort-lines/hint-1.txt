@@ -1,0 +1,1 @@
+Ordering lines is such a common job that Unix has a dedicated filter for it. Filters read standard input when you give them no file, so this one needs no arguments at all. Think of it as a tool that swallows every line and hands them back in order.

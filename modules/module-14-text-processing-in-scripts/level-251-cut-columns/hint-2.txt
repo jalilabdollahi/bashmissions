@@ -1,1 +1,7 @@
-Use the requested text-processing tool in the pipeline, then shape the output exactly.
+The tool is cut. Two options matter:
+
+  cut -d: -f1,3 /etc/example     # delimiter ':', keep fields 1 and 3
+  cut -d' ' -f2 words.txt        # a space delimiter must be quoted
+  cut -d, -f2-4 data.csv         # a range: fields 2 through 4
+
+Fields are counted from 1, and the kept ones come out joined by the same delimiter.

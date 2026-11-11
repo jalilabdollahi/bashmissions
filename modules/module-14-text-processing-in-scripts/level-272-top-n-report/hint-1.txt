@@ -1,0 +1,1 @@
+Nothing here is new; the job is to chain what you know in the right order. Think of it as a conveyor belt: first throw away the lines that do not qualify, keep one column, count equal values, rank the counts, keep the top few, and finally decorate each line with its position. Write and test one stage at a time.

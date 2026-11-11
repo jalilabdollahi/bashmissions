@@ -1,0 +1,9 @@
+tr has two more modes:
+
+  tr -d 'xy'     # delete every x and every y
+  tr -s ' '      # squeeze: runs of spaces become one space
+  tr -d '\r'     # \r means the carriage return character
+
+Chain them like any filters:
+
+  cmd | tr -d ',' | tr -s ' '

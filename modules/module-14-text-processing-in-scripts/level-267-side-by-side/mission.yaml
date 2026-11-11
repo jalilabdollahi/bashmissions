@@ -1,0 +1,90 @@
+id: 267
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Side by Side
+difficulty: advanced
+xp: 170
+story: |
+  Ollie, in an excess of diligence, built the rack inventory as three separate
+  notes: one file of server names, one of their IP addresses, one of who
+  looks after them. Line 5 of each file describes the same machine. Now Gus
+  wants a single table, and Ollie would very much like not to copy-paste a
+  hundred lines.
+objective: |
+  Write solution.sh that takes three arguments: the paths of a names file, an
+  addresses file and an owners file. Each holds one value per line, and line N
+  of every file belongs to the same machine. Print one comma-separated line
+  per row:
+    <name>,<address>,<owner>
+  If a file is shorter than the others, its missing values are empty (the
+  commas stay): `eel,,theo`. Use paste with -d to set the delimiter.
+concepts:
+  - "paste glues files together line by line"
+  - "paste -d sets the delimiter"
+  - "shorter files leave empty fields"
+required_patterns:
+  - pattern: '\bpaste\b'
+    message: "Use paste to put the files side by side."
+  - pattern: 'paste\s+.*-d\s*[,"'']'
+    message: "Join with commas using paste -d,."
+test_cases:
+  - name: three equal files
+    args: [names.txt, ips.txt, owners.txt]
+    files:
+      names.txt: |
+        anchovy
+        barracuda
+        cuttlefish
+      ips.txt: |
+        10.0.1.11
+        10.0.1.12
+        10.0.1.13
+      owners.txt: |
+        mara
+        theo
+        priya
+    expected_stdout: |-
+      anchovy,10.0.1.11,mara
+      barracuda,10.0.1.12,theo
+      cuttlefish,10.0.1.13,priya
+  - name: addresses missing for the last machine
+    args: [n.txt, a.txt, o.txt]
+    files:
+      n.txt: |
+        dory
+        eel
+        flounder
+      a.txt: |
+        10.0.2.1
+        10.0.2.2
+      o.txt: |
+        noor
+        gus
+        ollie
+    expected_stdout: |-
+      dory,10.0.2.1,noor
+      eel,10.0.2.2,gus
+      flounder,,ollie
+  - name: values with spaces
+    args: [hosts, nets, who]
+    files:
+      hosts: |
+        grouper
+        halibut
+      nets: |
+        192.168.7.4 /24
+        192.168.8.9 /16
+      who: |
+        on call
+        night shift
+    expected_stdout: |-
+      grouper,192.168.7.4 /24,on call
+      halibut,192.168.8.9 /16,night shift
+  - name: all empty
+    args: [e1, e2, e3]
+    files:
+      e1: ""
+      e2: ""
+      e3: ""
+    expected_stdout: ""

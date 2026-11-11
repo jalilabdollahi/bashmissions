@@ -1,0 +1,64 @@
+id: 262
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: awk Separators
+difficulty: advanced
+xp: 170
+story: |
+  The accounting package Gus bought exports invoices with semicolons between the
+  columns, because it was made in a country where the comma belongs to the
+  decimals. The invoice portal wants commas, and it also wants the customer
+  first. Gus cannot be taught to like semicolons, so the script gets to learn to
+  like both.
+objective: |
+  Write solution.sh that takes one argument, an invoice export. Each line has
+  four fields separated by semicolons:
+    <invoice>;<customer>;<date>;<amount>
+  for example `INV-301;Gull & Anchor Pub;2026-03-02;799.99`. Customer names
+  may contain spaces. Print the lines for the portal, comma-separated and
+  with only three fields, in this order:
+    <customer>,<invoice>,<amount>
+  An empty field stays empty (`INV-5;Old Mill;2026-01-01;` becomes
+  `Old Mill,INV-5,`). Use awk with -F to set the input separator and OFS to
+  set the output separator.
+concepts:
+  - "-F sets the input field separator"
+  - "OFS is the output field separator used by print a, b"
+required_patterns:
+  - pattern: 'awk\s+.*-F\s*[";'']?\s*[";'']'
+    message: "Tell awk the input separator with -F';'."
+  - pattern: '\bOFS\b'
+    message: "Set the output separator with OFS (for example -v OFS=,)."
+test_cases:
+  - name: reorder and re-delimit
+    args: [export.csv]
+    files:
+      export.csv: |
+        INV-301;Gull & Anchor Pub;2026-03-02;799.99
+        INV-302;Harbour Bakery;2026-03-03;120.00
+        INV-303;Tidewater Books;2026-03-05;340.50
+    expected_stdout: |-
+      Gull & Anchor Pub,INV-301,799.99
+      Harbour Bakery,INV-302,120.00
+      Tidewater Books,INV-303,340.50
+  - name: spaces in names, empty amount
+    args: [odd.csv]
+    files:
+      odd.csv: |
+        INV-5;Old Mill Cycles;2026-01-01;
+        INV-6;North Pier Dental;2026-01-02;55
+    expected_stdout: |-
+      Old Mill Cycles,INV-5,
+      North Pier Dental,INV-6,55
+  - name: one line, no trailing newline
+    args: [single.csv]
+    files:
+      single.csv: "INV-9;Salt & Sail;2026-02-11;19.5"
+    expected_stdout: |-
+      Salt & Sail,INV-9,19.5
+  - name: empty export
+    args: [none.csv]
+    files:
+      none.csv: ""
+    expected_stdout: ""

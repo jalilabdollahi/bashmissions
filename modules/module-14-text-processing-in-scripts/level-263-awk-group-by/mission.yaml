@@ -1,0 +1,78 @@
+id: 263
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: awk Group By
+difficulty: advanced
+xp: 180
+story: |
+  Mara is renegotiating the bandwidth contract and wants to know who is
+  actually eating the pipe. The traffic export has one row per customer per
+  day, and the same customers appear dozens of times. She needs one line
+  per customer with the number of days they showed up and their total.
+objective: |
+  Write solution.sh that takes one argument, a traffic export in CSV with a
+  header line:
+    date,customer,gb
+  (for example `2026-03-01,harbour-bakery,12`). gb values are whole numbers.
+  Skip the header, then print one line per distinct customer:
+    <customer>,<number of rows>,<total gb>
+  ordered by customer name (plain character order). A file with only a
+  header prints nothing. Use an awk associative array indexed by customer
+  and pipe the result through sort, because awk makes no promise about the
+  order in which it lists array keys.
+concepts:
+  - "awk arrays are indexed by strings: total[$2] += $3"
+  - "for (key in array) visits every key, in unspecified order"
+  - "sort after awk to make the order stable"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk with arrays for the grouping."
+  - pattern: '\w+\[\$\d+\]'
+    message: "Index an array by a field, for example total[$2] += $3."
+  - pattern: '\bfor\s*\(\s*\w+\s+in\s+\w+\s*\)'
+    message: "Walk the keys with for (name in array)."
+  - pattern: '\bsort\b'
+    message: "Pipe the awk output through sort: array order is not defined."
+test_cases:
+  - name: three customers over four days
+    args: [traffic.csv]
+    files:
+      traffic.csv: |
+        date,customer,gb
+        2026-03-01,harbour-bakery,12
+        2026-03-01,tidewater-books,40
+        2026-03-02,harbour-bakery,8
+        2026-03-02,gull-anchor,3
+        2026-03-03,tidewater-books,25
+        2026-03-04,harbour-bakery,10
+    expected_stdout: |-
+      gull-anchor,1,3
+      harbour-bakery,3,30
+      tidewater-books,2,65
+  - name: one customer only
+    args: [solo.csv]
+    files:
+      solo.csv: |
+        date,customer,gb
+        2026-05-01,north-pier,100
+        2026-05-02,north-pier,0
+    expected_stdout: |-
+      north-pier,2,100
+  - name: header is not data
+    args: [hdr.csv]
+    files:
+      hdr.csv: |
+        date,customer,gb
+        2026-06-01,zeta,5
+        2026-06-02,alpha,7
+        2026-06-03,zeta,5
+    expected_stdout: |-
+      alpha,1,7
+      zeta,2,10
+  - name: header only
+    args: [none.csv]
+    files:
+      none.csv: |
+        date,customer,gb
+    expected_stdout: ""

@@ -1,0 +1,9 @@
+Build it stage by stage, running the pipeline after each addition:
+
+  awk '$4 == "NXDOMAIN" { print $3 }' log        # filter + column
+  ... | sort | uniq -c | sed 's/^ *//'            # count, tidy
+  ... | sort -k1,1nr -k2,2                        # rank (count desc, name asc)
+  ... | head -n "$n"                              # top N
+  ... | awk '{ printf "%d. %s (%d)\n", NR, $2, $1 }'   # number them
+
+NR in the last awk is the line number, which is the rank. The title is just an echo before the pipeline.

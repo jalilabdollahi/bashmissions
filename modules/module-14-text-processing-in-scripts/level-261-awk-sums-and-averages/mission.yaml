@@ -1,0 +1,68 @@
+id: 261
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: awk Sums and Averages
+difficulty: advanced
+xp: 170
+story: |
+  Gus keeps the harbour-office petty cash in a text file, one expense per line,
+  and every month he adds it up on the back of an envelope and gets a
+  different answer. He would like the machine to do it: how many entries,
+  the total, and the average. He would also like it not to divide by zero
+  in March, when nobody bought anything.
+objective: |
+  Write solution.sh that takes one argument, an expenses file. Each line has
+  three whitespace-separated fields:
+    <date> <category> <amount>
+  for example `2026-03-01 fuel 19.99`. Add up the amounts and print exactly
+  one line:
+    count=<lines> total=<sum> avg=<average>
+  with total and avg printed with two decimals (printf "%.2f"). An empty
+  file prints count=0 total=0.00 avg=0.00; the script must not divide by zero.
+  Do the sums in a single awk program: accumulate on every line and print
+  the result in an END block.
+concepts:
+  - "awk variables start at 0 and keep their value across lines"
+  - "END { } runs once after the last line"
+  - "printf with %.2f"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk to add up the column."
+  - pattern: '\bEND\b'
+    message: "Print the result in an END block, after all lines were read."
+  - pattern: 'printf'
+    message: "Format the numbers with printf so they always have two decimals."
+test_cases:
+  - name: four small expenses
+    args: [march.txt]
+    files:
+      march.txt: |
+        2026-03-01 fuel 19.99
+        2026-03-04 stamps 5.01
+        2026-03-09 coffee 75
+        2026-03-15 repairs 100.00
+    expected_stdout: |-
+      count=4 total=200.00 avg=50.00
+  - name: one entry
+    args: [one.txt]
+    files:
+      one.txt: |
+        2026-04-02 ink 12.5
+    expected_stdout: |-
+      count=1 total=12.50 avg=12.50
+  - name: average is rounded to cents
+    args: [odd.txt]
+    files:
+      odd.txt: |
+        2026-05-01 tape 10
+        2026-05-02 tape 20
+        2026-05-03 glue 25
+    expected_stdout: |-
+      count=3 total=55.00 avg=18.33
+  - name: nobody bought anything
+    args: [none.txt]
+    files:
+      none.txt: ""
+    expected_stdout: |-
+      count=0 total=0.00 avg=0.00

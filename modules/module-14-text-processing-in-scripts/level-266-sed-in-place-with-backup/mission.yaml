@@ -1,0 +1,86 @@
+id: 266
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: sed In Place with Backup
+difficulty: advanced
+xp: 180
+story: |
+  Anchovy is being retired, and Theo wants it replaced by flounder in the
+  reverse proxy's upstream list before the weekend. He has already edited a
+  config file by hand once and "fixed" three servers with a typo. This time
+  Mara wants the change scripted, and she wants the old version kept beside
+  the new one in case someone has to roll back at midnight.
+objective: |
+  Write solution.sh that takes three arguments: OLD, NEW and FILE. Replace every
+  occurrence of OLD with NEW in FILE, changing the file itself (not printing
+  to the terminal), and keep a copy of the original as FILE.bak. OLD and NEW
+  are plain words made of letters, digits and dashes. When done, print
+  exactly:
+    patched FILE
+  where FILE is the argument. If OLD does not occur, the file stays the same
+  and the .bak copy is still created.
+  Use sed -i.bak (the suffix attached directly to -i) so that it behaves the same
+  on macOS and Linux.
+concepts:
+  - "sed -i edits a file in place"
+  - "-i.bak keeps the original as a backup"
+  - "bare -i behaves differently on macOS and GNU: always give a suffix"
+required_patterns:
+  - pattern: 'sed\s+-i\.bak\b'
+    message: "Edit in place with sed -i.bak (suffix attached to -i) so a backup is kept and it works on macOS and Linux."
+test_cases:
+  - name: replace the retired server
+    args: [anchovy, flounder, upstream.conf]
+    files:
+      upstream.conf: |
+        upstream app {
+          server anchovy:8080;
+          server barracuda:8080;
+          server anchovy:8081 backup;
+        }
+    expected_stdout: |-
+      patched upstream.conf
+    expected_files:
+      upstream.conf: |
+        upstream app {
+          server flounder:8080;
+          server barracuda:8080;
+          server flounder:8081 backup;
+        }
+      upstream.conf.bak: |
+        upstream app {
+          server anchovy:8080;
+          server barracuda:8080;
+          server anchovy:8081 backup;
+        }
+  - name: several matches on one line
+    args: [old-db, new-db, hosts.txt]
+    files:
+      hosts.txt: |
+        old-db old-db.local
+        cache
+    expected_stdout: |-
+      patched hosts.txt
+    expected_files:
+      hosts.txt: |
+        new-db new-db.local
+        cache
+      hosts.txt.bak: |
+        old-db old-db.local
+        cache
+  - name: nothing to replace
+    args: [eel, grouper, pool.cfg]
+    files:
+      pool.cfg: |
+        member dory
+        member marlin
+    expected_stdout: |-
+      patched pool.cfg
+    expected_files:
+      pool.cfg: |
+        member dory
+        member marlin
+      pool.cfg.bak: |
+        member dory
+        member marlin

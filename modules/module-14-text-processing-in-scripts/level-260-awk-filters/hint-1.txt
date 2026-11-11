@@ -1,0 +1,1 @@
+This is a filter followed by a print. awk lets you put a condition in front of its action, and the action then runs only for lines that satisfy it. Work out one test per rule and combine them so that all three have to hold at once.

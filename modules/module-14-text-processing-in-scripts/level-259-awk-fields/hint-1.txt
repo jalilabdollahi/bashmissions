@@ -1,0 +1,1 @@
+cut needs the column number, and here the ticket sits in a different column on each line. The tool you want knows how many fields each line has and lets you ask for "the last one". It also treats any amount of whitespace as one separator, so the messy spacing is not a problem.

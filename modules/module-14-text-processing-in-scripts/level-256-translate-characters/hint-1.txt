@@ -1,1 +1,1 @@
-Use the curriculum concept for this level: `tr`.
+You are replacing individual characters, not words or patterns, and every replacement is one character for one character. Unix has a tiny filter for translating characters: you give it a list of characters to look for and a list of what to turn them into, and it pairs them up by position.

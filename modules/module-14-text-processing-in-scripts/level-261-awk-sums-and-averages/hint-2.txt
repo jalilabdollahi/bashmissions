@@ -1,0 +1,12 @@
+awk variables need no declaration and start at 0 (or empty text):
+
+  awk '{ sum += $2 } END { print sum }' file
+  awk '{ n++ } END { print n }' file
+  awk 'END { print NR }' file             # NR = lines read so far; at END, all of them
+
+printf formats numbers the way C does:
+
+  printf "%.2f\n", 3.14159     # 3.14
+  printf "%d items\n", 3
+
+Guard a division: avg = (n > 0) ? total / n : 0
