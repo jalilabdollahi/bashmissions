@@ -1,0 +1,1 @@
+Every program finishes with a number, its exit status. Normally Bash picks 0 for you when the last command worked. Here you have to choose the number yourself, and you have to stop before the line that should never run.

@@ -1,0 +1,1 @@
+Put the width between the % and the letter: %8s is right-aligned in 8 characters, %-8s is left-aligned in 8 characters. printf '[%-6s] [%4d]\n' "ab" 7 prints [ab    ] [   7]. The header row uses %s with the same widths.

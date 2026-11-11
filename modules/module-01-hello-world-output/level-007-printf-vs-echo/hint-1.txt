@@ -1,1 +1,0 @@
-The goal is to print the argument exactly as-is — no escape sequences interpreted, no glob expansion.

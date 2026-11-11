@@ -1,1 +1,0 @@
-The shell exposes environment variables as regular variables. `$HOME` and `$USER` are inherited from your login session — you don't need to set them.

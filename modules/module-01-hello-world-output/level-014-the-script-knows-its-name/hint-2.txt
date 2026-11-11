@@ -1,0 +1,1 @@
+$0 is the script's own name, as typed on the command line. basename /a/b/c.txt prints c.txt. To use the result inside text, wrap it: "file is $(basename "$SOMEPATH")". Quotes inside the $( ) keep spaces in paths together.

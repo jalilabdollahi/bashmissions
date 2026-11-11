@@ -1,0 +1,1 @@
+echo has a switch, -n, that leaves out the final newline: echo -n "loading " then echo "done" prints loading done on one line. printf does the same by default whenever your format has no \n at the end.

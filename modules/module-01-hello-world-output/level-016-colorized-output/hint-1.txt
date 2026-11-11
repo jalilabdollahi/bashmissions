@@ -1,1 +1,0 @@
-Terminals interpret special escape sequences starting with the ESC byte (`\033` in octal) followed by `[` and a code. `\033[32m` switches the foreground to green; `\033[0m` resets all attributes.

@@ -1,0 +1,1 @@
+Inside printf's text, \t is a tab and \n is a new line. For example printf 'a\tb\nc\n' prints a, a tab, b, then a line break, then c and a final line break. Use single quotes so the backslashes reach printf intact.

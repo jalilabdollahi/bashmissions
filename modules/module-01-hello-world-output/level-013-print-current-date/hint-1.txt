@@ -1,1 +1,0 @@
-The `date` command prints the current date and time. With a format string like `+%Y-%m-%d` it prints just the year, month, and day separated by dashes.

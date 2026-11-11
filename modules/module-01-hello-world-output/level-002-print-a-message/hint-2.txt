@@ -1,1 +1,0 @@
-Quote `$1` when printing so messages with spaces stay intact.

@@ -1,0 +1,1 @@
+Header: cat <<EOF ... EOF with $SERVER inside. Rows: printf '%-12s %5d\n' "label" "$NUMBER". Log note: echo "..." >&2 with $(basename "$0") inside the text. Exit: exit accepts a variable, as in exit "$STATUS_CODE".

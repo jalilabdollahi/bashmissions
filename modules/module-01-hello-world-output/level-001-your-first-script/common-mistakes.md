@@ -1,13 +1,10 @@
-# Common Mistakes for Your First Script
+# Common Mistakes
 
-- Printing almost the right output, but not the exact expected text.
-  The validator compares against `Hello, BashMissions!`.
-
-- Adding extra output.
-  Even a second line like `Done` can fail exact checks.
-
-- Returning the wrong exit status.
-  A script can print the right text and still fail if it exits with the wrong code.
-
-- Overcomplicating a beginner level.
-  This mission is intentionally simple: one exact greeting line.
+- **Deleting or mistyping the shebang.** `# !/usr/bin/env bash` (with a space) or `#/usr/bin/env bash` is just an ordinary comment.
+  Wrong: `#!usr/bin/env bash`
+  Right: `#!/usr/bin/env bash`
+- **Forgetting that echo is the command.** A bare line of text is not printed, Bash tries to run it as a program.
+  Wrong: `Hello, Lanternfish!`
+  Right: `echo "Hello, Lanternfish!"`
+- **Changing the text.** The check is exact, so `Hello Lanternfish` (no comma) or `hello, lanternfish!` will fail. Copy the line from the objective.
+- **Leaving the TODO comment and nothing else.** Lines that start with `#` are ignored by Bash, so a script made only of comments prints nothing.

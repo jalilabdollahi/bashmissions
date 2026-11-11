@@ -1,0 +1,71 @@
+id: 18
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Status Card
+difficulty: beginner
+xp: 150
+story: |
+  End of week one. Mara asks you for the first real tool of your own: the
+  status card the team prints for every server. It needs a header for people,
+  a tidy table of numbers, a note in the log channel about who asked, and an
+  exit status for the monitoring wall. The collector sets SERVER, UPTIME (days),
+  ALERTS (open count) and STATUS_CODE (0 fine, 1 warning, 2 critical) before
+  it calls you. Everything you learned this week is in this one script.
+objective: |
+  Write solution.sh. To standard output print, for example with
+  SERVER=anchovy UPTIME=118 ALERTS=3:
+    === STATUS CARD: anchovy ===
+    Region: harbour-east
+    uptime days    118
+    open alerts      3
+  The first two lines come from one cat <<EOF here-document (with $SERVER
+  expanded). The two number lines use printf '%-12s %5d\n': the label
+  left-aligned in 12, the number right-aligned in 5.
+  To standard error print one line:  <script name>: card printed for <SERVER>
+  where the script name comes from $(basename "$0").
+  Finally exit with the status in $STATUS_CODE (exit "$STATUS_CODE").
+concepts:
+  - "here-document for the header"
+  - "printf widths for the numbers"
+  - ">&2 for the log note"
+  - "exit with a status taken from a variable"
+required_patterns:
+  - pattern: 'cat\s*<<'
+    message: "Print the header with a here-document: cat <<EOF."
+  - pattern: '%-12s'
+    message: "Use printf with %-12s for the labels."
+  - pattern: '%5d'
+    message: "Use %5d for the numbers."
+  - pattern: '>&2'
+    message: "Send the log note to stderr with >&2."
+  - pattern: '\bexit\b'
+    message: "Finish with exit \"$STATUS_CODE\"."
+test_cases:
+  - name: healthy server
+    env: {SERVER: "anchovy", UPTIME: "118", ALERTS: "3", STATUS_CODE: "0"}
+    expected_stdout: |-
+      === STATUS CARD: anchovy ===
+      Region: harbour-east
+      uptime days    118
+      open alerts      3
+    expected_stderr: "solution.sh: card printed for anchovy"
+    expected_exit: 0
+  - name: warning
+    env: {SERVER: "barracuda", UPTIME: "7", ALERTS: "21", STATUS_CODE: "1"}
+    expected_stdout: |-
+      === STATUS CARD: barracuda ===
+      Region: harbour-east
+      uptime days      7
+      open alerts     21
+    expected_stderr: "solution.sh: card printed for barracuda"
+    expected_exit: 1
+  - name: critical and fresh
+    env: {SERVER: "sea-urchin-9", UPTIME: "0", ALERTS: "0", STATUS_CODE: "2"}
+    expected_stdout: |-
+      === STATUS CARD: sea-urchin-9 ===
+      Region: harbour-east
+      uptime days      0
+      open alerts      0
+    expected_stderr: "solution.sh: card printed for sea-urchin-9"
+    expected_exit: 2

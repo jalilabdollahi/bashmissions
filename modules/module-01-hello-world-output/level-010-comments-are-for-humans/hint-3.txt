@@ -1,0 +1,1 @@
+Under the shebang add two comment lines starting with "# Purpose:" and "# Author:". Then put # at the beginning of the two lines that start with echo "DEBUG. Leave the other two echo lines untouched.

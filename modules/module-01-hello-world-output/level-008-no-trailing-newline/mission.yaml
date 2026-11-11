@@ -1,0 +1,38 @@
+id: 8
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: No Trailing Newline
+difficulty: beginner
+xp: 80
+story: |
+  The nightly backup check takes a few seconds per step, and Mara likes to
+  watch it work: first the label appears, then, when the step finishes, the
+  verdict lands on the same line. "Like a ship's log," she says. For that, the
+  label must not end the line. The step's verdict arrives in the environment
+  as RESULT (for example ok or FAILED).
+objective: |
+  Write solution.sh so that the output is one single line:
+    Checking backups... <RESULT>
+  For RESULT=ok that is:  Checking backups... ok
+  Print the label "Checking backups... " (with a space at the end) in one
+  command that does not add a newline, then print $RESULT in a second command
+  that does end the line. Use echo -n or printf without \n for the first one.
+concepts:
+  - "echo -n suppresses the newline"
+  - "printf only prints a newline if you write \\n"
+required_patterns:
+  - pattern: '(?s)(echo|printf)\b.*\b(echo|printf)\b'
+    message: "Use two commands: one prints the label, a second prints the result."
+  - pattern: 'echo\s+-n|printf'
+    message: "Print the label with echo -n or with printf and no \\n."
+test_cases:
+  - name: success
+    env: {RESULT: "ok"}
+    expected_stdout: "Checking backups... ok"
+  - name: failure
+    env: {RESULT: "FAILED"}
+    expected_stdout: "Checking backups... FAILED"
+  - name: verdict with a space
+    env: {RESULT: "ok (2 warnings)"}
+    expected_stdout: "Checking backups... ok (2 warnings)"

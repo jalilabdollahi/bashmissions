@@ -1,0 +1,1 @@
+Keep the CRITICAL echo and add exit 2 on its own line directly below it. The "all clear" echo may stay in the file under the exit, or be removed; either way it must not print.

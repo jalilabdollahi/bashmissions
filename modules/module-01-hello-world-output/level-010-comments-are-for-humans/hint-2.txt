@@ -1,0 +1,1 @@
+A line starting with # is a comment. Example: put a hash in front of  echo "hello"  and it becomes #echo "hello", which does nothing. Header lines are ordinary comments, for instance: # Purpose: back up the logs

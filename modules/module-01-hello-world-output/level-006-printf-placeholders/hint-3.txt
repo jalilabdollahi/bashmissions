@@ -1,0 +1,1 @@
+Format: 'Customer: %s | open: %d | oldest: #%d\n'. After it, add the three variables in the same order, each in double quotes: "$CUSTOMER" "$TICKETS" "$OLDEST".

@@ -1,0 +1,1 @@
+Use single quotes. Inside '...' every character means exactly itself. Try this in your terminal: echo "$HOME" prints a path, but echo '$HOME' prints the five characters $HOME.

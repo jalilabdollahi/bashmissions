@@ -1,0 +1,47 @@
+id: 16
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Color Codes
+difficulty: beginner
+xp: 110
+story: |
+  The big monitor above Mara's desk shows service status as plain white text,
+  and the harbour-town fog on the windows makes it worse. Ollie suggests
+  colours: green for good, yellow for trouble, red for disaster. Terminals
+  have supported that since before Ollie was born; it is done with special
+  character sequences that start with the Escape character. The service being
+  checked arrives in the environment as SERVICE.
+objective: |
+  Write solution.sh so that it prints three lines, using one printf each:
+    <green>OK<reset> <SERVICE> responds in time
+    <yellow>WARN<reset> <SERVICE> responds slowly
+    <red>FAIL<reset> <SERVICE> does not respond
+  The colour codes are written \033[32m (green), \033[33m (yellow),
+  \033[31m (red) and \033[0m (reset). \033 is the Escape character; printf
+  turns it into the real thing. Only the words OK, WARN and FAIL are coloured:
+  reset the colour straight after each of them.
+concepts:
+  - "ANSI escape sequences: \\033[<code>m"
+  - "printf translates \\033 into the Escape character"
+  - "reset with \\033[0m"
+required_patterns:
+  - pattern: '\bprintf\b'
+    message: "Use printf; it understands \\033 reliably."
+  - pattern: '\\(033|e|x1[bB])\[3[123]m'
+    message: "Start each coloured word with an escape sequence such as \\033[32m."
+  - pattern: '\\(033|e|x1[bB])\[0m'
+    message: "Reset the colour with \\033[0m after each coloured word."
+forbidden_patterns:
+  - pattern: '\btput\b'
+    message: "Write the escape codes yourself; tput is for another day."
+test_cases:
+  - name: dory
+    env: {SERVICE: "dory"}
+    expected_stdout: "\x1b[32mOK\x1b[0m dory responds in time\n\x1b[33mWARN\x1b[0m dory responds slowly\n\x1b[31mFAIL\x1b[0m dory does not respond"
+  - name: name with a space
+    env: {SERVICE: "mail relay"}
+    expected_stdout: "\x1b[32mOK\x1b[0m mail relay responds in time\n\x1b[33mWARN\x1b[0m mail relay responds slowly\n\x1b[31mFAIL\x1b[0m mail relay does not respond"
+  - name: a database
+    env: {SERVICE: "octopus-db"}
+    expected_stdout: "\x1b[32mOK\x1b[0m octopus-db responds in time\n\x1b[33mWARN\x1b[0m octopus-db responds slowly\n\x1b[31mFAIL\x1b[0m octopus-db does not respond"

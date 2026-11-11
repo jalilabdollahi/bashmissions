@@ -1,1 +1,0 @@
-The output has no trailing newline: `echo -n "LEVEL 8: Suppress Newline | $1 | $2"`

@@ -1,0 +1,1 @@
+When printf gets more values than its format has placeholders, it starts the format over again for the leftovers. So a format that prints one equals sign, fed thirty values, prints thirty equals signs.

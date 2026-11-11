@@ -1,1 +1,0 @@
-Width is a *minimum*: a 12-character title is printed in full, no truncation. The test exercises both shorter-than-10 and longer-than-10 inputs.

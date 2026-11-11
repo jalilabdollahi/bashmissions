@@ -1,1 +1,0 @@
-Redirect output to file descriptor 2 with `>&2` to send it to stderr instead of stdout.

@@ -1,1 +1,0 @@
-One `echo` call is enough: `echo "HOME=$HOME USER=$USER"`. The output will look like `HOME=/home/jalil USER=jalil`.

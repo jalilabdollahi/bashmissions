@@ -1,0 +1,1 @@
+Three parts: the border: printf '=%.0s' {1..30}; printf '\n'. The title row: printf '| %-26s |\n' "$TITLE". Then repeat the border line. The starter's single printf already hints at the middle row.

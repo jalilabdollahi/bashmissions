@@ -1,0 +1,1 @@
+Instead of one command per line, you can hand a whole block of text to a command in one go. The block sits right inside the script, and the shell feeds it to the command as if it were typed or read from a file.

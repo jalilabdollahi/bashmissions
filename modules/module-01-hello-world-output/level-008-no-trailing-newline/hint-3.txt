@@ -1,0 +1,1 @@
+Change only the first line of the starter: echo -n "Checking backups... " (or printf "Checking backups... "). Keep the trailing space inside the quotes, and keep echo "$RESULT" as the second command.

@@ -1,1 +1,0 @@
-Inside a double-quoted string, `$VAR` expands to the variable's value. So `"USER=$USER"` becomes something like `USER=jalil`.

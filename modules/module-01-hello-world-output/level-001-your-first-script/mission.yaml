@@ -1,20 +1,28 @@
 id: 1
 module: 1
 module_name: hello-world-output
-module_display: Hello World & Output
+module_display: Hello, Terminal
 title: Your First Script
 difficulty: beginner
-xp: 60
-objective: 'Create a script that prints exactly: Hello, BashMissions!'
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: 'Hello, BashMissions!'
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 50
+story: |
+  It is 8:55 on your first morning at Lanternfish Hosting. The harbour fog is
+  still on the windows, the coffee machine is gurgling, and Mara has pulled a
+  chair up to your desk. "Before I show you the servers," she says, "make the
+  terminal say hello. Every engineer here started with exactly this."
+objective: |
+  Write solution.sh so that it prints exactly this one line:
+    Hello, Lanternfish!
+  The file already starts with a shebang line (#!/usr/bin/env bash). Keep it,
+  and add one command underneath that prints the greeting.
 concepts:
-- shebang
-- echo
-scaffold: true
+  - "shebang line (#!/usr/bin/env bash)"
+  - "echo prints a line of text"
+single_case: true
+required_patterns:
+  - pattern: '\becho\b'
+    message: "Use the echo command to print the greeting."
+test_cases:
+  - name: greeting
+    expected_stdout: |-
+      Hello, Lanternfish!

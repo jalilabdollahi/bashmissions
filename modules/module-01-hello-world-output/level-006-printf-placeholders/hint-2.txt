@@ -1,0 +1,1 @@
+A blank for text is %s and a blank for a whole number is %d. Example: printf '%s scored %d\n' "Ana" 7 prints Ana scored 7. The values come after the format and are matched in order.

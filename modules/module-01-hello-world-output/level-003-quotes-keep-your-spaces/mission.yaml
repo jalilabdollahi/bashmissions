@@ -1,0 +1,28 @@
+id: 3
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Quotes Keep Your Spaces
+difficulty: beginner
+xp: 60
+story: |
+  Noor from the support desk wants a little sign printed on the shared
+  terminal for the Gull & Anchor Pub's rack: three words with wide gaps so
+  the pub's landlord can read it from across the room. Theo tried it with a
+  plain echo and the gaps vanished. "It just squashed everything!" he said.
+objective: |
+  Write solution.sh so that it prints exactly this line, including the wide
+  gaps (three spaces between each pair of words):
+    GULL   AND   ANCHOR
+  Use double quotes so the spaces survive.
+concepts:
+  - "double quotes keep the text together as one argument"
+  - "without quotes Bash collapses runs of spaces into one"
+single_case: true
+required_patterns:
+  - pattern: 'echo\s+"[^"]*  [^"]*"'
+    message: "Put the whole sign inside double quotes, e.g. echo \"...\", so the gaps are kept."
+test_cases:
+  - name: the sign keeps its gaps
+    expected_stdout: |-
+      GULL   AND   ANCHOR

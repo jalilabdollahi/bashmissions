@@ -1,0 +1,1 @@
+Inside double quotes Bash looks for words starting with a dollar sign and swaps them for their values. You want the opposite: a kind of quote that makes Bash hands-off.

@@ -1,0 +1,1 @@
+Fill the two echo lines of the starter: the text "Oldest: " is followed by $(head -n 1 fixtures/queue.txt) and the text "Newest: " by $(tail -n 1 fixtures/queue.txt), all inside the same double quotes.

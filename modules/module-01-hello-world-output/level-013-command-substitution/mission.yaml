@@ -1,0 +1,44 @@
+id: 13
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Command Substitution
+difficulty: beginner
+xp: 100
+story: |
+  Noor keeps the support queue in a plain text file, one ticket per line, with
+  the oldest ticket on top and the newest at the bottom. Every morning she
+  opens it just to learn two things: what has been waiting longest, and what
+  came in last. She asks you for a script that answers both and hands the
+  results to the dashboard, so she can keep her coffee warm.
+objective: |
+  The queue file is fixtures/queue.txt. Write solution.sh so that it prints
+  two lines:
+    Oldest: <first line of the file>
+    Newest: <last line of the file>
+  Let commands fetch the lines for you: head -n 1 FILE prints the first line
+  and tail -n 1 FILE prints the last. Put each of them inside $( ... ) in
+  your echo text. If the file has only one line, both lines show it.
+concepts:
+  - "$(command) is replaced by the command's output"
+  - "mixing command output into text"
+required_patterns:
+  - pattern: '\$\('
+    message: "Use command substitution, $(command), to fetch the lines."
+test_cases:
+  - name: three tickets
+    expected_stdout: |-
+      Oldest: T-5021 printer jam at Harbour Bakery
+      Newest: T-5023 password reset, North Pier Dental
+  - name: a different queue
+    files:
+      fixtures/queue.txt: "T-6001 DNS question, Gull & Anchor Pub\nT-6002 backup restore\nT-6003 invoice copy\nT-6004 new mailbox\n"
+    expected_stdout: |-
+      Oldest: T-6001 DNS question, Gull & Anchor Pub
+      Newest: T-6004 new mailbox
+  - name: only one ticket
+    files:
+      fixtures/queue.txt: "T-7001 lost password\n"
+    expected_stdout: |-
+      Oldest: T-7001 lost password
+      Newest: T-7001 lost password

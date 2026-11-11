@@ -1,0 +1,41 @@
+id: 6
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: printf Placeholders
+difficulty: beginner
+xp: 70
+story: |
+  Noor's support desk tool drops three values into the environment before it
+  calls your script: CUSTOMER (the business name, which may contain spaces),
+  TICKETS (how many tickets are open) and OLDEST (the number of the oldest
+  one). She wants one summary line for the wall dashboard, and she wants the
+  numbers to stay numbers: no surprises if a customer's name is long.
+objective: |
+  Write solution.sh so that it prints one line in this exact shape:
+    Customer: <CUSTOMER> | open: <TICKETS> | oldest: #<OLDEST>
+  For example: Customer: North Pier Dental | open: 4 | oldest: #1180
+  The values are in the variables $CUSTOMER, $TICKETS and $OLDEST. Write them
+  inside double quotes ("$CUSTOMER") so names with spaces stay in one piece.
+  Use one printf with %s for the name and %d for each number.
+concepts:
+  - "%s placeholder for text"
+  - "%d placeholder for whole numbers"
+  - "printf format first, values after"
+required_patterns:
+  - pattern: '\bprintf\b'
+    message: "Use printf here."
+  - pattern: '%s'
+    message: "Use %s for the customer name."
+  - pattern: '%d'
+    message: "Use %d for the numbers."
+test_cases:
+  - name: dental practice
+    env: {CUSTOMER: "North Pier Dental", TICKETS: "4", OLDEST: "1180"}
+    expected_stdout: "Customer: North Pier Dental | open: 4 | oldest: #1180"
+  - name: single word name
+    env: {CUSTOMER: "Tidewater", TICKETS: "12", OLDEST: "977"}
+    expected_stdout: "Customer: Tidewater | open: 12 | oldest: #977"
+  - name: nothing open
+    env: {CUSTOMER: "Gull & Anchor Pub", TICKETS: "0", OLDEST: "0"}
+    expected_stdout: "Customer: Gull & Anchor Pub | open: 0 | oldest: #0"

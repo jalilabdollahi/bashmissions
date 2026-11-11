@@ -1,0 +1,31 @@
+id: 2
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Two Lines of Output
+difficulty: beginner
+xp: 50
+story: |
+  Ollie, the intern, is on the night shift and keeps forgetting the handover
+  routine. Mara's fix: a tiny script that prints the handover note, so Ollie
+  only has to type one command. The note is three lines, and the order matters
+  because people read it top to bottom with a sleepy brain.
+objective: |
+  Write solution.sh so that it prints exactly these three lines, in this order:
+    HANDOVER NOTE
+    Pager: Ollie
+    Coffee: refilled
+  Use a separate echo command for each line.
+concepts:
+  - "one echo per line"
+  - "commands run top to bottom, so output order follows script order"
+single_case: true
+required_patterns:
+  - pattern: '(?s)echo\b.*\becho\b.*\becho\b'
+    message: "Use three echo commands, one for each line of the note."
+test_cases:
+  - name: handover note
+    expected_stdout: |-
+      HANDOVER NOTE
+      Pager: Ollie
+      Coffee: refilled

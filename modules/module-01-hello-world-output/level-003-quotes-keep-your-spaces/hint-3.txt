@@ -1,0 +1,1 @@
+Take the starter line and put quote marks around everything after echo, then widen the gaps to three spaces each: echo "GULL   AND   ANCHOR". Count the spaces, the check is exact.

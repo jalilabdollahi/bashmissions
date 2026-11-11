@@ -1,1 +1,0 @@
-Use quoted variables like "$1" and "$2" so spaces stay intact.

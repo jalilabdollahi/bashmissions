@@ -1,0 +1,1 @@
+Write one printf whose text has three rows. Skeleton: printf 'SERVER\tSTATUS\n...\t...\n...\t...\n' - fill the dots with anchovy up and barracuda down.

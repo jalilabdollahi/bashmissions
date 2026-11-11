@@ -1,0 +1,37 @@
+id: 12
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Reading the Environment
+difficulty: beginner
+xp: 90
+story: |
+  The shared jump box is where half the team logs in, and Ollie has twice run
+  a clean-up command while logged in as the wrong person. Mara wants a tiny
+  "who am I" script that every login prints, so nobody has to wonder. Your
+  shell already knows the answer: it keeps it in environment variables.
+objective: |
+  Write solution.sh so that it prints exactly one line:
+    You are <USER>, your home folder is <HOME>
+  where <USER> and <HOME> are the values of the environment variables $USER
+  and $HOME. For USER=noor and HOME=/home/noor that is:
+    You are noor, your home folder is /home/noor
+  Do not type the names or paths yourself; read them from the environment.
+concepts:
+  - "environment variables such as $USER and $HOME"
+  - "double quotes let $VARIABLES expand"
+required_patterns:
+  - pattern: '\$\{?USER\b'
+    message: "Read the user name from $USER."
+  - pattern: '\$\{?HOME\b'
+    message: "Read the home folder from $HOME."
+test_cases:
+  - name: noor
+    env: {USER: "noor", HOME: "/home/noor"}
+    expected_stdout: "You are noor, your home folder is /home/noor"
+  - name: root
+    env: {USER: "root", HOME: "/root"}
+    expected_stdout: "You are root, your home folder is /root"
+  - name: odd characters
+    env: {USER: "mara.k", HOME: "/srv/people/mara k"}
+    expected_stdout: "You are mara.k, your home folder is /srv/people/mara k"

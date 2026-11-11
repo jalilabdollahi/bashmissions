@@ -1,0 +1,1 @@
+Bash remembers the name used to start the script in a special variable, and there is a small command whose only job is cutting the folder part off a path. Combine the two, along with the substitution from the last level.

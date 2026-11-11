@@ -1,0 +1,1 @@
+printf placeholders can be told how wide their box is. Text usually looks best pushed to the left of its box and numbers to the right, so each placeholder needs a width and a direction.

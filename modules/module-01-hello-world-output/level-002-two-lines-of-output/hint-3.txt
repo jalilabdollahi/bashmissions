@@ -1,0 +1,1 @@
+The starter already has the first line. Add two more echo commands below it, one printing "Pager: Ollie" and one printing "Coffee: refilled", in that order.

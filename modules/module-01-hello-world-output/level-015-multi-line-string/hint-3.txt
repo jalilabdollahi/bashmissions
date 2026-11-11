@@ -1,1 +1,0 @@
-Pipe the heredoc into `cat` to print it: `cat <<EOF` ... lines ... `EOF`. Each newline in the heredoc becomes a newline in the output.

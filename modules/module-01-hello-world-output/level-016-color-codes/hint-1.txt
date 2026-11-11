@@ -1,0 +1,1 @@
+Colours are not a feature of echo or printf; they are just special characters in the text which the terminal interprets as "switch colour now". You need the right characters before the word and a "back to normal" afterwards.

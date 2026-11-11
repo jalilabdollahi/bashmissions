@@ -1,1 +1,0 @@
-Inside single quotes, `$name` stays literal; inside double quotes, `$name` expands.

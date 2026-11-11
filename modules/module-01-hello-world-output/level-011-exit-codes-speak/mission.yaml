@@ -1,0 +1,32 @@
+id: 11
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Exit Codes Speak
+difficulty: beginner
+xp: 90
+story: |
+  The monitoring wall at Lanternfish is run by a small program that never
+  reads what your script prints. It only looks at the number your script
+  returns when it finishes: 0 means fine, 1 means a warning, 2 means call
+  somebody. Ollie wrote the order-queue check and it always reports "fine",
+  even when the queue is backed up all the way to the pier.
+objective: |
+  Edit solution.sh so that it prints exactly this one line to standard output:
+    CRITICAL: order queue is backed up
+  and then ends immediately with exit status 2. The echo "all clear" line
+  that is already in the file must never run, so the script has to stop
+  before reaching it.
+concepts:
+  - "exit N ends the script with status N"
+  - "0 means success, anything else means a problem"
+  - "nothing after exit runs"
+single_case: true
+required_patterns:
+  - pattern: '\bexit\s+2\b'
+    message: "End the script with exit 2."
+test_cases:
+  - name: critical state
+    expected_stdout: |-
+      CRITICAL: order queue is backed up
+    expected_exit: 2

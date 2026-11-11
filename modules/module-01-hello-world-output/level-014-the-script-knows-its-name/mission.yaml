@@ -1,0 +1,46 @@
+id: 14
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: The Script Knows Its Name
+difficulty: beginner
+xp: 100
+story: |
+  Theo renames his scripts as often as other people change socks, and the
+  help messages keep saying the old names: "usage: old-backup-final-v2.sh".
+  Mara wants a script that never lies about itself. The nightly tool also
+  tells it where its report was written, as a full path in REPORT_PATH, but
+  the log wants just the file name, not the whole directory trail.
+objective: |
+  Write solution.sh so that it prints exactly two lines:
+    This script is called <script name>
+    Report file: <file name part of $REPORT_PATH>
+  When run as bash solution.sh with REPORT_PATH=/var/reports/2024/nightly.txt:
+    This script is called solution.sh
+    Report file: nightly.txt
+  Get the script's own name from $0 and use the basename command to strip
+  folders from a path; the name must not be typed by hand.
+concepts:
+  - "$0 holds the name the script was started with"
+  - "basename strips the directory part of a path"
+required_patterns:
+  - pattern: '\$\{?0\b'
+    message: "Read the script's name from $0."
+  - pattern: '\bbasename\b'
+    message: "Use basename to drop the folders from a path."
+test_cases:
+  - name: nightly report
+    env: {REPORT_PATH: "/var/reports/2024/nightly.txt"}
+    expected_stdout: |-
+      This script is called solution.sh
+      Report file: nightly.txt
+  - name: report in the current folder
+    env: {REPORT_PATH: "weekly.csv"}
+    expected_stdout: |-
+      This script is called solution.sh
+      Report file: weekly.csv
+  - name: folder with spaces
+    env: {REPORT_PATH: "/srv/Harbour Bakery/Q3 totals.txt"}
+    expected_stdout: |-
+      This script is called solution.sh
+      Report file: Q3 totals.txt
