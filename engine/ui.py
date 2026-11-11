@@ -107,7 +107,8 @@ def _logo_text() -> Text:
 
 def show_welcome(player_name: str, total_xp: int, levels: list[dict], progress: dict) -> None:
     logo     = _logo_text()
-    subtitle = Text("  500 challenges  •  26 modules  •  Real bash scripting", style="grey70")
+    modules  = len({lvl["module"] for lvl in levels})
+    subtitle = Text(f"  {len(levels)} challenges  •  {modules} modules  •  Real bash scripting", style="grey70")
     author   = Text("  Design and implementation by: Jalil Abdollahi", style="bold white")
     contact  = Text("  jalil.abdollahi@gmail.com", style="bright_magenta")
     agent    = Text.assemble(
@@ -142,7 +143,7 @@ def _show_module_progress(levels: list[dict], progress: dict) -> None:
         total      = len(mod_levels)
         mod_xp     = sum(l.get("xp", 0) for l in mod_levels if l["id"] in completed_ids)
         max_xp     = sum(l.get("xp", 0) for l in mod_levels)
-        name       = MODULE_DISPLAY.get(mod_id, f"Module {mod_id}")
+        name       = mod_levels[0].get("module_display") or MODULE_DISPLAY.get(mod_id, f"Module {mod_id}")
         pct        = done / total if total else 0
         filled     = int(pct * 12)
         bar        = f"[bright_green]{'█' * filled}[/bright_green][grey30]{'░' * (12 - filled)}[/grey30]"
@@ -178,7 +179,7 @@ def _module_rows(levels: list[dict], progress: dict) -> list[dict]:
         filled = int(pct * 10)
         rows.append({
             "id": mod_id,
-            "name": MODULE_DISPLAY.get(mod_id, f"Module {mod_id}"),
+            "name": mod_levels[0].get("module_display") or MODULE_DISPLAY.get(mod_id, f"Module {mod_id}"),
             "done": done,
             "total": total,
             "xp": mod_xp,
@@ -201,7 +202,7 @@ def _show_compact_progress(levels: list[dict], progress: dict) -> None:
     summary.add_column("value", style="bold white")
     summary.add_row("Current", f"Module {current_mod}  •  Level {current_level}")
     summary.add_row("Completed", f"{completed} / {total_levels}")
-    summary.add_row("View", "Type `status full` for all 26 modules")
+    summary.add_row("View", f"Type `status full` for all {len(rows)} modules")
     console.print(Panel(summary, border_style="bright_magenta", box=box.ROUNDED, padding=(0, 2)))
 
     nearby = [row for row in rows if abs(row["id"] - current_mod) <= 1]
@@ -234,7 +235,7 @@ def _show_compact_progress(levels: list[dict], progress: dict) -> None:
 
 def show_title_screen() -> None:
     logo     = _logo_text()
-    subtitle = Text("  500 challenges  •  26 modules  •  Real bash scripting", style="grey70")
+    subtitle = Text("  Learn Bash scripting one mission at a time", style="grey70")
     author   = Text("  Design and implementation by: Jalil Abdollahi", style="bold white")
     contact  = Text("  jalil.abdollahi@gmail.com", style="bright_magenta")
     body = Group(logo, Text(""), author, contact, Text(""), subtitle)
@@ -252,6 +253,7 @@ def show_mission(
     workspace: Path,
     show_workspace: bool = True,
     script_exists: bool = False,
+    total_modules: int = 26,
 ) -> None:
     diff   = level_data.get("difficulty", "beginner")
     color  = DIFFICULTY_COLOR.get(diff, "white")
@@ -259,7 +261,7 @@ def show_mission(
     mod_id = level_data.get("module", 1)
 
     meta = Text.assemble(
-        (f"Module {mod_id}/26  •  Level {level_index}/{total_levels}", "bright_cyan"),
+        (f"Module {mod_id}/{total_modules}  •  Level {level_index}/{total_levels}", "bright_cyan"),
         ("    ", ""),
         (stars, "bright_yellow"),
         ("  ", ""),
@@ -271,12 +273,18 @@ def show_mission(
     objective = level_data.get("objective", "").strip()
     concepts  = "  •  ".join(level_data.get("concepts", []))
 
+    story = (level_data.get("story") or "").strip()
     content_items = [
         meta,
         Rule(style="grey50"),
         Text(f"MISSION:    {level_data.get('title', '')}", style="bold white"),
         Text(""),
-        Text(f"OBJECTIVE:  {objective}", style="bright_green"),
+    ]
+    if story:
+        content_items.extend([Text(story, style="italic bright_white"), Text("")])
+    content_items += [
+        Text("OBJECTIVE:", style="bold bright_green"),
+        Text(objective, style="bright_green"),
         Text(""),
         Text(f"CONCEPTS:   {concepts}", style="grey70"),
     ]
@@ -333,7 +341,15 @@ def _validator_examples(level_data: dict) -> Text | None:
     shown = cases[:2]
     for index, case in enumerate(shown, start=1):
         args = " ".join(shlex.quote(str(arg)) for arg in case.get("args", [])) or "(no args)"
-        text.append(f"\n  case {index}: ./solution.sh {args}", style="grey70")
+        label = f" ({case['name']})" if case.get("name") else ""
+        text.append(f"\n  case {index}{label}: ./solution.sh {args}", style="grey70")
+        if case.get("stdin") is not None:
+            text.append("\n    stdin:  ", style="bright_yellow")
+            text.append(_inline_block(str(case["stdin"])), style="white")
+        if case.get("env"):
+            env_text = " ".join(f"{k}={v}" for k, v in case["env"].items())
+            text.append("\n    env:    ", style="bright_yellow")
+            text.append(env_text, style="white")
         if "expected_stdout" in case:
             text.append("\n    stdout: ", style="bright_yellow")
             text.append(_inline_block(str(case.get("expected_stdout", ""))), style="white")
@@ -390,13 +406,18 @@ def show_run_result(report: dict) -> None:
         ok       = r.get("passed", False)
         status   = "[bold bright_green]✓ PASS[/bold bright_green]" if ok else "[bold bright_red]✗ FAIL[/bold bright_red]"
         args_str = " ".join(str(a) for a in r.get("args", [])) or "[dim](none)[/dim]"
+        if r.get("name"):
+            args_str = f"[bold]{r['name']}[/bold]\n{args_str}"
 
         if ok:
             expected = "[dim]—[/dim]"
             got      = "[dim]—[/dim]"
         else:
             expected = _result_streams(r, "expected")
-            got      = r.get("message", "") or _result_streams(r, "actual")
+            got      = _result_streams(r, "actual") if "actual_stdout" in r else ""
+            if r.get("message"):
+                msg = str(r["message"]).replace("[", "\\[")
+                got = f"{got}\n[bright_red]{msg}[/bright_red]" if got else f"[bright_red]{msg}[/bright_red]"
 
         table.add_row(str(idx), status, args_str, expected, got)
 
@@ -413,14 +434,6 @@ def show_run_result(report: dict) -> None:
             padding=(0, 1),
         )
     )
-
-
-def _result_streams(result: dict, prefix: str) -> str:
-    stdout = result.get(f"{prefix}_stdout", "")
-    stderr = result.get(f"{prefix}_stderr")
-    if stderr is None:
-        return repr(stdout)
-    return f"stdout={stdout!r}\nstderr={stderr!r}"
     if not passed_all:
         console.print(
             Panel(
@@ -430,6 +443,18 @@ def _result_streams(result: dict, prefix: str) -> str:
                 padding=(0, 1),
             )
         )
+
+
+def _result_streams(result: dict, prefix: str) -> str:
+    stdout = result.get(f"{prefix}_stdout", "")
+    stderr = result.get(f"{prefix}_stderr")
+    exit_code = result.get(f"{prefix}_exit")
+    parts = [f"stdout={stdout!r}"]
+    if stderr:
+        parts.append(f"stderr={stderr!r}")
+    if exit_code is not None:
+        parts.append(f"exit={exit_code}")
+    return "\n".join(parts).replace("[", "\\[")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -444,7 +469,7 @@ def show_level_complete(level_data: dict, xp_earned: int, elapsed_seconds: float
 
     body = Group(
         Text(f"  MISSION ACCOMPLISHED{time_str}", style="bold bright_green"),
-        Text(f"  {MODULE_DISPLAY.get(level_data.get('module', 1), '')}  •  {level_data.get('title', '')}", style="white"),
+        Text(f"  {level_data.get('module_display') or MODULE_DISPLAY.get(level_data.get('module', 1), '')}  •  {level_data.get('title', '')}", style="white"),
         Text(f"  XP Earned: +{xp_earned}", style="bold bright_magenta"),
     )
     console.print(Panel(body, border_style="bright_green", box=box.DOUBLE, padding=(1, 2)))
@@ -670,7 +695,7 @@ def show_help() -> None:
 
     navigate = _section("NAVIGATE", [
         ("9  status",    "Compact progress view"),
-        ("status full",  "Show the full 26-module campaign map"),
+        ("status full",  "Show the full campaign map"),
         ("8  skip",      "Skip this level — no XP awarded"),
         ("0  quit",      "Save progress and exit"),
         ("?  help",      "Show this command reference"),

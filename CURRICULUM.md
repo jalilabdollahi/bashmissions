@@ -1,750 +1,745 @@
-# BashMissions — 500-Level Curriculum
+# BashMissions — Curriculum
 
-**26 modules | 500 levels | Beginner → Expert**
+**26 modules · 500 missions · from "I know a few commands" to "I automate production"**
 
----
+You are the newest operations engineer at **Lanternfish Hosting**, a small company
+that runs servers for local businesses. Each module is one stretch of your first
+year there; each mission is a real task someone hands you. Every mission teaches
+one new idea and only uses ideas from earlier missions.
 
-## Module 1 — Hello World & Output (18 levels) · Beginner
-
-> First contact with bash scripts: echo, variables, quoting rules.
-
-| Level | Title | Concept |
-|---|---|---|
-| 1 | Your First Script | `#!/bin/bash`, `echo` |
-| 2 | Print a Message | echo with a string argument |
-| 3 | Single vs Double Quotes | quoting differences |
-| 4 | Print Multiple Lines | multiple echo statements |
-| 5 | Escape Characters | `\n`, `\t` with `echo -e` |
-| 6 | printf Basics | `printf` format strings |
-| 7 | printf vs echo | choosing the right output tool |
-| 8 | Suppress Newline | `echo -n` |
-| 9 | Print to Stderr | `echo >&2` |
-| 10 | Comment Your Script | `#` comments, script header |
-| 11 | Script Exit Code | `exit 0`, `exit 1` |
-| 12 | Print Environment Variable | `$HOME`, `$USER` |
-| 13 | Print Current Date | `$(date)` command substitution |
-| 14 | Print Script Name | `$0` |
-| 15 | Multi-line String | here-string with echo |
-| 16 | Colorized Output | ANSI escape codes |
-| 17 | Print a Banner | printf with padding |
-| 18 | Print Version Info | combining variables in output |
+Difficulty: Beginner (modules 1–5) · Intermediate (6–13) · Advanced (14–22) · Expert (23–26)
 
 ---
 
-## Module 2 — Variables & Data Types (18 levels) · Beginner
-
-> Declaring, assigning, and using variables; string and integer basics.
+## Module 1 — Hello, Terminal (18 levels) · Beginner
+*Day one. Mara, your mentor, wants to see you make the terminal talk.*
+Directory: `module-01-hello-world-output`
 
 | Level | Title | Concept |
 |---|---|---|
-| 19 | Assign a Variable | `name=value` (no spaces) |
-| 20 | Use a Variable | `$var` and `${var}` |
-| 21 | Read-Only Variables | `readonly` |
-| 22 | Unset a Variable | `unset` |
-| 23 | Integer Variables | `declare -i` |
-| 24 | Default Values | `${var:-default}` |
-| 25 | Assign If Unset | `${var:=default}` |
-| 26 | Error If Unset | `${var:?error}` |
-| 27 | Variable Indirection | `${!varname}` |
-| 28 | Local vs Global Scope | `local` keyword (preview) |
-| 29 | Export a Variable | `export` |
-| 30 | Uppercase Variable | `${var^^}` |
-| 31 | Lowercase Variable | `${var,,}` |
-| 32 | String Length | `${#var}` |
-| 33 | Substring Extraction | `${var:offset:length}` |
-| 34 | Remove Prefix | `${var#pattern}` |
-| 35 | Remove Suffix | `${var%pattern}` |
-| 36 | Replace in String | `${var//old/new}` |
+| 1 | Your First Script | shebang line, `echo` |
+| 2 | Two Lines of Output | several `echo` commands, output order |
+| 3 | Quotes Keep Your Spaces | double quotes preserve spacing |
+| 4 | Single Quotes Are Literal | `'...'` stops `$` expansion |
+| 5 | Escapes with printf | `\n` and `\t` in `printf` |
+| 6 | printf Placeholders | `%s` and `%d` with arguments |
+| 7 | Padding Columns | field widths `%-10s` `%5d` |
+| 8 | No Trailing Newline | `printf` without `\n`, `echo -n` |
+| 9 | Talking to stderr | `>&2` for messages |
+| 10 | Comments Are for Humans | `#` comments and a header block |
+| 11 | Exit Codes Speak | `exit N` |
+| 12 | Reading the Environment | `$USER`, `$HOME` |
+| 13 | Command Substitution | `$(command)` inside output |
+| 14 | The Script Knows Its Name | `$0` and `basename` |
+| 15 | Here-Document Banner | `cat <<EOF` |
+| 16 | Color Codes | ANSI escapes with `printf` |
+| 17 | A Boxed Banner | building lines with `printf` repetition |
+| 18 | Status Card | combining printf, here-docs, stderr and exit |
+
+---
+
+## Module 2 — Variables (18 levels) · Beginner
+*Mara hands you the server inventory. Time to store and reuse values.*
+Directory: `module-02-variables-data-types`
+
+| Level | Title | Concept |
+|---|---|---|
+| 19 | Store a Value | `name=value` (no spaces) |
+| 20 | Braces Around Names | `${var}_suffix` |
+| 21 | Quote Your Variables | `"$var"` keeps spaces and stars |
+| 22 | Glue Strings Together | concatenation |
+| 23 | Capture Command Output | `var=$(command)` |
+| 24 | Read-Only Settings | `readonly` |
+| 25 | Unset and Check | `unset`, `${var+set}` |
+| 26 | Integer Variables | `declare -i` |
+| 27 | Fallback Values | `${var:-default}` |
+| 28 | Assign a Default | `${var:=default}` |
+| 29 | Fail Loudly When Missing | `${var:?message}` |
+| 30 | Empty Is Not Unset | `${var-x}` vs `${var:-x}` |
+| 31 | Exported to Children | `export` and child processes |
+| 32 | Environment Overrides | settings from the environment with fallbacks |
+| 33 | Swap Two Values | temporary variable |
+| 34 | Indirect References | `${!name}` |
+| 35 | The Last Exit Status | `$?` |
+| 36 | Server Profile Card | combining variables into a report |
 
 ---
 
 ## Module 3 — Arguments & Input (20 levels) · Beginner
-
-> Accepting positional arguments, reading user input, validating input.
+*Your scripts get users. Users pass arguments and type things.*
+Directory: `module-03-arguments-input`
 
 | Level | Title | Concept |
 |---|---|---|
 | 37 | First Argument | `$1` |
-| 38 | Multiple Arguments | `$1 $2 $3` |
-| 39 | Argument Count | `$#` |
-| 40 | All Arguments | `$@` vs `$*` |
-| 41 | Shift Arguments | `shift` |
-| 42 | Require an Argument | check `$#`, exit if missing |
-| 43 | Default Argument | `${1:-default}` |
-| 44 | Read from Stdin | `read var` |
-| 45 | Read with Prompt | `read -p "prompt" var` |
-| 46 | Read Silently | `read -s` for passwords |
-| 47 | Read with Timeout | `read -t` |
-| 48 | Read into Array | `read -a arr` |
-| 49 | Validate Numeric Input | test with regex `[[ $var =~ ^[0-9]+$ ]]` |
-| 50 | Validate Non-Empty | check `-z` |
-| 51 | Read a File Line by Line | while read loop |
-| 52 | Read from Pipe | detecting piped input |
-| 53 | Handle Quoted Arguments | quoting in `"$@"` |
-| 54 | Named Flags (manual) | parse `--flag value` with while/case |
-| 55 | Getopts Basics | `getopts "ab:" opt` |
-| 56 | Getopts with Required Option | error on missing optarg |
+| 38 | Several Arguments | `$1 $2 $3` |
+| 39 | Counting Arguments | `$#` |
+| 40 | Keep Arguments Intact | `"$@"` vs `$@` |
+| 41 | Join Arguments | `"$*"` and `IFS` |
+| 42 | Walk with shift | `shift` |
+| 43 | Require an Argument | usage message, `exit 2` |
+| 44 | Optional Second Argument | `${2:-default}` |
+| 45 | Read a Line | `read -r` from stdin |
+| 46 | Prompt on stderr | `read -p` |
+| 47 | Read Several Fields | `read -r a b c` |
+| 48 | Read into an Array | `read -ra` |
+| 49 | Secret Input | `read -s`, never echo secrets |
+| 50 | Is It a Number? | `[[ $x =~ ^[0-9]+$ ]]` |
+| 51 | Reject Empty Input | `-z` check |
+| 52 | Arguments or stdin | fall back to stdin when no args |
+| 53 | Read Until the End | `while read` until EOF |
+| 54 | Long Flags by Hand | `--name value` with `while`/`case` |
+| 55 | getopts Basics | `getopts "vn:"` |
+| 56 | getopts Error Handling | invalid options, missing values |
 
 ---
 
-## Module 4 — Conditionals (22 levels) · Beginner
-
-> if/elif/else, test expressions, file tests, string and numeric comparisons.
+## Module 4 — Making Decisions (22 levels) · Beginner
+*The on-call runbook is full of "if this, then that". Automate it.*
+Directory: `module-04-conditionals`
 
 | Level | Title | Concept |
 |---|---|---|
-| 57 | Simple if Statement | `if [ condition ]; then` |
-| 58 | if-else | binary decision |
-| 59 | if-elif-else | multiple branches |
-| 60 | Test String Equality | `[ "$a" = "$b" ]` |
-| 61 | Test String Inequality | `!=` |
-| 62 | Test Empty String | `-z` |
-| 63 | Test Non-Empty String | `-n` |
-| 64 | Numeric Comparison | `-eq -ne -lt -gt -le -ge` |
-| 65 | Double Bracket Test | `[[ ... ]]` advantages |
-| 66 | Logical AND in Test | `&&` inside `[[ ]]` |
-| 67 | Logical OR in Test | `\|\|` inside `[[ ]]` |
-| 68 | Negate a Condition | `!` |
-| 69 | File Exists | `-e`, `-f`, `-d` |
-| 70 | File is Readable | `-r`, `-w`, `-x` |
-| 71 | File is Not Empty | `-s` |
-| 72 | Compare File Ages | `-nt`, `-ot` |
-| 73 | Case Statement | `case $var in ... esac` |
-| 74 | Case with Glob Patterns | `case` pattern matching |
-| 75 | Ternary-Style One-Liner | `[[ cond ]] && true || false` |
-| 76 | Check Command Exists | `command -v` |
-| 77 | Check OS Type | `uname` in condition |
-| 78 | Nested if Statements | decision trees |
+| 57 | Your First if | `if [[ ... ]]; then` |
+| 58 | if and else | two branches |
+| 59 | The elif Ladder | several branches |
+| 60 | Same String? | `==` |
+| 61 | Different String? | `!=` |
+| 62 | Empty or Not | `-z`, `-n` |
+| 63 | Comparing Numbers | `-lt -le -gt -ge -eq -ne` |
+| 64 | Arithmetic Tests | `(( a > b ))` |
+| 65 | Both Must Be True | `&&` |
+| 66 | Either Will Do | `\|\|` |
+| 67 | Flip a Condition | `!` |
+| 68 | Does It Exist? | `-e -f -d` |
+| 69 | Permission Checks | `-r -w -x` |
+| 70 | Empty File? | `-s` |
+| 71 | Which File Is Newer? | `-nt`, `-ot` |
+| 72 | Glob Matching in [[ ]] | `== *.log` |
+| 73 | case Statements | `case ... esac` |
+| 74 | case with Patterns | `a\|b)`, `*.tar.gz)` |
+| 75 | One-Line Decisions | `cmd && a \|\| b` and its trap |
+| 76 | Is the Tool Installed? | `command -v` |
+| 77 | Platform Branches | `uname` in a condition |
+| 78 | The Deploy Gate | nested decisions |
 
 ---
 
-## Module 5 — Loops (22 levels) · Beginner→Intermediate
-
-> for, while, until, break, continue, loop control patterns.
+## Module 5 — Loops (22 levels) · Beginner → Intermediate
+*Fifty servers, one script. Repetition is where Bash starts saving you hours.*
+Directory: `module-05-loops`
 
 | Level | Title | Concept |
 |---|---|---|
-| 79 | for Loop over List | `for x in a b c` |
-| 80 | for Loop over Range | `for i in {1..10}` |
-| 81 | C-Style for Loop | `for ((i=0;i<10;i++))` |
-| 82 | while Loop | `while [ condition ]` |
-| 83 | until Loop | `until [ condition ]` |
-| 84 | Infinite Loop with Break | `while true; do ... break; done` |
-| 85 | Continue in Loop | skip iteration |
+| 79 | Loop over a List | `for x in a b c` |
+| 80 | Brace Ranges | `{1..5}`, `{01..10}` |
+| 81 | C-Style for | `for ((i=0; i<n; i++))` |
+| 82 | while with a Counter | `while (( i < n ))` |
+| 83 | until It Is Ready | `until` |
+| 84 | Break Out Early | `break` |
+| 85 | Skip with continue | `continue` |
 | 86 | Loop over Arguments | `for arg in "$@"` |
-| 87 | Loop over Files | `for f in *.txt` |
-| 88 | Loop over Lines of a File | `while IFS= read -r line` |
-| 89 | Loop with Counter | tracking iterations |
-| 90 | Nested Loops | matrix iteration |
-| 91 | Loop with Index | C-style with array index |
-| 92 | Loop until Input Valid | retry read loop |
-| 93 | Accumulate in Loop | summing, concatenating |
-| 94 | Loop with Pipe | `while read` from pipe |
-| 95 | Select Menu | `select` built-in |
-| 96 | Retry with Backoff | exponential wait in loop |
-| 97 | Loop over Command Output | `while IFS= read -r line < <(cmd)` |
-| 98 | Generate a Sequence | `seq` in loop |
-| 99 | Loop Early Exit Pattern | return/exit from loop |
-| 100 | Parallel Loop Jobs | `&` background + `wait` |
+| 87 | Loop over Files | globs, `nullglob` |
+| 88 | Line by Line | `while IFS= read -r line` |
+| 89 | Count What Matches | counting inside a loop |
+| 90 | Nested Loops | grids and combinations |
+| 91 | Number the Lines | loop with an index |
+| 92 | Ask Until Valid | retry reading input |
+| 93 | Running Totals | accumulating values |
+| 94 | The Pipe Subshell Trap | `cmd \| while read` loses variables |
+| 95 | select Menus | `select` built-in |
+| 96 | Doubling Delays | computing a backoff schedule |
+| 97 | Loop over Command Output | `while read ... < <(cmd)` |
+| 98 | Sequences with a Step | `seq` and step ranges |
+| 99 | Stop at the First Match | search loop with early exit |
+| 100 | Background Jobs and wait | `&` and `wait` |
 
 ---
 
 ## Module 6 — Functions (20 levels) · Intermediate
-
-> Defining functions, arguments, return values, local scope, recursion preview.
+*Your scripts are getting long. Mara: "If you copy-paste it twice, make it a function."*
+Directory: `module-06-functions`
 
 | Level | Title | Concept |
 |---|---|---|
-| 101 | Define a Function | `function_name() { }` |
-| 102 | Call a Function | function invocation |
-| 103 | Function Arguments | `$1 $2` inside function |
-| 104 | Return Exit Code | `return N` |
-| 105 | Capture Return Value | `$?` after call |
-| 106 | Return a String | via echo + $() |
-| 107 | Local Variables | `local var=value` |
-| 108 | Default Argument in Function | `${1:-default}` |
-| 109 | Validate Arguments in Function | guard clause pattern |
-| 110 | Function Library | source a helper file |
-| 111 | Recursive Function | factorial |
-| 112 | Recursive Tree Walk | directory traversal |
-| 113 | Function as Callback | passing function name |
-| 114 | Functions in a Loop | repeated calls |
-| 115 | Overriding a Function | redefining a function |
-| 116 | Anonymous-Style Function | inline definition |
-| 117 | Error-Handling Function | die() pattern |
-| 118 | Log Function | log with timestamp |
-| 119 | Function with Array Arg | passing arrays via nameref |
-| 120 | Function Return Array | returning multiple values |
+| 101 | Define and Call | `name() { ...; }` |
+| 102 | Function Arguments | `$1` inside functions |
+| 103 | Return a Status | `return N` |
+| 104 | Functions in Conditions | `if my_check; then` |
+| 105 | Return Data on stdout | `result=$(fn)` |
+| 106 | Local Variables | `local` |
+| 107 | The Global Leak | finding a variable clobbered by a function |
+| 108 | Default Parameters | `${1:-default}` in functions |
+| 109 | Guard Clauses | validate early, return early |
+| 110 | Source a Library | `source lib.sh` |
+| 111 | Recursion: Factorial | a function calling itself |
+| 112 | Recursion: Directory Tree | walking nested folders |
+| 113 | Callbacks by Name | passing a function name |
+| 114 | Functions Inside Loops | reuse per item |
+| 115 | Redefining a Function | later definitions win |
+| 116 | A die() Helper | message + exit code |
+| 117 | A log() Helper | levels and prefixes |
+| 118 | Name References | `local -n` |
+| 119 | Return Several Values | `printf` + `read` |
+| 120 | Your Function Toolkit | combining helpers |
 
 ---
 
-## Module 7 — String Manipulation (22 levels) · Intermediate
-
-> All the string operations bash offers natively.
+## Module 7 — String Surgery (22 levels) · Intermediate
+*Hostnames, versions, paths: everything is a string. Bash can cut them without extra tools.*
+Directory: `module-07-string-manipulation`
 
 | Level | Title | Concept |
 |---|---|---|
-| 121 | String Length | `${#str}` |
-| 122 | Substring | `${str:2:5}` |
-| 123 | Substring from End | negative offset |
-| 124 | Strip Shortest Prefix | `${str#pattern}` |
-| 125 | Strip Longest Prefix | `${str##pattern}` |
-| 126 | Strip Shortest Suffix | `${str%pattern}` |
-| 127 | Strip Longest Suffix | `${str%%pattern}` |
-| 128 | Replace First Match | `${str/old/new}` |
-| 129 | Replace All Matches | `${str//old/new}` |
-| 130 | Uppercase All | `${str^^}` |
-| 131 | Lowercase All | `${str,,}` |
-| 132 | Capitalize First Letter | `${str^}` |
-| 133 | Trim Leading Whitespace | parameter expansion trick |
-| 134 | Trim Trailing Whitespace | echo + sed or expansion |
-| 135 | Trim Both Ends | combined trimming |
-| 136 | Split String to Array | `IFS` split |
-| 137 | Join Array to String | `IFS=,` join trick |
-| 138 | Check Prefix | `[[ $str == prefix* ]]` |
-| 139 | Check Suffix | `[[ $str == *suffix ]]` |
-| 140 | Check Substring | `[[ $str == *sub* ]]` |
-| 141 | Regex Match | `[[ $str =~ regex ]]` |
-| 142 | Extract Regex Group | `${BASH_REMATCH[1]}` |
+| 121 | How Long Is It? | `${#str}` |
+| 122 | Substrings by Offset | `${str:2:5}` |
+| 123 | Counting from the End | `${str: -3}` |
+| 124 | Strip a Prefix | `${str#pattern}` |
+| 125 | Strip the Longest Prefix | `${str##pattern}` |
+| 126 | Strip a Suffix | `${str%pattern}` |
+| 127 | Strip the Longest Suffix | `${str%%pattern}` |
+| 128 | Replace the First Match | `${str/old/new}` |
+| 129 | Replace Every Match | `${str//old/new}` |
+| 130 | Anchored Replacements | `${str/#old/new}`, `${str/%old/new}` |
+| 131 | UPPER and lower | `${str^^}`, `${str,,}` |
+| 132 | Capitalize Words | `${word^}` per word |
+| 133 | Trim Whitespace | extglob or pattern trimming |
+| 134 | Pad and Truncate | `printf %-10.10s` |
+| 135 | Split on a Delimiter | `IFS=: read -ra` |
+| 136 | Join with a Separator | joining array items |
+| 137 | Starts With, Ends With | `[[ $s == pre* ]]` |
+| 138 | Contains a Substring | `[[ $s == *sub* ]]` |
+| 139 | Count a Character | removing everything else |
+| 140 | Reverse a String | character loop |
+| 141 | Regex Match | `[[ $s =~ regex ]]` |
+| 142 | Capture Groups | `BASH_REMATCH` |
 
 ---
 
 ## Module 8 — Arithmetic (14 levels) · Intermediate
-
-> Integer arithmetic, arithmetic expansion, and floating point via bc.
+*Capacity planning day. Gus from finance wants numbers, and they had better be right.*
+Directory: `module-08-arithmetic`
 
 | Level | Title | Concept |
 |---|---|---|
-| 143 | Integer Addition | `$(( a + b ))` |
-| 144 | Subtraction & Multiplication | `$(( a * b ))` |
-| 145 | Division & Modulo | `$(( a / b ))`, `$(( a % b ))` |
-| 146 | Power | `$(( base ** exp ))` |
-| 147 | Increment / Decrement | `(( i++ ))`, `(( i-- ))` |
-| 148 | Compound Assignment | `(( i += 5 ))` |
-| 149 | let Command | `let "result = a * b"` |
-| 150 | Arithmetic Condition | `(( a > b ))` as if condition |
-| 151 | Float Arithmetic with bc | `echo "scale=2; 1/3" \| bc` |
-| 152 | Random Number | `$RANDOM` |
-| 153 | Random in Range | `$(( RANDOM % N ))` |
-| 154 | Convert Bases | `printf "%x" 255` |
-| 155 | Sum a List | loop accumulator |
-| 156 | Min and Max | compare in loop |
+| 143 | Add Two Numbers | `$(( a + b ))` |
+| 144 | Operator Precedence | parentheses in arithmetic |
+| 145 | Division and Remainder | `/` and `%` |
+| 146 | Powers | `**` |
+| 147 | Increment and Decrement | `(( i++ ))`, `(( i-- ))` |
+| 148 | Compound Assignment | `+=`, `*=` |
+| 149 | let and (( )) | `let` vs `(( ))` |
+| 150 | Arithmetic Conditions | `if (( ... ))` |
+| 151 | Decimals with awk | floating point via `awk` |
+| 152 | Percentages Without Floats | fixed-point integer math |
+| 153 | Number Bases | `16#ff`, `printf %x %o` |
+| 154 | Random in a Range | `$RANDOM % n` |
+| 155 | Sum, Min, Max | single-pass statistics |
+| 156 | Rounding Division | round-half-up with integers |
 
 ---
 
-## Module 9 — Arrays (22 levels) · Intermediate
-
-> Indexed arrays, associative arrays, slicing, iteration.
+## Module 9 — Arrays & Maps (22 levels) · Intermediate
+*Lists of servers, maps of owners. Time for real data structures.*
+Directory: `module-09-arrays`
 
 | Level | Title | Concept |
 |---|---|---|
-| 157 | Declare an Array | `arr=(a b c)` |
-| 158 | Access Element | `${arr[0]}` |
-| 159 | All Elements | `${arr[@]}` |
+| 157 | Create an Array | `arr=(a b c)` |
+| 158 | Index into It | `${arr[1]}`, `${arr[-1]}` |
+| 159 | All Elements Safely | `"${arr[@]}"` |
 | 160 | Array Length | `${#arr[@]}` |
-| 161 | Append to Array | `arr+=(new)` |
-| 162 | Remove Element | `unset arr[i]` |
-| 163 | Slice an Array | `${arr[@]:start:len}` |
-| 164 | Loop over Array | `for item in "${arr[@]}"` |
-| 165 | Loop with Index | `for i in "${!arr[@]}"` |
-| 166 | Array from Command | `mapfile -t arr < <(cmd)` |
-| 167 | Array from File Lines | mapfile |
-| 168 | Search in Array | loop + grep |
-| 169 | Sort an Array | `readarray` + `sort` |
-| 170 | Unique Elements | sort + uniq trick |
-| 171 | Associative Array | `declare -A map` |
-| 172 | Add Key-Value | `map[key]=value` |
-| 173 | Iterate Assoc Array | `for k in "${!map[@]}"` |
-| 174 | Check Key Exists | `[[ -v map[key] ]]` |
-| 175 | Delete Key | `unset map[key]` |
-| 176 | Pass Array to Function | nameref `declare -n` |
-| 177 | Return Array from Function | output parsing |
-| 178 | 2D Array Simulation | key encoding trick |
+| 161 | Append Items | `arr+=(x)` |
+| 162 | Remove an Item | `unset 'arr[i]'` and gaps |
+| 163 | Slices | `${arr[@]:1:2}` |
+| 164 | Iterate Values | `for x in "${arr[@]}"` |
+| 165 | Iterate Indexes | `${!arr[@]}` |
+| 166 | mapfile from a File | `mapfile -t` |
+| 167 | mapfile from a Command | `mapfile -t < <(cmd)` |
+| 168 | Search an Array | membership test |
+| 169 | Sort an Array | `sort` round-trip |
+| 170 | Remove Duplicates | unique items, order kept |
+| 171 | Associative Arrays | `declare -A` |
+| 172 | Counting with a Map | `map[$k]+=1` |
+| 173 | Iterate Keys in Order | sorted keys |
+| 174 | Does the Key Exist? | `[[ -v map[$k] ]]` |
+| 175 | Delete a Key | `unset 'map[$k]'` |
+| 176 | Arrays into Functions | name references |
+| 177 | Two Lists into One Map | zipping arrays |
+| 178 | A Grid in a Map | `map[$row,$col]` |
 
 ---
 
-## Module 10 — Redirection & Pipelines in Scripts (18 levels) · Intermediate
-
-> stdin/stdout/stderr, file descriptors, here-docs, process substitution.
+## Module 10 — Streams & Redirection (18 levels) · Intermediate
+*Logs everywhere. You learn to steer every byte where it belongs.*
+Directory: `module-10-redirection-pipelines-in-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 179 | Redirect stdout to File | `>` and `>>` |
-| 180 | Redirect stderr to File | `2>` |
-| 181 | Redirect Both | `&>` |
-| 182 | Redirect stderr to stdout | `2>&1` |
-| 183 | Discard Output | `>/dev/null` |
-| 184 | Read from File with Redirect | `cmd < file` |
-| 185 | Here-Document | `<<EOF ... EOF` |
-| 186 | Here-Document No Expand | `<<'EOF'` |
-| 187 | Here-String | `cmd <<< "string"` |
-| 188 | Pipe Between Commands | `cmd1 \| cmd2` |
-| 189 | Pipeline Exit Code | `${PIPESTATUS[@]}` |
-| 190 | Process Substitution Input | `cmd <(other_cmd)` |
-| 191 | Process Substitution Output | `cmd >(other_cmd)` |
-| 192 | Tee in Pipeline | `tee` for logging |
-| 193 | Custom File Descriptor | `exec 3>file` |
-| 194 | Close File Descriptor | `exec 3>&-` |
-| 195 | Redirect in Function | function with fd |
-| 196 | Log Everything with exec | `exec > >(tee logfile)` |
+| 179 | Write to a File | `>` |
+| 180 | Append to a File | `>>` |
+| 181 | Errors to a File | `2>` |
+| 182 | Both Streams, One File | `&>` |
+| 183 | Merge stderr into stdout | `2>&1` and order |
+| 184 | Silence Is Golden | `/dev/null` |
+| 185 | Input from a File | `<` |
+| 186 | Here-Docs with Variables | `<<EOF` expansion |
+| 187 | Quoted Here-Docs | `<<'EOF'` |
+| 188 | Here-Strings | `<<<` |
+| 189 | Build a Pipeline | `a \| b \| c` |
+| 190 | Who Failed in the Pipe? | `PIPESTATUS` |
+| 191 | Compare Two Outputs | `diff <(...) <(...)` |
+| 192 | Keep a Copy with tee | `tee` |
+| 193 | Open a File Descriptor | `exec 3>file` |
+| 194 | Read Two Files at Once | `read -u 3` |
+| 195 | Close and Restore | saving and restoring stdout |
+| 196 | Redirect a Whole Block | `{ ...; } > file` |
 
 ---
 
-## Module 11 — Error Handling & Defensive Scripting (18 levels) · Intermediate
-
-> exit codes, set -e/u/o pipefail, guard clauses, trap.
+## Module 11 — Failing Safely (18 levels) · Intermediate
+*Theo's deploy script deleted the wrong folder. Never again.*
+Directory: `module-11-error-handling-defensive-scripting`
 
 | Level | Title | Concept |
 |---|---|---|
-| 197 | Check Exit Code | `$?` after command |
-| 198 | Exit on Failure | `cmd \|\| exit 1` |
-| 199 | set -e | abort on error |
-| 200 | set -u | abort on unset variable |
-| 201 | set -o pipefail | catch pipe failures |
-| 202 | Strict Mode Combo | `set -euo pipefail` |
-| 203 | Trap on EXIT | cleanup always runs |
-| 204 | Trap on ERR | log which command failed |
-| 205 | Trap on SIGINT | graceful Ctrl-C |
-| 206 | Trap on SIGTERM | handle kill signal |
-| 207 | Cleanup Temp Files | trap + mktemp |
-| 208 | die() Function | unified error exit |
-| 209 | Guard Clause Pattern | early return on bad input |
-| 210 | Retry on Failure | loop with counter |
-| 211 | Timeout a Command | `timeout` command |
-| 212 | Check Dependency Exists | `command -v` guard |
-| 213 | Validate File Argument | must exist and be readable |
-| 214 | Propagate Exit Codes | maintain exit code through functions |
+| 197 | Check the Status | `$?` after a command |
+| 198 | Or Else Exit | `cmd \|\| exit 1` |
+| 199 | What set -e Does | errexit and its exceptions |
+| 200 | set -u Catches Typos | nounset |
+| 201 | Failures Inside Pipes | `pipefail` |
+| 202 | Strict Mode | `set -euo pipefail` together |
+| 203 | Cleanup on Exit | `trap ... EXIT` |
+| 204 | Report the Failing Line | `trap ... ERR` |
+| 205 | Handle Ctrl-C | `trap ... INT` |
+| 206 | Graceful Shutdown | `trap ... TERM` |
+| 207 | Temp Files That Vanish | `mktemp` + trap |
+| 208 | Meaningful Exit Codes | a code per failure type |
+| 209 | Validate Before Acting | checking all inputs first |
+| 210 | Retry a Flaky Command | bounded retries |
+| 211 | A Time Limit by Hand | background job + `kill` |
+| 212 | Dependency Check | missing tools listed at once |
+| 213 | Error Messages That Help | what, where, how to fix |
+| 214 | Exit Codes Through Layers | propagating status |
 
 ---
 
-## Module 12 — Regular Expressions in Bash (18 levels) · Intermediate
-
-> Pattern matching with `[[ =~ ]]`, grep, sed, and BASH_REMATCH.
+## Module 12 — Patterns & Regex (18 levels) · Intermediate
+*Priya from security needs to find needles in log haystacks.*
+Directory: `module-12-regular-expressions-in-bash`
 
 | Level | Title | Concept |
 |---|---|---|
-| 215 | Basic Regex Match | `[[ $str =~ pattern ]]` |
-| 216 | Capture Group | `${BASH_REMATCH[1]}` |
-| 217 | Multiple Groups | `${BASH_REMATCH[2]}` |
-| 218 | Match a Number | `^[0-9]+$` |
-| 219 | Match an Email | email regex pattern |
-| 220 | Match an IP Address | IP regex pattern |
-| 221 | Match a Date | YYYY-MM-DD regex |
-| 222 | Anchors | `^` and `$` |
-| 223 | Character Classes | `[a-z]`, `[[:alpha:]]` |
-| 224 | Quantifiers | `*`, `+`, `?`, `{n,m}` |
-| 225 | Alternation | `(foo\|bar)` |
-| 226 | Non-Greedy in sed | `sed 's/a.*?b/X/'` (POSIX) |
-| 227 | grep -E in Script | extended regex in scripts |
-| 228 | grep -P in Script | Perl regex (where available) |
-| 229 | sed Substitution in Script | `sed 's/old/new/'` |
-| 230 | sed with Capture Group | `sed 's/\(.*\)/[\1]/'` |
-| 231 | Validate and Extract | combined match + capture |
-| 232 | Multi-line Regex Logic | line-by-line state machine |
+| 215 | Your First =~ | regex match in `[[ ]]` |
+| 216 | Anchors | `^` and `$` |
+| 217 | Character Classes | `[a-z]`, `[[:digit:]]` |
+| 218 | Quantifiers | `*` `+` `?` `{n,m}` |
+| 219 | Alternation | `(a\|b)` |
+| 220 | Capture One Group | `BASH_REMATCH[1]` |
+| 221 | Capture Several Groups | multiple captures |
+| 222 | Validate an Email Address | practical email check |
+| 223 | Validate an IPv4 Address | regex + range check |
+| 224 | Validate a Date | `YYYY-MM-DD` + month/day ranges |
+| 225 | Regex in a Variable | quoting pitfalls |
+| 226 | grep -E Filters | extended regex with grep |
+| 227 | Extract with grep -o | only the matching part |
+| 228 | Count and Invert | `grep -c`, `grep -v` |
+| 229 | sed Substitution | `s/old/new/g` |
+| 230 | sed Back-References | `\1` in replacements |
+| 231 | Negated Classes | `[^"]*` instead of lazy matching |
+| 232 | Log Line Parser | combining captures |
 
 ---
 
-## Module 13 — File Operations in Scripts (18 levels) · Intermediate
-
-> Creating, reading, writing, copying, and manipulating files from scripts.
+## Module 13 — Working with Files (18 levels) · Intermediate
+*The file server is a mess. You get to clean it — carefully.*
+Directory: `module-13-file-operations-in-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 233 | Create a File | `touch`, `>` |
-| 234 | Write to a File | echo redirect |
-| 235 | Append to a File | `>>` |
-| 236 | Read Entire File | `$(<file)` |
-| 237 | Read Line by Line | `while IFS= read -r` |
-| 238 | Read Specific Line | `sed -n '5p'` |
-| 239 | Count Lines in File | `wc -l` |
-| 240 | Copy a File | `cp` with error check |
-| 241 | Move/Rename a File | `mv` |
-| 242 | Delete Safely | check before delete |
-| 243 | Create Temp File | `mktemp` |
-| 244 | Create Temp Directory | `mktemp -d` |
-| 245 | Find Files by Pattern | `find` in script |
-| 246 | Find Files by Age | `find -mtime` |
-| 247 | File Locking | `flock` |
-| 248 | Atomic Write | write-then-move pattern |
-| 249 | Backup Before Write | cp + write pattern |
-| 250 | Parse CSV File | IFS split per line |
+| 233 | Make Directories and Files | `mkdir -p`, `touch` |
+| 234 | Don't Clobber | `set -o noclobber` |
+| 235 | Append Entries | timestamped appends |
+| 236 | Slurp a File | `$(<file)` |
+| 237 | Pick One Line | `sed -n 'Np'` |
+| 238 | Count Lines and Words | portable `wc` usage |
+| 239 | Copy with Checks | `cp` + verification |
+| 240 | Batch Rename | renaming by extension |
+| 241 | Delete Carefully | path guard before `rm` |
+| 242 | Temporary Files | `mktemp` |
+| 243 | Temporary Directories | `mktemp -d` |
+| 244 | Find by Name | `find -name` |
+| 245 | Find by Type and Size | `find -type -size` |
+| 246 | Find by Age | `find -mtime`, `-newer` |
+| 247 | Lock with mkdir | atomic lock directory |
+| 248 | Atomic Writes | write temp, then `mv` |
+| 249 | Rotate Backups | `.1 .2 .3` rotation |
+| 250 | Directory Summary | counts per extension |
 
 ---
 
-## Module 14 — Text Processing in Scripts (22 levels) · Intermediate→Advanced
-
-> Using awk, sed, cut, sort, uniq, tr as script tools.
+## Module 14 — Text Processing (22 levels) · Advanced
+*Reports, exports, CSVs. The classic Unix tools become your power tools.*
+Directory: `module-14-text-processing-in-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 251 | Cut Columns | `cut -d, -f2` |
-| 252 | Sort File | `sort` in script |
-| 253 | Sort Numerically | `sort -n` |
-| 254 | Unique Lines | `sort \| uniq` |
-| 255 | Count Occurrences | `sort \| uniq -c \| sort -rn` |
+| 251 | Cut Columns | `cut -d -f` |
+| 252 | Sort Lines | `sort` |
+| 253 | Sort by Key and Number | `sort -t -k -n` |
+| 254 | Collapse Repeats | `uniq` |
+| 255 | Frequency Table | `sort \| uniq -c \| sort -rn` |
 | 256 | Translate Characters | `tr` |
-| 257 | Delete Characters | `tr -d` |
-| 258 | Squeeze Whitespace | `tr -s ' '` |
-| 259 | awk Print Column | `awk '{print $2}'` |
-| 260 | awk with Condition | `awk '$3 > 100'` |
-| 261 | awk Sum Column | `awk '{sum+=$1} END{print sum}'` |
-| 262 | awk Field Separator | `awk -F,` |
-| 263 | awk Associative Array | frequency count |
-| 264 | sed Delete Lines | `sed '/pattern/d'` |
-| 265 | sed Print Line Range | `sed -n '5,10p'` |
-| 266 | sed Multi-command | `-e` |
-| 267 | sed In-Place Edit | `sed -i` |
-| 268 | Join Two Files | `join`, `paste` |
-| 269 | Column Alignment | `column -t` |
-| 270 | Generate a Report | combine awk+sort+head |
-| 271 | Parse Key=Value Config | while read + IFS |
-| 272 | Transform JSON-like Text | extract values with grep/awk |
+| 257 | Delete and Squeeze | `tr -d`, `tr -s` |
+| 258 | Head and Tail Windows | line ranges |
+| 259 | awk Fields | `$1`, `$NF` |
+| 260 | awk Filters | conditions on fields |
+| 261 | awk Sums and Averages | `END` blocks |
+| 262 | awk Separators | `-F` and `OFS` |
+| 263 | awk Group By | awk arrays |
+| 264 | sed Delete Lines | `/pattern/d` |
+| 265 | sed Line Ranges | `/start/,/end/p` |
+| 266 | sed In Place with Backup | `sed -i.bak` |
+| 267 | Side by Side | `paste` |
+| 268 | Join on a Key | `join` |
+| 269 | Set Differences | `comm` |
+| 270 | Align a Table | `printf` columns |
+| 271 | Parse key=value Files | `IFS='=' read` |
+| 272 | Top-N Report | combining tools |
 
 ---
 
-## Module 15 — Script Structure & Best Practices (18 levels) · Advanced
-
-> Headers, strict mode, documentation, shellcheck habits, portability.
+## Module 15 — Script Craft (18 levels) · Advanced
+*Your scripts will outlive you. Write them like it.*
+Directory: `module-15-script-structure-best-practices`
 
 | Level | Title | Concept |
 |---|---|---|
-| 273 | Proper Shebang | `#!/usr/bin/env bash` |
-| 274 | Script Header Block | name, author, usage, description |
-| 275 | Usage Function | print_usage() with exit |
-| 276 | Strict Mode Setup | `set -euo pipefail` + IFS |
-| 277 | ShellCheck Clean Script | write shellcheck-clean code |
-| 278 | Consistent Quoting | always quote variables |
-| 279 | Avoid Word Splitting Bugs | `"$@"` not `$@` |
-| 280 | Use Printf over Echo | portable output |
-| 281 | Avoid Useless Cat | `< file` not `cat file \|` |
-| 282 | Use Local Variables | prevent global leaks |
-| 283 | Use Meaningful Names | naming conventions |
-| 284 | DRY with Functions | no copy-pasted logic |
-| 285 | Modular Script Layout | organize into sections |
-| 286 | Configuration Section | top-of-script constants |
-| 287 | Main Function Pattern | `main() { }; main "$@"` |
-| 288 | Portable Bash | avoid bashisms where possible |
-| 289 | POSIX sh vs bash | know when you need bash |
-| 290 | Version Guard | check bash version |
+| 273 | A Proper Header | env shebang + strict mode + description |
+| 274 | Usage and --help | usage function |
+| 275 | The main() Pattern | `main "$@"` |
+| 276 | Constants Block | `readonly` configuration |
+| 277 | Filenames with Spaces | quoting everywhere |
+| 278 | Commands in Arrays | building argument lists safely |
+| 279 | printf Over echo | data that looks like flags |
+| 280 | Don't Parse ls | globs instead of `ls` output |
+| 281 | Local by Default | function hygiene |
+| 282 | Small Functions | one job per function |
+| 283 | Flags, Positionals and -- | full argument parsing |
+| 284 | Subcommands | `tool add/list/remove` |
+| 285 | Settings from the Environment | validated env config |
+| 286 | Idempotent Scripts | safe to run twice |
+| 287 | Library or Program? | `BASH_SOURCE` guard |
+| 288 | Version Guard | `BASH_VERSINFO` |
+| 289 | POSIX-Friendly Code | `[ ]` and `case` instead of bashisms |
+| 290 | Self-Documenting Help | help text read from the script itself |
 
 ---
 
-## Module 16 — Debugging Scripts (14 levels) · Advanced
-
-> set -x, PS4, bashdb techniques, tracing, and isolating bugs.
+## Module 16 — Debugging (14 levels) · Advanced
+*Something broke at 3 a.m. You learn to make scripts explain themselves.*
+Directory: `module-16-debugging-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 291 | set -x Trace | `set -x` |
-| 292 | set -v Verbose | `set -v` |
-| 293 | Custom PS4 | show file/line in trace |
-| 294 | Trace a Subshell | `bash -x script.sh` |
-| 295 | Trace Specific Block | `set -x; ...; set +x` |
-| 296 | Debug Log Function | conditional `DEBUG` variable |
-| 297 | LINENO in Errors | `$LINENO` |
-| 298 | FUNCNAME Stack | `${FUNCNAME[@]}` |
-| 299 | BASH_SOURCE | source file tracking |
-| 300 | Trap ERR with Context | log command + line |
-| 301 | Dry-Run Mode | `DRY_RUN=1` flag |
-| 302 | Assert Function | assert_eq, assert_true |
-| 303 | Test-Driven Bash | write tests for your function |
-| 304 | Isolate Failing Command | binary search debug |
+| 291 | Trace with set -x | xtrace on stderr |
+| 292 | Trace Only the Suspect | `set -x` / `set +x` around a block |
+| 293 | PS4 with Line Numbers | custom trace prefix |
+| 294 | Trace to a File | `BASH_XTRACEFD` |
+| 295 | A DEBUG Switch | conditional debug output |
+| 296 | LINENO in Messages | `$LINENO` |
+| 297 | The Call Stack | `FUNCNAME`, `BASH_LINENO` |
+| 298 | Where Was This Defined? | `BASH_SOURCE` in libraries |
+| 299 | ERR Trap with Context | command, line, status |
+| 300 | Dry-Run Mode | print instead of execute |
+| 301 | Assertions | `assert_eq` helper |
+| 302 | A Mini Test Harness | running test functions |
+| 303 | Fix the Off-by-One | debugging a broken fixture script |
+| 304 | Find the Failing Step | bisecting a list of steps |
 
 ---
 
-## Module 17 — Process Management in Scripts (18 levels) · Advanced
-
-> Background jobs, wait, signals, subshells, job control from scripts.
+## Module 17 — Processes & Signals (18 levels) · Advanced
+*The batch jobs are slow. Run them in parallel — without losing control.*
+Directory: `module-17-process-management-in-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 305 | Run in Background | `cmd &` |
-| 306 | Capture Background PID | `$!` |
-| 307 | Wait for Background Job | `wait $pid` |
-| 308 | Wait All Backgrounds | `wait` |
-| 309 | Check Job Still Running | `kill -0 $pid` |
-| 310 | Kill a Background Job | `kill $pid` |
-| 311 | Parallel Jobs with Limit | N workers pattern |
-| 312 | Subshell | `( ... )` |
-| 313 | Subshell Variable Isolation | changes don't leak |
-| 314 | Command Group | `{ ... }` |
-| 315 | Process Substitution | `<(cmd)` |
-| 316 | Named Pipe (FIFO) | `mkfifo` |
-| 317 | Send Signal to Self | `kill -USR1 $$` |
-| 318 | Handle SIGHUP | daemon-style script |
-| 319 | nohup & disown | detach from terminal |
-| 320 | xargs for Parallelism | `xargs -P N` |
-| 321 | GNU Parallel Basics | `parallel` tool |
-| 322 | Semaphore Pattern | limit concurrent jobs |
+| 305 | Run in the Background | `&` and `$!` |
+| 306 | Wait for One Job | `wait $pid` and its status |
+| 307 | Wait for Them All | collecting every status |
+| 308 | Still Running? | `kill -0` |
+| 309 | Stop a Job | `kill` + `wait` |
+| 310 | A Worker Limit | `wait -n` |
+| 311 | Subshell Isolation | `( ... )` |
+| 312 | cd Without Consequences | directory changes in a subshell |
+| 313 | Command Groups | `{ ...; }` |
+| 314 | Collect Job Results | one temp file per job |
+| 315 | Named Pipes | `mkfifo` |
+| 316 | Signal Yourself | `kill -USR1 $$` |
+| 317 | Reload on HUP | config reload handler |
+| 318 | Ignore and Restore Signals | `trap ''` and `trap -` |
+| 319 | Parallel xargs | `xargs -P` |
+| 320 | Safe Names with xargs -0 | `find -print0 \| xargs -0` |
+| 321 | A Job Queue from a File | worker loop |
+| 322 | A FIFO Semaphore | tokens through a pipe |
 
 ---
 
-## Module 18 — Advanced Functions & Patterns (18 levels) · Advanced
-
-> Higher-order patterns: dispatch tables, hooks, plugins, memoization.
+## Module 18 — Function Patterns (18 levels) · Advanced
+*Mara's toolbox: patterns that make big Bash programs manageable.*
+Directory: `module-18-advanced-functions-patterns`
 
 | Level | Title | Concept |
 |---|---|---|
-| 323 | Dispatch Table | assoc array of function names |
-| 324 | Plugin System | source files from a dir |
-| 325 | Hook System | pre/post hook arrays |
-| 326 | Memoize a Function | cache results in assoc array |
-| 327 | Curry-Style Partial | factory functions |
-| 328 | Decorator Pattern | wrap and extend a function |
-| 329 | Function Exists Check | `declare -F func` |
-| 330 | Dynamic Function Call | `"$func" args` |
-| 331 | Variadic Functions | `"$@"` forwarding |
-| 332 | Generator Pattern | function + global state |
-| 333 | Iterator over File | closure-style read |
-| 334 | Event Emitter | signal-driven pattern |
-| 335 | Builder Pattern | chained config calls |
-| 336 | Strategy Pattern | swap algorithm functions |
-| 337 | Middleware Chain | pipeline of functions |
-| 338 | Retry Decorator | wrap any command |
-| 339 | Timeout Decorator | `timeout` wrapping |
-| 340 | Audit Decorator | log all calls |
+| 323 | Dispatch Table | map of commands to functions |
+| 324 | Plugin Loader | sourcing every file in a folder |
+| 325 | Before and After Hooks | hook arrays |
+| 326 | Memoize | caching results in a map |
+| 327 | Function Factories | generating functions |
+| 328 | Decorators | wrapping an existing function |
+| 329 | Does the Function Exist? | `declare -F` |
+| 330 | Safe Dynamic Calls | allow-listed function names |
+| 331 | Forward Every Argument | `"$@"` pass-through |
+| 332 | Generators with State | next-value functions |
+| 333 | An Iterator over Lines | cursor in a file |
+| 334 | Event Handlers | register and emit |
+| 335 | Builder Pattern | chained configuration |
+| 336 | Strategy Pattern | swappable algorithms |
+| 337 | Middleware Chain | pipeline of transformers |
+| 338 | Retry Wrapper | retry any command |
+| 339 | Timing Wrapper | `SECONDS` / `EPOCHREALTIME` |
+| 340 | Audit Wrapper | log every call |
 
 ---
 
-## Module 19 — Configuration & Environment (14 levels) · Advanced
-
-> Config files, dotenv loading, environment variable management.
+## Module 19 — Configuration (14 levels) · Advanced
+*Every customer wants it "slightly different". Configuration done right.*
+Directory: `module-19-configuration-environment`
 
 | Level | Title | Concept |
 |---|---|---|
-| 341 | Load dotenv File | parse `KEY=VALUE` into env |
-| 342 | Config File with Defaults | layered config merging |
-| 343 | Override via Env Var | `${VAR:-config_value}` |
-| 344 | Validate Required Config | check all required vars |
-| 345 | XDG Base Dirs | `$XDG_CONFIG_HOME` |
-| 346 | Per-User Config | `~/.config/app/config` |
-| 347 | Per-Project Config | walk up to find config |
-| 348 | Config Schema Check | validate types, ranges |
-| 349 | Secret Handling | never echo secrets |
-| 350 | Masked Output | replace secret in logs |
-| 351 | Dynamic Config Reload | trap SIGHUP to reload |
-| 352 | Environment Report | print all config values |
-| 353 | Config Migration | upgrade old format |
-| 354 | Config Diff | compare two config files |
+| 341 | Load a .env File Safely | parse, never `source` |
+| 342 | Layered Defaults | defaults, file, environment |
+| 343 | Flags Beat Everything | precedence rules |
+| 344 | Required Keys | report all missing keys |
+| 345 | XDG Config Paths | `XDG_CONFIG_HOME` fallback |
+| 346 | Find the Project Config | walking up directories |
+| 347 | Type-Check Values | ints, booleans, enums |
+| 348 | Mask Secrets | redacted output |
+| 349 | Secrets from Files | `*_FILE` convention |
+| 350 | INI Sections | `[section]` parsing |
+| 351 | Reload on Signal | re-read config on HUP |
+| 352 | Show Effective Config | sorted final values |
+| 353 | Migrate an Old Format | config upgrade |
+| 354 | Diff Two Configs | added, removed, changed |
 
 ---
 
-## Module 20 — Script Security (14 levels) · Advanced
-
-> Injection prevention, safe file handling, privilege awareness.
+## Module 20 — Security (14 levels) · Advanced
+*Priya runs a security review of every script. Pass it.*
+Directory: `module-20-script-security`
 
 | Level | Title | Concept |
 |---|---|---|
-| 355 | Quote to Prevent Injection | `"$var"` vs eval danger |
-| 356 | Safe eval Usage | never eval user input |
-| 357 | Sanitize User Input | strip dangerous chars |
-| 358 | Safe Temp Files | mktemp, not predictable names |
-| 359 | Restrict Permissions | umask in scripts |
-| 360 | Avoid World-Writable | chmod after create |
-| 361 | Check Running as Root | guard non-root scripts |
-| 362 | Drop Privileges | `sudo -u` as target user |
-| 363 | Secure PATH | reset PATH at script start |
-| 364 | Avoid Parsing ls | use glob/find instead |
-| 365 | Safe Directory Traversal | check symlinks |
-| 366 | Prevent TOCTOU | atomic operations |
-| 367 | Credential Scrubbing | clear vars after use |
-| 368 | Log Sanitization | remove secrets from logs |
+| 355 | Quote to Stop Injection | unquoted input becomes code |
+| 356 | Replace eval | arrays and `case` instead of `eval` |
+| 357 | Allow-List Input | accept only known-good values |
+| 358 | Safe Temp Files | unpredictable names |
+| 359 | umask for Secrets | files born private |
+| 360 | Find World-Writable Files | `find -perm` |
+| 361 | Refuse to Run as Root | `id -u` guard |
+| 362 | Path Traversal Guard | rejecting `..` escapes |
+| 363 | Lock Down PATH | trusted `PATH` at start |
+| 364 | Globs Not ls | safe file iteration |
+| 365 | Symlink Checks | `-L` before writing |
+| 366 | Create Exclusively | noclobber against races |
+| 367 | Forget Secrets | `unset` after use |
+| 368 | Redact Logs | scrubbing tokens and passwords |
 
 ---
 
-## Module 21 — Networking in Scripts (14 levels) · Advanced
-
-> curl, wget, HTTP checks, API calls, retry logic, webhook scripts.
+## Module 21 — Talking to the Network (14 levels) · Advanced
+*The status page, the billing API, the DNS. Scripts that speak HTTP.*
+Directory: `module-21-networking-in-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 369 | HTTP GET with curl | `curl -s URL` |
-| 370 | Check HTTP Status Code | `curl -o /dev/null -w "%{http_code}"` |
-| 371 | POST with curl | `curl -X POST -d data` |
-| 372 | JSON POST | `curl -H "Content-Type: application/json"` |
-| 373 | Pass Auth Header | Bearer token |
-| 374 | Handle curl Errors | `--fail` flag |
-| 375 | Retry HTTP Request | loop with backoff |
-| 376 | Parse JSON Response | `jq` in scripts |
-| 377 | Extract Field from JSON | `jq -r '.field'` |
-| 378 | Webhook Listener Stub | `nc` listener |
-| 379 | Check Port Open | `nc -z host port` |
-| 380 | DNS Lookup in Script | `dig`, `nslookup` |
-| 381 | Download File Safely | verify checksum |
-| 382 | Rate-Limited API Script | sleep between calls |
+| 369 | Fetch a Page | `curl -s` |
+| 370 | HTTP Status Codes | `-w '%{http_code}'` |
+| 371 | POST Form Data | `-d` |
+| 372 | JSON with Headers | `-H`, JSON bodies |
+| 373 | Bearer Tokens | tokens from env, never printed |
+| 374 | Fail on HTTP Errors | `--fail` and exit codes |
+| 375 | Respect Retry-After | reading response headers |
+| 376 | Extract a JSON Field | `sed`/`grep` on simple JSON |
+| 377 | Follow Pagination | next-page loop |
+| 378 | Is the Port Open? | `nc -z` |
+| 379 | DNS Lookups | `dig +short` |
+| 380 | Download and Verify | checksum check |
+| 381 | Rate-Limited Calls | spacing requests |
+| 382 | Uptime Probe Report | probing a host list |
 
 ---
 
-## Module 22 — Logging & Monitoring Scripts (18 levels) · Advanced
-
-> Structured logging, log rotation, health checks, alerting scripts.
+## Module 22 — Logging & Monitoring (18 levels) · Advanced
+*You join the on-call rotation. Your scripts now watch the servers for you.*
+Directory: `module-22-logging-monitoring-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 383 | Timestamped Log | `printf "[%s] %s\n" "$(date)" "$msg"` |
-| 384 | Log Levels | DEBUG INFO WARN ERROR |
-| 385 | Log to File and Stdout | `tee` |
-| 386 | Log Rotation Stub | size check + mv |
-| 387 | Syslog from Script | `logger` command |
-| 388 | Health Check Script | check process, disk, memory |
-| 389 | Disk Usage Alert | threshold + notification |
-| 390 | CPU Load Check | `uptime` parse |
-| 391 | Memory Usage Check | `free` parse |
-| 392 | Process Alive Check | pidfile pattern |
-| 393 | Heartbeat Script | periodic ping/log |
-| 394 | Alert on Log Pattern | tail + grep + notify |
-| 395 | Metrics Collector | gather stats to file |
-| 396 | Dashboard Script | terminal status display |
-| 397 | Watchdog Script | restart crashed process |
-| 398 | On-Call Notification | curl to webhook on alert |
-| 399 | Audit Trail | append every action |
-| 400 | Summary Report Generator | aggregate daily stats |
+| 383 | Timestamped Log Lines | `printf '%(...)T'` |
+| 384 | Log Levels and Filtering | `LOG_LEVEL` threshold |
+| 385 | Log to File and Screen | `tee -a` |
+| 386 | Rotate by Size | size check + rename |
+| 387 | Structured Logs | `key=value` lines |
+| 388 | Disk Usage Alert | `df -P` parsing |
+| 389 | Load Average Check | parsing `uptime` |
+| 390 | Memory from meminfo | `/proc/meminfo` format |
+| 391 | PID File Health | stale PID detection |
+| 392 | Heartbeat Freshness | file age checks |
+| 393 | Error Spike Detector | counts per minute |
+| 394 | Metrics File | Prometheus text format |
+| 395 | Terminal Status Board | aligned dashboard |
+| 396 | Watchdog Restart | detect and restart |
+| 397 | Alert Webhook | posting alerts |
+| 398 | Tamper-Evident Audit Trail | sequence + checksum chain |
+| 399 | Collapse Repeated Messages | "repeated N times" |
+| 400 | Daily Summary | aggregating a day of logs |
 
 ---
 
-## Module 23 — Automation & CI/CD Scripts (18 levels) · Advanced
-
-> Deployment scripts, release management, CI helper scripts.
+## Module 23 — Build & Deploy (18 levels) · Expert
+*Lanternfish ships every day. You own the pipeline scripts.*
+Directory: `module-23-automation-ci-cd-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 401 | Build Script | compile + test + report |
-| 402 | Deploy Script | copy + restart + verify |
-| 403 | Rollback Script | restore previous version |
-| 404 | Health Check After Deploy | poll until healthy |
-| 405 | Release Tag Script | git tag + push |
-| 406 | Changelog Generator | git log formatting |
-| 407 | Version Bumper | semver increment |
-| 408 | Dependency Checker | check all tools installed |
-| 409 | Lint Script | run linters, collect exit codes |
-| 410 | Test Runner Script | run tests, parse output |
-| 411 | Coverage Check | fail below threshold |
-| 412 | Docker Build Script | build + tag + push |
-| 413 | Kubernetes Apply Script | apply + wait + verify |
-| 414 | Secret Injection Script | render template with secrets |
-| 415 | Environment Promo Script | promote config between envs |
-| 416 | Cron Wrapper Script | lock + log + notify |
-| 417 | Idempotent Setup Script | check before create |
-| 418 | Cleanup Script | remove old artifacts |
+| 401 | Step Runner | stop on the first failing step |
+| 402 | Run All Linters | collect every failure |
+| 403 | Parse Test Results | TAP output |
+| 404 | Coverage Gate | threshold check |
+| 405 | Semver Bump | major/minor/patch |
+| 406 | Changelog from Commits | grouping commit messages |
+| 407 | Tag a Release | `git tag` via stub |
+| 408 | Version from git describe | parsing describe output |
+| 409 | Build Matrix | every OS × version |
+| 410 | Artifact Names and Checksums | release manifest |
+| 411 | Build and Tag an Image | `docker` via stub |
+| 412 | Deploy with a Health Gate | polling until healthy |
+| 413 | Roll Back on Failure | restoring the previous release |
+| 414 | Render a Template | `${VAR}` substitution |
+| 415 | Promote Between Environments | dev → staging → prod |
+| 416 | Cron Wrapper | lock, log, exit status |
+| 417 | Idempotent Setup | check before create |
+| 418 | Prune Old Artifacts | keep the newest N |
 
 ---
 
-## Module 24 — Data Processing Scripts (18 levels) · Advanced
-
-> CSV, JSON, log parsing, report generation, data transformation.
+## Module 24 — Data Wrangling (18 levels) · Expert
+*Gus wants reports. Lots of reports. From messy data.*
+Directory: `module-24-data-processing-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 419 | Parse CSV | IFS + while read |
-| 420 | Validate CSV Schema | check column count |
-| 421 | Filter CSV Rows | awk condition |
-| 422 | Transform CSV Columns | awk reorder |
-| 423 | Aggregate CSV Column | sum/avg/min/max |
-| 424 | Join Two CSVs | join on key |
-| 425 | Convert CSV to JSON | awk JSON output |
-| 426 | Parse Log File | extract fields by regex |
-| 427 | Count Log Events | frequency table |
-| 428 | Top N from Log | sort + head |
-| 429 | Time-Range Filter | compare timestamps |
-| 430 | Pivot Table in Bash | assoc array aggregation |
-| 431 | Generate HTML Report | heredoc HTML |
-| 432 | Generate Markdown Report | dynamic tables |
-| 433 | Diff Two Data Sets | comm or diff |
-| 434 | Deduplicate Records | sort -u on key |
-| 435 | Merge Files by Key | multi-file join |
-| 436 | Streaming Transform | process line by line, no temp file |
+| 419 | Parse CSV Rows | `IFS=, read` |
+| 420 | Validate CSV Schema | column counts and header |
+| 421 | Filter Rows | conditions on columns |
+| 422 | Reorder Columns | `awk` projection |
+| 423 | Column Statistics | sum, average, min, max |
+| 424 | Join Two CSVs | matching on a key |
+| 425 | CSV to JSON | escaping and formatting |
+| 426 | JSON Lines to CSV | simple field extraction |
+| 427 | Parse Access Logs | combined log format |
+| 428 | Status Code Breakdown | grouping by class |
+| 429 | Top Talkers | busiest clients |
+| 430 | Time Window Filter | ISO timestamps compare as text |
+| 431 | Pivot Table | rows × columns totals |
+| 432 | Markdown Report | generated tables |
+| 433 | HTML Report | here-doc templates with escaping |
+| 434 | Diff Two Datasets | added, removed, changed rows |
+| 435 | Latest Record Wins | dedupe by key |
+| 436 | Streaming Transform | no temp files, constant memory |
 
 ---
 
-## Module 25 — System Automation Scripts (20 levels) · Expert
-
-> Real sysadmin-level scripts: backups, user management, system hardening.
+## Module 25 — Running the Fleet (20 levels) · Expert
+*You are trusted with the whole fleet. Real sysadmin automation.*
+Directory: `module-25-system-automation-scripts`
 
 | Level | Title | Concept |
 |---|---|---|
-| 437 | Backup Script | rsync + timestamp + retention |
-| 438 | Incremental Backup | rsync --link-dest |
-| 439 | Restore Verification | checksum comparison |
-| 440 | User Provisioning Script | create users from CSV |
-| 441 | User Deprovisioning Script | lock + archive home |
-| 442 | SSH Key Distributor | push keys to multiple hosts |
-| 443 | Multi-Host Executor | run command on host list |
-| 444 | Config Distributor | rsync config to servers |
-| 445 | Certificate Expiry Checker | parse openssl output |
-| 446 | Log Archiver | compress + move old logs |
-| 447 | Disk Cleanup Script | remove old files by age/size |
-| 448 | Package Audit Script | list installed, flag outdated |
-| 449 | Service Restart Orchestrator | rolling restart |
-| 450 | Database Dump Script | dump + compress + verify |
-| 451 | Port Scanner Script | nc loop over ports |
-| 452 | SSL Checker Script | verify cert chain |
-| 453 | Firewall Audit Script | parse iptables output |
-| 454 | Hardening Checklist Script | check security settings |
-| 455 | Compliance Report Script | gather evidence, write report |
-| 456 | Incident Response Script | collect forensic data |
+| 437 | Timestamped Backup | `tar` archives |
+| 438 | Backup Retention | keep daily/weekly |
+| 439 | Verify a Backup | checksum manifest |
+| 440 | Provision Users from CSV | `useradd` via stub |
+| 441 | Offboard a User | lock, archive, report |
+| 442 | Fleet Command Runner | `ssh` via stub |
+| 443 | Config Push with Dry-Run | `scp` via stub |
+| 444 | Certificate Expiry Report | days until expiry |
+| 445 | Log Archiver | compress old logs |
+| 446 | Disk Cleanup Policy | age and size rules |
+| 447 | Package Audit | installed vs policy |
+| 448 | Rolling Restart | one host at a time |
+| 449 | Database Dump Rotation | dump, compress, prune |
+| 450 | Port Inventory | open ports per host |
+| 451 | Firewall Rule Audit | parsing rule exports |
+| 452 | SSH Hardening Check | `sshd_config` audit |
+| 453 | Cron Inventory | every crontab, one table |
+| 454 | Account Audit | `/etc/passwd`-style data |
+| 455 | Incident Snapshot | evidence folder + manifest |
+| 456 | Compliance Report | pass/fail checklist |
 
 ---
 
-## Module 26 — War Games: Mega Scripts (44 levels) · Expert
+## Module 26 — Storm Season: War Games (44 levels) · Expert
+*Storm season hits the coast and the fleet. Every mission is a full incident or a
+full tool: several concepts, one production-quality script.*
+Directory: `module-26-war-games-mega-scripts`
 
-> Multi-step, real-world automation challenges. Each mission requires  
-> combining 5+ concepts into a production-quality script.
-
-| Level | Title | Mission Summary |
+| Level | Title | Mission |
 |---|---|---|
-| 457 | The Deployment Pipeline | Build → test → deploy → verify → rollback on failure |
-| 458 | The Log Investigator | Parse multi-format logs, extract incidents, generate report |
-| 459 | The Secret Rotator | Rotate credentials, update configs, verify services |
-| 460 | The Capacity Planner | Collect disk/CPU/mem trends, project growth, alert |
-| 461 | The User Auditor | Find orphan users, stale accounts, bad permissions |
-| 462 | The API Poller | Poll API, detect state changes, trigger webhooks |
-| 463 | The Backup Verifier | Restore + checksum every backup in retention window |
-| 464 | The Cron Analyzer | Parse crontabs across users, find conflicts, report |
-| 465 | The Config Drift Detector | Compare live config vs golden config, flag diffs |
-| 466 | The Release Manager | Tag, changelog, build, upload artifacts, notify |
-| 467 | The Certificate Watchdog | Check all certs, alert on expiry, auto-renew stub |
-| 468 | The Service Health Dashboard | Multi-service status in terminal, auto-refresh |
-| 469 | The Incident Responder | Collect system state snapshot on alert trigger |
-| 470 | The Multi-Env Deployer | Deploy to dev/staging/prod with promotion gates |
-| 471 | The Data Pipeline | Ingest CSV, validate, transform, load, report |
-| 472 | The Test Harness Builder | Framework: register + run + report test cases |
-| 473 | The Plugin System | Core + plugin discovery + execution |
-| 474 | The CLI Framework | Subcommands, flags, help, version |
-| 475 | The Config Manager | Load, validate, merge, export config |
-| 476 | The Job Queue | FIFO queue with worker pool |
-| 477 | The Audit Logger | Tamper-evident append-only log |
-| 478 | The Self-Updating Script | Download + verify + replace self |
-| 479 | The Distributed Lock | flock across shared filesystem |
-| 480 | The Rate Limiter | Token bucket in bash |
-| 481 | The Circuit Breaker | State machine for API calls |
-| 482 | The Feature Flag System | Config-driven feature toggling |
-| 483 | The Blue-Green Switcher | Atomic traffic switch between deployments |
-| 484 | The Canary Releaser | Gradual traffic shift + monitor |
-| 485 | The Chaos Monkey | Random fault injection for resilience testing |
-| 486 | The SLA Monitor | Track uptime, calculate SLA %, generate report |
-| 487 | The Cost Analyzer | Aggregate resource usage, estimate costs |
-| 488 | The Security Scanner | Find misconfigs, world-writable files, weak perms |
-| 489 | The Forensics Collector | Preserve evidence: processes, connections, files |
-| 490 | The Self-Healing Script | Monitor + detect + auto-remediate |
-| 491 | The Dependency Graph | Build task DAG, execute in order |
-| 492 | The Template Engine | Variable substitution in text templates |
-| 493 | The State Machine | Enum states, transitions, validation |
-| 494 | The Event Bus | Pub/sub via named pipes |
-| 495 | The Retry Framework | Configurable retry with strategies |
-| 496 | The Observability Kit | Metrics + logs + traces in bash |
-| 497 | The Compliance Enforcer | Apply and verify policy rules |
-| 498 | The Migration Runner | Ordered idempotent migration scripts |
-| 499 | The Ultimate Deployer | Full GitOps-style deploy pipeline |
-| 500 | The Grand Finale | Design and implement a complete sysadmin automation suite |
-
----
-
-## Difficulty Summary
-
-| Difficulty | Levels | Modules |
-|---|---|---|
-| Beginner | 160 | 1–5 (levels 1–100) + module 6 partial |
-| Intermediate | 175 | Modules 6–13 (levels 101–250) |
-| Advanced | 140 | Modules 14–24 (levels 251–436) |
-| Expert | 25 | Modules 25–26 (levels 437–500) |
-| **Total** | **500** | **26 modules** |
+| 457 | The Deployment Pipeline | build → test → deploy → verify → rollback on failure |
+| 458 | The Log Investigator | multi-format logs → incident timeline |
+| 459 | The Secret Rotator | rotate credentials, update configs, verify |
+| 460 | The Capacity Planner | usage history → growth projection → alert |
+| 461 | The User Auditor | orphans, stale accounts, bad permissions |
+| 462 | The API Poller | detect state changes, fire webhooks |
+| 463 | The Backup Verifier | restore + checksum every backup in the window |
+| 464 | The Cron Analyzer | parse crontabs, find overlaps |
+| 465 | The Config Drift Detector | live vs golden config |
+| 466 | The Release Manager | tag, changelog, artifacts, notify |
+| 467 | The Certificate Watchdog | expiry alerts + renew stub |
+| 468 | The Service Health Dashboard | many services, one screen |
+| 469 | The Incident Responder | snapshot on alert trigger |
+| 470 | The Multi-Env Deployer | promotion gates |
+| 471 | The Data Pipeline | ingest, validate, transform, load, report |
+| 472 | The Test Harness Builder | register, run, report tests |
+| 473 | The Plugin System | discovery, ordering, isolation |
+| 474 | The CLI Framework | subcommands, flags, help, version |
+| 475 | The Config Manager | load, validate, merge, export |
+| 476 | The Job Queue | FIFO queue with workers |
+| 477 | The Audit Logger | tamper-evident append-only log |
+| 478 | The Self-Updating Script | download, verify, replace self |
+| 479 | The Distributed Lock | lock with owner and expiry |
+| 480 | The Rate Limiter | token bucket |
+| 481 | The Circuit Breaker | closed / open / half-open |
+| 482 | The Feature Flag System | config-driven toggles with rollout % |
+| 483 | The Blue-Green Switcher | atomic symlink switch |
+| 484 | The Canary Releaser | gradual shift + automatic abort |
+| 485 | The Chaos Monkey | seeded fault injection |
+| 486 | The SLA Monitor | uptime % and error budget |
+| 487 | The Cost Analyzer | usage × price list → invoice |
+| 488 | The Security Scanner | misconfigurations and weak permissions |
+| 489 | The Forensics Collector | preserve evidence with hashes |
+| 490 | The Self-Healing Script | detect → remediate → verify |
+| 491 | The Dependency Graph | topological order, cycle detection |
+| 492 | The Template Engine | variables, conditionals, loops |
+| 493 | The State Machine | states, transitions, validation |
+| 494 | The Event Bus | publish/subscribe |
+| 495 | The Retry Framework | strategies: fixed, linear, exponential |
+| 496 | The Observability Kit | metrics + logs + spans |
+| 497 | The Compliance Enforcer | apply and verify policy rules |
+| 498 | The Migration Runner | ordered, idempotent migrations |
+| 499 | The Ultimate Deployer | GitOps-style full deploy |
+| 500 | The Grand Finale | the Lanternfish ops toolkit |
