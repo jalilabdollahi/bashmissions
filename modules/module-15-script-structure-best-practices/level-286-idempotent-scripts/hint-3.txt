@@ -1,0 +1,12 @@
+site="sites/$name"
+
+if [ -d "$site" ]; then echo "dir: exists"
+else mkdir -p "$site"; echo "dir: created"; fi
+
+if [ -e "$site/index.html" ]; then echo "index: exists"
+else # write <h1>name</h1> into it, then say created
+fi
+
+if [ -f sites.list ] && grep -qxF -- "$name" sites.list; then echo "list: present"
+else # append the name, then say added
+fi

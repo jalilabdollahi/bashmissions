@@ -1,0 +1,6 @@
+Keep slugify() and main() as they are. Delete the `set -euo pipefail` line near the top and replace the last line `main "$@"` with:
+
+  if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    set -euo pipefail
+    main "$@"
+  fi

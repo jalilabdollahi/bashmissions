@@ -1,0 +1,14 @@
+usage() {
+  cat <<'TXT'
+Usage: ticket.sh CUSTOMER SUBJECT
+Prints a one-line ticket stub.
+TXT
+}
+
+case "${1:-}" in
+  -h|--help) usage; exit 0 ;;
+esac
+
+if [ "$#" -ne 2 ]; then
+  # call usage so it goes to stderr, then exit with status 2
+fi

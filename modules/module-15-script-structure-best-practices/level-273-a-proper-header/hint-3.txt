@@ -1,0 +1,7 @@
+The top of the file should read:
+
+  #!/usr/bin/env bash
+  # Description: <one sentence>
+  set -euo pipefail
+
+Then the body stays as it is, with one important repair: write "$1" with quotes so the argument is passed as one word.

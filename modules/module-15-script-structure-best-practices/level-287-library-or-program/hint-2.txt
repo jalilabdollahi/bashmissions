@@ -1,0 +1,7 @@
+`$0` is the name the shell was started with: for a command it is the script itself, for a sourced file it is still the caller's name. `${BASH_SOURCE[0]}` is always the file currently being read. They are equal only when the file is the program:
+
+  if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    main "$@"
+  fi
+
+Options like `set -e` change the shell that executes them, so a library must not set them at its top level.

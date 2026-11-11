@@ -1,0 +1,48 @@
+id: 287
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Library or Program?
+difficulty: expert
+xp: 230
+story: |
+  Ollie wants to reuse Theo's slugify function, the one that turns "Harbour Bakery"
+  into "harbour-bakery" for URLs, in his own script. He wrote `source slugify.sh`
+  and his shell printed a usage message and closed. The file runs its program the
+  moment it is read. Mara asks you to make one file that behaves well both ways:
+  run it and it is a command, source it and it is a library.
+objective: |
+  Write solution.sh with a function slugify that takes one string and prints its
+  slug: lower case, every run of characters other than a-z and 0-9 replaced by a
+  single dash, and no dash at the start or the end.
+    "Harbour Bakery"      -> harbour-bakery
+    "  C++ & Go!  "       -> c-go
+  When EXECUTED, solution.sh prints the slug of every argument, one per line.
+  With no arguments it prints "usage: solution.sh TEXT..." to stderr and exits 2.
+  When SOURCED from another script it must only define slugify: print nothing,
+  not exit, not run main, and not leave shell options such as errexit switched
+  on in the caller. Turn strict mode on only when running as a program.
+  Decide between the two cases by comparing ${BASH_SOURCE[0]} with $0.
+  (Run `bash fixtures/use-lib.sh` in the workspace to see the library side.)
+concepts:
+  - "${BASH_SOURCE[0]} == $0 means executed, not sourced"
+  - "libraries define, programs run"
+  - "do not change the caller's shell options"
+required_patterns:
+  - pattern: 'BASH_SOURCE\[0\]'
+    message: "Compare ${BASH_SOURCE[0]} with $0 to detect whether the file is being run or sourced."
+test_cases:
+  - name: executed with two arguments
+    args: [Harbour Bakery, "  C++ & Go!  "]
+    expected_stdout: |-
+      harbour-bakery
+      c-go
+  - name: more punctuation
+    args: [Tidewater Books (Annex), "Gull & Anchor Pub", "north--pier___dental"]
+    expected_stdout: |-
+      tidewater-books-annex
+      gull-anchor-pub
+      north-pier-dental
+  - name: executed with no arguments
+    expected_stderr: "usage: solution.sh TEXT..."
+    expected_exit: 2

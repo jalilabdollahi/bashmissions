@@ -1,0 +1,68 @@
+id: 282
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Small Functions
+difficulty: advanced
+xp: 190
+story: |
+  Priya audits the endpoint list that the load balancer is built from. The script
+  that cleans it up is one thirty-line loop that lowercases, strips a trailing dot,
+  validates the port, and formats the result all in the same breath. Nobody dares
+  to change the port rule because nobody can find it. She wants each rule in a
+  function you could read in one glance, and test on its own.
+objective: |
+  solution.sh reads lines from stdin. Each line should look like  host:port.
+  For every non-blank line print one of:
+    endpoint=<host>:<port>          if the line is valid
+    invalid: <the line as read>     if not (to stdout as well)
+  Rules: the host is the part before the colon, lower-cased, with a single
+  trailing dot removed. The port is the part after the colon, which must be
+  1 to 5 digits with a value between 1 and 65535. A line without a colon, with
+  an empty host, or with a bad port is invalid. Blank lines are skipped.
+
+  Structure (checked): define these four functions and call main on the
+  last line:
+    normalise_host    prints the cleaned host given as $1
+    is_port           returns 0 if $1 is a valid port, 1 otherwise
+    format_endpoint   prints the endpoint=... line for a host and port
+    main              reads stdin and ties the pieces together
+  Each function does one job.
+concepts:
+  - "one function, one job"
+  - "functions that return status vs functions that print"
+  - "main only orchestrates"
+required_patterns:
+  - pattern: '(^|\s)normalise_host\s*\(\)'
+    message: "Define normalise_host() { ... }"
+  - pattern: '(^|\s)is_port\s*\(\)'
+    message: "Define is_port() { ... }"
+  - pattern: '(^|\s)format_endpoint\s*\(\)'
+    message: "Define format_endpoint() { ... }"
+  - pattern: '(?m)^main\s+"\$@"\s*$'
+    message: "End the script with: main \"$@\""
+test_cases:
+  - name: tidy and valid
+    stdin: "Harbour.Example.:8080\nTIDEWATER.example:443\n"
+    expected_stdout: |-
+      endpoint=harbour.example:8080
+      endpoint=tidewater.example:443
+  - name: invalid ports
+    stdin: "eel.example:0\neel.example:65536\neel.example:abc\neel.example:\neel.example:123456\n"
+    expected_stdout: |-
+      invalid: eel.example:0
+      invalid: eel.example:65536
+      invalid: eel.example:abc
+      invalid: eel.example:
+      invalid: eel.example:123456
+  - name: structure problems and blanks
+    stdin: "nocolon\n:80\n\ngull.example:00080\n"
+    expected_stdout: |-
+      invalid: nocolon
+      invalid: :80
+      endpoint=gull.example:80
+  - name: boundary ports
+    stdin: "a.example:1\nb.example:65535\n"
+    expected_stdout: |-
+      endpoint=a.example:1
+      endpoint=b.example:65535

@@ -1,0 +1,8 @@
+A function receives the script's arguments if you pass them on:
+
+  main() {
+    echo "got $# things, first is $1"
+  }
+  main "$@"
+
+"$@" keeps every argument as its own word, spaces and all. Inside a function, `return N` ends it with status N, and the script's exit status is the status of the last command, which is the `main "$@"` call.

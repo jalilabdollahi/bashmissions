@@ -1,0 +1,1 @@
+Two problems, one cure. The numbers repeated through the file should live in one place near the top, and the backup root must not be something the caller can replace. A variable that is set once and then locked is exactly what a constant is.

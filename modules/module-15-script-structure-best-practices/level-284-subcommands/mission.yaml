@@ -1,0 +1,98 @@
+id: 284
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Subcommands
+difficulty: expert
+xp: 220
+story: |
+  The night shift keeps a running list of chores on a sticky note that nobody can
+  find at 3 a.m. Mara wants a tiny tool instead, in the style of git: one program,
+  several verbs. "notes add", "notes list", "notes remove". Ollie has volunteered to
+  write the first version of the verbs; you are asked to build the frame that
+  dispatches to them so that adding a fourth verb later is a ten-line change.
+objective: |
+  solution.sh keeps its notes in the file notes.txt in the current directory,
+  one note per line. The first argument is a subcommand:
+    add TEXT...   join the remaining words with single spaces, append them as a
+                  new line, print  added: <text>.  With no TEXT: usage error.
+    list          print each note as  <n>) <text>  starting at 1. If the file is
+                  missing or empty print  no notes
+    remove N      delete note number N, print  removed: <text>. N must be a
+                  positive whole number no larger than the number of notes,
+                  otherwise print  solution.sh: no such note: <N>  to stderr and
+                  exit 1.
+  No subcommand: print  usage: solution.sh add TEXT... | list | remove N  to
+  stderr and exit 2. An unknown subcommand: print
+  solution.sh: unknown command: <word>  to stderr and exit 2.
+  Write one function per verb named cmd_add, cmd_list and cmd_remove, and
+  dispatch to them with a case on the first argument.
+concepts:
+  - "case on $1 to dispatch"
+  - "shift the subcommand away, pass the rest on"
+  - "one function per subcommand"
+required_patterns:
+  - pattern: '\bcase\s+"?\$'
+    message: "Dispatch with case \"$1\" in ... esac (or \"${1:-}\")."
+  - pattern: '(^|\s)cmd_add\s*\(\)'
+    message: "Define cmd_add() for the add verb."
+  - pattern: '(^|\s)cmd_list\s*\(\)'
+    message: "Define cmd_list() for the list verb."
+  - pattern: '(^|\s)cmd_remove\s*\(\)'
+    message: "Define cmd_remove() for the remove verb."
+test_cases:
+  - name: list numbered notes
+    args: [list]
+    files:
+      notes.txt: "buy ice\nrenew cert\ncall Noor\n"
+    expected_stdout: |-
+      1) buy ice
+      2) renew cert
+      3) call Noor
+  - name: list with no file
+    args: [list]
+    expected_stdout: "no notes"
+  - name: add joins the words
+    args: [add, rotate, the, logs]
+    files:
+      notes.txt: "buy ice\n"
+    expected_stdout: "added: rotate the logs"
+    expected_files:
+      notes.txt: "buy ice\nrotate the logs\n"
+  - name: add creates the file
+    args: [add, first note]
+    expected_stdout: "added: first note"
+    expected_files:
+      notes.txt: "first note\n"
+  - name: remove the middle note
+    args: [remove, "2"]
+    files:
+      notes.txt: "buy ice\nrenew cert\ncall Noor\n"
+    expected_stdout: "removed: renew cert"
+    expected_files:
+      notes.txt: "buy ice\ncall Noor\n"
+  - name: remove out of range
+    args: [remove, "4"]
+    files:
+      notes.txt: "buy ice\nrenew cert\n"
+    expected_stderr: "solution.sh: no such note: 4"
+    expected_exit: 1
+    expected_files:
+      notes.txt: "buy ice\nrenew cert\n"
+  - name: remove with a non-number
+    args: [remove, "two"]
+    files:
+      notes.txt: "buy ice\n"
+    expected_stderr: "solution.sh: no such note: two"
+    expected_exit: 1
+  - name: unknown subcommand
+    args: [frobnicate]
+    expected_stderr: "solution.sh: unknown command: frobnicate"
+    expected_exit: 2
+  - name: no subcommand
+    expected_stderr: "usage: solution.sh add TEXT... | list | remove N"
+    expected_exit: 2
+  - name: add without text
+    args: [add]
+    expected_stderr: "usage: solution.sh add TEXT... | list | remove N"
+    expected_exit: 2

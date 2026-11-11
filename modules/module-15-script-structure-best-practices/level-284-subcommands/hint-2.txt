@@ -1,0 +1,13 @@
+Dispatcher shape:
+
+  main() {
+    local verb=${1:-}
+    shift
+    case "$verb" in
+      start) cmd_start "$@" ;;
+      stop)  cmd_stop "$@" ;;
+      *)     echo "unknown command: $verb" >&2; exit 2 ;;
+    esac
+  }
+
+After `shift`, "$@" is the verb's own arguments. `"$*"` joins all arguments with a space, handy for building a sentence. `shift` with no arguments left is an error, so check the count first.

@@ -1,0 +1,5 @@
+Put double quotes around every expansion: `"$f"`, `"$name"`, `"$1"`. A glob needs special care, because quotes switch globbing off. Quote the variable part and leave the wildcard outside:
+
+  for f in "$dir"/*.txt; do ...
+
+Pieces can be glued inside one pair of quotes too: `"archive/$name"` is a single word.

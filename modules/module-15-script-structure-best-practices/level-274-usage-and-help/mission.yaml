@@ -1,0 +1,62 @@
+id: 274
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Usage and --help
+difficulty: advanced
+xp: 160
+story: |
+  Noor keeps pasting the same instructions into chat: "ticket.sh wants a customer
+  and a subject, in that order". Ollie ran it with three words last week and got a
+  ticket for a customer called "Harbour". A script that can explain itself saves
+  everyone a message, so ticket.sh is getting a usage() function and a --help.
+objective: |
+  Write solution.sh as a ticket stub tool with a function named usage.
+
+  usage prints exactly these two lines:
+    Usage: ticket.sh CUSTOMER SUBJECT
+    Prints a one-line ticket stub.
+
+  Behaviour:
+    - With -h or --help as the first argument: print usage to stdout, exit 0.
+    - With any other number of arguments than two: print usage to stderr and
+      exit 2.
+    - With exactly two arguments: print  ticket for <CUSTOMER>: <SUBJECT>
+      and exit 0.
+  Both the help and the error path must call the same usage function.
+concepts:
+  - "usage() function"
+  - "usage to stdout for --help, to stderr for errors"
+  - "exit 2 for bad invocation"
+required_patterns:
+  - pattern: '(^|\s)usage\s*\(\)'
+    message: "Define a function: usage() { ... }"
+  - pattern: 'usage\s*>&2'
+    message: "On a wrong argument count call usage >&2 so the text goes to stderr."
+test_cases:
+  - name: long help flag
+    args: [--help]
+    expected_stdout: |-
+      Usage: ticket.sh CUSTOMER SUBJECT
+      Prints a one-line ticket stub.
+  - name: short help flag
+    args: [-h]
+    expected_stdout: |-
+      Usage: ticket.sh CUSTOMER SUBJECT
+      Prints a one-line ticket stub.
+  - name: normal ticket
+    args: [Harbour Bakery, Oven offline]
+    expected_stdout: "ticket for Harbour Bakery: Oven offline"
+  - name: no arguments
+    expected_stdout: ""
+    expected_stderr: |-
+      Usage: ticket.sh CUSTOMER SUBJECT
+      Prints a one-line ticket stub.
+    expected_exit: 2
+  - name: too many arguments
+    args: [Harbour, Bakery, broken]
+    expected_stdout: ""
+    expected_stderr: |-
+      Usage: ticket.sh CUSTOMER SUBJECT
+      Prints a one-line ticket stub.
+    expected_exit: 2

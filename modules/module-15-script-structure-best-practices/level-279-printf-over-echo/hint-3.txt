@@ -1,0 +1,6 @@
+for tag in "$@"; do
+  printf '%s\n' "$tag"
+done
+printf 'count: %d\n' "$#"
+
+If a tag could start with a dash and you ever pass it as the *format*, printf would complain; as an argument after '%s\n' it cannot.

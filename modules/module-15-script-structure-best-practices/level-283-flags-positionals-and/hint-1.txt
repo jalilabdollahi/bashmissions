@@ -1,0 +1,1 @@
+Stop looking at $1 and $2 by position. Look at the first remaining argument, decide what kind it is (a flag, a flag with a value, the end marker, or the first word), handle it, remove it, and repeat until the options are used up. What is left is the list of words.

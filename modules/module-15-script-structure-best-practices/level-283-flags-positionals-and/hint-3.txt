@@ -1,0 +1,9 @@
+Branches for this tool:
+  -u|--upper)   upper=1; shift ;;
+  -p|--prefix)  # if fewer than 2 arguments remain: message on stderr, exit 2
+                prefix=$2; shift 2 ;;
+  --)           shift; break ;;
+  -*)           # unknown option message, exit 2 ;;
+  *)            break ;;
+
+After the loop: no words left -> usage on stderr, exit 2. Otherwise print each word, upper-casing with ${word^^} if requested, preceded by "$prefix".

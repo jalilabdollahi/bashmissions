@@ -1,0 +1,12 @@
+show_help() {
+  awk 'NR == 1 { next }
+       /^#/    { sub(/^# ?/, ""); print; next }
+               { exit }' "$0"
+}
+
+case "${1:-}" in
+  -h|--help) show_help; exit 0 ;;
+  "")        # help to stderr, exit 2 ;;
+esac
+
+dir=$1     # the rest of the script already handles DIR

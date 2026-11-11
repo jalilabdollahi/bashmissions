@@ -1,0 +1,1 @@
+The program's first word picks which job to do, and the remaining words belong to that job. So: look at the first argument, remove it from the list, and hand what is left to a function named after the verb. A case statement is the natural switchboard.

@@ -1,0 +1,6 @@
+Defaults with parameter expansion:
+
+  retries=${RETRIES:-3}      # unset or empty -> 3
+  name=${NAME:-}             # unset or empty -> "" (and safe under set -u)
+
+Checking: `[ -n "$name" ]` tests non-empty; `[[ $retries =~ ^[0-9]+$ ]]` tests digits only; `case "$mode" in a|b) ;; *) error ;; esac` tests a fixed list. Test "digits only" before you compare numerically, so text never reaches the arithmetic.

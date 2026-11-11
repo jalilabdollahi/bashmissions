@@ -1,0 +1,10 @@
+args=(find "$dir" -type f)
+
+if [ "$#" -gt 0 ]; then
+  args+=( '(' )
+  # loop over "$@": before every pattern except the first add  -o
+  #   then add  -name "$p"
+  args+=( ')' )
+fi
+
+"${args[@]}" | sort

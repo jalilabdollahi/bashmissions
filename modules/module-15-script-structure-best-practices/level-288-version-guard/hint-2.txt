@@ -1,0 +1,9 @@
+`BASH_VERSINFO` is an array: element 0 is the major version, element 1 the minor.
+
+  echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"
+
+To split "4.4" use a regex with capture groups; the matches appear in BASH_REMATCH:
+
+  if [[ $v =~ ^([0-9]+)(\.([0-9]+))?$ ]]; then echo "${BASH_REMATCH[1]} ${BASH_REMATCH[3]:-0}"; fi
+
+Numbers compare with (( a > b )) inside double parentheses.

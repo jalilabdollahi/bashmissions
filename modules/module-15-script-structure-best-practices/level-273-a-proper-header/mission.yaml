@@ -1,0 +1,59 @@
+id: 273
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: A Proper Header
+difficulty: advanced
+xp: 150
+story: |
+  Theo has left for a week of kayaking and his line counter, count-lines.sh, is
+  still in cron. Mara opened it and found no description, a shebang that points at
+  a path that does not exist on half the servers, and no safety switches: when
+  the report file is missing it quietly says "0 lines" and carries on. Your first
+  job in the craft module is to give the script a proper front door.
+objective: |
+  Edit solution.sh so that its first lines are a proper header, then keep the
+  behaviour below.
+
+  Header rules (checked):
+    - line 1 is exactly: #!/usr/bin/env bash
+    - within the next few lines, a comment starting with "# Description:"
+      that says in one sentence what the script does
+    - strict mode: the line  set -euo pipefail  before any other command
+
+  Behaviour: solution.sh takes one argument, a file. It prints
+    lines: <N>
+    done
+  where N is the number of lines in the file (no padding spaces). The count
+  must be taken from a pipeline that starts with cat, as it does now. With
+  strict mode on, a missing file stops the script before it prints anything
+  and exits with status 1, and so does a missing argument.
+concepts:
+  - "#!/usr/bin/env bash"
+  - "set -euo pipefail"
+  - "a Description comment"
+required_patterns:
+  - pattern: 'set\s+-euo\s+pipefail'
+    message: "Add the line set -euo pipefail near the top (after the header comment)."
+test_cases:
+  - name: three line file
+    args: [report.txt]
+    files:
+      report.txt: "alpha\nbeta\ngamma\n"
+    expected_stdout: |-
+      lines: 3
+      done
+  - name: single line file
+    args: [one.txt]
+    files:
+      one.txt: "only\n"
+    expected_stdout: |-
+      lines: 1
+      done
+  - name: missing file stops the script
+    args: [nope.txt]
+    expected_stdout: ""
+    expected_exit: 1
+  - name: missing argument stops the script
+    expected_stdout: ""
+    expected_exit: 1

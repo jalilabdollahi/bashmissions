@@ -1,0 +1,9 @@
+Portable replacements:
+
+  [[ -e $p ]]            ->  [ -e "$p" ]
+  (( $# == 0 ))          ->  [ "$#" -eq 0 ]
+  ((n++))                ->  n=$((n + 1))
+  ${s,,}                 ->  $(printf '%s' "$s" | tr '[:upper:]' '[:lower:]')
+  [[ $x == *.png ]]      ->  case "$x" in *.png) ... ;; esac
+
+A case branch can list several patterns with |, and `;;` ends each branch. The shebang becomes #!/bin/sh and `echo` is best replaced with printf.

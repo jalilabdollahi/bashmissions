@@ -1,1 +1,0 @@
-Use this curriculum concept: write shellcheck-clean code.

@@ -1,0 +1,7 @@
+Tests that fit the three steps:
+
+  [ -d "$dir" ]                       # directory exists
+  [ -e "$file" ]                      # path exists (any kind)
+  grep -qxF -- "$line" list.txt       # file has this exact whole line
+
+-q prints nothing and just sets the status, -x demands that the whole line match, -F reads the pattern as plain text (a name like a.b must not match "axb"). grep fails if the file does not exist, so guard with `[ -f list.txt ] &&`. Use `printf '%s\n' ... >>` to append.

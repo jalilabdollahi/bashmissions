@@ -1,0 +1,1 @@
+Run the script and watch the "logged" line: the name changed after the helper ran. Functions in bash do not get a private notebook; they scribble in the caller's. Find which variables format_row assigns, and ask bash to keep them to itself.

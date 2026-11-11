@@ -1,0 +1,6 @@
+`readonly NAME=value` assigns and locks in one step; any later `NAME=other` is an error. Assigning without a `${NAME:-default}` fallback means whatever the caller exported is simply overwritten:
+
+  readonly RETRIES=3
+  echo "trying $RETRIES times"
+
+By convention constants are UPPER_CASE and sit in a clearly marked block under the shebang and strict mode.

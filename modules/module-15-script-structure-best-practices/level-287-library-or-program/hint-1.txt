@@ -1,0 +1,1 @@
+When bash sources a file it just reads and runs it, so the last line, `main "$@"`, fires inside Ollie's shell. You need a way for the file to tell "someone ran me" from "someone sourced me", and to run the program part only in the first case.

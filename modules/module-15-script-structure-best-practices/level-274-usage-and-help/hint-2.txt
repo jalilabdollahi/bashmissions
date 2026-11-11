@@ -1,0 +1,10 @@
+A function that prints several lines is easiest with a here-document:
+
+  show() {
+    cat <<'TXT'
+  line one
+  line two
+  TXT
+  }
+
+Redirect a call like any command: `show >&2`. Count arguments with `$#`, and compare numbers with `[ "$#" -ne 2 ]`. Under `set -u`, peeking at a maybe-missing first argument needs `${1:-}`.

@@ -1,0 +1,11 @@
+normalise_host() { local host=${1,,}; printf '%s\n' "${host%.}"; }
+
+is_port() {
+  [[ $1 =~ ^[0-9]{1,5}$ ]] || return 1
+  (( 10#$1 >= 1 && 10#$1 <= 65535 ))
+}
+
+format_endpoint() { printf 'endpoint=%s:%d\n' "$1" "$((10#$2))"; }
+
+main() { ... the while loop, calling these three ... }
+main "$@"
