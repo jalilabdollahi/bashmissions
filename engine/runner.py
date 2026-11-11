@@ -186,6 +186,9 @@ def _write_test_files(run_dir: Path, files: dict | None) -> None:
         target = (run_dir / rel).resolve()
         if run_dir.resolve() not in target.parents:
             raise ValueError(f"Test file escapes the run directory: {rel}")
+        if str(rel).endswith("/"):  # "logs/": an empty directory
+            target.mkdir(parents=True, exist_ok=True)
+            continue
         target.parent.mkdir(parents=True, exist_ok=True)
         if isinstance(content, dict):  # {content: str, mode: "0644", mtime: epoch}
             target.write_text(str(content.get("content", "")), encoding="utf-8")

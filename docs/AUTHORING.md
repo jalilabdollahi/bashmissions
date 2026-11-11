@@ -113,7 +113,8 @@ test_cases:
 Test-case keys: `name` (required, unique), `args`, `stdin` (string fed on
 stdin; default is no input / EOF), `env` (map of extra environment
 variables), `files` (map `path: content` created before the run; content may
-also be `{content: ..., mode: "0600", mtime: 1700000000}`), `expected_stdout`,
+also be `{content: ..., mode: "0600", mtime: 1700000000}`; a path ending in
+`/` with an empty value, e.g. `"archive/": ""`, creates an empty directory), `expected_stdout`,
 `expected_stderr`, `expected_exit` (default 0), `comparison` and
 `stderr_comparison` (`exact` default, `contains`, `ignore_whitespace`,
 `regex` = Python `re.fullmatch`), `expected_files` (map `path: content`; `true`
