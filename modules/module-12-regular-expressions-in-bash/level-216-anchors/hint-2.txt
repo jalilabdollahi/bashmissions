@@ -1,0 +1,8 @@
+^ matches the start of the string and $ matches the end:
+
+  [[ $s =~ ^ab ]]     # starts with ab
+  [[ $s =~ ab$ ]]     # ends with ab
+  [[ $s =~ ^ab$ ]]    # is exactly ab
+  [[ $s =~ ^$ ]]      # is empty (start right next to end)
+
+Use an if / elif / else chain so the first matching rule wins. A space inside an unquoted regex needs a backslash: \ yes$

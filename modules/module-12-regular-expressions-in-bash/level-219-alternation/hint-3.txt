@@ -1,0 +1,9 @@
+  block_re='ACTION=(DROP|REJECT|DENY)( |$)'
+  allow_re='ACTION=(...)( |$)'            # the two allowing words
+
+  if [[ $line =~ $block_re ]]; then   blocked=$(( blocked + 1 ))
+  elif [[ $line =~ $allow_re ]]; then allowed=$(( allowed + 1 ))
+  else                                other=$(( other + 1 ))
+  fi
+
+Print the totals once, after the loop.

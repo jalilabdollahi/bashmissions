@@ -1,0 +1,7 @@
+  while IFS= read -r line || [[ -n $line ]]; do
+    if [[ $line =~ Failed\ password ]]; then
+      echo "ALERT: $line"
+    fi
+  done
+
+Only the "if" line is new compared with a plain read loop. Notice the backslash before the space in the pattern.

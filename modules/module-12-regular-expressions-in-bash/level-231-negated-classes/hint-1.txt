@@ -1,0 +1,1 @@
+The text you want sits between two quotes, and the trouble is that ".anything" is greedy: it runs as far as it can, up to the last quote on the line. Instead of telling the pattern "as little as possible", describe the content directly. What kind of characters can the message contain? Everything except one particular character.

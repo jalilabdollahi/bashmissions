@@ -1,0 +1,9 @@
+Quantifiers apply to the single item just before them (a character, a class, or a group in parentheses):
+
+  +        one or more        [a-z]+
+  *        zero or more       [ ]*
+  ?        zero or one        (ab)?
+  {3}      exactly three      [0-9]{3}
+  {2,4}    two to four        [0-9]{2,4}
+
+Parentheses group several characters so a quantifier can apply to all of them: (-x[0-9])?

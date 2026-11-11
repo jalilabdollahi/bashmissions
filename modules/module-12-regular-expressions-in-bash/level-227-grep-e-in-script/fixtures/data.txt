@@ -1,4 +1,0 @@
-INFO: boot
-WARN: disk
-ERROR: network
-DEBUG: trace

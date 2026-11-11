@@ -1,0 +1,1 @@
+Searching for text anywhere is too loose here: the position matters. A regex can say "only at the very beginning of the line" and "only at the very end of the line". Use those two markers for the comment, risky and blank rules, and keep the order of the checks in mind.

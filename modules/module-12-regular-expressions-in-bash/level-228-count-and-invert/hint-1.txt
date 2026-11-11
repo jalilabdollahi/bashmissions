@@ -1,0 +1,1 @@
+grep can do two jobs besides printing: it can report how many lines matched instead of showing them, and it can flip the test and select the lines that do NOT match. You need both: one to throw away comments and blank lines, one to count. One thing to watch: when grep counts zero matches it still reports that as a failure status.

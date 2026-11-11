@@ -1,0 +1,8 @@
+On the right of =~, quoting turns the regex into plain text:
+
+  re='^[0-9]+$'
+  [[ 42 =~ $re ]]       # true:  $re is a regex
+  [[ 42 =~ "$re" ]]     # false: looks for the literal text ^[0-9]+$
+  [[ 'a.b' =~ "a.b" ]]  # true only for the exact text a.b
+
+So the regex mode needs the variable unquoted, and the literal mode needs it quoted. The two lines in the starter are swapped.

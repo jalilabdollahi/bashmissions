@@ -1,0 +1,82 @@
+id: 229
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: sed Substitution
+difficulty: intermediate
+xp: 150
+story: |
+  A vendor needs the last week of application logs to debug a crash, and Priya
+  will not hand over the real internal names. Every occurrence of the internal
+  domain and of the internal install path has to be swapped for something
+  harmless before the file leaves the building. The original log stays
+  untouched; the sanitised copy goes to standard output so she can redirect it
+  wherever she likes.
+objective: |
+  Write solution.sh that takes one argument, a log file, and prints the file
+  to standard output with two substitutions applied to every line, every
+  time they occur (not only the first):
+
+    lanternfish.internal   becomes   example.test
+    /srv/lanternfish       becomes   /srv/app
+
+  The dots in the domain are literal dots: "lanternfishXinternal" must NOT be
+  changed. The file itself must not be modified. If no argument is given, print
+  "usage: solution.sh LOGFILE" to stderr and exit with status 2.
+  Use sed with s/old/new/g. For the path, pick a delimiter other than / so you
+  do not have to escape the slashes.
+concepts:
+  - "s/old/new/ replaces the first match on each line"
+  - "the g flag replaces every match on the line"
+  - "any character can be the delimiter: s|old|new|"
+  - "escape a regex dot with \\."
+required_patterns:
+  - pattern: '\bsed\b'
+    message: "Use sed for the substitutions."
+  - pattern: 's([|#,:@!])[^\n]*\1[^\n]*\1g'
+    message: "Use a different delimiter for the path, e.g. s|/srv/lanternfish|/srv/app|g"
+  - pattern: 's/lanternfish\\\.internal/example\.test/g'
+    message: "Replace the domain with s/lanternfish\\.internal/example.test/g (escape the dots)."
+forbidden_patterns:
+  - pattern: 'sed\s+(-[A-Za-z]*i|--in-place)'
+    message: "Do not edit the file in place; print the result to stdout."
+test_cases:
+  - name: domain and path replaced
+    files:
+      "app.log": |
+        2024-11-07 09:30:15 INFO started at /srv/lanternfish/app/bin
+        2024-11-07 09:30:16 INFO connecting to db.lanternfish.internal:5432
+        2024-11-07 09:30:17 INFO ready
+    args: [app.log]
+    expected_stdout: |-
+      2024-11-07 09:30:15 INFO started at /srv/app/app/bin
+      2024-11-07 09:30:16 INFO connecting to db.example.test:5432
+      2024-11-07 09:30:17 INFO ready
+  - name: every occurrence on a line
+    files:
+      "relay.log": |
+        relay a.lanternfish.internal -> b.lanternfish.internal via /srv/lanternfish/tmp and /srv/lanternfish/cache
+    args: [relay.log]
+    expected_stdout: "relay a.example.test -> b.example.test via /srv/app/tmp and /srv/app/cache"
+  - name: dots are literal
+    files:
+      "trap.log": |
+        lookup lanternfishXinternal failed
+        lookup lanternfish-internal failed
+        lookup lanternfish.internal failed
+    args: [trap.log]
+    expected_stdout: |-
+      lookup lanternfishXinternal failed
+      lookup lanternfish-internal failed
+      lookup example.test failed
+  - name: the original file is left alone
+    files:
+      "orig.log": "host=lanternfish.internal\n"
+    args: [orig.log]
+    expected_stdout: "host=example.test"
+    expected_files:
+      "orig.log": "host=lanternfish.internal"
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh LOGFILE"
+    expected_exit: 2

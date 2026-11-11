@@ -1,0 +1,1 @@
+Work in layers, cheapest and most general first. First the shape: is it four digits, a dash, two digits, a dash, two digits? If not, you are done with that line. Then the month: is it a real one? Only then the day, because how many days are allowed depends on the month, and for February on the year.

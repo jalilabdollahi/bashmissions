@@ -1,0 +1,1 @@
+Split the job in two. A regex is excellent at the shape ("four numbers with dots") but it cannot easily say "not bigger than 255". So let the regex pull the four numbers out, and let arithmetic judge each one. Also think about what happens to a number like 08 when Bash does arithmetic on it.

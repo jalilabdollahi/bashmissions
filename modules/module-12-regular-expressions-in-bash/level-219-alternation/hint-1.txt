@@ -1,0 +1,1 @@
+At one spot in the pattern you can accept several different words. Regex has an "or" for that. Think about where the "or" starts and stops: only the action word varies, the text "ACTION=" in front of it is always the same. Also think about what must come right after the word, so a longer word that merely begins with it is rejected.

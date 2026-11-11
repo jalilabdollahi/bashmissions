@@ -1,1 +1,0 @@
-Use the regex concept from the curriculum: `sed 's/a.*?b/X/'` (POSIX).

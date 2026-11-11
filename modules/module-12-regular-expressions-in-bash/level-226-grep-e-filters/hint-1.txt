@@ -1,0 +1,1 @@
+You already know how to say "one of these three" in a regex. grep can use that same language if you ask it to, and it reads the file for you, so no loop is needed. Think about what surrounds the status code in a real line, so that digits in other places cannot trigger it. And remember what grep reports when it finds nothing at all.

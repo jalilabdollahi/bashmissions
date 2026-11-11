@@ -1,0 +1,1 @@
+You need three separate pieces from the same line. A regex can remember as many pieces as you mark, and it numbers them in the order they appear. Write the shape of the whole tag first, with the dots that separate the numbers, then decide which three parts to mark.

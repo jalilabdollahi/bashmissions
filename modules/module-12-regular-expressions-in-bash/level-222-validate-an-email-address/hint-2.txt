@@ -1,0 +1,8 @@
+Useful building blocks:
+
+  [[:alnum:]._%+-]+   one or more letters, digits or any of . _ % + -   (put - LAST in the brackets)
+  \.                  a literal dot
+  [[:alpha:]]{2,}     two or more letters
+  ^ and $             the ends of the whole string
+
+Keep the finished regex in a variable and test with [[ $addr =~ $re ]].

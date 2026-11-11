@@ -1,0 +1,74 @@
+id: 231
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Negated Classes
+difficulty: advanced
+xp: 180
+story: |
+  The new application logger writes key="value" pairs, and most lines carry two
+  or three quoted fields: msg="...", user="...", host="...". Theo asks you for
+  a script that pulls out just the message text. Priya warns that his first try
+  with ".*" returned half the line, because it ran on to the last quote in the
+  line. You will need a different way to say "stop at the next quote".
+objective: |
+  Write solution.sh that reads log lines from standard input. Each line may
+  contain a field of the form msg="<text>", where the text has no double quote
+  inside it and may be empty or contain spaces and other fields' characters. For every line print
+
+    msg: <text>          when the line has a msg="..." field
+    no msg               when it does not
+
+  Lines can hold other quoted fields before or after msg, for example
+    level=warn user="ollie" msg="disk is 91% full" host="halibut" code="D91"
+  and the text must stop at the quote that closes msg, not at the last quote on
+  the line. Use [[ =~ ]] with a capture group and a negated character class
+  [^"]* (any characters except a quote) instead of a greedy ".*".
+  No grep, sed, awk or cut.
+concepts:
+  - '[^"]* matches anything except a quote'
+  - "a negated class stops at the next delimiter; ERE has no lazy .*?"
+  - "the pattern as a variable keeps quotes readable"
+required_patterns:
+  - pattern: '\[\^"\]'
+    message: 'Use the negated class [^"] to stop at the next double quote.'
+  - pattern: 'BASH_REMATCH\[1\]'
+    message: "Read the text from ${BASH_REMATCH[1]}."
+forbidden_patterns:
+  - pattern: '\.\*\?|\b(grep|sed|awk|cut)\b'
+    message: 'ERE has no lazy ".*?"; use [^"]* and a capture group, without external tools.'
+test_cases:
+  - name: one quoted field
+    stdin: |
+      ts=09:30:15 level=info msg="service started"
+      ts=09:30:16 level=info msg="listening on :8080"
+    expected_stdout: |-
+      msg: service started
+      msg: listening on :8080
+  - name: other quoted fields after msg
+    stdin: |
+      level=warn user="ollie" msg="disk is 91% full" host="halibut" code="D91"
+    expected_stdout: "msg: disk is 91% full"
+  - name: other quoted fields before msg
+    stdin: |
+      host="cuttlefish" user="mara" msg="backup finished" took="42s"
+    expected_stdout: "msg: backup finished"
+  - name: empty message and no message
+    stdin: |
+      level=debug msg="" host="dory"
+      level=info user="tom" host="eel"
+      level=info message="not the msg field"
+    expected_stdout: |-
+      msg: 
+      no msg
+      no msg
+  - name: stops at the first closing quote
+    stdin: |
+      msg="first" msg="second"
+      note="x" msg="a, b, c" tail
+    expected_stdout: |-
+      msg: first
+      msg: a, b, c
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

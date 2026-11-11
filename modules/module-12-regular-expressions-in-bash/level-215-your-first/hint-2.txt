@@ -1,0 +1,5 @@
+Inside double brackets the operator =~ means "matches the regular expression on the right". It succeeds when the pattern is found anywhere in the string:
+
+  if [[ $word =~ ell ]]; then echo "contains ell"; fi
+
+A space ends the pattern unless you protect it, so write a literal space as "\ " (backslash space), or keep the pattern in a variable.

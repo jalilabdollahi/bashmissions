@@ -1,0 +1,1 @@
+This is a find-and-replace job on a stream of lines, which is what sed is for. Think about two details: by default only the first match on each line is replaced, and in the pattern a dot means "any character". The path contains slashes, which are also sed's usual separator, so think about how to avoid a mess.

@@ -1,0 +1,8 @@
+The sed substitution command is s/pattern/replacement/flags. Without -i it prints the result and leaves the file untouched.
+
+  sed 's/cat/dog/' f        # first "cat" on each line
+  sed 's/cat/dog/g' f       # every "cat"
+  sed 's/a\.b/X/g' f        # \. is a real dot
+  sed 's|/old/dir|/new/dir|g' f   # any character can separate the parts
+
+Use -e once per substitution to chain several in one sed call.

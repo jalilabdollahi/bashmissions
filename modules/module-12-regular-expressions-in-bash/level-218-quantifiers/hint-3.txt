@@ -1,0 +1,7 @@
+  re='^[A-Z]+-...(-P[0-9])?...$'
+
+  - after the dash: a digit class with a {min,max} count
+  - the optional priority group is already written for you
+  - at the end: a space, repeated zero or more times, then $
+
+Then the usual loop: if [[ $line =~ $re ]]; then echo "$line: valid"; else echo "$line: invalid"; fi

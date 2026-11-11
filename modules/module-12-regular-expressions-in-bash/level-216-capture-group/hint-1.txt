@@ -1,1 +1,0 @@
-Use the regex concept from the curriculum: `${BASH_REMATCH[1]}`.

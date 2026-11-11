@@ -1,0 +1,1 @@
+This time yes or no is not enough, you want a piece of the line back. A regex can mark the part it should remember, and after a successful match Bash keeps that part somewhere you can read. First write a pattern for the whole phrase around the username, then mark the username.

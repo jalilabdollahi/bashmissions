@@ -1,0 +1,7 @@
+  entries=$(grep -v -E '^(#|$)' "$log" | grep -c '' || true)
+  failed=$(grep -v -E '...' "$log" | grep -c '...' || true)
+
+  echo "entries: $entries"
+  echo "failed: $failed"
+
+grep -c '' counts every line it is given (the empty pattern matches all of them). For "failed", filter out comments and blanks first, then count the lines containing the phrase.

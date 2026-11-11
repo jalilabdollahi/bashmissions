@@ -1,0 +1,9 @@
+A caret as the first character inside brackets negates the class:
+
+  [^ ]      any one character except a space
+  [^,]*     zero or more characters that are not commas
+  [^"]*     zero or more characters that are not a double quote
+
+A match for [^"]* can never run over a quote, so it stops at the next one. Wrap it in a group to capture it, and keep the regex in a single-quoted variable so the " is no problem:
+
+  re='name="([^"]*)"'

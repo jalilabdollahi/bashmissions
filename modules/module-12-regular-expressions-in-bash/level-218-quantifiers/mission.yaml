@@ -1,0 +1,90 @@
+id: 218
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Quantifiers
+difficulty: intermediate
+xp: 140
+story: |
+  Priya's security tickets all carry a reference: the team prefix in capitals,
+  a dash, and a number, like OPS-4410 or SEC-123. Urgent ones add "-P1" to
+  "-P3" at the end. The ticket importer refuses anything that does not
+  fit, and people keep pasting references with a stray trailing space or with
+  four-digit prefixes. Priya wants a checker that says which ones the importer
+  will accept.
+objective: |
+  Write solution.sh that reads ticket references from standard input, one per
+  line, and prints for each line
+
+    <line>: valid     or     <line>: invalid
+
+  A valid reference is, in this order:
+    - one or more capital letters (the team prefix),
+    - a dash,
+    - between 3 and 5 digits,
+    - optionally "-P" followed by one digit,
+    - optionally trailing spaces (any number of them, including none),
+  and nothing else. Anchor both ends. Use the quantifiers + , {m,n} , ? and *
+  in a single [[ =~ ]] test. The output repeats the line exactly as read.
+concepts:
+  - "+ one or more, * zero or more, ? zero or one"
+  - "{n}, {n,} and {n,m} bounded repetition"
+  - "a quantifier applies to the item just before it"
+required_patterns:
+  - pattern: '\{[0-9]+,[0-9]+\}'
+    message: "Use a {min,max} quantifier for the 3 to 5 digits."
+  - pattern: '\]\+'
+    message: "Use + after a class for the one-or-more capital letters."
+  - pattern: '\)\?'
+    message: "Wrap the optional -P part in a group and put ? after it."
+test_cases:
+  - name: plain and priority references
+    stdin: |
+      OPS-4410
+      SEC-123
+      NET-90210-P1
+      DB-88888-P3
+    expected_stdout: |-
+      OPS-4410: valid
+      SEC-123: valid
+      NET-90210-P1: valid
+      DB-88888-P3: valid
+  - name: digit counts out of range
+    stdin: |
+      OPS-12
+      OPS-123456
+      OPS-
+      OPS
+    expected_stdout: |-
+      OPS-12: invalid
+      OPS-123456: invalid
+      OPS-: invalid
+      OPS: invalid
+  - name: prefix problems
+    stdin: |
+      -4410
+      ops-4410
+      O1-4410
+      LONGTEAM-4410
+    expected_stdout: |-
+      -4410: invalid
+      ops-4410: invalid
+      O1-4410: invalid
+      LONGTEAM-4410: valid
+  - name: priority suffix problems
+    stdin: |
+      OPS-4410-P
+      OPS-4410-P12
+      OPS-4410-p1
+      OPS-4410-P1-P2
+    expected_stdout: |-
+      OPS-4410-P: invalid
+      OPS-4410-P12: invalid
+      OPS-4410-p1: invalid
+      OPS-4410-P1-P2: invalid
+  - name: trailing spaces are tolerated, leading ones are not
+    stdin: "OPS-4410  \n  OPS-4410\nOPS-4410-P2 \n"
+    expected_stdout: |-
+      OPS-4410  : valid
+        OPS-4410: invalid
+      OPS-4410-P2 : valid

@@ -1,0 +1,86 @@
+id: 221
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Capture Several Groups
+difficulty: intermediate
+xp: 150
+story: |
+  Theo tags every release with a version like v2.14.3, and the deployment tracker
+  wants the three numbers in separate columns so Gus can see how far behind
+  each customer site is. Some tags in the repository are garbage, such as "latest" or
+  "v2.14" left over from experiments, and those should be reported without
+  stopping the whole run.
+objective: |
+  Write solution.sh that reads release tags from standard input, one per line.
+  A valid tag is the letter v, then three numbers separated by dots:
+  v<major>.<minor>.<patch>, each number being one or more digits, and nothing
+  else on the line. For every valid tag print
+
+    major=<major> minor=<minor> patch=<patch>
+
+  For every other line print "bad tag: <the line>". Capture the three numbers
+  with three ( ) groups in one [[ =~ ]] test and read ${BASH_REMATCH[1]},
+  [2] and [3]. No grep, sed, awk or cut.
+concepts:
+  - "groups are numbered by their opening parenthesis"
+  - "several captures from one match"
+  - "BASH_REMATCH[0] is the whole match"
+required_patterns:
+  - pattern: 'BASH_REMATCH\[3\]'
+    message: "Read all three groups: ${BASH_REMATCH[1]}, [2] and [3]."
+  - pattern: '=~'
+    message: "Match with [[ $tag =~ regex ]]."
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|cut)\b|\$\{[^}]*(#|%)[^}]*\}|\bIFS=\.'
+    message: "Use three capture groups with =~ rather than splitting the string."
+test_cases:
+  - name: ordinary tags
+    stdin: |
+      v2.14.3
+      v1.0.0
+      v10.200.3000
+    expected_stdout: |-
+      major=2 minor=14 patch=3
+      major=1 minor=0 patch=0
+      major=10 minor=200 patch=3000
+  - name: bad tags are reported
+    stdin: |
+      latest
+      v2.14
+      2.14.3
+    expected_stdout: |-
+      bad tag: latest
+      bad tag: v2.14
+      bad tag: 2.14.3
+  - name: extra text is not allowed
+    stdin: |
+      v2.14.3-rc1
+      v2.14.3.4
+      xv2.14.3
+      v2.14.3 
+    expected_stdout: |-
+      bad tag: v2.14.3-rc1
+      bad tag: v2.14.3.4
+      bad tag: xv2.14.3
+      bad tag: v2.14.3 
+  - name: empty fields and letters
+    stdin: |
+      v1..3
+      v.2.3
+      v1.two.3
+      vA.1.2
+    expected_stdout: |-
+      bad tag: v1..3
+      bad tag: v.2.3
+      bad tag: v1.two.3
+      bad tag: vA.1.2
+  - name: a bad line does not leak the previous groups
+    stdin: |
+      v3.1.4
+      oops
+      v0.9.9
+    expected_stdout: |-
+      major=3 minor=1 patch=4
+      bad tag: oops
+      major=0 minor=9 patch=9

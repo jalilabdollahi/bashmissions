@@ -1,0 +1,1 @@
+Bash can ask "does this text appear inside that string?" with a regular expression, not just with equality. Read the lines one by one and, for each one, test whether the phrase is somewhere inside it. A line that fails the test should simply produce nothing.

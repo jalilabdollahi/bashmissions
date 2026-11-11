@@ -1,0 +1,80 @@
+id: 216
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Anchors
+difficulty: intermediate
+xp: 120
+story: |
+  Before every audit Priya skims sshd_config for risky switches. The trouble is
+  that a commented-out "#PermitRootLogin yes" looks just as scary to a
+  careless script as the real one, and "PermitRootLogin yesterday" (a typo
+  someone once committed) is not a setting at all. She wants each line
+  sorted into a bucket, and the position of the text is what decides the bucket.
+objective: |
+  Write solution.sh that reads config lines from standard input and prints one
+  word per line, in the same order, describing each line:
+
+    blank     the line is empty
+    comment   the line starts with #
+    risky     the line ends with " yes" (a space, then yes, and nothing after)
+    other     everything else
+
+  Check the rules in that order, so "#PermitRootLogin yes" is a comment, not
+  risky. Use [[ =~ ]] with ^ and $ anchors. No grep, case or sed.
+concepts:
+  - "^ anchors a pattern to the start of the string"
+  - "$ anchors a pattern to the end of the string"
+  - "^$ matches the empty string"
+required_patterns:
+  - pattern: '=~\s*\S*\^'
+    message: 'Use a ^ anchor in a regex, for example [[ $line =~ ^# ]].'
+  - pattern: '=~\s*\S*\$(\s|;|\)|"|\x27|$)'
+    message: 'Use a $ anchor at the end of a regex, for example [[ $line =~ yes$ ]].'
+forbidden_patterns:
+  - pattern: '\b(grep|awk|sed|case)\b'
+    message: "Use anchored regexes with =~ for this level."
+test_cases:
+  - name: a typical sshd_config
+    stdin: |
+      # Authentication settings
+
+      PermitRootLogin yes
+      PasswordAuthentication no
+      Port 22
+    expected_stdout: |-
+      comment
+      blank
+      risky
+      other
+      other
+  - name: commented-out switches stay comments
+    stdin: |
+      #PermitRootLogin yes
+      #X11Forwarding yes
+      X11Forwarding yes
+    expected_stdout: |-
+      comment
+      comment
+      risky
+  - name: yes must be the last word
+    stdin: |
+      PermitRootLogin yesterday
+      PermitEmptyPasswords yes please
+      Banner /etc/yes
+      PermitUserEnvironment yes
+    expected_stdout: |-
+      other
+      other
+      other
+      risky
+  - name: a hash in the middle is not a comment
+    stdin: |
+      Banner /etc/issue # yes-ish
+      Match User ollie # temp
+    expected_stdout: |-
+      other
+      other
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

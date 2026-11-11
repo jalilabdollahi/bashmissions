@@ -1,0 +1,10 @@
+  re='^rack-[a-z]...$'     # fill in the two digit classes
+  while IFS= read -r tag || [[ -n $tag ]]; do
+    if [[ $tag =~ $re ]]; then
+      echo "$tag: ok"
+    else
+      echo "$tag: bad"
+    fi
+  done
+
+After the letter class you need [[:digit:]] twice, one per digit.

@@ -1,0 +1,1 @@
+So far grep printed whole lines. Here you only want the little piece that matched, and there may be several pieces per line. grep has a switch for exactly that. Describe an address as "a number, a dot" repeated, then one last number, and then deal with sorting and duplicates the way you would for any list.

@@ -1,0 +1,80 @@
+id: 227
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Extract with grep -o
+difficulty: intermediate
+xp: 150
+story: |
+  The bastion's auth log is a mess of sentences, and somewhere in them are the
+  IP addresses Priya wants to put on the blocklist. The lines have different
+  shapes, some have two addresses (the client and a forwarded one), and she does
+  not care about the rest of the sentence. She wants the bare addresses, each
+  one listed once, in a tidy order, and she needs them ten minutes ago.
+objective: |
+  Write solution.sh that takes one argument, a log file, and prints every
+  IPv4-looking address found in it: four groups of 1 to 3 digits separated by
+  dots. Print each distinct address once, sorted in plain text order (what
+  sort gives you under LC_ALL=C). A line may contain several addresses, and an
+  address may repeat across lines. If the file contains no address, print
+  nothing and exit with status 0. If no argument is given, print
+  "usage: solution.sh LOGFILE" to stderr and exit with status 2.
+  Do not check the ranges; "999.1.1.1" counts as address-looking.
+  Use grep -o -E so that grep prints only the matching part of each line.
+concepts:
+  - "grep -o prints only the matched text, one match per line"
+  - "extended regex with a repeated group"
+  - "pipeline: grep -o | sort -u"
+required_patterns:
+  - pattern: 'grep\s+(-[A-Za-z]*o[A-Za-z]*E|-[A-Za-z]*E[A-Za-z]*o|-o\s+-E|-E\s+-o)'
+    message: "Use grep -o -E (or -oE) to print only the matching text."
+  - pattern: '\|\s*sort'
+    message: "Pipe the matches into sort to order them and remove repeats."
+forbidden_patterns:
+  - pattern: 'grep\s+-P|\bawk\b|\bsed\b|\bcut\b'
+    message: "grep -o -E and sort are enough here."
+test_cases:
+  - name: collects unique addresses in order
+    files:
+      "auth.log": |
+        Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+        Nov  7 09:30:19 anchovy sshd[2212]: Failed password for deploy from 203.0.113.9 port 4023 ssh2
+        Nov  7 09:31:02 anchovy sshd[2214]: Accepted publickey for mara from 198.51.100.4 port 52114 ssh2
+        Nov  7 09:32:10 anchovy sshd[2218]: Failed password for ollie from 192.0.2.8 port 4031 ssh2
+    args: [auth.log]
+    expected_stdout: |-
+      192.0.2.8
+      198.51.100.4
+      203.0.113.9
+  - name: several addresses on one line
+    files:
+      "proxy.log": |
+        relay: client=10.1.2.3 forwarded-for=172.16.0.9, 10.1.2.3 target=192.168.1.20:8080
+        relay: client=10.9.9.9 target=192.168.1.20:8080
+    args: [proxy.log]
+    expected_stdout: |-
+      10.1.2.3
+      10.9.9.9
+      172.16.0.9
+      192.168.1.20
+  - name: lines without addresses and look-alikes
+    files:
+      "noise.log": |
+        cron: version 2.14.3 installed
+        cron: build 1.2.3
+        cron: ratio 3.14
+        sshd: Accepted from 8.8.4.4
+    args: [noise.log]
+    expected_stdout: "8.8.4.4"
+  - name: no address at all
+    files:
+      "quiet.log": |
+        cron: nothing happened
+        cron: still nothing
+    args: [quiet.log]
+    expected_stdout: ""
+    expected_exit: 0
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh LOGFILE"
+    expected_exit: 2

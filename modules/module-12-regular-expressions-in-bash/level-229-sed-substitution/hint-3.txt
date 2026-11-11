@@ -1,0 +1,4 @@
+  sed -e 's/lanternfish\.internal/.../g' \
+      -e 's|...|...|g' "$1"
+
+Fill in the replacement texts from the objective. The first command already shows the escaped dot; the second uses | as its delimiter so /srv/lanternfish can be written as is.
