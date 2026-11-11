@@ -1,0 +1,1 @@
+The target format is plain text with a strict shape: for each metric, a comment line describing it, a comment line naming its type, and then one or more sample lines. First compute the numbers (one pass over the log is enough), then print everything in the exact order the objective shows. Think about how to publish the file so nobody reads it half-written.

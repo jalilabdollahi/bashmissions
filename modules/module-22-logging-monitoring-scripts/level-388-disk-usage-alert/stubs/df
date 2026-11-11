@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Fake df for BashMissions. Only "df -P" is understood (POSIX output format).
+# FAKE_DF selects the scenario: healthy (default), busy, fail.
+if [[ ${1:-} != -P || $# -ne 1 ]]; then
+  echo "df: this stub only understands: df -P" >&2
+  exit 2
+fi
+header='Filesystem     1024-blocks      Used Available Capacity Mounted on'
+case ${FAKE_DF:-healthy} in
+  healthy)
+    echo "$header"
+    echo '/dev/vda1         41151808  12345678  26701234      32% /'
+    echo '/dev/vdb1        103081248  41232500  56600000      43% /var'
+    echo 'tmpfs               498312         0    498312       0% /dev/shm'
+    ;;
+  busy)
+    echo "$header"
+    echo '/dev/vda1         41151808  36000000   3300000      92% /'
+    echo '/dev/vdb1        103081248  80400000  17000000      83% /var'
+    echo '/dev/vdc1        515396076 446000000  43000000      91% /srv/backups'
+    echo 'tmpfs               498312    498312         0     100% /dev/shm'
+    ;;
+  fail)
+    echo "df: cannot read table of mounted file systems" >&2
+    exit 1
+    ;;
+  *)
+    echo "df stub: unknown FAKE_DF scenario" >&2
+    exit 2
+    ;;
+esac

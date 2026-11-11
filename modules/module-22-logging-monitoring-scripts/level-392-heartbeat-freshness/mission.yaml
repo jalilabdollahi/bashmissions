@@ -1,0 +1,85 @@
+id: 392
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Heartbeat Freshness
+difficulty: advanced
+xp: 170
+story: |
+  Lanternfish's batch jobs each `touch` a heartbeat file when they finish a
+  cycle: billing, mail-relay, report-builder. A job that hangs does not crash,
+  it just goes quiet, and Gus found out about the silent billing job when a
+  customer called. Mara's trick: a cron entry refreshes a stamp file so its
+  modification time is "five minutes ago", and any heartbeat older than the
+  stamp is dead.
+objective: |
+  Write solution.sh: `solution.sh STAMP BEAT...` where STAMP is the stamp file
+  and each BEAT is a heartbeat file path.
+
+  For every BEAT, in the order given, print one line, using the file's base
+  name (the part after the last `/`) with `.beat` removed:
+
+  - `fresh NAME` when BEAT exists and is not older than STAMP (the same
+    modification time counts as fresh)
+  - `STALE NAME` when BEAT exists but is older than STAMP
+  - `MISSING NAME` when BEAT does not exist
+
+  Exit 0 if every heartbeat is fresh, otherwise 1. If STAMP does not exist
+  print `no stamp file: STAMP` to stderr and exit 2. With fewer than two
+  arguments print `usage: solution.sh STAMP BEAT...` to stderr, exit 2.
+
+  Compare modification times with the shell's file tests, not by parsing `ls`.
+concepts:
+  - "[[ a -nt b ]] is true when a is newer than b"
+  - "the age of a file is its modification time"
+  - "compare against a reference instead of doing date maths"
+required_patterns:
+  - pattern: '-nt|-ot|-newer'
+    message: "Compare modification times with [[ a -nt b ]] (or -ot, or find -newer)."
+test_cases:
+  - name: all jobs alive
+    args: [stamp, beats/billing.beat, beats/mail-relay.beat]
+    files:
+      stamp: {content: "", mtime: 1772359200}
+      beats/billing.beat: {content: "", mtime: 1772359500}
+      beats/mail-relay.beat: {content: "", mtime: 1772359260}
+    expected_stdout: |-
+      fresh billing
+      fresh mail-relay
+  - name: one job went quiet
+    args: [stamp, beats/billing.beat, beats/report-builder.beat]
+    files:
+      stamp: {content: "", mtime: 1772359200}
+      beats/billing.beat: {content: "", mtime: 1772355600}
+      beats/report-builder.beat: {content: "", mtime: 1772359400}
+    expected_stdout: |-
+      STALE billing
+      fresh report-builder
+    expected_exit: 1
+  - name: same second as the stamp is fresh
+    args: [stamp, hb/queue.beat]
+    files:
+      stamp: {content: "", mtime: 1772359200}
+      hb/queue.beat: {content: "", mtime: 1772359200}
+    expected_stdout: "fresh queue"
+  - name: a job that never started
+    args: [stamp, beats/billing.beat, beats/newjob.beat]
+    files:
+      stamp: {content: "", mtime: 1772359200}
+      beats/billing.beat: {content: "", mtime: 1772359300}
+    expected_stdout: |-
+      fresh billing
+      MISSING newjob
+    expected_exit: 1
+  - name: stamp missing
+    args: [nostamp, beats/billing.beat]
+    files:
+      beats/billing.beat: ""
+    expected_stderr: "no stamp file: nostamp"
+    expected_exit: 2
+  - name: usage
+    args: [stamp]
+    files:
+      stamp: ""
+    expected_stderr: "usage: solution.sh STAMP BEAT..."
+    expected_exit: 2

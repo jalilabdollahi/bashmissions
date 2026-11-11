@@ -1,0 +1,1 @@
+Two jobs: first decide whether the log is too big, then shuffle files. For the shuffle, think about the order. If you rename the newest copy first it lands on top of the next one and destroys it. Which end of the numbering do you start from?

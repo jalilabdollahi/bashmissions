@@ -1,0 +1,18 @@
+Skeleton:
+
+  failed=0
+  for svc in "$@"; do
+    if systemctl is-active "$svc" > /dev/null; then
+      echo "ok $svc"
+      continue
+    fi
+    if systemctl restart "$svc" && systemctl is-active "$svc" > /dev/null; then
+      echo "restarted $svc"
+    else
+      echo "FAILED $svc"
+      failed=1
+    fi
+  done
+  exit "$failed"
+
+Put the usage check for "no arguments" before the loop.

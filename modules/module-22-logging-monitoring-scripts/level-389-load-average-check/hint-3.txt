@@ -1,0 +1,10 @@
+Skeleton:
+
+  out=$(uptime)
+  [[ $out == *"load average: "* ]] || { echo "cannot parse uptime" >&2; exit 3; }
+  IFS=', ' read -r l1 l5 l15 <<< "${out##*load average: }"
+  echo "load 1m=$l1 5m=$l5 15m=$l15"
+  bigger() { awk -v a="$1" -v b="$2" 'BEGIN { exit !(a + 0 > b + 0) }'; }
+  # bigger "$l1" "$limit"  -> HIGH line and status 1, else OK
+  # bigger "$l1" "$l15" -> rising; bigger "$l15" "$l1" -> falling
+  # remember to exit with the saved status at the very end

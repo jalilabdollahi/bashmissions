@@ -1,0 +1,7 @@
+cut -c1-16 keeps characters 1 to 16 of every line, which is a fixed-width timestamp prefix. uniq counts only adjacent duplicates, so sort first:
+
+  grep -E '^[0-9-]+ [0-9:]+ WARN ' app.log | cut -c1-16 | sort | uniq -c
+  #     3 2026-03-01 14:05
+  #     1 2026-03-01 14:06
+
+uniq -c puts the count first, so read -r count day minute splits it back into variables. grep exits 1 when nothing matches; guard it with `|| true` under set -e.

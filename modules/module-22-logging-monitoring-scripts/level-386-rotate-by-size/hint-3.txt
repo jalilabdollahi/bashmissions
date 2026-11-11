@@ -1,0 +1,9 @@
+Skeleton:
+
+  size=$(( $(wc -c < "$log") ))
+  if (( size <= max )); then echo "$log ok ($size bytes)"; exit 0; fi
+  rm -f "$log.$keep"
+  for (( i = keep - 1; i >= 1; i-- )); do
+    # if "$log.$i" exists, mv it to "$log.$((i + 1))"
+  done
+  # mv "$log" to "$log.1", create the empty new log, print "rotated ..."

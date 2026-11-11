@@ -1,0 +1,13 @@
+Skeleton:
+
+  level=${1,,}; msg=$2; shift 2
+  # case $level in debug|info|warn|error) ;; *) ...bad level...; exit 2 ;; esac
+  # stamp: NOW if set, else printf -v stamp '%(%Y-%m-%dT%H:%M:%SZ)T' -1
+  msg=${msg//\"/\\\"}
+  line="time=$stamp level=$level msg=\"$msg\""
+  for field in "$@"; do
+    # no "=" inside -> "bad field: $field", exit 2
+    # key=${field%%=*}; value=${field#*=}; quote value if it has a space
+    line+=" $key=$value"
+  done
+  printf '%s\n' "$line"

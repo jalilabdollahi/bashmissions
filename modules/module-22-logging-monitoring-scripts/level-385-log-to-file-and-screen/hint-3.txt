@@ -1,0 +1,12 @@
+Skeleton:
+
+  log=$1; job=$2
+  [[ -d $(dirname "$log") ]] || { echo "cannot write to $log" >&2; exit 1; }
+  count=0
+  while IFS= read -r line; do
+    count=$((count + 1))
+    printf '%s: %s\n' "$job" "$line" | tee -a "$log"
+  done
+  # last line: the same pipe with the finished message and $count
+
+Add the usage check at the very top.

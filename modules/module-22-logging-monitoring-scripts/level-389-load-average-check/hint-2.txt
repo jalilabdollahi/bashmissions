@@ -1,0 +1,9 @@
+${var##*text} deletes the longest prefix that ends with "text", leaving what follows it. read with IFS set to several characters splits on any of them:
+
+  line="speed: 3.5, 4.5, 6"
+  rest=${line##*speed: }               # 3.5, 4.5, 6
+  IFS=', ' read -r x y z <<< "$rest"   # x=3.5 y=4.5 z=6
+
+awk can compare decimals and turn the result into an exit status:
+
+  awk -v a="$x" -v b="$y" 'BEGIN { exit !(a + 0 > b + 0) }' && echo "x is larger"

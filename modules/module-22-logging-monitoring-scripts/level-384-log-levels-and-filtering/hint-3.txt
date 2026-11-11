@@ -1,0 +1,12 @@
+Skeleton:
+
+  declare -A rank=([ERROR]=1 [WARN]=2 [INFO]=3 [DEBUG]=4)
+  threshold=${LOG_LEVEL:-INFO}
+  # unknown threshold -> message on stderr, exit 2
+  while IFS= read -r line; do
+    level=${line%% *}
+    # unknown level -> "skipped: $line" on stderr, continue
+    # (( rank[$level] <= rank[$threshold] )) -> print the line
+  done
+
+Fill in the two checks with [[ -z ${rank[$x]:-} ]].

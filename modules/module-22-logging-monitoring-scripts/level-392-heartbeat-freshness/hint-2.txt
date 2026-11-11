@@ -1,0 +1,8 @@
+Inside [[ ]], -nt means "newer than" and -ot means "older than" (by modification time). A missing file is neither, so test for existence first:
+
+  [[ a.txt -nt b.txt ]] && echo "a was modified more recently"
+  [[ a.txt -ot b.txt ]] && echo "a is older"
+  [[ -e path ]]            # does it exist at all?
+  basename /x/y/job.beat .beat     # job
+
+Same time on both files: neither -nt nor -ot is true.

@@ -1,0 +1,15 @@
+Skeleton:
+
+  width=4; swidth=5
+  while IFS= read -r line; do
+    read -r -a f <<< "$line"
+    # not 4 fields -> "bad line: $line" on stderr, continue
+    # store the four fields in four arrays; widen $width / $swidth if needed
+  done
+  # no rows -> "no hosts" on stderr, exit 1
+  printf '%-*s  %-*s  %5s  %5s\n' "$width" HOST "$swidth" STATE LOAD DISK
+  # rule: printf -v rule '%*s' $(( width + swidth + 16 )) '' ; print ${rule// /-}
+  for i in "${!hosts[@]}"; do
+    # printf -v row ... ; row+="  <-- disk" when pct >= 90 ; row+="  <-- DOWN" when state != up
+  done
+  # summary line

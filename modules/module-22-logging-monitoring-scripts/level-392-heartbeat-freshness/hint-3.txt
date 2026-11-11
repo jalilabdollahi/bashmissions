@@ -1,0 +1,14 @@
+Skeleton:
+
+  stamp=$1; shift
+  bad=0
+  for beat in "$@"; do
+    name=$(basename "$beat" .beat)
+    if [[ ! -e $beat ]]; then   # print MISSING, set bad=1
+    elif [[ $beat -ot $stamp ]]; then   # print STALE, set bad=1
+    else   # print fresh
+    fi
+  done
+  exit "$bad"
+
+Check the arguments and the stamp file before the loop.

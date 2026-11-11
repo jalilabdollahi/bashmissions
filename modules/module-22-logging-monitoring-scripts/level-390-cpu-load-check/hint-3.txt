@@ -1,1 +1,0 @@
-Print only the expected result lines; redirect or stub external side effects.

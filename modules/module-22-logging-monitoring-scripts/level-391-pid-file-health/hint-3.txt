@@ -1,0 +1,11 @@
+Skeleton:
+
+  [[ -e $pidfile ]] || { echo "stopped"; exit 3; }
+  pid=$(< "$pidfile")
+  [[ $pid =~ ^[0-9]+$ ]] || { echo "bad pid file"; exit 2; }
+  actual=$(ps -p "$pid" -o comm= || true)
+  # empty            -> "stale: pid $pid is not running", rm -f, exit 1
+  # differs from $name -> "stale: pid $pid belongs to $actual, not $name", rm -f, exit 1
+  # otherwise        -> "running pid=$pid"
+
+The usage check goes first.

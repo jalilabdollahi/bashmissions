@@ -1,0 +1,85 @@
+id: 395
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Terminal Status Board
+difficulty: advanced
+xp: 180
+story: |
+  The on-call desk at Lanternfish has a spare monitor, and Gus wants it to show
+  "the fleet at a glance". Your checks already produce one line per server.
+  What is missing is the board itself: a tidy table where the columns line up
+  whether the server is called `eel` or `humpback-staging`.
+objective: |
+  Write solution.sh. It reads lines from stdin of the form `HOST STATE LOAD DISK`
+  (for example `eel up 0.42 31%`) and prints a status board.
+
+  Let W be the length of the longest host name (at least 4) and S the length
+  of the longest state (at least 5). Print:
+
+  1. A header: `HOST` padded to W, two spaces, `STATE` padded to S, two
+     spaces, `LOAD` right-aligned in 5, two spaces, `DISK` right-aligned in 5.
+  2. A line of `-` as wide as the header (W + S + 16 characters).
+  3. One row per host in the same layout. If the disk percentage is 90 or
+     more, add `  <-- disk` at the end of the row; if STATE is anything other
+     than `up`, add `  <-- DOWN` (both markers if both apply, disk first).
+  4. A summary: `N hosts, D down, A disk alerts`.
+
+  Lines that do not have exactly four fields are not printed; they go to
+  stderr as `bad line: <the line>` and are not counted. If no valid host
+  remains, print `no hosts` to stderr and exit 1. Rows have no trailing spaces.
+concepts:
+  - "printf %-10s pads left-aligned, %5s right-aligned"
+  - "%-*s takes the width from an argument"
+  - "two passes: measure, then print"
+required_patterns:
+  - pattern: '%-\*s'
+    message: "Take the host column width from a variable with printf's %-*s."
+test_cases:
+  - name: short names use the minimum width
+    stdin: |
+      eel up 0.42 31%
+      dory up 1.10 45%
+    expected_stdout: |-
+      HOST  STATE   LOAD   DISK
+      -------------------------
+      eel   up      0.42    31%
+      dory  up      1.10    45%
+      2 hosts, 0 down, 0 disk alerts
+  - name: long name widens the column, alerts marked
+    stdin: |
+      anchovy up 0.20 12%
+      humpback-staging down 0.00 95%
+      cuttlefish up 3.75 90%
+    expected_stdout: |-
+      HOST              STATE   LOAD   DISK
+      -------------------------------------
+      anchovy           up      0.20    12%
+      humpback-staging  down    0.00    95%  <-- disk  <-- DOWN
+      cuttlefish        up      3.75    90%  <-- disk
+      3 hosts, 1 down, 2 disk alerts
+  - name: down host with a healthy disk
+    stdin: |
+      marlin degraded 7.00 20%
+    expected_stdout: |-
+      HOST    STATE      LOAD   DISK
+      ------------------------------
+      marlin  degraded   7.00    20%  <-- DOWN
+      1 hosts, 1 down, 0 disk alerts
+  - name: malformed lines are reported and skipped
+    stdin: |
+      eel up 0.42 31%
+      this is not a row at all
+      grouper up
+    expected_stdout: |-
+      HOST  STATE   LOAD   DISK
+      -------------------------
+      eel   up      0.42    31%
+      1 hosts, 0 down, 0 disk alerts
+    expected_stderr: |-
+      bad line: this is not a row at all
+      bad line: grouper up
+  - name: nothing to show
+    stdin: ""
+    expected_stderr: "no hosts"
+    expected_exit: 1

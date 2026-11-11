@@ -1,0 +1,79 @@
+id: 389
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Load Average Check
+difficulty: intermediate
+xp: 160
+story: |
+  Barracuda hosts the pub's online ordering, and on Friday evenings it creaks.
+  Theo swears "it's not my code", Mara wants evidence. The kernel already keeps
+  the evidence: three load averages (1, 5 and 15 minutes) printed at the end of
+  `uptime`. Your job is to catch them, compare, and say which way things are
+  heading.
+objective: |
+  Write solution.sh: `solution.sh LIMIT`, where LIMIT is a number such as `2`
+  or `1.5` (anything else: print `usage: solution.sh LIMIT` to stderr,
+  exit 2).
+
+  Run `uptime`. Its last part reads `load average: 0.52, 0.58, 0.59`.
+  Pull out the three numbers and print two lines:
+
+      load 1m=0.52 5m=0.58 15m=0.59
+      <verdict>
+
+  The verdict is `OK` when the 1-minute load is not above LIMIT, otherwise
+  `HIGH: 1m load 4.10 is above 2` (the load and LIMIT exactly as written). In
+  the HIGH case exit 1, otherwise exit 0.
+
+  Then, only when the 1-minute number is larger than the 15-minute one, add a
+  third line `trend: rising`; when it is smaller add `trend: falling`; when
+  equal print nothing more.
+
+  If the uptime output has no `load average:` part, print
+  `cannot parse uptime` to stderr and exit 3.
+concepts:
+  - "${var##*pattern} keeps what comes after the last match"
+  - "IFS=', ' read splits on commas and spaces"
+  - "bash cannot compare decimals; awk can"
+required_patterns:
+  - pattern: 'IFS='
+    message: "Split the three numbers with read and a custom IFS."
+test_cases:
+  - name: calm server
+    args: ["2"]
+    expected_stdout: |-
+      load 1m=0.52 5m=0.58 15m=0.59
+      OK
+      trend: falling
+  - name: busy server
+    args: ["2"]
+    env: {FAKE_LOAD: "4.10, 3.20, 1.05"}
+    expected_stdout: |-
+      load 1m=4.10 5m=3.20 15m=1.05
+      HIGH: 1m load 4.10 is above 2
+      trend: rising
+    expected_exit: 1
+  - name: decimal limit, equal trend
+    args: ["1.5"]
+    env: {FAKE_LOAD: "1.50, 1.60, 1.50"}
+    expected_stdout: |-
+      load 1m=1.50 5m=1.60 15m=1.50
+      OK
+  - name: decimals are compared as numbers
+    args: ["1.5"]
+    env: {FAKE_LOAD: "10.00, 9.00, 9.50"}
+    expected_stdout: |-
+      load 1m=10.00 5m=9.00 15m=9.50
+      HIGH: 1m load 10.00 is above 1.5
+      trend: rising
+    expected_exit: 1
+  - name: uptime output is not understood
+    args: ["2"]
+    env: {FAKE_UPTIME: broken}
+    expected_stderr: "cannot parse uptime"
+    expected_exit: 3
+  - name: limit must be a number
+    args: ["two"]
+    expected_stderr: "usage: solution.sh LIMIT"
+    expected_exit: 2

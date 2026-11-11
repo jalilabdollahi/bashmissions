@@ -1,0 +1,1 @@
+Programs report success or failure through their exit status, and `if` can test it directly, so you do not need to read any text a command prints. Picture the steps for one service (check, restart, check again) and wrap them in a loop. Decide what happens to the failures: should one broken service stop you from looking after the others?

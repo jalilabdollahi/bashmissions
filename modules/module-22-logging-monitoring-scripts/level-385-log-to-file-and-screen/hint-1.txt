@@ -1,0 +1,1 @@
+You want one stream to go to two places: your terminal and a file. There is a classic small tool shaped like a T-junction that does exactly that. Think about what happens to the file's old content when you write to it, and how to avoid losing it.

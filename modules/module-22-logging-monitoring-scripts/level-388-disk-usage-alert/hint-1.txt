@@ -1,0 +1,1 @@
+df prints a table. Once you know the order of its columns (device, size, used, available, capacity, mount point), each line can be split into named pieces and handled one at a time. You will need to drop the first line, and the percent sign, before comparing numbers.

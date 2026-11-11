@@ -1,0 +1,10 @@
+cksum reads a stream and prints "CRC size". printf '%s' prints text without a trailing newline, which matters because the newline would change the checksum:
+
+  printf '%s' "abc" | cksum          # 1219131554 3
+  read -r crc size < <(printf '%s' "$text" | cksum)
+
+IFS='|' read -r a b rest splits a line at pipes, and the last variable keeps everything that remains, even more pipes:
+
+  IFS='|' read -r seq sum msg <<< "2|123|a | b"    # msg is "a | b"
+
+Keep prev and a line counter in the loop, and compare against the recomputed values.

@@ -1,0 +1,96 @@
+id: 393
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Error Spike Detector
+difficulty: advanced
+xp: 180
+story: |
+  A single error in the web log is weather; forty errors in one minute is a
+  storm. Theo shipped a release at 14:05 and swears nothing changed, and Mara
+  would like a script that finds the minutes where the error count jumped, so
+  the argument can be settled with a log instead of with opinions.
+objective: |
+  Write solution.sh: `solution.sh LOGFILE THRESHOLD`.
+
+  Each log line starts with a date, a time and a level:
+  `2026-03-01 14:05:17 ERROR checkout timed out`. Count the ERROR lines per
+  minute (lines of other levels do not count; the level is the third word).
+
+  For every minute with at least THRESHOLD errors print, in time order,
+
+      SPIKE 2026-03-01 14:05 errors=7
+
+  and exit 1 when at least one spike was found. If there were none, print
+  `no spikes` and exit 0.
+
+  Errors: unreadable LOGFILE -> `cannot read LOGFILE` on stderr, exit 2;
+  THRESHOLD missing or not a positive whole number ->
+  `usage: solution.sh LOGFILE THRESHOLD` on stderr, exit 2.
+concepts:
+  - "cut -c slices fixed-width timestamps"
+  - "sort | uniq -c counts groups"
+  - "a threshold turns counts into alerts"
+required_patterns:
+  - pattern: 'uniq\s+-c'
+    message: "Group and count the minutes with sort | uniq -c."
+test_cases:
+  - name: one bad minute
+    args: [app.log, "3"]
+    files:
+      app.log: |
+        2026-03-01 14:04:59 INFO release started
+        2026-03-01 14:05:01 ERROR checkout timed out
+        2026-03-01 14:05:03 ERROR checkout timed out
+        2026-03-01 14:05:03 WARN retrying
+        2026-03-01 14:05:17 ERROR card gateway 502
+        2026-03-01 14:05:40 ERROR checkout timed out
+        2026-03-01 14:06:02 ERROR checkout timed out
+        2026-03-01 14:07:30 INFO recovered
+    expected_stdout: "SPIKE 2026-03-01 14:05 errors=4"
+    expected_exit: 1
+  - name: two spikes, reported in time order
+    args: [app.log, "2"]
+    files:
+      app.log: |
+        2026-03-01 09:59:10 ERROR a
+        2026-03-01 09:59:12 ERROR b
+        2026-03-01 10:00:00 ERROR c
+        2026-03-01 23:58:01 ERROR d
+        2026-03-01 23:58:02 ERROR e
+        2026-03-01 23:58:03 ERROR f
+    expected_stdout: |-
+      SPIKE 2026-03-01 09:59 errors=2
+      SPIKE 2026-03-01 23:58 errors=3
+    expected_exit: 1
+  - name: quiet log
+    args: [app.log, "5"]
+    files:
+      app.log: |
+        2026-03-01 08:00:01 ERROR lonely
+        2026-03-01 08:00:02 INFO ok
+        2026-03-01 08:01:02 ERROR lonely again
+    expected_stdout: "no spikes"
+  - name: the word ERROR inside a message is not an error line
+    args: [app.log, "2"]
+    files:
+      app.log: |
+        2026-03-01 12:00:01 INFO ERROR page is cached
+        2026-03-01 12:00:02 INFO no ERROR here either
+        2026-03-01 12:00:03 ERROR real one
+    expected_stdout: "no spikes"
+  - name: empty log
+    args: [app.log, "1"]
+    files:
+      app.log: ""
+    expected_stdout: "no spikes"
+  - name: log missing
+    args: [gone.log, "3"]
+    expected_stderr: "cannot read gone.log"
+    expected_exit: 2
+  - name: bad threshold
+    args: [app.log, "0"]
+    files:
+      app.log: ""
+    expected_stderr: "usage: solution.sh LOGFILE THRESHOLD"
+    expected_exit: 2

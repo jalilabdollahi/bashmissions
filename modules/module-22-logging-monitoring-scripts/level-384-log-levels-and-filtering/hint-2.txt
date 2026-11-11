@@ -1,0 +1,8 @@
+An associative array maps text keys to values, and (( )) compares numbers:
+
+  declare -A size=([small]=1 [large]=3)
+  pick=large
+  (( size[$pick] >= size[small] )) && echo "big enough"
+  [[ -z ${size[$word]:-} ]]     # true when $word is not a known key
+
+${LOG_LEVEL:-INFO} gives the variable's value, or INFO when it is unset. ${line%% *} keeps the first word of a line.

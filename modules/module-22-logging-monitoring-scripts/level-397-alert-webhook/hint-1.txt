@@ -1,0 +1,1 @@
+Two parts: first build the JSON text by hand (it is just a string, but a quote inside the message could break it), then send it with curl. You do not want curl's response body on screen; you only want to know the HTTP status code, so ask curl to print just that.

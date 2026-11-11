@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Fake curl for BashMissions. Understands: -s -S -X METHOD -H HEADER -d DATA
+# -o FILE -w FORMAT --max-time N URL. The request is recorded in .curl.log:
+#   line 1: METHOD URL, then one "H: header" line per -H, then the body.
+# FAKE_HTTP_STATUS sets the response code (default 200); 000 means "cannot connect".
+method=""; url=""; data=""; out=""; fmt=""; headers=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -s|-S|-sS|-Ss) shift ;;
+    -X) method=$2; shift 2 ;;
+    -H) headers+=("$2"); shift 2 ;;
+    -d) data=$2; shift 2 ;;
+    -o) out=$2; shift 2 ;;
+    -w) fmt=$2; shift 2 ;;
+    --max-time) shift 2 ;;
+    -*) echo "curl: stub does not know option $1" >&2; exit 2 ;;
+    *) url=$1; shift ;;
+  esac
+done
+if [[ -z $url ]]; then
+  echo "curl: no URL specified" >&2
+  exit 2
+fi
+[[ -z $method ]] && { [[ -n $data ]] && method=POST || method=GET; }
+{
+  echo "$method $url"
+  for h in "${headers[@]}"; do echo "H: $h"; done
+  [[ -n $data ]] && echo "$data"
+} >> .curl.log
+status=${FAKE_HTTP_STATUS:-200}
+if [[ $status == 000 ]]; then
+  echo "curl: (7) Failed to connect to host" >&2
+  [[ -n $fmt ]] && printf '000'
+  exit 7
+fi
+[[ -n $out && $out != /dev/null ]] && echo '{"ok":true}' > "$out"
+[[ -n $fmt ]] && printf '%s' "${fmt//%\{http_code\}/$status}"
+exit 0

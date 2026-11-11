@@ -1,0 +1,7 @@
+${line#* } removes everything up to and including the first space, which drops a timestamp. A small function keeps the "report the pending count" logic in one place so you can call it from two spots:
+
+  line="12:00:00 disk slow"
+  msg=${line#* }               # disk slow
+  note() { (( n > 0 )) && echo "seen $n more"; n=0; }
+
+Careful: under set -e a function whose last command is a false (( )) test returns failure. Use if/elif inside it.

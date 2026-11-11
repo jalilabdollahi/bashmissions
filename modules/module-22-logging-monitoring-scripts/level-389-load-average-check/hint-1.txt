@@ -1,0 +1,1 @@
+The three numbers sit at the very end of the uptime line, after a fixed label. Cut the line down to just what follows the label, then split that on its separators. Bash's own arithmetic only understands whole numbers, so think about who can compare 0.52 with 1.5.

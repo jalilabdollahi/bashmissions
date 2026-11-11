@@ -1,0 +1,1 @@
+Words like WARN and ERROR cannot be compared with "bigger than", but numbers can. Give every level a number once, at the top of the script, and then compare numbers for each line. Remember which direction means "more important".

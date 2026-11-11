@@ -1,0 +1,134 @@
+id: 394
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Metrics File
+difficulty: advanced
+xp: 190
+story: |
+  Lanternfish is finally getting a proper monitoring server, and it speaks
+  Prometheus: it reads a text file of metrics that every machine exposes. Mara
+  hands you the web server's access log and a promise: "turn it into numbers
+  the dashboard can chart, and never let the dashboard see a half-written file."
+objective: |
+  Write solution.sh: `solution.sh ACCESSLOG OUTFILE`.
+
+  Each access-log line has five fields:
+  `2026-03-01T10:00:01Z GET /menu 200 5123` (time, method, path, HTTP status,
+  bytes sent). A line is *valid* when it has exactly five fields and both
+  the status and the bytes are whole numbers; every other line is malformed.
+
+  Write OUTFILE in the Prometheus text format, exactly in this layout (codes
+  in ascending numeric order; the `{...}` sample lines appear only for codes
+  that occur):
+
+      # HELP lanternfish_http_requests_total Requests served, by status code.
+      # TYPE lanternfish_http_requests_total counter
+      lanternfish_http_requests_total{code="200"} 3
+      lanternfish_http_requests_total{code="404"} 1
+      # HELP lanternfish_http_response_bytes_total Bytes sent to clients.
+      # TYPE lanternfish_http_response_bytes_total counter
+      lanternfish_http_response_bytes_total 7000
+      # HELP lanternfish_http_largest_response_bytes Largest single response.
+      # TYPE lanternfish_http_largest_response_bytes gauge
+      lanternfish_http_largest_response_bytes 5123
+      # HELP lanternfish_http_malformed_lines_total Log lines that could not be parsed.
+      # TYPE lanternfish_http_malformed_lines_total counter
+      lanternfish_http_malformed_lines_total 0
+
+  Write the file to `OUTFILE.tmp` first and then `mv` it onto OUTFILE, so a
+  reader never sees a partial file. When done print `wrote OUTFILE (N requests)`
+  where N is the number of valid lines. If ACCESSLOG cannot be read print
+  `cannot read ACCESSLOG` to stderr, exit 1, and do not create OUTFILE. Wrong
+  argument count: `usage: solution.sh ACCESSLOG OUTFILE` to stderr, exit 2.
+concepts:
+  - "Prometheus text format: # HELP, # TYPE, name{label=\"v\"} value"
+  - "counters only grow, gauges go up and down"
+  - "write to a temporary file and mv for an atomic update"
+required_patterns:
+  - pattern: '\bmv\b'
+    message: "Write to a temporary file, then mv it into place so readers never see half a file."
+test_cases:
+  - name: normal traffic
+    args: [access.log, metrics/web.prom]
+    files:
+      "metrics/": ""
+      access.log: |
+        2026-03-01T10:00:01Z GET /menu 200 5123
+        2026-03-01T10:00:02Z GET /menu 200 1000
+        2026-03-01T10:00:03Z GET /gone 404 877
+        2026-03-01T10:00:04Z POST /order 200 0
+    expected_stdout: "wrote metrics/web.prom (4 requests)"
+    expected_files:
+      metrics/web.prom: |-
+        # HELP lanternfish_http_requests_total Requests served, by status code.
+        # TYPE lanternfish_http_requests_total counter
+        lanternfish_http_requests_total{code="200"} 3
+        lanternfish_http_requests_total{code="404"} 1
+        # HELP lanternfish_http_response_bytes_total Bytes sent to clients.
+        # TYPE lanternfish_http_response_bytes_total counter
+        lanternfish_http_response_bytes_total 7000
+        # HELP lanternfish_http_largest_response_bytes Largest single response.
+        # TYPE lanternfish_http_largest_response_bytes gauge
+        lanternfish_http_largest_response_bytes 5123
+        # HELP lanternfish_http_malformed_lines_total Log lines that could not be parsed.
+        # TYPE lanternfish_http_malformed_lines_total counter
+        lanternfish_http_malformed_lines_total 0
+      metrics/web.prom.tmp: null
+  - name: codes sort numerically and bad lines are counted
+    args: [access.log, out.prom]
+    files:
+      access.log: |
+        2026-03-01T10:00:01Z GET /a 503 10
+        2026-03-01T10:00:02Z GET /b 200 20
+        garbage line
+        2026-03-01T10:00:03Z GET /c 1000 30
+        2026-03-01T10:00:04Z GET /d 200 oops
+        2026-03-01T10:00:05Z GET /e 301 40
+    expected_stdout: "wrote out.prom (4 requests)"
+    expected_files:
+      out.prom: |-
+        # HELP lanternfish_http_requests_total Requests served, by status code.
+        # TYPE lanternfish_http_requests_total counter
+        lanternfish_http_requests_total{code="200"} 1
+        lanternfish_http_requests_total{code="301"} 1
+        lanternfish_http_requests_total{code="503"} 1
+        lanternfish_http_requests_total{code="1000"} 1
+        # HELP lanternfish_http_response_bytes_total Bytes sent to clients.
+        # TYPE lanternfish_http_response_bytes_total counter
+        lanternfish_http_response_bytes_total 100
+        # HELP lanternfish_http_largest_response_bytes Largest single response.
+        # TYPE lanternfish_http_largest_response_bytes gauge
+        lanternfish_http_largest_response_bytes 40
+        # HELP lanternfish_http_malformed_lines_total Log lines that could not be parsed.
+        # TYPE lanternfish_http_malformed_lines_total counter
+        lanternfish_http_malformed_lines_total 2
+  - name: empty log still produces a valid file
+    args: [access.log, quiet.prom]
+    files:
+      access.log: ""
+    expected_stdout: "wrote quiet.prom (0 requests)"
+    expected_files:
+      quiet.prom: |-
+        # HELP lanternfish_http_requests_total Requests served, by status code.
+        # TYPE lanternfish_http_requests_total counter
+        # HELP lanternfish_http_response_bytes_total Bytes sent to clients.
+        # TYPE lanternfish_http_response_bytes_total counter
+        lanternfish_http_response_bytes_total 0
+        # HELP lanternfish_http_largest_response_bytes Largest single response.
+        # TYPE lanternfish_http_largest_response_bytes gauge
+        lanternfish_http_largest_response_bytes 0
+        # HELP lanternfish_http_malformed_lines_total Log lines that could not be parsed.
+        # TYPE lanternfish_http_malformed_lines_total counter
+        lanternfish_http_malformed_lines_total 0
+  - name: missing log leaves no output file
+    args: [nope.log, out.prom]
+    expected_stderr: "cannot read nope.log"
+    expected_exit: 1
+    expected_files:
+      out.prom: null
+      out.prom.tmp: null
+  - name: usage
+    args: [access.log]
+    expected_stderr: "usage: solution.sh ACCESSLOG OUTFILE"
+    expected_exit: 2

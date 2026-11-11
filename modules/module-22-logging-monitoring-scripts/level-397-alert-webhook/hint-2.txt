@@ -1,0 +1,10 @@
+curl can send a body and then print only the status:
+
+  code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST \
+         -H 'Content-Type: application/json' -d "$body" "$url") || true
+
+-o /dev/null throws the reply away, -w '%{http_code}' prints the status. Escape text before you put it in quotes:
+
+  s=${s//\\/\\\\}      # backslash -> two backslashes (do this first)
+  s=${s//\"/\\\"}      # quote -> backslash + quote
+  [[ $code == 2?? ]]   # any 2xx code

@@ -1,0 +1,16 @@
+Skeleton:
+
+  # validate $date and "at least one file", then shift; check each file with [[ -r ]]
+  data=$(awk -v day="$date" '
+    $1 == day && NF >= 4 {
+      total++; level[$3]++
+      if ($3 == "ERROR") {
+        host[$4]++
+        # track the smallest time ($2) and its host in first/firsthost
+        # track the largest time and its host in last/lasthost
+      }
+    }
+    END { print "LINES", total + 0; ... print "HOST", h, host[h] for each host ...; print "FIRST", ...; print "LAST", ... }
+  ' "$@")
+  # then print the report lines, taking each value out of $data with awk '$1 == "KEY" {print $2}'
+  # hosts: sort -k2,2nr -k1,1 | head -n 3 ; empty -> "  none"

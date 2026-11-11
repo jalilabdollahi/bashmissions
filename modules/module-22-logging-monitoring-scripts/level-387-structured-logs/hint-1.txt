@@ -1,0 +1,1 @@
+Build the line in a variable, piece by piece, and print it once at the end. For each extra argument you need two halves: the part before the first = and the part after it. Only some values need quotes around them; decide which.

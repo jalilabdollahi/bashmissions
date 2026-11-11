@@ -1,0 +1,10 @@
+Skeleton:
+
+  host=$1; severity=$2; message=$3
+  # WEBHOOK_URL empty -> message, exit 2 ; case $severity in info|warning|critical) ;; *) ... ;; esac
+  message=${message//\\/\\\\}
+  message=${message//\"/\\\"}
+  body="{\"host\":\"$host\",\"severity\":\"$severity\",\"text\":\"$message\"}"
+  status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 \
+    -X POST -H 'Content-Type: application/json' -d "$body" "$WEBHOOK_URL") || true
+  # [[ $status == 2?? ]] -> "alert sent ($status)"; else "alert failed ($status)" on stderr, exit 1

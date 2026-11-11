@@ -1,0 +1,15 @@
+Skeleton:
+
+  checksum() { local sum size; read -r sum size < <(printf '%s' "$1|$2|$3" | cksum); echo "$sum"; }
+
+  walk() {                        # sets $entries, $last_sum, $bad
+    local prev=0 n=0 seq sum msg
+    while IFS='|' read -r seq sum msg; do
+      n=$((n + 1))
+      # if $seq != $n or $sum != $(checksum "$prev" "$n" "$msg"): bad=$n; return 1
+      prev=$sum
+    done < "$log"
+  }
+
+verify prints "OK: $entries entries" or "TAMPERED: line $bad". append calls walk first, then writes
+"$next|$(checksum "$last_sum" "$next" "$msg")|$msg" with >>. Treat a missing log as an empty one.

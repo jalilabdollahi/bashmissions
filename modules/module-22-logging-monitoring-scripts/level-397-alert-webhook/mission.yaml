@@ -1,0 +1,87 @@
+id: 397
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Alert Webhook
+difficulty: advanced
+xp: 190
+story: |
+  The on-call team lives in a chat room, and the chat room has a webhook: POST
+  a little JSON document at its URL and the message appears, with a siren
+  emoji if the severity is critical. Priya insists on one rule: "An alert that
+  cannot be delivered must say so, loudly, or it did not happen." Your script
+  will be the last step of every check you wrote so far.
+objective: |
+  Write solution.sh: `solution.sh HOST SEVERITY MESSAGE`.
+
+  - The webhook address comes from the environment variable WEBHOOK_URL. If it
+    is unset or empty print `WEBHOOK_URL is not set` to stderr, exit 2.
+  - SEVERITY must be info, warning or critical; otherwise print
+    `bad severity: SEVERITY` to stderr, exit 2. Wrong argument count:
+    `usage: solution.sh HOST SEVERITY MESSAGE`, exit 2.
+  - Build this JSON document (one line, no spaces outside the strings; any
+    `\` or `"` inside MESSAGE must be escaped with a backslash):
+
+        {"host":"eel","severity":"critical","text":"disk is 97% full"}
+
+  - POST it with curl: method POST, header `Content-Type: application/json`,
+    the JSON as the body (`-d`), silent but showing errors (`-sS`), the
+    response body discarded, a 5 second limit (`--max-time 5`) and the HTTP
+    status code printed with `-w '%{http_code}'`.
+  - A status from 200 to 299: print `alert sent (200)` (the real code) on
+    stdout, exit 0. Anything else, including `000` when curl could not
+    connect: print `alert failed (CODE)` on stderr, exit 1.
+concepts:
+  - "curl -sS -X POST -H -d sends a JSON body"
+  - "curl -o /dev/null -w '%{http_code}' returns only the status"
+  - "build JSON text safely: escape before you wrap"
+required_patterns:
+  - pattern: 'curl\b'
+    message: "Send the alert with curl."
+  - pattern: 'http_code'
+    message: "Capture the status with curl -w '%{http_code}'."
+test_cases:
+  - name: delivered
+    args: [eel, critical, "disk is 97% full"]
+    env: {WEBHOOK_URL: "https://chat.example/hooks/oncall"}
+    expected_stdout: "alert sent (200)"
+    expected_files:
+      .curl.log: |-
+        POST https://chat.example/hooks/oncall
+        H: Content-Type: application/json
+        {"host":"eel","severity":"critical","text":"disk is 97% full"}
+  - name: another success code
+    args: [dory, info, "backup done"]
+    env: {WEBHOOK_URL: "https://chat.example/hooks/oncall", FAKE_HTTP_STATUS: "204"}
+    expected_stdout: "alert sent (204)"
+  - name: quotes in the message are escaped
+    args: [marlin, warning, 'queue "billing" stuck']
+    env: {WEBHOOK_URL: "https://chat.example/hooks/oncall"}
+    expected_stdout: "alert sent (200)"
+    expected_files:
+      .curl.log: |-
+        POST https://chat.example/hooks/oncall
+        H: Content-Type: application/json
+        {"host":"marlin","severity":"warning","text":"queue \"billing\" stuck"}
+  - name: server error
+    args: [eel, critical, "disk is 97% full"]
+    env: {WEBHOOK_URL: "https://chat.example/hooks/oncall", FAKE_HTTP_STATUS: "503"}
+    expected_stderr: "alert failed (503)"
+    expected_exit: 1
+  - name: cannot connect
+    args: [eel, critical, "disk is 97% full"]
+    env: {WEBHOOK_URL: "https://chat.example/hooks/oncall", FAKE_HTTP_STATUS: "000"}
+    stderr_comparison: contains
+    expected_stderr: "alert failed (000)"
+    expected_exit: 1
+  - name: url not configured
+    args: [eel, info, hi]
+    expected_stderr: "WEBHOOK_URL is not set"
+    expected_exit: 2
+  - name: bad severity
+    args: [eel, panic, hi]
+    env: {WEBHOOK_URL: "https://chat.example/hooks/oncall"}
+    expected_stderr: "bad severity: panic"
+    expected_exit: 2
+    expected_files:
+      .curl.log: null

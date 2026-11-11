@@ -1,0 +1,81 @@
+id: 391
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: PID File Health
+difficulty: advanced
+xp: 170
+story: |
+  After a power cut on eel, the web server refuses to start because its PID file
+  says it is "already running". The number in the file belongs to a different
+  program now: the machine rebooted and the kernel handed the old number to cron.
+  Ollie asks how you can tell a live PID file from a leftover one. You decide
+  to write the checker, and to make it not fall for recycled numbers.
+objective: |
+  Write solution.sh: `solution.sh PIDFILE NAME`. NAME is the program name
+  the PID file should belong to (for example `nginx`).
+
+  Look at PIDFILE and print exactly one line:
+
+  - the file does not exist: `stopped`, exit 3
+  - the file does not contain a single whole number: `bad pid file`, exit 2
+  - the process with that PID exists and its command name is NAME:
+    `running pid=4242`, exit 0
+  - there is no such process: `stale: pid 4242 is not running`; delete the
+    PID file, exit 1
+  - the process exists but has another name, for example cron:
+    `stale: pid 977 belongs to cron, not nginx`; delete the PID file, exit 1
+
+  Ask `ps -p PID -o comm=` for the name of process PID (it prints nothing and
+  exits non-zero when the process does not exist). Wrong number of arguments:
+  `usage: solution.sh PIDFILE NAME` on stderr, exit 2.
+concepts:
+  - "a PID file records a process id, and ids get reused"
+  - "ps -p PID -o comm= asks for one process's name"
+  - "stale means the file lies; clean it up"
+required_patterns:
+  - pattern: 'ps\s+-p'
+    message: "Ask ps -p PID -o comm= for the process name."
+test_cases:
+  - name: healthy service
+    args: [run/nginx.pid, nginx]
+    env: {FAKE_PS: "1:init 977:cron 4242:nginx"}
+    files:
+      run/nginx.pid: "4242\n"
+    expected_stdout: "running pid=4242"
+    expected_files:
+      run/nginx.pid: true
+  - name: no process with that pid
+    args: [run/nginx.pid, nginx]
+    env: {FAKE_PS: "1:init 977:cron"}
+    files:
+      run/nginx.pid: "4242\n"
+    expected_stdout: "stale: pid 4242 is not running"
+    expected_exit: 1
+    expected_files:
+      run/nginx.pid: null
+  - name: pid was reused by another program
+    args: [run/nginx.pid, nginx]
+    env: {FAKE_PS: "1:init 977:cron"}
+    files:
+      run/nginx.pid: "977\n"
+    expected_stdout: "stale: pid 977 belongs to cron, not nginx"
+    expected_exit: 1
+    expected_files:
+      run/nginx.pid: null
+  - name: never started
+    args: [run/app.pid, app]
+    expected_stdout: "stopped"
+    expected_exit: 3
+  - name: file holds junk
+    args: [run/app.pid, app]
+    files:
+      run/app.pid: "not-a-number\n"
+    expected_stdout: "bad pid file"
+    expected_exit: 2
+    expected_files:
+      run/app.pid: true
+  - name: usage
+    args: [run/app.pid]
+    expected_stderr: "usage: solution.sh PIDFILE NAME"
+    expected_exit: 2

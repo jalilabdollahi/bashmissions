@@ -1,0 +1,152 @@
+id: 400
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Daily Summary
+difficulty: expert
+xp: 240
+story: |
+  Gus reads exactly one thing from operations every morning, and it is not the
+  logs. He wants a short report: how many lines, how many warnings and errors,
+  which servers were the noisiest, and when trouble began and ended. The
+  servers each write their own log, and each file also holds the tail of the
+  day before. Time to put the whole rota together in one script.
+objective: |
+  Write solution.sh: `solution.sh DATE LOGFILE...` where DATE looks like
+  `2026-03-01` and there is at least one LOGFILE.
+
+  Log lines look like `2026-03-01 08:14:03 ERROR eel upstream timed out`
+  (date, time, level, host, message). Only lines that start with DATE followed
+  by a space count; lines from other days and malformed lines are ignored.
+  Combine all files and print exactly this report:
+
+      Daily summary for 2026-03-01
+      lines: 9
+      INFO: 5
+      WARN: 1
+      ERROR: 3
+      errors by host:
+        eel 2
+        dory 1
+      first error: 08:14:03 (eel)
+      last error: 17:45:10 (dory)
+
+  - `lines:` counts every line of that day (any level, including DEBUG).
+  - The INFO, WARN and ERROR counts are always printed, even when 0.
+  - Hosts are listed with their ERROR counts, most first, ties by host name,
+    at most three hosts, each indented with two spaces.
+  - First and last error are the earliest and latest ERROR times of that day
+    (files are not sorted against each other). With no errors print `  none`
+    under `errors by host:` and `first error: none` / `last error: none`.
+  - A LOGFILE that cannot be read: print `cannot read LOGFILE` to stderr,
+    exit 1, and print no report. Bad DATE or no LOGFILE:
+    `usage: solution.sh DATE LOGFILE...` to stderr, exit 2.
+concepts:
+  - "awk aggregates counts and extremes in one pass"
+  - "combining several files in one run"
+  - "sort + head for a top-N list"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Aggregate the day's lines in one pass with awk."
+test_cases:
+  - name: two servers, one busy day
+    args: ["2026-03-01", eel.log, dory.log]
+    files:
+      eel.log: |
+        2026-02-28 23:59:58 ERROR eel yesterday's problem
+        2026-03-01 08:14:03 ERROR eel upstream timed out
+        2026-03-01 09:00:00 INFO eel recovered
+        2026-03-01 11:30:00 ERROR eel upstream timed out
+        2026-03-01 12:00:00 INFO eel nightly job done
+      dory.log: |
+        2026-03-01 07:00:00 INFO dory started
+        2026-03-01 08:20:00 WARN dory slow disk
+        2026-03-01 17:45:10 ERROR dory disk full
+        2026-03-01 18:00:00 DEBUG dory tick
+        2026-03-02 00:00:01 ERROR dory tomorrow's problem
+    expected_stdout: |-
+      Daily summary for 2026-03-01
+      lines: 8
+      INFO: 3
+      WARN: 1
+      ERROR: 3
+      errors by host:
+        eel 2
+        dory 1
+      first error: 08:14:03 (eel)
+      last error: 17:45:10 (dory)
+  - name: quiet day, no errors
+    args: ["2026-03-01", web.log]
+    files:
+      web.log: |
+        2026-03-01 10:00:00 INFO anchovy ok
+        2026-03-01 11:00:00 WARN anchovy slow
+        not a log line
+    expected_stdout: |-
+      Daily summary for 2026-03-01
+      lines: 2
+      INFO: 1
+      WARN: 1
+      ERROR: 0
+      errors by host:
+        none
+      first error: none
+      last error: none
+  - name: only the three noisiest hosts, ties broken by name
+    args: ["2026-03-01", all.log]
+    files:
+      all.log: |
+        2026-03-01 10:05:00 ERROR flounder x
+        2026-03-01 10:01:00 ERROR cuttlefish x
+        2026-03-01 10:02:00 ERROR cuttlefish x
+        2026-03-01 10:03:00 ERROR barracuda x
+        2026-03-01 10:04:00 ERROR anchovy x
+        2026-03-01 10:06:00 ERROR flounder x
+        2026-03-01 10:07:00 ERROR eel x
+    expected_stdout: |-
+      Daily summary for 2026-03-01
+      lines: 7
+      INFO: 0
+      WARN: 0
+      ERROR: 7
+      errors by host:
+        cuttlefish 2
+        flounder 2
+        anchovy 1
+      first error: 10:01:00 (cuttlefish)
+      last error: 10:07:00 (eel)
+  - name: files do not have to be in time order
+    args: ["2026-03-01", late.log, early.log]
+    files:
+      late.log: |
+        2026-03-01 22:00:00 ERROR grouper late one
+      early.log: |
+        2026-03-01 01:00:00 ERROR halibut early one
+    expected_stdout: |-
+      Daily summary for 2026-03-01
+      lines: 2
+      INFO: 0
+      WARN: 0
+      ERROR: 2
+      errors by host:
+        grouper 1
+        halibut 1
+      first error: 01:00:00 (halibut)
+      last error: 22:00:00 (grouper)
+  - name: unreadable file stops the report
+    args: ["2026-03-01", eel.log, missing.log]
+    files:
+      eel.log: |
+        2026-03-01 08:00:00 INFO eel ok
+    expected_stderr: "cannot read missing.log"
+    expected_exit: 1
+  - name: bad date
+    args: ["yesterday", eel.log]
+    files:
+      eel.log: ""
+    expected_stderr: "usage: solution.sh DATE LOGFILE..."
+    expected_exit: 2
+  - name: no files
+    args: ["2026-03-01"]
+    expected_stderr: "usage: solution.sh DATE LOGFILE..."
+    expected_exit: 2

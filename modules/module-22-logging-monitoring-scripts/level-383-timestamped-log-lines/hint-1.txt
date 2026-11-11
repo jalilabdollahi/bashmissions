@@ -1,0 +1,1 @@
+Bash can format a time without calling any program. There is a special printf conversion for dates, and it takes the moment to format as its argument, an epoch number. Think about how to ask it for "right now" too.

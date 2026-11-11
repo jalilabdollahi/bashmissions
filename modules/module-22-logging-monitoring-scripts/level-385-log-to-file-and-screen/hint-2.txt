@@ -1,0 +1,6 @@
+tee copies its stdin to stdout and to each file named. By default it overwrites the file; -a appends:
+
+  echo "backup ok" | tee -a /tmp/backup.log
+  generate-report | tee -a daily.log | wc -l
+
+dirname "$path" gives the folder part of a path, and [[ -d folder ]] tests that it exists. Use printf to build the prefixed line before piping it into tee.

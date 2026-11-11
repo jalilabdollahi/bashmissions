@@ -1,0 +1,13 @@
+Skeleton:
+
+  declare -A mem
+  while IFS=': ' read -r key value _unit; do
+    [[ -n $key ]] && mem[$key]=$value
+  done < "$file"
+  total=${mem[MemTotal]}
+  if [[ -n ${mem[MemAvailable]:-} ]]; then avail=${mem[MemAvailable]}
+  else avail=$(( ${mem[MemFree]:-0} + ${mem[Buffers]:-0} + ${mem[Cached]:-0} )); fi
+  used=$(( total - avail )); pct=$(( used * 100 / total ))
+  # print the memory line (kB / 1024 for MiB), the swap line, the WARN line
+
+Do the argument and MemTotal checks first.

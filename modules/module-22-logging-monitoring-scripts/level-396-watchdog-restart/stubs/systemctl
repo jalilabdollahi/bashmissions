@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Fake systemctl: understands "is-active NAME" and "restart NAME" only.
+# FAKE_ACTIVE      services that are running at the start ("nginx sshd")
+# FAKE_RESTART_FAIL services whose restart fails
+# Restarts are recorded in .calls.log; restarted services stay active (.restarted).
+if [[ $# -ne 2 ]]; then
+  echo "systemctl: stub supports: is-active NAME | restart NAME" >&2
+  exit 2
+fi
+action=$1
+name=$2
+is_up() {
+  [[ " ${FAKE_ACTIVE:-} $(cat .restarted 2>/dev/null | tr '\n' ' ') " == *" $name "* ]]
+}
+case $action in
+  is-active)
+    if is_up; then echo active; exit 0; fi
+    echo inactive
+    exit 3
+    ;;
+  restart)
+    echo "restart $name" >> .calls.log
+    if [[ " ${FAKE_RESTART_FAIL:-} " == *" $name "* ]]; then
+      echo "Job for $name.service failed." >&2
+      exit 1
+    fi
+    echo "$name" >> .restarted
+    ;;
+  *)
+    echo "systemctl: unsupported action '$action'" >&2
+    exit 2
+    ;;
+esac

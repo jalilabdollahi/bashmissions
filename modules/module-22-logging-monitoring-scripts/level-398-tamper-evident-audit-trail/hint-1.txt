@@ -1,0 +1,1 @@
+The chain works because every line's checksum depends on the line before it. So both modes need the same small helper that computes a checksum for (previous checksum, sequence number, message), and the same walk over the file that remembers the previous checksum as it goes. Build verify first, then let append reuse it.

@@ -1,0 +1,1 @@
+Think of two stages. Stage one is a single pass over all the files that gathers the facts: how many lines, how many per level, how many errors per host, and the earliest and latest error time. Stage two prints those facts in the report layout. A tool that keeps counters in arrays while it reads lines is the natural fit for stage one.

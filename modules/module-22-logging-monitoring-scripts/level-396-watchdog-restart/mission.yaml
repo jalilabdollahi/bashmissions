@@ -1,0 +1,81 @@
+id: 396
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Watchdog Restart
+difficulty: advanced
+xp: 190
+story: |
+  Twice this month the mail relay on octopus died at night and nobody woke up
+  for it. Theo's reaction: "just restart it, it always comes back." Mara's
+  reaction: "then let a script do it, once, and tell us whether it worked." You
+  are writing the night watchman for the three services that matter.
+objective: |
+  Write solution.sh: `solution.sh SERVICE...` (one or more service names).
+
+  For each service, in the order given:
+
+  1. Ask `systemctl is-active SERVICE`; exit status 0 means it is running.
+     If so print `ok SERVICE`.
+  2. Otherwise run `systemctl restart SERVICE` exactly once, then ask
+     `is-active` again. If it is running now, print `restarted SERVICE`;
+     if the restart failed or it is still not running, print `FAILED SERVICE`.
+
+  Keep going through the whole list even after a failure. Exit 0 if every
+  service is ok or was restarted, otherwise exit 1. With no arguments print
+  `usage: solution.sh SERVICE...` to stderr and exit 2.
+
+  Do not read the printed word `active`; use systemctl's exit status.
+concepts:
+  - "test a command by its exit status: if cmd; then"
+  - "act once, then verify the result"
+  - "keep going and report at the end"
+required_patterns:
+  - pattern: 'systemctl\s+restart'
+    message: "Restart a dead service with systemctl restart."
+  - pattern: 'if\s+!?\s*systemctl'
+    message: "Test systemctl's exit status directly: if systemctl is-active ...; then"
+test_cases:
+  - name: everything is running
+    args: [nginx, postfix]
+    env: {FAKE_ACTIVE: "nginx postfix sshd"}
+    expected_stdout: |-
+      ok nginx
+      ok postfix
+    expected_files:
+      .calls.log: null
+  - name: a dead service is restarted once
+    args: [nginx, postfix]
+    env: {FAKE_ACTIVE: "nginx"}
+    expected_stdout: |-
+      ok nginx
+      restarted postfix
+    expected_files:
+      .calls.log: "restart postfix"
+  - name: restart fails
+    args: [postfix, nginx, cron]
+    env: {FAKE_ACTIVE: "nginx", FAKE_RESTART_FAIL: "postfix"}
+    expected_stdout: |-
+      FAILED postfix
+      ok nginx
+      restarted cron
+    stderr_comparison: contains
+    expected_stderr: "failed"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |-
+        restart postfix
+        restart cron
+  - name: all dead, all revived
+    args: [a, b]
+    expected_stdout: |-
+      restarted a
+      restarted b
+    expected_files:
+      .calls.log: |-
+        restart a
+        restart b
+  - name: usage
+    args: []
+    expected_stderr: "usage: solution.sh SERVICE..."
+    expected_exit: 2

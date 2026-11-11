@@ -1,0 +1,1 @@
+To make columns line up you must know the widest value in each column before you print the first row, so read everything first and print afterwards. Then let printf do the padding for you instead of counting spaces by hand.
