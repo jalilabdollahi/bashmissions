@@ -1,0 +1,14 @@
+worker() {
+  local id=$1 n=0 job
+  while IFS= read -r job; do
+    skip blank lines and lines starting with #   (continue)
+    if (( n % workers == id )); then
+      if deploy "$job"; then echo "$job ok"; else echo "$job FAILED"; fi
+    fi
+    n=$((n + 1))
+  done < "$queue"
+}
+
+results=$( { for ((id = 0; id < workers; id++)); do worker "$id" & done; wait; } | sort )
+
+Then print $results (when not empty), count the lines and the ones ending in " FAILED", print the summary and exit 1 on failures. Do the two argument checks first.

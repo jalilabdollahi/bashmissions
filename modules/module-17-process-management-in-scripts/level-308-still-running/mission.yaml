@@ -1,0 +1,61 @@
+id: 308
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Still Running?
+difficulty: advanced
+xp: 190
+story: |
+  The search index at Lanternfish is rebuilt by `reindex`, which takes anywhere
+  from a few seconds to a few minutes. Noor has a dashboard that should say
+  "reindex finished" as soon as it ends, and "still running" if it drags on,
+  without freezing the dashboard script while it waits. Theo mutters that you
+  can ask the system whether a process is alive without disturbing it.
+objective: |
+  Write solution.sh that takes one argument, CHECKS (a positive whole number).
+  Without it, print `usage: solution.sh CHECKS` to stderr and exit with
+  status 2.
+
+  1. Start `reindex` in the background and keep its PID.
+  2. Look at the job up to CHECKS times. Each look is `kill -0 "$pid"`: it
+     sends no signal at all, it only succeeds while the process still exists.
+     (Silence its error message with `2>/dev/null`.)
+  3. If the process is gone at a look, print `reindex finished` and exit 0.
+  4. Otherwise sleep 0.1 seconds and look again.
+  5. If it is still there after CHECKS looks, print
+     `reindex still running after CHECKS checks` and exit with status 1.
+     Leave the job alone; do not wait for it and do not kill it.
+
+  Do not use `wait` or `jobs` for the looks; the point is `kill -0`.
+concepts:
+  - "kill -0 PID tests whether a process exists"
+  - "polling a background job without blocking"
+required_patterns:
+  - pattern: 'kill\s+-0\b'
+    message: "Test the process with kill -0 \"$pid\"."
+  - pattern: '\$!'
+    message: "Keep the background job's PID from $!."
+forbidden_patterns:
+  - pattern: '\bwait\b'
+    message: "Do not wait for the job; poll it with kill -0 instead."
+test_cases:
+  - name: job ends while we are looking
+    args: [20]
+    env:
+      REINDEX_SECONDS: "0.3"
+    expected_stdout: "reindex finished"
+  - name: a job that is already over after a blink
+    args: [30]
+    env:
+      REINDEX_SECONDS: "0"
+    expected_stdout: "reindex finished"
+  - name: we run out of patience
+    args: [4]
+    env:
+      REINDEX_SECONDS: "5"
+    expected_stdout: "reindex still running after 4 checks"
+    expected_exit: 1
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh CHECKS"
+    expected_exit: 2

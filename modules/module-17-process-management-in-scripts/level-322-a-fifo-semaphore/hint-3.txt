@@ -1,0 +1,16 @@
+mkfifo slots.fifo
+exec 3<> slots.fifo
+rm slots.fifo
+for ((i = 0; i < slots; i++)); do echo >&3; done
+: > failed.log
+
+for name in "$@"; do
+  read -r -u 3
+  {
+    if ! render "$name"; then echo "$name" >> failed.log; fi
+    echo >&3
+  } &
+done
+wait
+
+Finish by counting the lines of failed.log with $(( $(wc -l < failed.log) )) and printing the summary line; the usage check and `shift` for SLOTS come first.

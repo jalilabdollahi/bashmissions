@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Fake integrity-check for BashMissions. Silent; the exit status is the answer:
+#   marlin -> 3 (corruption found), octopus -> 4 (unreachable), others -> 0.
+if [[ $# -ne 1 ]]; then
+  echo "usage: integrity-check SERVER" >&2
+  exit 2
+fi
+sleep 0.3
+case $1 in
+  marlin)  exit 3 ;;
+  octopus) exit 4 ;;
+  *)       exit 0 ;;
+esac

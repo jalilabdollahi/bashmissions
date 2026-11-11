@@ -1,0 +1,1 @@
+A script can tell the system "I do not care about this signal" and later "go back to normal". There are two separate commands for that, and they look almost the same. The interesting part is what a program started in between sees: think about what it inherits.

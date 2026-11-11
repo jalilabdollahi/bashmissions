@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Fake vmbackup for BashMissions. Silent. Each server has its own duration and
+# result, so the jobs finish in a different order than they were started:
+#   anchovy 0.5s ok | barracuda 0.1s exit 2 | cuttlefish 0.3s ok
+#   dory 0.2s exit 5 | eel 0.4s ok | anything else 0.2s ok
+if [[ $# -ne 1 ]]; then
+  echo "usage: vmbackup SERVER" >&2
+  exit 2
+fi
+echo "start $1" >> .calls.log
+case $1 in
+  anchovy)    delay=0.5; code=0 ;;
+  barracuda)  delay=0.1; code=2 ;;
+  cuttlefish) delay=0.3; code=0 ;;
+  dory)       delay=0.2; code=5 ;;
+  eel)        delay=0.4; code=0 ;;
+  *)          delay=0.2; code=0 ;;
+esac
+sleep "$delay"
+echo "end $1" >> .calls.log
+exit "$code"

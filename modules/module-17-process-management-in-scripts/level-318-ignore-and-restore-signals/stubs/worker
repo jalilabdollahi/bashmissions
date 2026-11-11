@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Fake worker for BashMissions: sends SIGTERM to itself. Unless TERM was
+# ignored when it was started (an ignored signal stays ignored in children),
+# the signal ends it before the message.
+kill -TERM $$
+echo "worker: still alive after TERM"

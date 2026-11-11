@@ -1,0 +1,8 @@
+for server in "$@"; do
+  snapshot "$server" &
+  echo "$!" >> pids.txt
+done
+echo "started $# snapshots"
+wait
+
+Add the usage check for "no arguments" before the loop (stderr, exit 2).

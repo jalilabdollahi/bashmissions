@@ -1,0 +1,75 @@
+id: 317
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Reload on HUP
+difficulty: advanced
+xp: 235
+story: |
+  Every time Priya changes the welcome banner, somebody restarts the greeter
+  service, and every restart drops a few customers' connections. The grown-up
+  way is the one nginx and sshd use: leave the process running and send it
+  SIGHUP, the traditional "please re-read your configuration". Priya's deploy
+  tool `confpush` already does its half: it overwrites the config file and then
+  sends HUP. You write the half that listens.
+objective: |
+  Write solution.sh that takes one argument, CONF, the path of a config file
+  containing a line `greeting=SOMETHING` (the text may contain spaces or more
+  `=` signs). Without it print `usage: solution.sh CONF` to stderr, exit 2.
+
+  1. Define a function that reads the greeting from CONF (everything after the
+     first `=` on the `greeting=` line) into the variable `greeting`.
+  2. Load it once and print `loaded greeting=<value>`.
+  3. Install a handler for `HUP` with `trap`. On HUP it must load the config
+     again, set `reloaded=1`, and print `reloaded greeting=<new value>`.
+  4. Only then start the pusher: `confpush "$$" "$CONF" &`. It rewrites CONF
+     about 0.3 seconds later and then sends HUP to PID `$$`.
+  5. Poll up to 20 times: `sleep 0.1`, then stop looking as soon as
+     `reloaded` is 1.
+  6. If the reload happened, print `reload handled` and exit 0. If it did not
+     arrive after 20 polls, print `no reload received` to stderr and exit 1.
+
+  Install the trap before starting `confpush`: the default action of HUP is to
+  terminate the process.
+concepts:
+  - "SIGHUP as the conventional 'reload your config' signal"
+  - "a handler that re-reads state and sets a flag"
+  - "the trap must be in place before the signal can arrive"
+required_patterns:
+  - pattern: 'trap\s+\S+(\s+\S+)*\s+HUP'
+    message: "Install the handler with trap ... HUP."
+  - pattern: 'confpush\b[^\n]*&\s*$'
+    message: "Start confpush in the background: confpush \"$$\" \"$conf\" &"
+test_cases:
+  - name: the banner is reloaded
+    args: [app.conf]
+    files:
+      app.conf: "port=8080\ngreeting=Ahoy from Lanternfish\n"
+      push.conf: "port=8080\ngreeting=Welcome aboard\n"
+    expected_stdout: |-
+      loaded greeting=Ahoy from Lanternfish
+      reloaded greeting=Welcome aboard
+      reload handled
+  - name: values may contain equals signs
+    args: [banner.conf]
+    files:
+      banner.conf: "greeting=a=b\n"
+      push.conf: "# new banner\ngreeting=x=y=z\n"
+    expected_stdout: |-
+      loaded greeting=a=b
+      reloaded greeting=x=y=z
+      reload handled
+  - name: nobody sends HUP
+    args: [app.conf]
+    env:
+      FAKE_NO_HUP: "1"
+    files:
+      app.conf: "greeting=Quiet harbour\n"
+      push.conf: "greeting=never applied\n"
+    expected_stdout: "loaded greeting=Quiet harbour"
+    expected_stderr: "no reload received"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh CONF"
+    expected_exit: 2

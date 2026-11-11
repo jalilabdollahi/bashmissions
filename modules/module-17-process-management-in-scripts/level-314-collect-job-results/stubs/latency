@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Fake latency probe for BashMissions. Prints "HOST NNms" where NN depends on
+# the name; names ending in -down fail. The delay (0.1-0.6 s) also depends on
+# the name, so jobs finish in a different order than they were started.
+if [[ $# -ne 1 ]]; then
+  echo "usage: latency HOST" >&2
+  exit 2
+fi
+echo "start $1" >> .calls.log
+sleep "0.$(( 6 - ${#1} % 6 ))"
+echo "end $1" >> .calls.log
+case $1 in
+  *-down)
+    echo "$1: unreachable" >&2
+    exit 1
+    ;;
+esac
+echo "$1 $(( ${#1} * 7 + 11 ))ms"

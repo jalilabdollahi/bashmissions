@@ -1,0 +1,6 @@
+`xargs -n 1 -P 4 cmd` reads words from stdin, runs `cmd word` once per word, and keeps up to 4 running at once. If any call fails, xargs exits with 123. With `set -o pipefail`, a pipeline fails when any part of it fails, so you can translate that into your own exit status:
+
+  printf '%s\n' a b c | xargs -n 1 -P 2 echo | sort
+  if ! xargs ... | sort; then exit 1; fi
+
+The number of workers can come from a variable: `-P "$workers"`.

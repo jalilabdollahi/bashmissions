@@ -1,0 +1,68 @@
+id: 307
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Wait for Them All
+difficulty: advanced
+xp: 185
+story: |
+  Gus wants one line in the morning email: "the weekend backups went fine" or
+  the names of the servers where they did not. Backing up the VMs one by one
+  takes most of the night, so Theo started them all together. The problem is
+  that the first backup to finish is rarely the first one you started, and a
+  plain `wait` forgets who failed.
+objective: |
+  Write solution.sh. Every argument is a server name; with no arguments it
+  does nothing but print the summary below.
+
+  Start `vmbackup SERVER` in the background for every server (all running at
+  the same time) and remember each PID. Then wait for the jobs one by one,
+  in the order the servers were given, using `wait "$pid"` for each, and
+  keep each exit status.
+
+  After the last wait, print one line per server, in the order given:
+    SERVER ok            (status 0)
+    SERVER failed (N)    (any other status N)
+  then a summary line
+    A ok, B failed
+  Exit with status 0 if everything succeeded, otherwise 1.
+
+  The jobs finish in an unpredictable order, but your output must not. Print
+  only after all waits are done. Do not use a bare `wait`.
+concepts:
+  - "keep PIDs in an array and wait for each"
+  - "collect one status per job"
+  - "report in submission order, not completion order"
+required_patterns:
+  - pattern: '\$!'
+    message: "Save each job's PID from $!."
+  - pattern: 'wait\s+"?\$\{?[A-Za-z_]'
+    message: "Wait for each job by PID: wait \"${pids[i]}\" or wait \"$pid\"."
+forbidden_patterns:
+  - pattern: '^\s*wait\s*$'
+    message: "A bare wait throws the statuses away. Wait for each PID."
+test_cases:
+  - name: everything succeeds
+    args: [anchovy, cuttlefish, eel]
+    expected_stdout: |-
+      anchovy ok
+      cuttlefish ok
+      eel ok
+      3 ok, 0 failed
+  - name: the fast job fails and the slow one succeeds
+    args: [anchovy, barracuda, dory, eel]
+    expected_stdout: |-
+      anchovy ok
+      barracuda failed (2)
+      dory failed (5)
+      eel ok
+      2 ok, 2 failed
+    expected_exit: 1
+  - name: a server the tool has no special rule for
+    args: [flounder]
+    expected_stdout: |-
+      flounder ok
+      1 ok, 0 failed
+  - name: nothing to back up
+    args: []
+    expected_stdout: "0 ok, 0 failed"

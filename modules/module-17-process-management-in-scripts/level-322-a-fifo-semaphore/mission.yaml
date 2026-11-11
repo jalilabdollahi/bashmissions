@@ -1,0 +1,75 @@
+id: 322
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: A FIFO Semaphore
+difficulty: expert
+xp: 270
+story: |
+  Mara closes the module with a trick from the old guard. "Counting running jobs
+  by hand is fine until the day you forget one decrement. Let the operating
+  system count for you." Her idea: a pipe holding a few tokens, one per free
+  seat. To start a job you take a token out of the pipe, and if there is none you
+  simply wait until one appears. When the job ends it puts the token back. The pipe
+  is the counter, and `read` is the bouncer.
+objective: |
+  Write solution.sh. The first argument is SLOTS, the most `render` jobs that
+  may run at once; the other arguments are scene names. With no arguments
+  print `usage: solution.sh SLOTS NAME...` to stderr and exit 2.
+
+  Build a semaphore from a named pipe:
+    1. Create the FIFO `slots.fifo` with `mkfifo` and open it for reading and
+       writing on file descriptor 3 with `exec 3<> slots.fifo` (opening it
+       read-write means the open does not block). Then delete the name with
+       `rm slots.fifo`: the open descriptor keeps working.
+    2. Put SLOTS tokens into it: SLOTS times `echo >&3` (a token is one newline).
+    3. Empty `failed.log` at the start (`: > failed.log`).
+    4. For every NAME: take a token with `read -r -u 3` (this waits while all
+       tokens are in use), then start in the background a group that runs
+       `render NAME`, appends NAME to `failed.log` if render failed, and always
+       puts the token back with `echo >&3`.
+    5. `wait` for all jobs.
+
+  Print `rendered N, failed F`: N is the number of names, F the number of
+  lines in failed.log. Exit with status 1 if F is above zero, otherwise 0.
+  Do not use `wait -n` or `xargs`; the pipe is the limit.
+concepts:
+  - "a FIFO filled with tokens is a counting semaphore"
+  - "read -u 3 blocks until a token is available"
+  - "exec 3<> opens a pipe for both reading and writing"
+required_patterns:
+  - pattern: '\bmkfifo\b'
+    message: "Create the semaphore with mkfifo slots.fifo."
+  - pattern: 'exec\s+(\{\w+\}|[0-9]+)<>'
+    message: "Open the FIFO read-write on a descriptor: exec 3<> slots.fifo."
+  - pattern: 'read\s+[^\n]*-u\s*\$?\{?[0-9A-Za-z_]+'
+    message: "Take a token with read -r -u 3 (it blocks while none are left)."
+forbidden_patterns:
+  - pattern: '\bwait\s+-n\b|\bxargs\b'
+    message: "The FIFO is the limiter in this level: no wait -n and no xargs."
+test_cases:
+  - name: five scenes, two at a time
+    args: [2, harbour-dawn, harbour-dusk, pier-night, lighthouse, wharf-fog]
+    expected_stdout: "rendered 5, failed 0"
+    expected_files:
+      slots.fifo: null
+  - name: one slot and a broken scene
+    args: [1, intro, broken-bad, outro]
+    expected_stdout: "rendered 3, failed 1"
+    expected_exit: 1
+    expected_files:
+      failed.log: "broken-bad"
+  - name: more slots than scenes
+    args: [6, one, two]
+    expected_stdout: "rendered 2, failed 0"
+  - name: three slots with two failures
+    args: [3, a, b-bad, c, d-bad, e, f, g]
+    expected_stdout: "rendered 7, failed 2"
+    expected_exit: 1
+  - name: nothing to render
+    args: [3]
+    expected_stdout: "rendered 0, failed 0"
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh SLOTS NAME..."
+    expected_exit: 2

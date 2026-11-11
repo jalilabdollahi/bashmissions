@@ -1,0 +1,1 @@
+Think of a pool with MAX seats. Before starting a job, check whether a seat is free; if the pool is full, wait until some job ends and give its seat away. You need a number that goes up when you start a job and down when one is collected, and a way to wait for "whichever finishes first" instead of a particular PID.

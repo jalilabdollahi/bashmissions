@@ -1,0 +1,15 @@
+tmp=$(mktemp -d)
+n=0
+for host in "$@"; do
+  n=$((n + 1))
+  latency "$host" > "$tmp/$n" 2>&1 &
+done
+wait
+
+for ((i = 1; i <= n; i++)); do
+  cat "$tmp/$i"
+done
+rm -rf "$tmp"
+echo "checked $# hosts"
+
+Do not forget the usage check for "no hosts".

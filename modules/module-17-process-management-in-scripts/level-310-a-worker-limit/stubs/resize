@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake resize for BashMissions: 0.4 s of work, silent. Names starting with
+# "corrupt-" fail with status 1. Start and end are noted in .calls.log so the
+# level checker can measure how many ran at the same moment.
+if [[ $# -ne 1 ]]; then
+  echo "usage: resize IMAGE" >&2
+  exit 2
+fi
+echo "start $1" >> .calls.log
+sleep 0.4
+echo "end $1" >> .calls.log
+case $1 in
+  corrupt-*) exit 1 ;;
+esac
+exit 0

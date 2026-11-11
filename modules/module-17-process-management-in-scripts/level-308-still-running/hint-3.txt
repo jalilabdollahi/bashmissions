@@ -1,0 +1,15 @@
+checks=$1
+reindex &
+pid=$!
+
+for ((round = 1; round <= checks; round++)); do
+  if ! kill -0 "$pid" 2>/dev/null; then
+    echo "reindex finished"
+    exit 0
+  fi
+  sleep 0.1
+done
+echo "reindex still running after $checks checks"
+exit 1
+
+Add the usage check for a missing CHECKS yourself.

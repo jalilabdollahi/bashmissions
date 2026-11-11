@@ -1,0 +1,76 @@
+id: 320
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Safe Names with xargs -0
+difficulty: advanced
+xp: 250
+story: |
+  Gus wants a checksum manifest of every log file the Gull & Anchor Pub's
+  till software has written, so the auditors can later prove nothing was
+  edited. The till software names its files after whatever the cashier typed:
+  "Gull & Anchor.log", "it's.log", "web 1.log". Theo's `find | xargs cksum` runs
+  fine on the demo folder and falls over on the real one with
+  "unterminated quote". Priya just says "filenames are data, not syntax".
+objective: |
+  Write solution.sh that takes one argument, DIR.
+  - With no argument print `usage: solution.sh DIR` to stderr, exit 2.
+  - If DIR is not a folder print `not a folder: DIR` to stderr, exit 1.
+
+  Otherwise print a manifest of every regular file whose name ends in `.log`
+  anywhere below DIR (not folders, even if one is called `old.log`): the
+  output of `cksum` for each file, which is `CRC SIZE PATH`, sorted with a
+  plain `sort`. The paths are shown as `find` prints them (DIR first).
+
+  File names may contain spaces, quotes, `&`, `*`, `$` or start with a dash.
+  Pass them from `find` to `cksum` with NUL separators: `find ... -print0`
+  and `xargs -0`. The folder will always contain at least one .log file.
+concepts:
+  - "find -print0 ends each name with a NUL byte"
+  - "xargs -0 splits only on NUL, not on spaces or quotes"
+  - "filenames are data: never parse them as shell words"
+required_patterns:
+  - pattern: '-print0'
+    message: "End each name with a NUL byte: find ... -print0"
+  - pattern: 'xargs\s+(-[A-Za-z0-9]+\s+)*-0\b'
+    message: "Tell xargs to split on NUL: xargs -0 cksum"
+test_cases:
+  - name: spaces, ampersand and an apostrophe
+    args: [logs]
+    files:
+      "logs/Gull & Anchor.log": "pub up\n"
+      "logs/web 1.log": "hit\nhit\n"
+      "logs/it's.log": "quote\n"
+      "logs/notes.txt": "ignore me\n"
+      "logs/old.log/real.log": "deep\n"
+    expected_stdout: |-
+      125740437 6 logs/it's.log
+      2976348667 5 logs/old.log/real.log
+      4201635638 7 logs/Gull & Anchor.log
+      596855069 8 logs/web 1.log
+  - name: quotes, wildcards, dollars and a leading dash
+    args: [archive]
+    files:
+      "archive/a\"b.log": "quoted\n"
+      "archive/star*.log": "wild\n"
+      "archive/$HOME.log": "money\n"
+      "archive/-dash.log": "dash\n"
+      "archive/a.log.gz": "not a log\n"
+    expected_stdout: |-
+      1192659386 7 archive/a"b.log
+      1949063184 5 archive/star*.log
+      2225201542 6 archive/$HOME.log
+      3039240015 5 archive/-dash.log
+  - name: deep folders with spaces
+    args: [site]
+    files:
+      "site/my logs/2024 01/app.log": "January\n"
+    expected_stdout: "3569136369 8 site/my logs/2024 01/app.log"
+  - name: folder does not exist
+    args: [nowhere]
+    expected_stderr: "not a folder: nowhere"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

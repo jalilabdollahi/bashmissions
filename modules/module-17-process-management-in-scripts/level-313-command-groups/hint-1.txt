@@ -1,0 +1,1 @@
+You want several commands to behave like one command, so that a single redirection can catch everything they print. The shell has a way to group commands without starting a new process. The same grouping helps when an error branch needs to do two things: print a message and leave the script.

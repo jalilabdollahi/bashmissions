@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fake snapshot tool for BashMissions: half a second of "work" per server.
+# It notes when it starts (with its own PID) and when it ends, so the level
+# checker can see whether the snapshots really overlapped.
+if [[ $# -ne 1 ]]; then
+  echo "usage: snapshot SERVER" >&2
+  exit 2
+fi
+echo "start $1 $$" >> .calls.log
+sleep 0.5
+echo "end $1" >> .calls.log

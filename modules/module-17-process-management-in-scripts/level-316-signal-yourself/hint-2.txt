@@ -1,0 +1,7 @@
+`$$` is the PID of the running script. `kill -USR1 $$` sends it signal USR1 (a signal with no built-in meaning, free for your own use), and `trap handler USR1` registers `handler` (a function or a quoted command) to run when it arrives:
+
+  hello() { echo "got a signal"; }
+  trap hello USR1
+  kill -USR1 $$        # prints: got a signal
+
+USR1 and USR2 are the two "user defined" signals.

@@ -1,0 +1,1 @@
+Two steps, and the second one matters as much as the first: ask the process to end, then collect it. A process you stopped but never waited for stays in the process table, and you never learn how it ended. Also think about what happens if the job is already gone when you try to stop it.

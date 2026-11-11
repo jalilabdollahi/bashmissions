@@ -1,0 +1,8 @@
+`wait PID` blocks until that process ends and then returns its exit status, so `$?` (or an `||` branch) tells you how it went:
+
+  sleep 1 &
+  pid=$!
+  wait "$pid"
+  echo "sleep ended with $?"
+
+If your script uses `set -e`, a non-zero `wait` stops it. Write `status=0` first and then `wait "$pid" || status=$?` to keep control.

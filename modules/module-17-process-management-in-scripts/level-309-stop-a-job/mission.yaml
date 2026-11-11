@@ -1,0 +1,59 @@
+id: 309
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Stop a Job
+difficulty: advanced
+xp: 195
+story: |
+  Last Friday somebody started `soaktest` on a staging box and went home. It
+  is meant to run for a minute; this one ran until Monday and ate the disk.
+  Mara wants a launcher that starts the soak test, gives it a fixed amount of
+  time, and then stops it politely if it is still going. She also wants to know
+  how it ended, because "stopped by us" and "crashed" are not the same story.
+objective: |
+  Write solution.sh that takes one argument, GRACE: the number of seconds to
+  let the test run (it may be a decimal such as 0.3). Without it print
+  `usage: solution.sh GRACE` to stderr and exit with status 2.
+
+  1. Start `soaktest` in the background and keep its PID.
+  2. `sleep "$GRACE"`.
+  3. Try to stop it with a plain `kill "$pid"` (silence errors with
+     `2>/dev/null`).
+     - If the kill worked, the job was still running: `wait "$pid"` to collect
+       it and print `soaktest stopped (status N)`.
+     - If the kill failed, the job had already ended by itself: `wait "$pid"`
+       to collect its status and print `soaktest finished by itself (status N)`.
+  N is the status that `wait` returned. A job ended by the default signal
+  of `kill` reports 143 (128 + 15).
+
+  Always exit with status 0 once the message is printed. By default
+  `soaktest` runs for 30 seconds, far longer than your GRACE.
+concepts:
+  - "kill PID sends SIGTERM"
+  - "wait PID reaps the job and shows 128+signal"
+  - "kill fails when the process is already gone"
+required_patterns:
+  - pattern: '\bkill\s+"?\$'
+    message: "Stop the job with kill \"$pid\"."
+  - pattern: 'wait\s+"?\$\{?[A-Za-z_]'
+    message: "Collect the job with wait \"$pid\" to get its status."
+test_cases:
+  - name: runaway job is stopped
+    args: ["0.3"]
+    expected_stdout: "soaktest stopped (status 143)"
+  - name: job that finished before the deadline
+    args: ["0.7"]
+    env:
+      SOAK_SECONDS: "0.1"
+    expected_stdout: "soaktest finished by itself (status 0)"
+  - name: job that crashed before the deadline
+    args: ["0.7"]
+    env:
+      SOAK_SECONDS: "0.1"
+      SOAK_EXIT: "7"
+    expected_stdout: "soaktest finished by itself (status 7)"
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh GRACE"
+    expected_exit: 2

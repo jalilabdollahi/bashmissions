@@ -1,0 +1,8 @@
+`trap '' SIGNAL` (an empty command) makes the shell ignore the signal. `trap - SIGNAL` restores the default action. Children inherit an ignored signal, but not a handler:
+
+  trap '' TERM
+  kill -TERM $$        # survived
+  trap - TERM
+  kill -TERM $$        # the script is terminated here
+
+To keep a non-zero status from ending a `set -e` script, write `status=0; cmd || status=$?`.

@@ -1,0 +1,1 @@
+A background job is a separate process: anything it assigns to a variable dies with it. But a job can write to the file system, and the parent can read it afterwards. Give every job its own private file, and later read the files in the order you want the report in.

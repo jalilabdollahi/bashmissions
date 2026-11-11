@@ -1,0 +1,17 @@
+label=$1
+LOG_LEVEL=info
+export LOG_LEVEL
+
+status=0
+(
+  export LOG_LEVEL=debug
+  export PROBE_LABEL=$label
+  probe
+  exit 7
+) || status=$?
+echo "subshell exited with $status"
+
+probe
+echo "main LOG_LEVEL=$LOG_LEVEL"
+
+Add the usage check at the top yourself.

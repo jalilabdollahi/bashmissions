@@ -1,0 +1,16 @@
+load_config() { greeting=$(sed -n 's/^greeting=//p' "$conf" | head -n 1); }
+on_hup() { load_config; reloaded=1; echo "reloaded greeting=$greeting"; }
+
+reloaded=0
+load_config
+echo "loaded greeting=$greeting"
+trap on_hup HUP
+confpush "$$" "$conf" &
+
+for ((poll = 1; poll <= 20; poll++)); do
+  sleep 0.1
+  ...stop when reloaded is 1...
+done
+...success: "reload handled" / failure: stderr message, exit 1...
+
+Remember the usage check at the top.

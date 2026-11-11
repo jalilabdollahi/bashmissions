@@ -1,0 +1,17 @@
+verbose=off
+steps=0
+on_usr1() { ...flip $verbose, then echo "verbose is now $verbose"...; }
+on_usr2() { echo "status: $steps steps, verbose=$verbose"; }
+trap on_usr1 USR1
+trap on_usr2 USR2
+
+for action in "$@"; do
+  case $action in
+    go)      ...count, maybe print "step N"... ;;
+    verbose) kill -USR1 $$ ;;
+    status)  kill -USR2 $$ ;;
+    *)       echo "unknown command: $action" >&2; exit 2 ;;
+  esac
+done
+
+The usage check for "no actions" goes before all of this.

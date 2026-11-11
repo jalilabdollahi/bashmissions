@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Fake soaktest for BashMissions. Runs for $SOAK_SECONDS (default 30) and then
+# exits with $SOAK_EXIT (default 0). It lets go of stdout/stderr, and uses
+# exec in the default case so the PID the caller sees is the sleeping process.
+exec >/dev/null 2>&1
+if [[ -n ${SOAK_EXIT:-} ]]; then
+  sleep "${SOAK_SECONDS:-30}"
+  exit "$SOAK_EXIT"
+fi
+exec sleep "${SOAK_SECONDS:-30}"

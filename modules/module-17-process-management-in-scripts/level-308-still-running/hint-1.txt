@@ -1,0 +1,1 @@
+There is a way to ask the operating system "does this process exist?" without sending it anything harmful and without waiting for it. Use that as the condition of a loop that peeks, sleeps a moment and peeks again, giving up after a fixed number of rounds.

@@ -1,0 +1,5 @@
+An array can collect PIDs as you create them: `pids+=("$!")`. Loop over it later with `for pid in "${pids[@]}"`, and use `wait "$pid" || status=$?` to read each status. A second array keeps the results; `"${!arr[@]}"` loops over the indexes of an array so you can look at several arrays side by side:
+
+  for i in "${!names[@]}"; do echo "${names[i]} -> ${codes[i]}"; done
+
+Careful: with `set -u` on older bash, expanding an empty array can be an error. Bash 5 is fine.

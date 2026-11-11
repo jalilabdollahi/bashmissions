@@ -1,0 +1,7 @@
+Parentheses run a list of commands in a subshell (a child copy of the shell):
+
+  x=1
+  ( x=2; echo "inside: $x" )     # inside: 2
+  echo "outside: $x"             # outside: 1
+
+`exit` inside ( ) leaves only the subshell, and its status is available as `$?` after the `)`. To keep `set -e` from stopping on a non-zero one, write `( ... ) || status=$?`.

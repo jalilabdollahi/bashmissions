@@ -1,0 +1,67 @@
+id: 318
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Ignore and Restore Signals
+difficulty: advanced
+xp: 240
+story: |
+  The nightly database migration has one fragile stretch in the middle where
+  an impatient SIGTERM, from a deploy tool that "just wants to restart
+  everything", would leave the schema half changed. Mara wants that stretch
+  shielded, and then the shield removed again. She also asks you to prove a
+  surprising rule: a signal you ignore is ignored by every program you start
+  while the shield is up.
+objective: |
+  Write solution.sh that takes one argument, NAME (it may contain spaces).
+  Without it print `usage: solution.sh NAME` to stderr and exit 2.
+
+  Use the helper `worker`. It sends SIGTERM to itself, and if it is still
+  alive afterwards prints `worker: still alive after TERM`.
+
+  1. Ignore TERM with `trap '' TERM`.
+  2. Send TERM to yourself with `kill -TERM $$` and print `shielded NAME`.
+     The script must survive.
+  3. Run `worker`, capture its exit status without letting a non-zero status
+     stop the script, and print `phase 1 (NAME): status N`.
+  4. Restore the default behaviour with `trap - TERM`.
+  5. Run `worker` again, capture its status the same way, and print
+     `phase 2 (NAME): status N`.
+
+  In phase 2 the worker is killed by its own TERM, so N is 143 (128 + 15).
+  Bash may print a "Terminated" notice on stderr; that is fine.
+concepts:
+  - "trap '' SIGNAL ignores a signal"
+  - "ignored signals are inherited by child processes"
+  - "trap - SIGNAL restores the default action"
+required_patterns:
+  - pattern: 'trap\s+(\x27\x27|"")\s+(TERM|SIGTERM|15)\b'
+    message: "Ignore the signal with trap '' TERM."
+  - pattern: 'trap\s+-\s+(TERM|SIGTERM|15)\b'
+    message: "Restore the default with trap - TERM."
+test_cases:
+  - name: shield up, then down
+    args: [nightly]
+    expected_stdout: |-
+      shielded nightly
+      worker: still alive after TERM
+      phase 1 (nightly): status 0
+      phase 2 (nightly): status 143
+  - name: name with spaces
+    args: [weekend batch]
+    expected_stdout: |-
+      shielded weekend batch
+      worker: still alive after TERM
+      phase 1 (weekend batch): status 0
+      phase 2 (weekend batch): status 143
+  - name: a short name
+    args: [x]
+    expected_stdout: |-
+      shielded x
+      worker: still alive after TERM
+      phase 1 (x): status 0
+      phase 2 (x): status 143
+  - name: no name
+    args: []
+    expected_stderr: "usage: solution.sh NAME"
+    expected_exit: 2
