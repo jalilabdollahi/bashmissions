@@ -1,1 +1,0 @@
-`${var,,}` is the lowercase counterpart of `${var^^}`. Both are pure parameter expansion — no subprocess.

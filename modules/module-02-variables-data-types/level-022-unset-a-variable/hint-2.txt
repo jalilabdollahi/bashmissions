@@ -1,1 +1,0 @@
-After `unset v`, the variable is genuinely gone. With `set -u`, `echo "$v"` would abort.

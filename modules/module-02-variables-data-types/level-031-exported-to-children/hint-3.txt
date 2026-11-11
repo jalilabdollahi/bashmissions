@@ -1,0 +1,6 @@
+Export one, keep the other, run the tool, then print from the parent's point of view:
+
+  export REGION="$SITE"
+  SCRATCH="/srv/scratch/$SITE"
+  bash fixtures/child.sh
+  echo "parent sees: REGION=[$REGION] SCRATCH=[...]"

@@ -1,0 +1,12 @@
+Four assignments, then print the block (a here-document keeps it tidy):
+
+  name=${APP_NAME:-lanternfish-web}
+  mode=...
+  workers=...
+  port=${APP_PORT:-${PORT:-8080}}
+
+  cat <<EOF
+  name=$name
+  ...
+  listen=$name:$port
+  EOF

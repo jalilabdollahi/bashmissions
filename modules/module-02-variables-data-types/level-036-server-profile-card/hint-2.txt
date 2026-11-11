@@ -1,0 +1,10 @@
+The tools, each with a generic example:
+
+  need=${NAME:?NAME must be set}        # stop if missing
+  readonly OWNER="Lanternfish"          # constant
+  size=${SIZE:-8}                       # default
+  declare -i half; half=$size/2         # integer arithmetic
+  who=$(grep "^$need:" list | cut -d: -f2)   # captured output
+  who=${who:-nobody}                    # fallback after capturing
+
+For the card itself, a here-document (cat <<EOF ... EOF) prints several lines with variables inside.

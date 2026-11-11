@@ -1,1 +1,0 @@
-`${var:-default}` expands to `$var` when set and non-empty, otherwise to `default`. The original variable is **not** modified.

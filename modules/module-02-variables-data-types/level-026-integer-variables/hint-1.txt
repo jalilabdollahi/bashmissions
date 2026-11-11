@@ -1,0 +1,1 @@
+By default every variable holds text, so "3+2+1" is just five characters. You can tell Bash that one particular variable is a number, and from then on assignments to it are calculated.

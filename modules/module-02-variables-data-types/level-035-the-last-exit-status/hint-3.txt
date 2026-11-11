@@ -1,0 +1,9 @@
+Each grep is followed immediately by its own saved status; the prints and the exit come last:
+
+  grep -q -x -F "$HOST" fixtures/active.txt
+  active_rc=$?
+  grep ... fixtures/retired.txt
+  retired_rc=$?
+  echo "active=$active_rc"
+  echo "retired=..."
+  exit "$active_rc"

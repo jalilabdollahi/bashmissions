@@ -1,1 +1,0 @@
-`${var#pattern}` removes the **shortest** match of `pattern` from the **beginning** of `$var`. The pattern is a glob, not a regex.

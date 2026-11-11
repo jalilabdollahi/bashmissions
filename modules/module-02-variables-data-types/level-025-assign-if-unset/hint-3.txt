@@ -1,1 +1,0 @@
-`: "${name:=guest}"` is the idiomatic line — `:` is a no-op command, used purely to trigger the assignment side-effect.

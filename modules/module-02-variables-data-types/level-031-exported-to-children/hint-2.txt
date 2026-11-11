@@ -1,0 +1,5 @@
+export marks a variable so that every program started afterwards inherits it. You can assign and export in one go. Generic example:
+
+  export MODE=fast         # children can read $MODE
+  tmp=/work/job1           # only this script knows $tmp
+  bash child.sh

@@ -1,0 +1,96 @@
+id: 36
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Server Profile Card
+difficulty: intermediate
+xp: 120
+story: |
+  End of week one. Mara hands you a printed copy of the first server card
+  you made on Monday: it is full of hand-typed values and one of them is
+  already wrong. "Make the card a script," she says. "Give it a server name
+  and it fills in everything else, sensible defaults and all. Show me you
+  learned something this week." Gus wants one for every machine by Friday.
+objective: |
+  The card tool passes settings in the environment: SERVER (required),
+  ROLE (optional, default web), RAM_GB (optional, default 8) and DIMMS
+  (optional, default 2). The file fixtures/owners.txt has lines like
+  "dory:Tidewater Books" (server, colon, customer).
+
+  Write solution.sh that:
+    - Stops with "SERVER must be set" on stderr and exit status 1 if SERVER
+      is missing or empty (before printing anything), using ${SERVER:?...}.
+    - Locks the company name in a read-only variable:
+      readonly COMPANY="Lanternfish Hosting".
+    - Uses defaults for ROLE, RAM_GB and DIMMS with ${...:-...}.
+    - Declares an integer variable per_dimm with declare -i and sets it to
+      RAM_GB divided by DIMMS (whole-number division).
+    - Captures the owner with owner=$(...) by searching fixtures/owners.txt
+      for the line starting with "<SERVER>:" and cutting out the part after
+      the colon. If there is no such line, the owner is "unassigned".
+    - Prints exactly this card (a here-document is a good fit):
+
+        === Lanternfish Hosting ===
+        server: <SERVER>
+        role:   <ROLE>
+        memory: <RAM_GB> GB (<DIMMS> x <per_dimm> GB)
+        owner:  <owner>
+        slug:   <SERVER>_<ROLE>
+concepts:
+  - "combining variables into a report"
+  - "defaults, required settings, integers, readonly and captured output together"
+required_patterns:
+  - pattern: '\$\{SERVER:\?'
+    message: "Require SERVER with ${SERVER:?SERVER must be set}."
+  - pattern: '\breadonly\b'
+    message: "Lock the company name with readonly COMPANY=..."
+  - pattern: '\$\{ROLE:-'
+    message: "Give ROLE its default with ${ROLE:-web}."
+  - pattern: '\b(declare|typeset)\s+-[a-zA-Z]*i\b'
+    message: "Declare per_dimm as an integer with declare -i."
+  - pattern: '=\$\([^)]*owners\.txt'
+    message: "Capture the owner from fixtures/owners.txt with owner=$(...)."
+  - pattern: '\$\{[A-Za-z_]+\}_\$\{[A-Za-z_]+\}'
+    message: "Build the slug with braces around both names, e.g. ${server}_${role}."
+test_cases:
+  - name: all defaults
+    env: {SERVER: anchovy}
+    expected_stdout: |-
+      === Lanternfish Hosting ===
+      server: anchovy
+      role:   web
+      memory: 8 GB (2 x 4 GB)
+      owner:  Harbour Bakery
+      slug:   anchovy_web
+  - name: everything given
+    env: {SERVER: dory, ROLE: db, RAM_GB: "64", DIMMS: "4"}
+    expected_stdout: |-
+      === Lanternfish Hosting ===
+      server: dory
+      role:   db
+      memory: 64 GB (4 x 16 GB)
+      owner:  Tidewater Books
+      slug:   dory_db
+  - name: unknown owner and uneven memory
+    env: {SERVER: kraken, RAM_GB: "10", DIMMS: "4"}
+    expected_stdout: |-
+      === Lanternfish Hosting ===
+      server: kraken
+      role:   web
+      memory: 10 GB (4 x 2 GB)
+      owner:  unassigned
+      slug:   kraken_web
+  - name: owner name with spaces and an ampersand
+    env: {SERVER: eel, ROLE: cache}
+    expected_stdout: |-
+      === Lanternfish Hosting ===
+      server: eel
+      role:   cache
+      memory: 8 GB (2 x 4 GB)
+      owner:  Gull & Anchor Pub
+      slug:   eel_cache
+  - name: missing server stops the script
+    expected_stdout: ""
+    expected_stderr: "SERVER must be set"
+    stderr_comparison: contains
+    expected_exit: 1

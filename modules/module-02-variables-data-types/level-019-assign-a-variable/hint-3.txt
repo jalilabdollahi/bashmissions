@@ -1,1 +1,0 @@
-Once assigned, refer to the variable as `$greeting` or `${greeting}` in any string.

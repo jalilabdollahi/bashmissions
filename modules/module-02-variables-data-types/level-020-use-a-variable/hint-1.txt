@@ -1,1 +1,0 @@
-`$var` and `${var}` mean the same thing — but only the braced form makes the variable name unambiguous when followed by letters, digits, or underscores.

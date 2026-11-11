@@ -1,0 +1,6 @@
+Store the name in a variable, then use an exclamation mark inside the braces: ${!holder} means "the value of the variable whose name is stored in holder". Generic example:
+
+  which=colour_sky
+  colour_sky=blue
+  echo "${!which}"           # blue
+  echo "${!which:-none}"     # fallbacks work too

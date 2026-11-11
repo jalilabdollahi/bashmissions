@@ -1,0 +1,5 @@
+Put a colon, a dash and the fallback inside the braces: ${name:-fallback}. The fallback is used when name is unset or empty. Generic example:
+
+  echo "port=${PORT:-80}"       # prints port=80 when PORT is not set
+  PORT=8080
+  echo "port=${PORT:-80}"       # prints port=8080

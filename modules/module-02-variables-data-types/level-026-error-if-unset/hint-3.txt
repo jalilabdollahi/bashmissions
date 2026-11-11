@@ -1,1 +1,0 @@
-Stdout stays empty on the error path — the message goes to stderr, and the script terminates immediately.

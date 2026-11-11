@@ -1,1 +1,0 @@
-`${var##pattern}` (double hash) removes the **longest** match instead. Useful when you want everything after the *last* dot.

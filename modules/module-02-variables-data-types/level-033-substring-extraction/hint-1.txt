@@ -1,1 +1,0 @@
-`${var:offset:length}` slices a substring. `offset` is 0-based; `length` is optional (defaults to the rest of the string).

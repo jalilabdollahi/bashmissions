@@ -1,1 +1,0 @@
-The `:` makes the rule "unset *or* empty". Drop the `:` (`${var-default}`) and only an unset variable triggers the default.

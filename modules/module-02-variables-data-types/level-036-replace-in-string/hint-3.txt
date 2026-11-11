@@ -1,1 +1,0 @@
-Like other parameter expansions, this is in-process — no `sed`, no `tr` subprocess.

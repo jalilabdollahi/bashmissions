@@ -1,0 +1,5 @@
+Use a third variable as a parking space. The classic three-step shuffle, with generic names:
+
+  tmp=$left        # park left
+  left=$right      # left is free to change now
+  right=$tmp       # right gets the parked value

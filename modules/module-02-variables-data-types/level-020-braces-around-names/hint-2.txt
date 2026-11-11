@@ -1,0 +1,5 @@
+Wrap the name in curly braces: ${name}. Anything after the closing brace is plain text. Generic example:
+
+  fruit=plum
+  echo "${fruit}_jam and ${fruit}s"     # plum_jam and plums
+  echo "$fruit_jam"                      # prints an empty line!

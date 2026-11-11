@@ -1,0 +1,6 @@
+Three assignments and a print:
+
+  url=https://$SITE
+  url+=:$PORT
+  url+=...            # /status/ followed by the stage
+  echo "$url"

@@ -1,0 +1,5 @@
+Print the first line, then read the setting with the :? form, then print the last line:
+
+  echo "backup job starting"
+  host=${DB_HOST:?DB_HOST must be set}
+  echo "dumping database on ..."

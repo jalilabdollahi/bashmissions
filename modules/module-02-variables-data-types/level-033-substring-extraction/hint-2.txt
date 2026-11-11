@@ -1,1 +1,0 @@
-Negative offsets count from the end, but require a leading space inside the braces: `${var: -3}` for the last 3 characters.

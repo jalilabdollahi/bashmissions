@@ -1,0 +1,62 @@
+id: 27
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Fallback Values
+difficulty: beginner
+xp: 70
+story: |
+  Theo's log viewer works beautifully on his laptop, where he has every
+  setting exported, and crashes on the support desk machines, where nobody
+  has set anything. Noor has been phoning him about it. Mara's rule for
+  tools that other people run: every setting needs a sensible default, so
+  the tool works the moment it is started.
+objective: |
+  The viewer reads three optional settings from the environment: LOG_LEVEL,
+  LOG_DIR and MAX_LINES. Any of them may be missing or empty.
+
+  Write solution.sh that prints exactly three lines:
+
+    level=<LOG_LEVEL, or info when missing or empty>
+    dir=<LOG_DIR, or /var/log/lanternfish when missing or empty>
+    lines=<MAX_LINES, or 200 when missing or empty>
+
+  Use the ${name:-default} form for each of them; do not assign to the
+  variables and do not use if statements.
+concepts:
+  - "${var:-default} fallback value"
+  - "empty counts as missing with the colon"
+required_patterns:
+  - pattern: '\$\{LOG_LEVEL:-'
+    message: "Use ${LOG_LEVEL:-info} for the level."
+  - pattern: '\$\{LOG_DIR:-'
+    message: "Use ${LOG_DIR:-...} for the directory."
+  - pattern: '\$\{MAX_LINES:-'
+    message: "Use ${MAX_LINES:-200} for the line count."
+forbidden_patterns:
+  - pattern: '^\s*(if\b|\[\[)'
+    message: "No if statements here - the fallback form does the job."
+test_cases:
+  - name: nothing configured
+    expected_stdout: |-
+      level=info
+      dir=/var/log/lanternfish
+      lines=200
+  - name: everything configured
+    env: {LOG_LEVEL: debug, LOG_DIR: /srv/logs, MAX_LINES: "50"}
+    expected_stdout: |-
+      level=debug
+      dir=/srv/logs
+      lines=50
+  - name: level empty counts as missing
+    env: {LOG_LEVEL: "", LOG_DIR: /srv/logs}
+    expected_stdout: |-
+      level=info
+      dir=/srv/logs
+      lines=200
+  - name: only the line count given
+    env: {MAX_LINES: "5"}
+    expected_stdout: |-
+      level=info
+      dir=/var/log/lanternfish
+      lines=5

@@ -1,0 +1,7 @@
+The special variable $? holds the exit status of the previous command. Copy it on the very next line:
+
+  grep -q -x -F "needle" haystack.txt
+  found=$?
+  echo "grep said $found"     # 0 = found, 1 = not found
+
+If you echo first and read $? afterwards, you get the status of the echo instead.

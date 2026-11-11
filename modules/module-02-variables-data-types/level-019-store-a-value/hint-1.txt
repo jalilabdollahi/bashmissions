@@ -1,0 +1,1 @@
+A variable is a named box. First put something in the box, then use the box's name whenever you want what is inside. Do this for the server name and for the rack.

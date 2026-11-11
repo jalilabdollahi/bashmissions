@@ -1,0 +1,49 @@
+id: 21
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Quote Your Variables
+difficulty: beginner
+xp: 60
+story: |
+  Noor forwards a ticket marked URGENT: the welcome-note script worked for
+  "Harbour" but fell over on "Gull & Anchor Pub", and for one customer whose
+  account name is literally "*" it welcomed every file in the folder. Somebody
+  wrote the script in a hurry and left the variables bare. Mara hands it to
+  you with a smile.
+objective: |
+  solution.sh already contains the hurried (broken) script. Fix it without
+  changing what it is supposed to do. The customer name arrives in the
+  environment setting CUSTOMER and may contain spaces, ampersands or a star.
+
+  The script must:
+    1. Create a file called "<CUSTOMER>.txt" in the current folder containing
+       the single line:  Welcome, <CUSTOMER>
+    2. Print the line:   Filed: [<CUSTOMER>]
+
+  Put every use of the variable inside double quotes.
+concepts:
+  - '"$var" keeps spaces and stars as plain text'
+  - "word splitting and globbing"
+required_patterns:
+  - pattern: '"\$\{?CUSTOMER\}?(\.txt)?"'
+    message: 'Put the variable inside double quotes: "$CUSTOMER".'
+forbidden_patterns:
+  - pattern: '(^|[^"{A-Za-z_])\$CUSTOMER\b[^"]*$'
+    message: 'A bare $CUSTOMER is still on a line - wrap it in double quotes.'
+test_cases:
+  - name: plain name
+    env: {CUSTOMER: Harbour}
+    expected_stdout: "Filed: [Harbour]"
+    expected_files:
+      "Harbour.txt": "Welcome, Harbour"
+  - name: spaces and an ampersand
+    env: {CUSTOMER: "Gull & Anchor Pub"}
+    expected_stdout: "Filed: [Gull & Anchor Pub]"
+    expected_files:
+      "Gull & Anchor Pub.txt": "Welcome, Gull & Anchor Pub"
+  - name: the star account
+    env: {CUSTOMER: "*"}
+    expected_stdout: "Filed: [*]"
+    expected_files:
+      "*.txt": "Welcome, *"

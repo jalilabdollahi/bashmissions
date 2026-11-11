@@ -1,1 +1,0 @@
-Anchored variants: `${var/#old/new}` matches only at the start, `${var/%old/new}` only at the end.

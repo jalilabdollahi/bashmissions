@@ -1,0 +1,53 @@
+id: 33
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Swap Two Values
+difficulty: beginner
+xp: 80
+story: |
+  The primary database server at Lanternfish has a hiccup, and the standby
+  must take over. The failover checklist begins with "swap the roles", and
+  Ollie, trying to be helpful, wrote PRIMARY=$STANDBY and then STANDBY=$PRIMARY
+  - and ended up with two servers both called the same thing. Mara slides a
+  coffee mug across the desk and says: "Think of two glasses of juice. You
+  need a third glass."
+objective: |
+  The failover tooling passes the current roles in the environment settings
+  PRIMARY and STANDBY (each is one server name, possibly with spaces).
+
+  Write solution.sh that:
+    1. Prints:  before: primary=<PRIMARY> standby=<STANDBY>
+    2. Swaps the two values so that PRIMARY holds what STANDBY held and
+       STANDBY holds what PRIMARY held. Do this by assigning to the two
+       variables themselves, using a temporary third variable.
+    3. Prints:  after: primary=<PRIMARY> standby=<STANDBY>
+concepts:
+  - "swapping with a temporary variable"
+  - "assignment order matters"
+required_patterns:
+  - pattern: '^\s*PRIMARY='
+    message: "Assign to PRIMARY itself - the swap must change the variables."
+  - pattern: '^\s*STANDBY='
+    message: "Assign to STANDBY itself - the swap must change the variables."
+test_cases:
+  - name: dory and eel
+    env: {PRIMARY: dory, STANDBY: eel}
+    expected_stdout: |-
+      before: primary=dory standby=eel
+      after: primary=eel standby=dory
+  - name: names with spaces
+    env: {PRIMARY: "old dory", STANDBY: "new eel"}
+    expected_stdout: |-
+      before: primary=old dory standby=new eel
+      after: primary=new eel standby=old dory
+  - name: already identical
+    env: {PRIMARY: marlin, STANDBY: marlin}
+    expected_stdout: |-
+      before: primary=marlin standby=marlin
+      after: primary=marlin standby=marlin
+  - name: one side is empty
+    env: {PRIMARY: halibut, STANDBY: ""}
+    expected_stdout: |-
+      before: primary=halibut standby=
+      after: primary= standby=halibut

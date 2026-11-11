@@ -1,0 +1,53 @@
+id: 23
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Capture Command Output
+difficulty: beginner
+xp: 65
+story: |
+  The inventory file fixtures/servers.txt lists one server per line, in the
+  order somebody remembered them. Priya needs the alphabetical first and last
+  names for the audit header. You could copy them by eye, but the list grows
+  every month, and Mara says people who copy by eye are people who make
+  mistakes at 2 a.m.
+objective: |
+  Write solution.sh that reads fixtures/servers.txt (one server name per line)
+  and prints exactly three lines:
+
+    first: <alphabetically first name>
+    last: <alphabetically last name>
+    range: <first>..<last>
+
+  Capture the first and last name into variables called first and last with
+  command substitution (first=$(...), last=$(...)), then use only those
+  variables to print the lines. The file may be replaced by a different list
+  when your script is checked.
+concepts:
+  - "var=$(command) captures output"
+  - "reusing a captured value"
+required_patterns:
+  - pattern: '^\s*first=\$\('
+    message: "Capture the first name with first=$( ... )."
+  - pattern: '^\s*last=\$\('
+    message: "Capture the last name with last=$( ... )."
+test_cases:
+  - name: the shipped inventory
+    expected_stdout: |-
+      first: anchovy
+      last: marlin
+      range: anchovy..marlin
+  - name: a different list
+    files:
+      "fixtures/servers.txt": "halibut\nflounder\ngrouper\nbarracuda\n"
+    expected_stdout: |-
+      first: barracuda
+      last: halibut
+      range: barracuda..halibut
+  - name: only one server
+    files:
+      "fixtures/servers.txt": "octopus\n"
+    expected_stdout: |-
+      first: octopus
+      last: octopus
+      range: octopus..octopus

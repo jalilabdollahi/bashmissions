@@ -1,1 +1,0 @@
-Useful for table-driven dispatch: store a key name in a variable, look up the value indirectly.

@@ -1,0 +1,5 @@
+${name:-x} falls back when name is unset OR empty. Drop the colon - ${name-x} - and it falls back only when name is unset. Generic example:
+
+  unset a;  echo "[${a-x}] [${a:-x}]"     # [x] [x]
+  a=;       echo "[${a-x}] [${a:-x}]"     # [] [x]
+  a=hello;  echo "[${a-x}] [${a:-x}]"     # [hello] [hello]

@@ -1,0 +1,1 @@
+A variable can be missing in two different ways: it was never set, or it was set to nothing. The fallback form you know treats both the same. One small change in the syntax makes it care only about the first case.

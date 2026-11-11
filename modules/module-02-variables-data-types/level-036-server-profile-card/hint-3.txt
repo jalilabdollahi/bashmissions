@@ -1,0 +1,16 @@
+The skeleton, with the card left for you to fill in:
+
+  server=${SERVER:?SERVER must be set}
+  readonly COMPANY="Lanternfish Hosting"
+  role=${ROLE:-web}
+  ram=...
+  dimms=...
+  declare -i per_dimm
+  per_dimm=$ram/$dimms
+  owner=$(grep "^$server:" fixtures/owners.txt | cut -d: -f2)
+  owner=${owner:-unassigned}
+  cat <<EOF
+  === $COMPANY ===
+  ...
+  slug:   ${server}_${role}
+  EOF

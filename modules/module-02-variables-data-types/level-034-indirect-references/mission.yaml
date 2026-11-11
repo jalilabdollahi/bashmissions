@@ -1,0 +1,48 @@
+id: 34
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Indirect References
+difficulty: intermediate
+xp: 90
+story: |
+  Gus keeps each customer's storage quota as a separate setting named after
+  them: LIMIT_bakery, LIMIT_books, LIMIT_dental, and so on. Noor needs a tiny
+  tool that answers "what is the quota for this customer?" for whichever name
+  the desk types in. The variable's name is not known until the script runs.
+  Ollie asks if you have to write a case statement for every customer. You
+  do not.
+objective: |
+  The desk tool passes the customer's short name in the environment setting
+  CUSTOMER, next to the quota settings (LIMIT_bakery=50, LIMIT_books=120, ...).
+  The quota for a customer lives in the variable named LIMIT_ followed by the
+  customer's short name.
+
+  Write solution.sh that builds that variable name in a variable called
+  quota_var, looks up the value of the variable it names, and prints:
+
+    quota for <CUSTOMER>: <value>
+
+  If that quota variable does not exist or is empty, print "unlimited" in
+  place of the value. Use the ${!quota_var} indirect expansion.
+concepts:
+  - "${!name} indirect expansion"
+  - "building a variable name at run time"
+required_patterns:
+  - pattern: '\$\{!quota_var'
+    message: 'Look the value up indirectly with ${!quota_var}.'
+  - pattern: '^\s*quota_var=.*LIMIT_'
+    message: 'Build the variable name with quota_var=LIMIT_$CUSTOMER (or similar).'
+test_cases:
+  - name: bakery
+    env: {CUSTOMER: bakery, LIMIT_bakery: "50", LIMIT_books: "120"}
+    expected_stdout: "quota for bakery: 50"
+  - name: books
+    env: {CUSTOMER: books, LIMIT_bakery: "50", LIMIT_books: "120", LIMIT_dental: "75"}
+    expected_stdout: "quota for books: 120"
+  - name: customer without a quota
+    env: {CUSTOMER: pub, LIMIT_bakery: "50"}
+    expected_stdout: "quota for pub: unlimited"
+  - name: quota set to empty
+    env: {CUSTOMER: dental, LIMIT_dental: ""}
+    expected_stdout: "quota for dental: unlimited"

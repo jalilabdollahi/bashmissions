@@ -1,0 +1,5 @@
+One echo per setting, with the fallback written right inside the braces:
+
+  echo "level=${LOG_LEVEL:-info}"
+  echo "dir=..."      # fallback /var/log/lanternfish
+  echo "lines=..."    # fallback 200

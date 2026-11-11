@@ -1,1 +1,0 @@
-For arrays, the same `!` prefix gives you the indices: `${!arr[@]}` (covered in module 9).

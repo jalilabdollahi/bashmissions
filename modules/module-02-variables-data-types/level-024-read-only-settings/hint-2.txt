@@ -1,0 +1,6 @@
+The word is readonly, and you can set the value in the same command. Generic example:
+
+  readonly MAX_USERS=50
+  MAX_USERS=500        # Bash: MAX_USERS: readonly variable (script stops)
+
+The lock lasts until the script ends; there is no way to undo it.

@@ -1,0 +1,4 @@
+${name:?message} gives the value of name, or - if it is unset or empty - prints the message to stderr and ends the script with exit status 1. Generic example:
+
+  target=${DEPLOY_TARGET:?DEPLOY_TARGET is required}
+  echo "deploying to $target"

@@ -1,0 +1,6 @@
+One settling line, then three plain echo lines:
+
+  : "${REGION:=north-pier}"
+  echo "deploying to $REGION"
+  echo "backups: ..."
+  echo "tag: ..."

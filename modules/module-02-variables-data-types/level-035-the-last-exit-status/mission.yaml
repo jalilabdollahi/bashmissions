@@ -1,0 +1,63 @@
+id: 35
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: The Last Exit Status
+difficulty: intermediate
+xp: 90
+story: |
+  Before a server gets a new customer, Mara wants to know whether it is still
+  in service or has been retired to the lobster-pot graveyard. The inventory
+  keeps two plain lists, fixtures/active.txt and fixtures/retired.txt, one
+  name per line. Every command Bash runs leaves behind a number saying how it
+  went, and that number disappears the moment the next command runs. Your
+  job is to catch both numbers before they vanish.
+objective: |
+  The inventory tool passes the server name in the setting HOST. Write
+  solution.sh that checks the two lists with grep, using grep -q -x -F so
+  that only a whole-line match counts and nothing is printed:
+
+    grep -q -x -F "$HOST" fixtures/active.txt
+    grep -q -x -F "$HOST" fixtures/retired.txt
+
+  Immediately after each grep, copy the special variable $? into a variable
+  (active_rc and retired_rc). Then print:
+
+    active=<active_rc>
+    retired=<retired_rc>
+
+  and finally end the script with the same exit status as the first check
+  (exit "$active_rc"). grep returns 0 when it finds the line and 1 when it
+  does not.
+concepts:
+  - "$? holds the last exit status"
+  - "saving $? before it is overwritten"
+required_patterns:
+  - pattern: '^\s*active_rc=\$\?'
+    message: "Save the status right after the first grep with active_rc=$?."
+  - pattern: '^\s*retired_rc=\$\?'
+    message: "Save the status right after the second grep with retired_rc=$?."
+test_cases:
+  - name: active server
+    env: {HOST: dory}
+    expected_stdout: |-
+      active=0
+      retired=1
+  - name: retired server
+    env: {HOST: haddock}
+    expected_stdout: |-
+      active=1
+      retired=0
+    expected_exit: 1
+  - name: unknown server
+    env: {HOST: kraken}
+    expected_stdout: |-
+      active=1
+      retired=1
+    expected_exit: 1
+  - name: partial names do not match
+    env: {HOST: dor}
+    expected_stdout: |-
+      active=1
+      retired=1
+    expected_exit: 1

@@ -1,0 +1,1 @@
+You already know how to put a command's output into a line of text. The new step is to keep that output in a variable so you can use it more than once without running the command again.

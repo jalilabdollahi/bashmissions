@@ -1,0 +1,1 @@
+You want "use this variable, but if it has nothing useful, use this other value instead" - and you want to say it inside the line you print, with no extra steps.

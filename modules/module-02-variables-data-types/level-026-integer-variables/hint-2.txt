@@ -1,0 +1,6 @@
+declare -i name gives a variable the integer attribute. After that, name=2+3 stores 5, and name+=4 adds 4 to the current number. Generic example:
+
+  declare -i apples
+  apples=2+3
+  apples+=4
+  echo "$apples"      # 9

@@ -1,0 +1,1 @@
+Some settings have no safe default. For those, the right behaviour is to complain clearly and stop immediately, before anything else happens. Bash has an expansion built for that.

@@ -1,0 +1,57 @@
+id: 29
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Fail Loudly When Missing
+difficulty: beginner
+xp: 75
+story: |
+  The nightly database backup ran for two weeks against... nothing. Nobody
+  had set DB_HOST on the new machine, so the script cheerfully dumped the
+  database at "" and reported success. North Pier Dental's receptionist found
+  out when she needed a record from last Thursday. Priya says some settings
+  have no sensible default, and a script that cannot work should say so and
+  stop.
+objective: |
+  The backup tool passes the database host in the environment setting
+  DB_HOST. Write solution.sh that:
+
+    1. Prints:  backup job starting
+    2. Reads DB_HOST into a variable called host, and if DB_HOST is missing
+       or empty stops the script right there with the error message
+       "DB_HOST must be set" on stderr and exit status 1. Do this with the
+       ${DB_HOST:?message} expansion, not with an if statement.
+    3. Otherwise prints:  dumping database on <host>
+
+  The error message must contain the text: DB_HOST must be set
+concepts:
+  - "${var:?message} aborts when missing"
+  - "required settings"
+required_patterns:
+  - pattern: '\$\{DB_HOST:\?[^}]*DB_HOST must be set[^}]*\}'
+    message: 'Use ${DB_HOST:?DB_HOST must be set} for the required setting.'
+forbidden_patterns:
+  - pattern: '^\s*if\b'
+    message: "No if statement needed - the :? expansion stops the script itself."
+test_cases:
+  - name: host provided
+    env: {DB_HOST: dory.lanternfish.example}
+    expected_stdout: |-
+      backup job starting
+      dumping database on dory.lanternfish.example
+  - name: host missing
+    expected_stdout: "backup job starting"
+    expected_stderr: "DB_HOST must be set"
+    stderr_comparison: contains
+    expected_exit: 1
+  - name: host empty
+    env: {DB_HOST: ""}
+    expected_stdout: "backup job starting"
+    expected_stderr: "DB_HOST must be set"
+    stderr_comparison: contains
+    expected_exit: 1
+  - name: another host
+    env: {DB_HOST: eel.lanternfish.example}
+    expected_stdout: |-
+      backup job starting
+      dumping database on eel.lanternfish.example

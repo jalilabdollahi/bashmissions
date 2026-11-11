@@ -1,0 +1,5 @@
+All three lines have the same shape - echo, quotes, a label, then ${NODE} followed by the glued-on text:
+
+  echo "archive: ${NODE}_backup.tar.gz"
+  echo "replica: ..."
+  echo "host: ..."

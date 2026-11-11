@@ -1,0 +1,6 @@
+Double quotes around a variable make its value one single, untouched word: "$var". Compare, with var="two words":
+
+  touch $var       # two files: "two" and "words"
+  touch "$var"     # one file called "two words"
+
+Quote the variable wherever it appears as an argument or a redirect target.

@@ -1,1 +1,0 @@
-`${var^^}` expands `$var` with **all** letters uppercased. Non-letter characters are left alone.

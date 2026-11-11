@@ -1,0 +1,1 @@
+For each setting, the environment gets the first say and the built-in default only applies when the environment says nothing. For the port there are two possible sources in the environment, so you need a chain: first choice, second choice, last resort.

@@ -1,0 +1,4 @@
+The first line already quotes the message but not the file name. Quote that too, and quote the argument of printf:
+
+  echo "Welcome, $CUSTOMER" > "$CUSTOMER.txt"
+  printf 'Filed: [%s]\n' "$CUSTOMER"

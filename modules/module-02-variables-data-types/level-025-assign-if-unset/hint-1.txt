@@ -1,1 +1,0 @@
-`${var:=default}` (with `=`) substitutes the default *and* assigns it to `var` — unlike `:-` which only substitutes.
