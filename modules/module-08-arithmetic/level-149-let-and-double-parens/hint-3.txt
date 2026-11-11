@@ -1,0 +1,8 @@
+total="$1"
+used="$2"
+let "free = ..."         # quoted expression
+let_status=$?            # capture the status immediately
+(( used_pct = ... ))     # USED * 100 / TOTAL
+echo "free=$free"
+echo "used_pct=$used_pct"
+echo "let_status=$let_status"

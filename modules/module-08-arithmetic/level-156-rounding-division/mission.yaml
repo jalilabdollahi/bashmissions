@@ -1,0 +1,97 @@
+id: 156
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Rounding Division
+difficulty: advanced
+xp: 200
+story: |
+  The harbour cluster costs the same amount every month, and Gus has to split
+  it between the customers who share it. Amounts are in cents, so no one can
+  pay half a cent. "Do I charge them 3 cents, or 4?" he asks about a bill that
+  divides into 3.5. Then: "And how many disks do I buy if each one holds 4
+  terabytes?" Same division, three different answers, depending on the
+  rounding. Time to get all three exactly right.
+objective: |
+  Write solution.sh that takes two whole numbers: AMOUNT ($1, zero or more) and
+  PARTS ($2, one or more). Print three lines:
+
+    floor=<AMOUNT / PARTS rounded down>
+    nearest=<AMOUNT / PARTS rounded to the nearest whole number; exactly .5 rounds UP>
+    ceiling=<AMOUNT / PARTS rounded up>
+
+  Examples: 7 / 2 = 3.5 gives floor 3, nearest 4, ceiling 4.
+  10 / 3 = 3.33 gives floor 3, nearest 3, ceiling 4. 8 / 4 = 2 gives 2, 2, 2.
+
+  If PARTS is 0, print "parts must be at least 1" to stderr and exit with
+  status 2. Use integer arithmetic only: no awk, no bc, no printf %.0f.
+concepts:
+  - "round half up: (a + b/2) / b"
+  - "ceiling division: (a + b - 1) / b"
+required_patterns:
+  - pattern: '\$\(\([^)]*/'
+    message: "Do the divisions inside $(( )) with /."
+forbidden_patterns:
+  - pattern: '\b(awk|bc|dc|python3?|perl|expr)\b'
+    message: "Rounding with integers only: add a little before you divide."
+  - pattern: '%\.?[0-9]*f'
+    message: "No floating point formats here: integers only."
+test_cases:
+  - name: exact half rounds up
+    args: ["7", "2"]
+    expected_stdout: |-
+      floor=3
+      nearest=4
+      ceiling=4
+  - name: below half
+    args: ["10", "3"]
+    expected_stdout: |-
+      floor=3
+      nearest=3
+      ceiling=4
+  - name: above half
+    args: ["11", "3"]
+    expected_stdout: |-
+      floor=3
+      nearest=4
+      ceiling=4
+  - name: divides evenly
+    args: ["8", "4"]
+    expected_stdout: |-
+      floor=2
+      nearest=2
+      ceiling=2
+  - name: nothing to split
+    args: ["0", "5"]
+    expected_stdout: |-
+      floor=0
+      nearest=0
+      ceiling=0
+  - name: a single customer
+    args: ["999", "1"]
+    expected_stdout: |-
+      floor=999
+      nearest=999
+      ceiling=999
+  - name: half a cent exactly, 1 over 2
+    args: ["1", "2"]
+    expected_stdout: |-
+      floor=0
+      nearest=1
+      ceiling=1
+  - name: half with an even divisor
+    args: ["10", "4"]
+    expected_stdout: |-
+      floor=2
+      nearest=3
+      ceiling=3
+  - name: big invoice
+    args: ["1234567", "12"]
+    expected_stdout: |-
+      floor=102880
+      nearest=102881
+      ceiling=102881
+  - name: parts of zero is rejected
+    args: ["50", "0"]
+    expected_stderr: "parts must be at least 1"
+    expected_exit: 2

@@ -1,0 +1,1 @@
+In Bash, "7" and "5" are just text until you ask for arithmetic. Writing them next to each other glues them into "75". You need a construct that tells the shell: evaluate this as a sum and hand me the number.

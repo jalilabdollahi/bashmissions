@@ -1,0 +1,81 @@
+id: 153
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Number Bases
+difficulty: intermediate
+xp: 150
+story: |
+  Priya is auditing the firewall. The rule file lists ports in hexadecimal
+  ("1f90") and file modes in octal ("640"), while the dashboard shows decimal.
+  She keeps converting in her head and keeps losing. "I need a quick table I can
+  trust," she says. "Port and permission, in the other bases too."
+objective: |
+  Write solution.sh that takes two arguments: a PORT written in hexadecimal
+  ($1, digits 0-9 and a-f or A-F, no 0x prefix) and a MODE written in octal
+  ($2, digits 0-7, possibly with a leading zero like 0644).
+  Print exactly four lines:
+
+    port=<PORT in decimal>
+    mode=<MODE in decimal>
+    port_octal=<the port in octal>
+    mode_hex=<the mode in lowercase hexadecimal>
+
+  Read the numbers with Bash's base#number notation inside $(( )), and write
+  the other bases with printf (%o and %x). No bc, no awk.
+concepts:
+  - "base#number (16#ff, 8#755)"
+  - "printf %x and %o"
+required_patterns:
+  - pattern: '16#'
+    message: "Read the hex port with 16#<digits> inside $(( ))."
+  - pattern: '8#'
+    message: "Read the octal mode with 8#<digits> inside $(( ))."
+  - pattern: 'printf[^\n]*%[ox]'
+    message: "Write numbers in other bases with printf %o or %x."
+forbidden_patterns:
+  - pattern: '\b(bc|dc|awk|expr)\b'
+    message: "Bash can read any base itself with base#number."
+test_cases:
+  - name: web port and typical file mode
+    args: ["1f90", "640"]
+    expected_stdout: |-
+      port=8080
+      mode=416
+      port_octal=17620
+      mode_hex=1a0
+  - name: uppercase hex digits
+    args: ["FFFF", "777"]
+    expected_stdout: |-
+      port=65535
+      mode=511
+      port_octal=177777
+      mode_hex=1ff
+  - name: single byte and a leading-zero mode
+    args: ["ff", "0644"]
+    expected_stdout: |-
+      port=255
+      mode=420
+      port_octal=377
+      mode_hex=1a4
+  - name: zeros
+    args: ["0", "0"]
+    expected_stdout: |-
+      port=0
+      mode=0
+      port_octal=0
+      mode_hex=0
+  - name: octal 10 is eight
+    args: ["8", "10"]
+    expected_stdout: |-
+      port=8
+      mode=8
+      port_octal=10
+      mode_hex=8
+  - name: leading zeros on the hex port
+    args: ["0050", "755"]
+    expected_stdout: |-
+      port=80
+      mode=493
+      port_octal=120
+      mode_hex=1ed

@@ -1,0 +1,9 @@
+(( )) works as an if condition: it is true when the expression is true. Inside it you can use <, <=, >, >=, == and != just like in maths, and * for arithmetic. Generic example:
+
+  if (( temperature * 10 > limit * 9 )); then
+    echo "hot"
+  elif (( temperature >= 20 )); then
+    echo "warm"
+  else
+    echo "cold"
+  fi

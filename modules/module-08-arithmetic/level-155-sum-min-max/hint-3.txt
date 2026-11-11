@@ -1,0 +1,12 @@
+count=0; sum=0; min=0; max=0
+while read -r value; do
+  [[ -z $value ]] && continue
+  if (( count == 0 )); then
+    min=$value; max=$value          # first reading sets both records
+  else
+    ...                              # replace min / max when beaten
+  fi
+  count=$(( count + 1 ))
+  sum=$(( ... ))
+done
+# then: no data check, and five echo lines (avg is sum / count)

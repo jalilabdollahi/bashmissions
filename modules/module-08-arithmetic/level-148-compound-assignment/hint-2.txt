@@ -1,1 +1,6 @@
-`((i += 5))` adds 5 to `i`.
+In arithmetic, "x += n" means "x = x + n", and "x *= n" means "x = x * n". The same pattern exists for -=, /= and %=. Used inside (( )) they change the variable in place. Generic example:
+
+  stock=10
+  (( stock += 5 ))     # 15
+  (( stock *= 3 ))     # 45
+  echo "$stock"

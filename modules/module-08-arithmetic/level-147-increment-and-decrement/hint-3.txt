@@ -1,0 +1,10 @@
+total=0
+active=0
+while read -r event user; do
+  case "$event" in
+    connect)    ... ;;      # both counters go up
+    disconnect) ... ;;      # only active goes down
+  esac
+done
+echo "total_connects=$total"
+echo "still_connected=$active"

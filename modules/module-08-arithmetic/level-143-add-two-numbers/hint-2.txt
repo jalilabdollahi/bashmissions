@@ -1,0 +1,5 @@
+Arithmetic expansion looks like $(( expression )). Bash evaluates the expression and replaces the whole thing with the result. Variable names inside need no dollar sign. Generic example:
+
+  width=6; height=7
+  area=$(( width * height ))
+  echo "area is $area"        # area is 42

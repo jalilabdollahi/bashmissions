@@ -1,0 +1,63 @@
+id: 150
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Arithmetic Conditions
+difficulty: intermediate
+xp: 140
+story: |
+  Marlin's disk filled up at 3 a.m. last Tuesday and nobody knew until a customer
+  called. Mara has decided that every disk gets a traffic light: green, amber or
+  red, based on how full it is. "Keep it simple," she says. "Two thresholds,
+  and no floating point. If you compare it right, you won't even need
+  to compute a percentage."
+objective: |
+  Write solution.sh that takes three arguments: a server NAME ($1), the USED
+  space ($2) and the TOTAL size ($3), both whole numbers in GB (TOTAL is always
+  positive). Print one line:
+
+    <NAME>: <STATUS>
+
+  where STATUS is
+    CRITICAL   when the disk is 90% full or more
+    WARNING    when it is 75% full or more (but below 90%)
+    OK         otherwise
+
+  Decide with `if (( ... ))` / `elif (( ... ))`. Avoid a percentage division:
+  compare USED * 100 with TOTAL * 90 (and TOTAL * 75) instead.
+concepts:
+  - "if (( ... )) arithmetic condition"
+  - "comparison operators >= > < == inside (( ))"
+required_patterns:
+  - pattern: '\b(if|elif)\s+\(\('
+    message: "Use if (( ... )) for the comparisons."
+forbidden_patterns:
+  - pattern: '\s-(eq|ne|lt|le|gt|ge)\s'
+    message: "Inside (( )) you can write >= and < like in maths; no -ge or -lt needed."
+  - pattern: '\b(bc|expr|awk)\b'
+    message: "No external tools: (( )) can compare numbers by itself."
+test_cases:
+  - name: plenty of room
+    args: ["anchovy", "100", "500"]
+    expected_stdout: "anchovy: OK"
+  - name: just below the warning line
+    args: ["barracuda", "74", "100"]
+    expected_stdout: "barracuda: OK"
+  - name: exactly at the warning line
+    args: ["cuttlefish", "75", "100"]
+    expected_stdout: "cuttlefish: WARNING"
+  - name: just below critical
+    args: ["dory", "89", "100"]
+    expected_stdout: "dory: WARNING"
+  - name: exactly critical
+    args: ["eel", "450", "500"]
+    expected_stdout: "eel: CRITICAL"
+  - name: totally full
+    args: ["marlin", "2000", "2000"]
+    expected_stdout: "marlin: CRITICAL"
+  - name: empty disk
+    args: ["flounder", "0", "250"]
+    expected_stdout: "flounder: OK"
+  - name: odd sizes where integer division would mislead
+    args: ["grouper", "599", "800"]
+    expected_stdout: "grouper: OK"

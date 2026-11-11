@@ -1,0 +1,4 @@
+In $(( )) multiplication and division bind tighter than addition and subtraction. Parentheses override the order, exactly as on paper. Generic example:
+
+  echo $(( 2 + 3 * 4 ))       # 14  (3 * 4 first)
+  echo $(( (2 + 3) * 4 ))     # 20  (the parentheses win)

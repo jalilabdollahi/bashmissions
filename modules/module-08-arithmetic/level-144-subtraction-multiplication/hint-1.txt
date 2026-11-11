@@ -1,1 +1,0 @@
-Use `-` for subtraction and `*` for multiplication inside `$(( ))`.

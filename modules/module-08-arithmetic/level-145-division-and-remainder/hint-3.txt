@@ -1,0 +1,5 @@
+minutes="$1"
+days=$(( minutes / 1440 ))
+hours=$(( minutes % ... / 60 ))      # leftover after days, then whole hours
+mins=$(( minutes % ... ))            # leftover after hours
+echo "uptime: ${days}d ${hours}h ${mins}m"

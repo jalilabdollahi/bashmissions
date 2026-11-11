@@ -1,0 +1,4 @@
+awk can run a program with no input if the whole program is a BEGIN block. Pass shell variables in with -v, and print with printf to control the decimals. Generic example:
+
+  awk -v price="$1" -v qty="$2" 'BEGIN { printf "cost=%.1f\n", price * qty }'
+  # ./solution.sh 2.50 3   ->   cost=7.5

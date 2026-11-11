@@ -1,0 +1,66 @@
+id: 152
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Percentages Without Floats
+difficulty: intermediate
+xp: 150
+story: |
+  The status page for the harbour cluster needs a usage figure with one
+  decimal, like "37.5%". Gus wants it exact, Priya refuses to ship a script
+  that depends on awk being installed on the status box, and Theo mutters that
+  Bash can't do decimals. "It can fake them," Mara says. "Count in tenths of a
+  percent, then put the point back when you print."
+objective: |
+  Write solution.sh that takes two whole numbers: USED ($1) and TOTAL ($2).
+  Print one line:
+
+    usage: <percent>%
+
+  where percent is USED / TOTAL * 100 with exactly one decimal digit, cut off
+  (truncated, not rounded). Examples: 1 of 3 is 33.3%, 2 of 3 is 66.6%,
+  5 of 2000 is 0.2%, 50 of 50 is 100.0%.
+
+  If TOTAL is 0, print "total must not be zero" to stderr and exit with
+  status 2.
+
+  Use integer arithmetic only: scale first (USED * 1000 / TOTAL gives tenths
+  of a percent), then split the result into whole part and decimal digit.
+  No awk, no bc.
+concepts:
+  - "fixed-point integer maths"
+  - "scale up, divide, split with / and %"
+required_patterns:
+  - pattern: '\$\(\([^)]*/'
+    message: "Do the scaled division inside $(( )) with /."
+  - pattern: '\$\(\([^)]*%'
+    message: "Split the tenths into whole and decimal part with % (and /)."
+forbidden_patterns:
+  - pattern: '\b(awk|bc|dc|python3?|perl|expr)\b'
+    message: "This level is about doing it with integers only."
+test_cases:
+  - name: one decimal exactly
+    args: ["375", "1000"]
+    expected_stdout: "usage: 37.5%"
+  - name: repeating third
+    args: ["1", "3"]
+    expected_stdout: "usage: 33.3%"
+  - name: truncates, does not round
+    args: ["2", "3"]
+    expected_stdout: "usage: 66.6%"
+  - name: nothing used
+    args: ["0", "50"]
+    expected_stdout: "usage: 0.0%"
+  - name: completely used
+    args: ["50", "50"]
+    expected_stdout: "usage: 100.0%"
+  - name: below one percent keeps the leading zero
+    args: ["5", "2000"]
+    expected_stdout: "usage: 0.2%"
+  - name: over one hundred percent
+    args: ["130", "100"]
+    expected_stdout: "usage: 130.0%"
+  - name: zero total is rejected
+    args: ["10", "0"]
+    expected_stderr: "total must not be zero"
+    expected_exit: 2

@@ -1,1 +1,0 @@
-Both results should be printed on one line.

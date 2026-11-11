@@ -1,1 +1,0 @@
-Loop over the remaining values and compare each one.

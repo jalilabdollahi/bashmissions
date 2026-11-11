@@ -1,1 +1,0 @@
-Use the first argument as the base and the second as the exponent.

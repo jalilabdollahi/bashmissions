@@ -1,0 +1,1 @@
+Integer division always cuts the fraction off, which is "rounding down". To round differently, change the number before you divide: push it up by just enough that a big enough remainder spills over into the next whole number, and a small one does not.

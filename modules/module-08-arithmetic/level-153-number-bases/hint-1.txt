@@ -1,0 +1,1 @@
+A number is the same number whatever base you write it in, but Bash has to be told which base the digits you hand it are in. Convert both inputs into plain numbers first, then print them back out in the bases the objective names.

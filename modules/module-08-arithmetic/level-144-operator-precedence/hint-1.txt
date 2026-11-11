@@ -1,0 +1,1 @@
+Bash follows the maths you learned at school: some operators are stronger than others and are done first. Work out which part of each line has to be calculated first, and ask yourself whether the natural reading order already does it.

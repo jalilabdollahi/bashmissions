@@ -1,0 +1,63 @@
+id: 146
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Powers
+difficulty: intermediate
+xp: 120
+story: |
+  Ollie is setting up a private network for the harbour office and has
+  discovered the slash notation: "/24", "/28", "/30". "How many machines fit in
+  a /26?" he asks. Priya, passing with a mug, says "Count the host bits and
+  raise two to that power." Ollie wants a script instead of a lecture.
+objective: |
+  Write solution.sh that takes one argument: an IPv4 prefix length P, a whole
+  number from 8 to 30. A network with prefix /P has 32 - P host bits.
+  Print two lines:
+
+    addresses=<2 to the power of (32 - P)>
+    hosts=<addresses minus 2>
+
+  (two addresses are reserved: the network address and the broadcast address).
+  Use the ** power operator inside $(( ... )).
+concepts:
+  - "** exponentiation"
+required_patterns:
+  - pattern: '\*\*'
+    message: "Raise 2 to the power of the host bits with the ** operator."
+forbidden_patterns:
+  - pattern: '<<'
+    message: "Bit shifting would skip the lesson: use ** for the power."
+  - pattern: '\b(bc|expr|awk)\b'
+    message: "Bash can raise to a power on its own: $(( 2 ** n ))."
+test_cases:
+  - name: the classic /24
+    args: ["24"]
+    expected_stdout: |-
+      addresses=256
+      hosts=254
+  - name: a small /28
+    args: ["28"]
+    expected_stdout: |-
+      addresses=16
+      hosts=14
+  - name: the tiniest allowed network
+    args: ["30"]
+    expected_stdout: |-
+      addresses=4
+      hosts=2
+  - name: a big /16
+    args: ["16"]
+    expected_stdout: |-
+      addresses=65536
+      hosts=65534
+  - name: the huge /8
+    args: ["8"]
+    expected_stdout: |-
+      addresses=16777216
+      hosts=16777214
+  - name: an odd one in between
+    args: ["21"]
+    expected_stdout: |-
+      addresses=2048
+      hosts=2046

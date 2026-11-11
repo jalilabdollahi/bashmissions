@@ -1,0 +1,4 @@
+anchovy_gb="$1"
+barracuda_gb="$2"
+total=$(( ... + ... ))        # add the two named values
+echo "combined: $total GB"

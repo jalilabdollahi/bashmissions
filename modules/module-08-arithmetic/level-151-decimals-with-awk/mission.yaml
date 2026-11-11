@@ -1,0 +1,64 @@
+id: 151
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Decimals with awk
+difficulty: intermediate
+xp: 150
+story: |
+  Gus does not want to read "104 dollars" on an invoice: customers pay in
+  dollars and cents, and the rate is 8.5 cents per gigabyte. Ollie tries
+  $(( 1234.5 * 0.085 )) in the terminal and gets a stern error message.
+  "Bash only does whole numbers," Mara explains. "For decimals we borrow awk,
+  which has been doing floating point since 1977."
+objective: |
+  Write solution.sh that takes three arguments:
+    $1  GB       traffic in gigabytes (may have decimals)
+    $2  RATE     price per gigabyte in dollars (may have decimals)
+    $3  SERVERS  number of servers sharing the bill (a positive whole number)
+
+  Print two lines, each with exactly two decimals:
+    total=$<GB * RATE>
+    per_server=$<GB * RATE / SERVERS>
+
+  Do the calculation with awk, using
+  awk -v name=value 'BEGIN { printf "..." }' (no input files needed).
+  Do not use bc.
+concepts:
+  - "floating point via awk BEGIN"
+  - "awk -v to pass shell values"
+  - "printf %.2f"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk for the decimal arithmetic."
+  - pattern: 'printf[^\n]*%\.2f'
+    message: "Format the amounts with printf \"%.2f\" so they always show two decimals."
+forbidden_patterns:
+  - pattern: '\b(bc|dc|python3?|perl)\b'
+    message: "Use awk: it exists on every Linux and macOS machine."
+test_cases:
+  - name: round numbers
+    args: ["1200", "0.05", "4"]
+    expected_stdout: |-
+      total=$60.00
+      per_server=$15.00
+  - name: decimals everywhere
+    args: ["250.5", "0.12", "2"]
+    expected_stdout: |-
+      total=$30.06
+      per_server=$15.03
+  - name: no traffic
+    args: ["0", "0.09", "3"]
+    expected_stdout: |-
+      total=$0.00
+      per_server=$0.00
+  - name: rounding to cents
+    args: ["99.9", "0.07", "7"]
+    expected_stdout: |-
+      total=$6.99
+      per_server=$1.00
+  - name: one server pays all
+    args: ["73", "0.2", "1"]
+    expected_stdout: |-
+      total=$14.60
+      per_server=$14.60

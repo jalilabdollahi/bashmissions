@@ -1,0 +1,1 @@
+Bash arithmetic cannot handle a decimal point at all, so this is a job for a different tool. One that you already know from the text-processing world turns out to be a perfectly good calculator when you give it no files to read.

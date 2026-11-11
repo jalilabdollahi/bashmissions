@@ -1,1 +1,0 @@
-Store the arguments in `a` and `b` for readability.

@@ -1,0 +1,5 @@
+The power operator is **, and its exponent can be an expression if you wrap it in parentheses. Generic example:
+
+  echo $(( 3 ** 4 ))          # 81
+  n=5
+  echo $(( 10 ** (n - 2) ))   # 1000

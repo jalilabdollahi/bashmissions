@@ -1,0 +1,69 @@
+id: 149
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: let and (( ))
+difficulty: intermediate
+xp: 140
+story: |
+  Theo left a script behind before going on holiday, and half of it uses a
+  strange command called "let" while the other half uses double parentheses.
+  Mara wants you to understand both before touching it. "They do the same
+  job," she says, "but they behave a little differently when something
+  evaluates to zero. Let's see if you catch it."
+objective: |
+  Write solution.sh that takes two whole numbers: TOTAL ($1) and USED ($2),
+  the size and the used space of a volume in GB (TOTAL is never zero).
+  Print exactly three lines:
+
+    free=<TOTAL - USED>
+    used_pct=<USED * 100 / TOTAL, whole number>
+    let_status=<exit status of the let command that computed free>
+
+  Compute free with the `let` command (quote its expression), and used_pct with
+  an assignment inside (( ... )). Read the status with $? on the very next
+  command after let. Do not use set -e: a let (or (( )) ) whose result is zero
+  reports failure.
+concepts:
+  - "let command"
+  - "(( )) arithmetic command"
+  - "exit status of arithmetic commands"
+required_patterns:
+  - pattern: '\blet\b'
+    message: "Calculate free space with the let command."
+  - pattern: '\(\([^)]*=[^)]*\)\)'
+    message: "Calculate used_pct with an assignment inside (( ... ))."
+forbidden_patterns:
+  - pattern: '\b(expr|bc)\b'
+    message: "Use let and (( )), not expr or bc."
+test_cases:
+  - name: quarter full
+    args: ["500", "125"]
+    expected_stdout: |-
+      free=375
+      used_pct=25
+      let_status=0
+  - name: completely full volume makes let report failure
+    args: ["200", "200"]
+    expected_stdout: |-
+      free=0
+      used_pct=100
+      let_status=1
+  - name: over-committed volume
+    args: ["80", "100"]
+    expected_stdout: |-
+      free=-20
+      used_pct=125
+      let_status=0
+  - name: empty volume
+    args: ["60", "0"]
+    expected_stdout: |-
+      free=60
+      used_pct=0
+      let_status=0
+  - name: percent is truncated
+    args: ["30", "10"]
+    expected_stdout: |-
+      free=20
+      used_pct=33
+      let_status=0

@@ -1,1 +1,0 @@
-`$RANDOM` expands to a pseudo-random integer.

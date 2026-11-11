@@ -1,0 +1,5 @@
+prefix="$1"
+addresses=$(( 2 ** (... - prefix) ))    # 32 total bits minus the network bits
+hosts=$(( addresses - ... ))
+echo "addresses=$addresses"
+echo "hosts=$hosts"
