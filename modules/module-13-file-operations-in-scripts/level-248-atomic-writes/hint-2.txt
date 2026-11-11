@@ -1,0 +1,6 @@
+Renaming a file inside the same disk (`mv`) replaces the target in one step; copying does not. So make the temporary file in the same folder as the target: `mktemp config/.name.XXXXXX` (the template's trailing X's become random characters). `grep -Eq` tests silently whether a pattern matches a line:
+
+  tmp=$(mktemp dir/.file.XXXXXX)
+  cat > "$tmp"
+  grep -Eq '^key=[0-9]+$' "$tmp" || { rm -f "$tmp"; exit 1; }
+  mv "$tmp" dir/file

@@ -1,0 +1,5 @@
+`[[ -f $x && -r $x ]]` tests for a readable regular file, `[[ -d $x ]]` for a folder, `[[ -e $x ]]` for "anything exists there". `basename "$path"` gives the last part of a path. `cmp -s a b` prints nothing and returns 0 only when the two files are identical:
+
+  if ! cmp -s "$one" "$two"; then
+    echo "different" >&2
+  fi

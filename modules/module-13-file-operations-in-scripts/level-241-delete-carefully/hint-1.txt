@@ -1,0 +1,1 @@
+Think like a pessimist. Before anything is deleted, ask what could the argument secretly be: nothing at all, the top of the disk, a path that climbs out with `..`, or the very folder that is supposed to be the safe zone. Only when every worry is cleared does the delete line run, and it should run on a path you have *resolved*, not on the raw text.

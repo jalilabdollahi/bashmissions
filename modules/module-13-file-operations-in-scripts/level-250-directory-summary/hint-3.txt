@@ -1,0 +1,11 @@
+  declare -A count=()
+  total=0
+  while IFS= read -r path; do
+    name=${path##*/}
+    stem=${name%.*}
+    ext=${name##*.}
+    if [[ $name == *.* && -n $stem && -n $ext ]]; then ext=${ext,,}; else ext="(none)"; fi
+    count[$ext]=$(( ${count[$ext]:-0} + 1 ))
+    total=$(( total + 1 ))
+  done < <(find "$folder" -type f)
+  # print "ext count" lines, sort -k2,2nr -k1,1, reshape to "ext: N", then the total line

@@ -1,0 +1,10 @@
+  total_lines=0; total_words=0
+  for f in "$@"; do
+    [[ -f $f ]] || { echo "skipping $f (not a file)" >&2; continue; }
+    lines=$(( $(wc -l < "$f") ))
+    words=$(( $(wc -w < "$f") ))
+    echo "$f: $lines lines, $words words"
+    total_lines=$(( total_lines + lines ))
+    total_words=$(( total_words + words ))
+  done
+  echo "total: ..."

@@ -1,0 +1,67 @@
+id: 235
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Append Entries
+difficulty: beginner
+xp: 120
+story: |
+  Gus has asked, for the third time, "who touched the file server and when?"
+  and the honest answer is that nobody wrote it down. Ollie volunteers to
+  keep a captain's log. Mara hands you the pen: "Make it one command anyone
+  can run. Each entry gets a timestamp, and nobody's old entries get lost."
+objective: |
+  Write solution.sh that adds one entry to the file `ops.log` in the current
+  folder. The arguments are a LEVEL (a single word such as INFO or WARN)
+  followed by the message, which may be several words:
+
+    ./solution.sh WARN disk is at 91 percent
+
+  Append exactly one line in this format:
+
+    [YYYY-MM-DD HH:MM:SS] LEVEL: message words joined by single spaces
+
+  The time comes from `date` (local time, 24-hour clock). Existing lines in
+  ops.log must stay as they are, and a missing ops.log is created.
+
+  Finally print the whole ops.log to stdout so the caller sees the history.
+  With fewer than two arguments print `usage: solution.sh LEVEL MESSAGE...`
+  to stderr and exit 2.
+concepts:
+  - ">> appends instead of replacing"
+  - "date +FORMAT for timestamps"
+required_patterns:
+  - pattern: '>>'
+    message: "Append with >> so earlier entries survive."
+  - pattern: "date\\s+['\"]?\\+"
+    message: "Build the timestamp with date +FORMAT, for example date '+%Y-%m-%d %H:%M:%S'."
+test_cases:
+  - name: appends after existing entries
+    args: [WARN, disk, is, at, 91, percent]
+    files:
+      ops.log: |
+        [2024-03-01 08:00:00] INFO: backup started
+        [2024-03-01 08:42:10] INFO: backup finished
+    comparison: regex
+    expected_stdout: '\[2024-03-01 08:00:00\] INFO: backup started\n\[2024-03-01 08:42:10\] INFO: backup finished\n\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] WARN: disk is at 91 percent'
+    expected_files:
+      ops.log: true
+  - name: creates the log when missing
+    args: [INFO, "cache purged"]
+    comparison: regex
+    expected_stdout: '\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] INFO: cache purged'
+  - name: three runs build three lines
+    args: [ERROR, nightly, sync, failed]
+    files:
+      ops.log: |
+        [2024-05-09 23:00:01] INFO: nightly sync started
+        [2024-05-09 23:00:09] ERROR: eel unreachable
+        [2024-05-09 23:00:10] INFO: retrying
+    comparison: regex
+    expected_stdout: '\[2024-05-09 23:00:01\] INFO: nightly sync started\n\[2024-05-09 23:00:09\] ERROR: eel unreachable\n\[2024-05-09 23:00:10\] INFO: retrying\n\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] ERROR: nightly sync failed'
+  - name: message needs words
+    args: [INFO]
+    expected_stderr: "usage: solution.sh LEVEL MESSAGE..."
+    expected_exit: 2
+    expected_files:
+      ops.log: null

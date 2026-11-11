@@ -1,0 +1,1 @@
+Files remember when they were last modified, and `find` can compare that time in two ways: against "now minus some days", and against another file's time. The second is perfect when the reference moment is "when the backup finished" and a file already records it.

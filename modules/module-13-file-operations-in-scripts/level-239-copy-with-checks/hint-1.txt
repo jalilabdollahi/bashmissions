@@ -1,0 +1,1 @@
+Do all the cheap checks before copying: is there something to copy, somewhere to put it, and nothing that would be replaced? After the copy, do not just believe it worked; compare the copy with the original and clean up if they differ.

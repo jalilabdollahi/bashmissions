@@ -1,0 +1,6 @@
+`find START -name 'PATTERN'` prints every path below START whose last component matches the wildcard. Put a variable in double quotes so the shell passes its text through untouched:
+
+  find "$dir" -name "$pat"
+  find /var/log -name '*.gz' | sort
+
+Counting results: capture them in a variable and count the lines, being careful about the case of no result at all.

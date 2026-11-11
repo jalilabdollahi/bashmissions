@@ -1,0 +1,4 @@
+`wc -l < file` counts newline characters, `wc -w < file` counts words. With `<` the file name is not printed. Wrapping in `$(( ))` converts the output to a plain integer on every platform, and lets you add:
+
+  n=$(( $(wc -l < "$f") ))
+  sum=$(( sum + n ))

@@ -1,0 +1,8 @@
+`mktemp -d` creates a new unique folder and prints its path. `trap 'rm -rf "$dir"' EXIT` removes it at the end. Running a command "from inside" a folder without moving your script there is done in a subshell: `( cd "$dir" && command )`. To skip names by prefix inside a loop:
+
+  dir=$(mktemp -d)
+  trap 'rm -rf "$dir"' EXIT
+  for f in src/*.txt; do
+    [[ ${f##*/} == tmp-* ]] && continue
+    cp "$f" "$dir/"
+  done

@@ -1,0 +1,1 @@
+Picture three shelves with the oldest on the right. To add a new box on the left you must first remove the right-hand one, then slide the others along, starting from the right. Doing it in the wrong order would crush a box. Some shelves may be empty at the start, so each slide needs to ask "is there anything here?".

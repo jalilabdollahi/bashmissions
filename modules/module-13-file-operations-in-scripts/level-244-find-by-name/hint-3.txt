@@ -1,0 +1,10 @@
+  matches=$(find "$folder" -name "$pattern" | sort)
+  if [[ -n $matches ]]; then
+    echo "$matches"
+    count=$(( $(echo "$matches" | wc -l) ))
+  else
+    count=0
+  fi
+  echo "found: $count"
+
+Add the argument check and the "no such folder" check before the find.

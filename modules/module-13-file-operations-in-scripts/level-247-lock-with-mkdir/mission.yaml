@@ -1,0 +1,89 @@
+id: 247
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Lock with mkdir
+difficulty: advanced
+xp: 160
+story: |
+  The nightly sync is scheduled every hour, and last Tuesday one run took
+  ninety minutes. For half an hour two copies were syncing the same
+  customer folders, and each one "fixed" what the other was busy writing.
+  Theo wants "a lock", but this server has no `flock`. Mara grins: "The
+  oldest lock in Unix is a folder. `mkdir` either makes it or it doesn't,
+  and there is no 'both of you'."
+objective: |
+  Write solution.sh that takes a JOB name and makes sure only one copy of
+  that job runs at a time, using a lock *directory* `run/JOB.lock`.
+
+  1. With no argument print `usage: solution.sh JOB` to stderr and exit 2.
+  2. Make sure the folder `run` exists (`mkdir -p run`).
+  3. Take the lock by creating `run/JOB.lock` with a plain `mkdir` (no `-p`).
+     Do not test with `-d` or `-e` first: creating the folder is the test.
+     If `mkdir` fails, another copy holds the lock: print
+     `JOB is already running (lock: run/JOB.lock)` to stderr and exit 1,
+     leaving that lock exactly as it was.
+  4. Once you hold the lock, remove it again when the script ends, however
+     it ends (use `trap ... EXIT` with `rmdir`).
+  5. Append the line `JOB started` to `run/jobs.log`, run the command
+     `run-job JOB`, and then append `JOB finished`. If `run-job` fails, the
+     script must stop with the same exit status, without writing the
+     `finished` line, and the lock must still be released.
+concepts:
+  - "mkdir is atomic: only one caller can create the directory"
+  - "release the lock from a trap"
+required_patterns:
+  - pattern: '\bmkdir\s+"?\$'
+    message: "Take the lock with mkdir on the lock path (no -p): it either creates the folder or fails."
+  - pattern: '\btrap\b'
+    message: "Use trap ... EXIT so the lock is released on every exit path."
+  - pattern: '\brmdir\b'
+    message: "Release the lock with rmdir."
+forbidden_patterns:
+  - pattern: '\[\[?\s+!?\s*-[de]\s'
+    message: "Do not check first and create second: two copies can both pass the check. Let mkdir itself be the test."
+test_cases:
+  - name: lock is free
+    args: [nightly-sync]
+    expected_stdout: "working on nightly-sync"
+    expected_files:
+      run/nightly-sync.lock: null
+      run/jobs.log: |-
+        nightly-sync started
+        nightly-sync finished
+  - name: another copy holds the lock
+    args: [nightly-sync]
+    files:
+      run/nightly-sync.lock/pid: "4242\n"
+    expected_stdout: ""
+    expected_stderr: "nightly-sync is already running (lock: run/nightly-sync.lock)"
+    expected_exit: 1
+    expected_files:
+      run/nightly-sync.lock/pid: "4242"
+      run/jobs.log: null
+  - name: locks are per job
+    args: [rotate-logs]
+    files:
+      run/nightly-sync.lock/pid: "4242\n"
+      run/jobs.log: "nightly-sync started\n"
+    expected_stdout: "working on rotate-logs"
+    expected_files:
+      run/rotate-logs.lock: null
+      run/nightly-sync.lock/pid: "4242"
+      run/jobs.log: |-
+        nightly-sync started
+        rotate-logs started
+        rotate-logs finished
+  - name: a failing job still frees the lock
+    args: [billing-export]
+    env:
+      JOB_RC: "3"
+    expected_stdout: "working on billing-export"
+    expected_exit: 3
+    expected_files:
+      run/billing-export.lock: null
+      run/jobs.log: "billing-export started"
+  - name: no job name
+    args: []
+    expected_stderr: "usage: solution.sh JOB"
+    expected_exit: 2

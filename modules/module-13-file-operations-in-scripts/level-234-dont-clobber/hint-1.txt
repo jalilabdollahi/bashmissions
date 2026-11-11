@@ -1,0 +1,1 @@
+The shell can be told to refuse when `>` would replace a file that already exists. It is an option you switch on once; after that a plain `>` becomes a safe operation, and you need a special spelling when you genuinely want to overwrite.

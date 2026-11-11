@@ -1,0 +1,11 @@
+  mkdir -p config
+  tmp=$(mktemp config/.app.conf.XXXXXX)
+  cat > "$tmp"
+  if ! grep -Eq '^port=[0-9]+$' "$tmp"; then
+    rm -f "$tmp"
+    echo "invalid config: no port= line, keeping the old file" >&2
+    exit 1
+  fi
+  chmod 644 "$tmp"
+  mv "$tmp" config/app.conf
+  # count the lines of config/app.conf (wc -l < file, wrapped in $(( ))) and print

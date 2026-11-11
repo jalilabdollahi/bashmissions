@@ -1,0 +1,6 @@
+`set -o noclobber` (short form `set -C`) makes `> file` fail if `file` exists. `>| file` always overwrites. A failing redirection prints the shell's own message; to hide it, wrap the command in braces and silence the group:
+
+  set -o noclobber
+  if ! { echo "hi" > "$f"; } 2>/dev/null; then
+    echo "cannot write $f" >&2
+  fi

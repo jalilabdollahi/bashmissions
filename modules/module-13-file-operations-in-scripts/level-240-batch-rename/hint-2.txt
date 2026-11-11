@@ -1,0 +1,5 @@
+`${name%.txt}` removes `.txt` from the END of the value (`%` trims a suffix, `%%` the longest one). `mv old new` renames. With `shopt -s nullglob` a wildcard that matches nothing expands to nothing, instead of staying as literal text. A variable can sit inside the pattern too:
+
+  for f in "$dir"/*."$ext"; do
+    echo "${f%."$ext"}.bak"
+  done

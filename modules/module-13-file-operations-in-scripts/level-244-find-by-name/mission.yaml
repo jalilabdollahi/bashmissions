@@ -1,0 +1,98 @@
+id: 244
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Find by Name
+difficulty: intermediate
+xp: 145
+story: |
+  Priya is auditing the file server for forgotten keys and stray config
+  files, and she does not trust `ls` to look into forty nested folders.
+  "Give me a command that takes a folder and a name pattern and tells me
+  every place that name turns up. Same command for `*.conf`, for `id_rsa*`,
+  for anything I think of at midnight."
+objective: |
+  Write solution.sh that takes a FOLDER and a name PATTERN (a shell-style
+  wildcard such as `*.conf` or `id_*`, passed to your script as plain text)
+  and lists everything below FOLDER, at any depth, whose name matches the
+  pattern. Use `find` with `-name`.
+
+  Print the matching paths, one per line, sorted (pipe through `sort`, since
+  `find` does not promise any order), and finish with a line `found: N`.
+  With no match print only `found: 0`.
+
+  The pattern is matched against the file name, not the whole path, and
+  capital letters count (`*.conf` does not match `X.CONF`). If FOLDER is not
+  a directory print `no such folder: FOLDER` to stderr and exit 1. With
+  other than two arguments print `usage: solution.sh FOLDER PATTERN` to
+  stderr and exit 2.
+concepts:
+  - "find DIR -name PATTERN"
+  - "quote the pattern so find, not the shell, expands it"
+required_patterns:
+  - pattern: '\bfind\b[^\n]*-name\b'
+    message: "Search with find FOLDER -name \"$pattern\"."
+  - pattern: '-name\s+"\$\{?[A-Za-z_][A-Za-z0-9_]*\}?"'
+    message: "Quote the pattern: -name \"$pattern\". Unquoted, the shell expands it first."
+test_cases:
+  - name: config files at several depths
+    args: [srv, "*.conf"]
+    files:
+      srv/web/nginx.conf: "w"
+      srv/web/sites/harbour.conf: "h"
+      srv/db/pg.conf: "d"
+      srv/db/pg.conf.bak: "b"
+      srv/readme.txt: "r"
+      stray-a.conf: "stray"
+      stray-b.conf: "stray"
+    expected_stdout: |-
+      srv/db/pg.conf
+      srv/web/nginx.conf
+      srv/web/sites/harbour.conf
+      found: 3
+  - name: key files with a prefix pattern
+    args: [home, "id_rsa*"]
+    files:
+      home/ollie/.ssh/id_rsa: "k1"
+      home/ollie/.ssh/id_rsa.pub: "k1p"
+      home/mara/.ssh/id_rsa: "k2"
+      home/mara/.ssh/known_hosts: "kh"
+    expected_stdout: |-
+      home/mara/.ssh/id_rsa
+      home/ollie/.ssh/id_rsa
+      home/ollie/.ssh/id_rsa.pub
+      found: 3
+  - name: matching is case sensitive and ? is one character
+    args: [bk, "backup-??.tar"]
+    files:
+      bk/backup-01.tar: "1"
+      bk/backup-02.tar: "2"
+      bk/backup-100.tar: "3"
+      bk/BACKUP-03.tar: "4"
+    expected_stdout: |-
+      bk/backup-01.tar
+      bk/backup-02.tar
+      found: 2
+  - name: names with spaces
+    args: ["Shared Files", "*.pdf"]
+    files:
+      "Shared Files/Q3 invoice.pdf": "i"
+      "Shared Files/Gull & Anchor/menu card.pdf": "m"
+      "Shared Files/notes.txt": "n"
+    expected_stdout: |-
+      Shared Files/Gull & Anchor/menu card.pdf
+      Shared Files/Q3 invoice.pdf
+      found: 2
+  - name: nothing found
+    args: [docs, "*.key"]
+    files:
+      docs/a.txt: "a"
+    expected_stdout: "found: 0"
+  - name: folder missing
+    args: [ghost, "*.conf"]
+    expected_stderr: "no such folder: ghost"
+    expected_exit: 1
+  - name: wrong argument count
+    args: [srv]
+    expected_stderr: "usage: solution.sh FOLDER PATTERN"
+    expected_exit: 2

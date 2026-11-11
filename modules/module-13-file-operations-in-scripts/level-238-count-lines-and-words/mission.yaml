@@ -1,0 +1,79 @@
+id: 238
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Count Lines and Words
+difficulty: intermediate
+xp: 125
+story: |
+  Gus wants a "how much writing do we actually keep on the file server"
+  number for his board slide, and he wants it by this afternoon. The support
+  team's notes are scattered over dozens of text files. Mara hands you a
+  warning along with the task: "wc is easy. wc on a Mac and wc on Linux
+  print slightly different things, and the script has to run on both."
+objective: |
+  Write solution.sh that takes one or more FILE arguments and prints, for
+  each file, in the order given:
+
+    FILE: L lines, W words
+
+  Then, after all files, print one summary line:
+
+    total: L lines, W words
+
+  adding up all files that were counted. L is the number of lines (newline
+  characters) and W the number of words.
+
+  Use `wc` with the file fed in through `<` so that it prints only a number,
+  and wrap the result in `$(( ))` so it has no padding spaces on any system.
+  An argument that is not a regular file is not counted; print
+  `skipping X (not a file)` to stderr for it and carry on. The exit status
+  stays 0. With no arguments print `usage: solution.sh FILE...` to stderr
+  and exit 2.
+concepts:
+  - "wc -l < file and wc -w < file"
+  - "$(( )) strips the padding some wc versions add"
+required_patterns:
+  - pattern: '\bwc\s+-[lw]\s*<'
+    message: "Feed the file to wc with <, e.g. wc -l < \"$f\", so only the number is printed."
+forbidden_patterns:
+  - pattern: '\bwc\s+-[lwc]+\s+["$A-Za-z./]'
+    message: "wc FILE prints the file name too (and padding differs by system). Use wc -l < \"$f\" instead."
+test_cases:
+  - name: two ordinary files
+    args: [notes/a.txt, notes/b.txt]
+    files:
+      notes/a.txt: "call customer back\nreset the password\nclose ticket\n"
+      notes/b.txt: "one two three four five\n"
+    expected_stdout: |-
+      notes/a.txt: 3 lines, 8 words
+      notes/b.txt: 1 lines, 5 words
+      total: 4 lines, 13 words
+  - name: empty file and a name with spaces
+    args: ["quiet notes.txt", empty.txt]
+    files:
+      "quiet notes.txt": "  spaced   out   words  \n\nlast\n"
+      empty.txt: ""
+    expected_stdout: |-
+      quiet notes.txt: 3 lines, 4 words
+      empty.txt: 0 lines, 0 words
+      total: 3 lines, 4 words
+  - name: skips things that are not files
+    args: [log.txt, ghost.txt, docs]
+    files:
+      log.txt: "a b\nc d\ne f\ng h\n"
+      docs/readme.txt: "ignored\n"
+    expected_stdout: |-
+      log.txt: 4 lines, 8 words
+      total: 4 lines, 8 words
+    expected_stderr: |-
+      skipping ghost.txt (not a file)
+      skipping docs (not a file)
+  - name: only skipped files
+    args: [nothing-here]
+    expected_stdout: "total: 0 lines, 0 words"
+    expected_stderr: "skipping nothing-here (not a file)"
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh FILE..."
+    expected_exit: 2

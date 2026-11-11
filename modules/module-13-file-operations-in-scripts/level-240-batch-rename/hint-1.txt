@@ -1,0 +1,1 @@
+A loop over a wildcard gives you each matching file in turn. For each one you need the same name with the ending swapped: that is string surgery on the file name, then a move. Think about what should happen when the new name is already taken, and about a wildcard that matches nothing.

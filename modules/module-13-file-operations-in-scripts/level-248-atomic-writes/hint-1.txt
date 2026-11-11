@@ -1,0 +1,1 @@
+Anyone who reads a file while you are still writing it can see a half-finished version. The fix is to do all the slow, risky work somewhere else, check the result, and only then swap it into place with one instant step. Think about which kind of "move" is instant, and what that requires of where you do the preparation.

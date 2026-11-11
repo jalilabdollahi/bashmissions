@@ -1,0 +1,9 @@
+`mkdir path` fails if `path` already exists, and (without `-p`) the check and the creation are one indivisible step. `rmdir` removes an empty folder. `trap 'command' EXIT` runs the command whenever the script ends:
+
+  if ! mkdir "$lockdir" 2>/dev/null; then
+    echo "busy" >&2
+    exit 1
+  fi
+  trap 'rmdir "$lockdir"' EXIT
+
+The parent folder of the lock must exist before the `mkdir`.

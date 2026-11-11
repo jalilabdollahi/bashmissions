@@ -1,0 +1,6 @@
+`tmp=$(mktemp)` creates an empty file with a unique name in the temp folder and prints its path. `trap 'rm -f "$tmp"' EXIT` deletes it whenever the script ends. `tr 'A-Z' 'a-z'` lowercases, `sed '/^[[:space:]]*$/d'` removes blank lines, `sort -u` sorts and drops duplicates:
+
+  tmp=$(mktemp)
+  trap 'rm -f "$tmp"' EXIT
+  sort -u < "$in" > "$tmp"
+  cat "$tmp" > "$in"

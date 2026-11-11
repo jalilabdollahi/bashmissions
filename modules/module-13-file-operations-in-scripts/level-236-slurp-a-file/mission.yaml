@@ -1,0 +1,82 @@
+id: 236
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Slurp a File
+difficulty: beginner
+xp: 120
+story: |
+  Priya found an API token pasted into a ticket, in full, for the whole
+  company to see. Her new rule: tokens live in a file and tickets only ever
+  show a masked version. Noor needs a tiny helper for the support desk that
+  reads a token file and prints just enough to recognise it.
+objective: |
+  Write solution.sh that takes one argument, the path of a token FILE which
+  holds a single token on its first line.
+
+  Read the whole file into a variable in one go with `$(<FILE)` (no `cat`,
+  no loop). Then print two lines:
+
+    length=N
+    masked=XXXX****
+
+  where N is the number of characters in the token (without any trailing
+  newline) and XXXX is the first four characters of the token. A token
+  shorter than four characters is shown whole, still followed by `****`.
+
+  If FILE is not a readable file, print `cannot read FILE` to stderr and
+  exit 1. With no argument, print `usage: solution.sh FILE` to stderr and
+  exit 2.
+concepts:
+  - "$(<file) reads a whole file into a variable"
+  - "trailing newlines are stripped by command substitution"
+required_patterns:
+  - pattern: '\$\(<'
+    message: "Read the file with the short form $(<file); it needs no extra process."
+forbidden_patterns:
+  - pattern: '\bcat\b'
+    message: "The point of this level is $(<file); leave cat out."
+test_cases:
+  - name: ordinary token
+    args: [token.txt]
+    files:
+      token.txt: "lf_live_9f8a7c2b41\n"
+    expected_stdout: |-
+      length=18
+      masked=lf_l****
+  - name: trailing blank lines are not counted
+    args: [secrets/marlin.token]
+    files:
+      secrets/marlin.token: "ABCD1234efgh\n\n\n"
+    expected_stdout: |-
+      length=12
+      masked=ABCD****
+  - name: tiny token
+    args: [short.txt]
+    files:
+      short.txt: "xy\n"
+    expected_stdout: |-
+      length=2
+      masked=xy****
+  - name: empty file
+    args: [empty.txt]
+    files:
+      empty.txt: ""
+    expected_stdout: |-
+      length=0
+      masked=****
+  - name: path with a space
+    args: ["old keys/gull anchor.txt"]
+    files:
+      "old keys/gull anchor.txt": "tw-77-QQ\n"
+    expected_stdout: |-
+      length=8
+      masked=tw-7****
+  - name: file does not exist
+    args: [nope.txt]
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh FILE"
+    expected_exit: 2

@@ -1,0 +1,86 @@
+id: 237
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Pick One Line
+difficulty: beginner
+xp: 125
+story: |
+  The on-call rota is a plain text file with one name per line, in order of
+  the days of the cycle. Day 1 is line 1, day 2 is line 2, and so on.
+  Nobody wants to open the file at 3 a.m. to count down to the right line,
+  and Ollie keeps miscounting. "Ask for the day, get the name," says Mara.
+objective: |
+  Write solution.sh that takes a ROTA file and a DAY number and prints the
+  person on call:
+
+    day 3: Priya
+
+  where the name is line number DAY of the file. Use `sed -n` with a line
+  number and the `p` command to extract that line.
+
+  - DAY must be a positive whole number (1 or more), otherwise print
+    `usage: solution.sh ROTA DAY` to stderr and exit 2. The same happens
+    when an argument is missing.
+  - If the file has no line DAY, or that line is empty, print
+    `no one on call for day N` to stderr and exit 1.
+  - If ROTA does not exist, print `cannot read ROTA` to stderr and exit 1.
+concepts:
+  - "sed -n 'Np' prints only line N"
+  - "validating a numeric argument before using it"
+required_patterns:
+  - pattern: "sed\\s+-n\\s+['\"]?\\$?\\{?[A-Za-z0-9_]+\\}?p"
+    message: "Use sed -n with a line number and p, e.g. sed -n \"${day}p\" file."
+test_cases:
+  - name: third day
+    args: [rota.txt, "3"]
+    files:
+      rota.txt: |
+        Mara
+        Theo
+        Priya
+        Noor
+        Ollie
+    expected_stdout: "day 3: Priya"
+  - name: first and last line
+    args: [teams/weekend.txt, "2"]
+    files:
+      teams/weekend.txt: |
+        Gus
+        Ollie
+    expected_stdout: "day 2: Ollie"
+  - name: name with spaces and a two digit day
+    args: ["night shift.txt", "12"]
+    files:
+      "night shift.txt": "a1\na2\na3\na4\na5\na6\na7\na8\na9\na10\na11\nAnna Marie Holm\na13\n"
+    expected_stdout: "day 12: Anna Marie Holm"
+  - name: day beyond the end
+    args: [rota.txt, "9"]
+    files:
+      rota.txt: |
+        Mara
+        Theo
+    expected_stderr: "no one on call for day 9"
+    expected_exit: 1
+  - name: blank line means nobody
+    args: [rota.txt, "2"]
+    files:
+      rota.txt: "Mara\n\nPriya\n"
+    expected_stderr: "no one on call for day 2"
+    expected_exit: 1
+  - name: day is not a number
+    args: [rota.txt, "monday"]
+    files:
+      rota.txt: "Mara\n"
+    expected_stderr: "usage: solution.sh ROTA DAY"
+    expected_exit: 2
+  - name: day zero is rejected
+    args: [rota.txt, "0"]
+    files:
+      rota.txt: "Mara\n"
+    expected_stderr: "usage: solution.sh ROTA DAY"
+    expected_exit: 2
+  - name: missing file
+    args: [ghost.txt, "1"]
+    expected_stderr: "cannot read ghost.txt"
+    expected_exit: 1

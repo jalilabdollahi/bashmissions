@@ -1,0 +1,7 @@
+  marker="$folder/.last-backup"
+  old=$(find "$folder" -type f ! -name .last-backup -mtime +"$days" | sort)
+  changed=$(find "$folder" -type f ! -name .last-backup -newer "$marker" | sort)
+  # for each non-empty list: print "old: ..." / "changed: ..." per line and count
+  echo "summary: $old_count old, $changed_count changed"
+
+Validate DAYS with [[ $days =~ ^[1-9][0-9]*$ ]] and check [[ -f $marker ]] first.

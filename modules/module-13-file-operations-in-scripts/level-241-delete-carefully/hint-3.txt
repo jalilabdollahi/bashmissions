@@ -1,0 +1,9 @@
+  [[ -z $dir ]]   && { echo "refusing: empty path" >&2; exit 2; }
+  [[ $dir == / ]] && { ...root message..., exit 1; }
+  [[ -d $dir ]]   || { ...not a folder..., exit 1; }
+  base="$(pwd -P)/shared"
+  resolved=$(cd "$dir" && pwd -P)
+  # resolved == base      -> "that is the shared folder itself"
+  # case "$resolved/" in "$base"/*) ;; *) ...outside... ;; esac
+  rm -rf -- "$resolved"
+  echo "deleted: $dir"

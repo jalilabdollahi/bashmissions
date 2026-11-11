@@ -1,0 +1,71 @@
+id: 234
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Don't Clobber
+difficulty: beginner
+xp: 115
+story: |
+  Last Friday Theo ran his "save release notes" script twice and the second
+  run quietly replaced two hours of hand-written notes with a single line.
+  The shell did exactly what it was told. Priya would like the shell to be
+  told something different: "Overwriting should be something you do on
+  purpose, never by accident."
+objective: |
+  Write solution.sh that takes a FILE, a TEXT and an optional third word
+  `--force`, and saves TEXT plus a newline into FILE with `>`.
+
+  Turn on the shell's overwrite protection at the top of the script with
+  `set -o noclobber`. Then:
+
+  - FILE does not exist yet: it is created. Print `wrote FILE`.
+  - FILE already exists and no `--force` was given: leave it untouched, print
+    `refusing to overwrite FILE` to stderr and exit 1. The shell's own error
+    message must not be shown.
+  - FILE already exists and the third argument is `--force`: overwrite it
+    anyway using the redirection that bypasses noclobber, `>|`.
+    Print `wrote FILE`.
+
+  With fewer than two arguments, print `usage: solution.sh FILE TEXT [--force]`
+  to stderr and exit 2.
+concepts:
+  - "set -o noclobber makes > refuse to replace files"
+  - ">| overrides noclobber on purpose"
+required_patterns:
+  - pattern: '(set\s+-o\s+noclobber|set\s+-[a-zA-Z]*C)'
+    message: "Turn the protection on with set -o noclobber (or set -C)."
+  - pattern: '>\|'
+    message: "For --force use the override redirection >| so the overwrite is deliberate."
+test_cases:
+  - name: new file is created
+    args: [release-notes.txt, "v2.4 ships Tuesday"]
+    expected_stdout: "wrote release-notes.txt"
+    expected_files:
+      release-notes.txt: "v2.4 ships Tuesday"
+  - name: existing file is protected
+    args: [notes/welcome.txt, "oops"]
+    files:
+      notes/welcome.txt: "Welcome to Lanternfish!\nTwo hours of careful work.\n"
+    expected_stdout: ""
+    expected_stderr: "refusing to overwrite notes/welcome.txt"
+    expected_exit: 1
+    expected_files:
+      notes/welcome.txt: "Welcome to Lanternfish!\nTwo hours of careful work."
+  - name: force overwrites on purpose
+    args: [notes/welcome.txt, "fresh start", --force]
+    files:
+      notes/welcome.txt: "old text\n"
+    expected_stdout: "wrote notes/welcome.txt"
+    expected_files:
+      notes/welcome.txt: "fresh start"
+  - name: force on a new file is fine
+    args: ["status page.txt", "all green", --force]
+    expected_stdout: "wrote status page.txt"
+    expected_files:
+      "status page.txt": "all green"
+  - name: missing text
+    args: [only-a-file.txt]
+    expected_stderr: "usage: solution.sh FILE TEXT [--force]"
+    expected_exit: 2
+    expected_files:
+      only-a-file.txt: null

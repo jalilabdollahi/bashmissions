@@ -1,0 +1,90 @@
+id: 242
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Temporary Files
+difficulty: intermediate
+xp: 140
+story: |
+  Noor's newsletter list has grown by copy and paste: the same customer
+  appears as Anna@Harbour.example and anna@harbour.example, there are blank
+  lines, and some people have been sent every mailing twice. She wants the
+  list cleaned in place, and Mara has one condition: "You cannot sort a
+  file straight into itself. The shell empties it before sort even starts.
+  You'll need a scratch file, a properly named one."
+objective: |
+  Write solution.sh that takes one argument, the path of a mailing LIST with
+  one e-mail address per line, and cleans it in place:
+
+  - turn every address into lowercase,
+  - drop blank lines (lines that are empty or only spaces),
+  - sort the addresses and remove duplicates (`sort -u`).
+
+  Do the work through a temporary file created with `mktemp` (never a fixed
+  name such as `/tmp/list.tmp`), then copy the result back over LIST. The
+  temporary file must be gone when the script ends, whether it succeeds or
+  not.
+
+  Print `kept N of M addresses`, where M is the number of non-blank lines
+  before cleaning and N the number of lines after. If LIST is not a readable
+  file print `cannot read LIST` to stderr and exit 1; with no argument print
+  `usage: solution.sh LIST` to stderr and exit 2.
+concepts:
+  - "mktemp creates a unique, safe scratch file"
+  - "never read and write the same file in one pipeline"
+required_patterns:
+  - pattern: '\bmktemp\b'
+    message: "Create the scratch file with mktemp, not with a made-up name."
+  - pattern: '\btrap\b|\brm\s+-f\b|\brm\b'
+    message: "Remove the temporary file when you are done (rm -f, ideally from a trap on EXIT)."
+test_cases:
+  - name: duplicates in two spellings
+    args: [list.txt]
+    files:
+      list.txt: |
+        Anna@Harbour.example
+        theo@tidewater.example
+        anna@harbour.example
+        ZED@pier.example
+        theo@tidewater.example
+    expected_stdout: "kept 3 of 5 addresses"
+    expected_files:
+      list.txt: |-
+        anna@harbour.example
+        theo@tidewater.example
+        zed@pier.example
+  - name: blank lines vanish and do not count
+    args: [lists/weekly.txt]
+    files:
+      lists/weekly.txt: "b@x.example\n\n   \nA@x.example\n\nb@x.example\n"
+    expected_stdout: "kept 2 of 3 addresses"
+    expected_files:
+      lists/weekly.txt: |-
+        a@x.example
+        b@x.example
+  - name: already clean list and a path with a space
+    args: ["old lists/gull anchor.txt"]
+    files:
+      "old lists/gull anchor.txt": "a@pub.example\nb@pub.example\n"
+    expected_stdout: "kept 2 of 2 addresses"
+    expected_files:
+      "old lists/gull anchor.txt": |-
+        a@pub.example
+        b@pub.example
+  - name: empty list
+    args: [empty.txt]
+    files:
+      empty.txt: ""
+    expected_stdout: "kept 0 of 0 addresses"
+    expected_files:
+      empty.txt: ""
+  - name: missing list
+    args: [nothing.txt]
+    expected_stderr: "cannot read nothing.txt"
+    expected_exit: 1
+    expected_files:
+      nothing.txt: null
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh LIST"
+    expected_exit: 2

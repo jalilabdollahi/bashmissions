@@ -1,0 +1,1 @@
+`find` walks a whole folder tree for you and can test every name against a pattern. The pattern is meant for `find`'s eyes, not the shell's, so think about what the shell would do to a `*` if you let it. Also: `find` prints in whatever order it meets things.

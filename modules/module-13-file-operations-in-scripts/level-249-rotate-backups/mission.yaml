@@ -1,0 +1,103 @@
+id: 249
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Rotate Backups
+difficulty: advanced
+xp: 170
+story: |
+  The customer database dump is copied to `customers.sql.bak` every night,
+  and every night the copy replaces yesterday's. Last week a bad import
+  corrupted the dump on Tuesday afternoon; by Wednesday morning the only
+  backup was a copy of the corruption. Gus, who now carries the memory of
+  that morning, has one request: "Keep three. Always three nights back."
+objective: |
+  Write solution.sh that takes a FILE and rotates its numbered backups, then
+  makes a fresh backup of it. FILE.1 is the newest backup, FILE.3 the
+  oldest. Keep at most three:
+
+  - the old FILE.3 is deleted,
+  - FILE.2 becomes FILE.3,
+  - FILE.1 becomes FILE.2,
+  - FILE is copied to FILE.1.
+
+  Backups that do not exist yet are simply skipped (do not fail and do not
+  create empty files for them). FILE itself stays in place. Do the shifting
+  oldest first, so nothing is overwritten before it has been moved.
+
+  At the end print `rotated FILE: N backups kept`, where N counts how many
+  of FILE.1, FILE.2, FILE.3 exist now. If FILE is not a regular file print
+  `cannot read FILE` to stderr and exit 1 (and touch nothing). With the
+  wrong number of arguments print `usage: solution.sh FILE` to stderr and
+  exit 2.
+concepts:
+  - "rotation: move the oldest copy first"
+  - "optional steps guarded with [[ -e ]]"
+required_patterns:
+  - pattern: '\bmv\b'
+    message: "Shift each backup up one number with mv."
+  - pattern: '\bcp\b'
+    message: "Make the new FILE.1 with cp."
+test_cases:
+  - name: full set, the oldest drops out
+    args: [customers.sql]
+    files:
+      customers.sql: "tonight\n"
+      customers.sql.1: "last night\n"
+      customers.sql.2: "two nights ago\n"
+      customers.sql.3: "three nights ago\n"
+    expected_stdout: "rotated customers.sql: 3 backups kept"
+    expected_files:
+      customers.sql: "tonight"
+      customers.sql.1: "tonight"
+      customers.sql.2: "last night"
+      customers.sql.3: "two nights ago"
+  - name: first ever rotation
+    args: [orders.csv]
+    files:
+      orders.csv: "o1\n"
+    expected_stdout: "rotated orders.csv: 1 backups kept"
+    expected_files:
+      orders.csv: "o1"
+      orders.csv.1: "o1"
+      orders.csv.2: null
+      orders.csv.3: null
+  - name: a gap in the series
+    args: [db/pg.dump]
+    files:
+      db/pg.dump: "new\n"
+      db/pg.dump.1: "old\n"
+    expected_stdout: "rotated db/pg.dump: 2 backups kept"
+    expected_files:
+      db/pg.dump.1: "new"
+      db/pg.dump.2: "old"
+      db/pg.dump.3: null
+  - name: name with spaces and other files are untouched
+    args: ["daily report.txt"]
+    files:
+      "daily report.txt": "R3\n"
+      "daily report.txt.1": "R2\n"
+      "daily report.txt.2": "R1\n"
+      "daily report.txt.3": "R0\n"
+      "daily report.txt.4": "ancient\n"
+      "daily report.txt.bak": "other\n"
+    expected_stdout: "rotated daily report.txt: 3 backups kept"
+    expected_files:
+      "daily report.txt.1": "R3"
+      "daily report.txt.2": "R2"
+      "daily report.txt.3": "R1"
+      "daily report.txt.4": "ancient"
+      "daily report.txt.bak": "other"
+  - name: missing source changes nothing
+    args: [ghost.sql]
+    files:
+      ghost.sql.1: "keep me\n"
+    expected_stderr: "cannot read ghost.sql"
+    expected_exit: 1
+    expected_files:
+      ghost.sql.1: "keep me"
+      ghost.sql.2: null
+  - name: wrong argument count
+    args: []
+    expected_stderr: "usage: solution.sh FILE"
+    expected_exit: 2

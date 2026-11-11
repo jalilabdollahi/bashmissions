@@ -1,0 +1,74 @@
+id: 233
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Make Directories and Files
+difficulty: beginner
+xp: 110
+story: |
+  The shared file server at Lanternfish has one folder per customer website,
+  and every one of them was created by hand, slightly differently. Noor has
+  just signed a new customer and Mara has had enough. "Three folders, two log
+  files, one landing page. Every time. Script it, and make it safe to run
+  twice, because somebody will."
+objective: |
+  Write solution.sh that takes one argument, a CUSTOMER name, and prepares
+  the site folder `sites/CUSTOMER`:
+
+    sites/CUSTOMER/public/       (directory)
+    sites/CUSTOMER/logs/         (directory)
+    sites/CUSTOMER/backup/       (directory)
+    sites/CUSTOMER/logs/access.log
+    sites/CUSTOMER/logs/error.log
+    sites/CUSTOMER/public/index.html
+
+  The `sites` folder itself may not exist yet. Running the script a second
+  time must not fail and must not erase anything already inside the files.
+  The customer name can contain spaces.
+
+  When done, print one line: `ready: sites/CUSTOMER`
+  With no argument, print `usage: solution.sh CUSTOMER` to stderr and exit 2.
+concepts:
+  - "mkdir -p creates parents and tolerates existing folders"
+  - "touch creates an empty file without touching its content"
+required_patterns:
+  - pattern: 'mkdir\s+(-[a-zA-Z]*p|-p)'
+    message: "Create the folders with mkdir -p so missing parents are made and existing folders are fine."
+  - pattern: '\btouch\b'
+    message: "Create the empty files with touch."
+test_cases:
+  - name: brand new customer
+    args: [harbour-bakery]
+    expected_stdout: "ready: sites/harbour-bakery"
+    expected_files:
+      sites/harbour-bakery/public: true
+      sites/harbour-bakery/logs: true
+      sites/harbour-bakery/backup: true
+      sites/harbour-bakery/logs/access.log: ""
+      sites/harbour-bakery/logs/error.log: ""
+      sites/harbour-bakery/public/index.html: ""
+  - name: second run keeps existing content
+    args: [tidewater-books]
+    files:
+      sites/tidewater-books/public/index.html: "<h1>Tidewater Books</h1>\n"
+      sites/tidewater-books/logs/access.log: "GET / 200\nGET /shop 200\n"
+    expected_stdout: "ready: sites/tidewater-books"
+    expected_files:
+      sites/tidewater-books/public/index.html: "<h1>Tidewater Books</h1>"
+      sites/tidewater-books/logs/access.log: "GET / 200\nGET /shop 200"
+      sites/tidewater-books/logs/error.log: ""
+      sites/tidewater-books/backup: true
+  - name: name with spaces, other sites untouched
+    args: ["Gull & Anchor Pub"]
+    files:
+      sites/north-pier-dental/public/index.html: "open 9-5\n"
+    expected_stdout: "ready: sites/Gull & Anchor Pub"
+    expected_files:
+      "sites/Gull & Anchor Pub/public/index.html": ""
+      "sites/Gull & Anchor Pub/logs/error.log": ""
+      "sites/Gull & Anchor Pub/backup": true
+      sites/north-pier-dental/public/index.html: "open 9-5"
+  - name: missing customer
+    args: []
+    expected_stderr: "usage: solution.sh CUSTOMER"
+    expected_exit: 2

@@ -1,0 +1,91 @@
+id: 243
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Temporary Directories
+difficulty: intermediate
+xp: 145
+story: |
+  Every Friday a customer's website is packed into a tarball for the CDN.
+  Until now, Theo did it by copying files into `/tmp/stage`, tarring that,
+  and forgetting to clean up. Last week two people packed two different
+  customers at the same moment, and Tidewater Books shipped Harbour
+  Bakery's menu. The staging area needs to be private, new every time, and
+  gone when the job ends.
+objective: |
+  Write solution.sh that takes one argument, a SITE folder, and builds
+  `release.tar` in the current folder from the site's pages.
+
+  1. Create a private staging folder with `mktemp -d` and make sure it is
+     removed when the script ends, however it ends.
+  2. Copy every `*.html` file directly inside SITE into the staging folder,
+     except those whose name starts with `draft-`.
+  3. Write a file named `MANIFEST` into the staging folder: one page name
+     per line, in the order the shell lists them.
+  4. Create `release.tar` in the current folder, containing the staged files
+     at the top level of the archive (no folder prefix), by running `tar`
+     from inside the staging folder.
+  5. Print `packed N pages into release.tar` (N does not count MANIFEST),
+     then the archive's file names, sorted, one per line (`tar -tf` piped
+     through `sort`).
+
+  If SITE is not a folder print `no such folder: SITE` to stderr and exit 1.
+  If it holds no pages to pack print `no pages to pack in SITE` to stderr,
+  exit 1 and create no archive. With no argument print
+  `usage: solution.sh SITE` to stderr and exit 2.
+concepts:
+  - "mktemp -d creates a private scratch folder"
+  - "trap cleanup of a whole folder"
+required_patterns:
+  - pattern: 'mktemp\s+-d'
+    message: "Create the staging folder with mktemp -d."
+  - pattern: '\btrap\b'
+    message: "Use trap ... EXIT so the staging folder is removed however the script ends."
+test_cases:
+  - name: pack a small site
+    args: [site]
+    files:
+      site/index.html: "<h1>Harbour Bakery</h1>\n"
+      site/menu.html: "<ul><li>bun</li></ul>\n"
+      site/draft-prices.html: "secret\n"
+      site/style.css: "body{}\n"
+    expected_stdout: |-
+      packed 2 pages into release.tar
+      MANIFEST
+      index.html
+      menu.html
+    expected_files:
+      release.tar: true
+  - name: spaces in names, sub-folders ignored
+    args: [www/tidewater]
+    files:
+      "www/tidewater/price list.html": "p\n"
+      "www/tidewater/about us.html": "a\n"
+      "www/tidewater/archive/old.html": "o\n"
+    expected_stdout: |-
+      packed 2 pages into release.tar
+      MANIFEST
+      about us.html
+      price list.html
+    expected_files:
+      release.tar: true
+  - name: only drafts
+    args: [site]
+    files:
+      site/draft-one.html: "1\n"
+      site/draft-two.html: "2\n"
+      site/notes.txt: "n\n"
+    expected_stderr: "no pages to pack in site"
+    expected_exit: 1
+    expected_files:
+      release.tar: null
+  - name: a folder that does not exist
+    args: [nowhere]
+    expected_stderr: "no such folder: nowhere"
+    expected_exit: 1
+    expected_files:
+      release.tar: null
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh SITE"
+    expected_exit: 2

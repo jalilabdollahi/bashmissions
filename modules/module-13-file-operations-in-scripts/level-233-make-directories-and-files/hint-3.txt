@@ -1,0 +1,6 @@
+  site="sites/$1"
+  mkdir -p "$site/public" "$site/logs" "$site/backup"
+  touch "$site/logs/access.log" "$site/logs/error.log" "$site/public/index.html"
+  echo "ready: $site"
+
+Put the argument check (exactly one argument, otherwise usage + exit 2) in front.

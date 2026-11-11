@@ -1,0 +1,91 @@
+id: 245
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Find by Type and Size
+difficulty: intermediate
+xp: 150
+story: |
+  The file server's disk is 94% full and Gus has noticed, which is worse
+  than the disk being full. Before anyone buys more storage, Mara wants two
+  lists: the files that are suspiciously big, and the zero-byte leftovers
+  that crashed uploads left behind. "And mind the folders," she adds. "A
+  folder is not a file, however large `ls` makes it look."
+objective: |
+  Write solution.sh that takes a FOLDER and a size limit in BYTES (a whole
+  number, 0 or more) and reports on everything below FOLDER, at any depth,
+  using `find` with `-type` and `-size`.
+
+  Print, in this order:
+
+  1. `big: PATH` for every regular file larger than BYTES bytes, sorted.
+  2. `empty: PATH` for every regular file of size zero, sorted.
+  3. `folders: N`, the number of sub-folders below FOLDER (FOLDER itself is
+     not counted).
+
+  Use the portable byte form of the size test (`-size +Nc`, with the `c`
+  suffix). Folders must never appear in the `big:` or `empty:` lines.
+  If FOLDER is not a directory print `no such folder: FOLDER` to stderr and
+  exit 1. If BYTES is not a whole number, or there are not exactly two
+  arguments, print `usage: solution.sh FOLDER BYTES` to stderr and exit 2.
+concepts:
+  - "find -type f / -type d"
+  - "find -size +Nc (bytes)"
+required_patterns:
+  - pattern: '-type\s+f'
+    message: "Restrict file searches with -type f so folders are not counted as files."
+  - pattern: '-type\s+d'
+    message: "Count sub-folders with find ... -type d."
+  - pattern: '-size\s+\+?["$\{A-Za-z0-9_\}]+c'
+    message: "Test sizes in bytes with -size +${bytes}c (the c suffix keeps it portable)."
+test_cases:
+  - name: big files, empty files and folders
+    args: [share, "20"]
+    files:
+      share/a/video.mov: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      share/a/note.txt: "hi\n"
+      share/b/c/empty.cfg: ""
+      share/empty.log: ""
+      share/big.dir/tiny: "t\n"
+    expected_stdout: |-
+      big: share/a/video.mov
+      empty: share/b/c/empty.cfg
+      empty: share/empty.log
+      folders: 4
+  - name: limit zero means any content is big
+    args: [x, "0"]
+    files:
+      x/a: "1"
+      x/sub/b: "22"
+      x/zero: ""
+    expected_stdout: |-
+      big: x/a
+      big: x/sub/b
+      empty: x/zero
+      folders: 1
+  - name: names with spaces
+    args: ["Media Library", "10"]
+    files:
+      "Media Library/holiday video.mp4": "aaaaaaaaaaaaaaaaaaaaaaaaa"
+      "Media Library/Old Stuff/blank page.txt": ""
+      "Media Library/Old Stuff/ok.txt": "ok"
+    expected_stdout: |-
+      big: Media Library/holiday video.mp4
+      empty: Media Library/Old Stuff/blank page.txt
+      folders: 1
+  - name: flat folder with nothing to report
+    args: [flat, "100"]
+    files:
+      flat/a.txt: "short\n"
+      flat/b.txt: "also short\n"
+    expected_stdout: "folders: 0"
+  - name: size must be a number
+    args: [flat, "big"]
+    files:
+      flat/a.txt: "x"
+    expected_stderr: "usage: solution.sh FOLDER BYTES"
+    expected_exit: 2
+  - name: folder missing
+    args: [ghost, "10"]
+    expected_stderr: "no such folder: ghost"
+    expected_exit: 1

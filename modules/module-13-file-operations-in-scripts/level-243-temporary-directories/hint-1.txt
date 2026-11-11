@@ -1,0 +1,1 @@
+The job needs a workshop: an empty folder that only this run uses, that you can fill freely, and that disappears afterwards no matter how the script ends. Ask the system to create such a folder for you instead of choosing a name yourself.

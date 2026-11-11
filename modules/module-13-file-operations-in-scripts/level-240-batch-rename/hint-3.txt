@@ -1,0 +1,14 @@
+  shopt -s nullglob
+  renamed=0; skipped=0
+  for path in "$folder"/*."$old"; do
+    [[ -f $path ]] || continue
+    target="${path%."$old"}.$new"
+    if [[ -e $target ]]; then
+      # print "skipped: ..." (names only), count it, continue
+    fi
+    mv "$path" "$target"
+    # print "renamed: ...", count it
+  done
+  echo "done: $renamed renamed, $skipped skipped"
+
+Show names without the folder using ${path##*/}.

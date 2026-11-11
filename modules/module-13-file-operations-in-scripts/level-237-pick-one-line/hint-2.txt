@@ -1,0 +1,4 @@
+`sed -n '5p' file` prints only line 5. To use a variable, switch to double quotes so it expands: `sed -n "${n}p" file`. For the check of the number, a regex in `[[ ]]` works well:
+
+  [[ $n =~ ^[1-9][0-9]*$ ]] || exit 2
+  line=$(sed -n "${n}p" notes.txt)

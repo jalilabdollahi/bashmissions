@@ -1,0 +1,1 @@
+You need an action that only one of several simultaneous callers can succeed at, and whose success or failure tells you who won. Creating a folder has that property: the folder either did not exist (and now you made it) or it did (and you did not). Then think carefully about when the cleanup may be registered.

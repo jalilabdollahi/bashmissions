@@ -1,0 +1,1 @@
+You cannot read a file and write the result back into it in the same pipeline: the shell empties the target first. The usual cure is a middle step, a scratch file. Its name must be one nobody else is using at the same time, so let a tool pick the name, and remember to delete it afterwards, even when something fails.
