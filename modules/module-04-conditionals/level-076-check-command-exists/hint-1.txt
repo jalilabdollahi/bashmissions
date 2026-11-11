@@ -1,1 +1,0 @@
-`command -v name` succeeds when a command can be found in PATH.

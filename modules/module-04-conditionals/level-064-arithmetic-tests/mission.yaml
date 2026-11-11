@@ -1,0 +1,46 @@
+id: 64
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Arithmetic Tests
+difficulty: beginner
+xp: 100
+story: |
+  Gus has found a line on the bandwidth invoice that makes him wince: customers
+  who exceed their monthly transfer quota are billed per extra gigabyte, and
+  nobody told them how far over they were. He wants one sentence per customer,
+  with the maths done for him.
+objective: |
+  Write solution.sh that takes two whole numbers: gigabytes USED ($1) and the
+  QUOTA ($2), both in GB.
+  If used is greater than quota, print
+    over quota: <used> GB used of <quota> GB (+<used minus quota> GB)
+  Otherwise (equal counts as within quota) print
+    within quota: <used> GB used of <quota> GB (<quota minus used> GB left)
+  Write the decision with double parentheses, `if (( used > quota ))`, and
+  calculate the difference with `$(( ... ))`.
+concepts:
+  - "(( a > b )) arithmetic test"
+  - "$(( a - b )) arithmetic expansion"
+required_patterns:
+  - pattern: 'if\s*\(\('
+    message: "Make the decision with if (( used > quota )); then."
+forbidden_patterns:
+  - pattern: '-(lt|le|gt|ge|eq|ne)\b'
+    message: "Use (( )) with > and < here instead of -gt / -lt."
+test_cases:
+  - name: over the limit
+    args: ["340", "300"]
+    expected_stdout: "over quota: 340 GB used of 300 GB (+40 GB)"
+  - name: well within
+    args: ["120", "300"]
+    expected_stdout: "within quota: 120 GB used of 300 GB (180 GB left)"
+  - name: exactly at the quota
+    args: ["500", "500"]
+    expected_stdout: "within quota: 500 GB used of 500 GB (0 GB left)"
+  - name: one gigabyte over
+    args: ["101", "100"]
+    expected_stdout: "over quota: 101 GB used of 100 GB (+1 GB)"
+  - name: two digits against three
+    args: ["95", "100"]
+    expected_stdout: "within quota: 95 GB used of 100 GB (5 GB left)"

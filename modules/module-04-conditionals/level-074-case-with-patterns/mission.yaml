@@ -1,0 +1,61 @@
+id: 74
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: case with Patterns
+difficulty: beginner
+xp: 130
+story: |
+  Customers send Noor their site exports in every archive format known to
+  humankind. Ollie keeps asking "which command opens this one?" and Noor is
+  running out of patience. Write the helper that looks at a file name and
+  prints the right extraction command, so nobody has to remember the flags.
+objective: |
+  Write solution.sh that takes one argument: an archive file name.
+  Print `extract with: <command> <file>` where the command depends on the
+  name's ending:
+    .tar.gz or .tgz   ->  tar -xzf
+    .tar              ->  tar -xf
+    .zip              ->  unzip
+    .gz  (only)       ->  gunzip
+  Note that `site.tar.gz` ends in `.gz` too, so the order of your branches matters.
+  For any other name print to stderr
+    unknown archive type: <file>
+  and exit with status 1.
+  Use a `case` statement with several patterns on one branch separated by `|`.
+concepts:
+  - "a|b) several patterns in one branch"
+  - "*.tar.gz) wildcard patterns, first match wins"
+required_patterns:
+  - pattern: '\bcase\b'
+    message: "Use a case statement."
+  - pattern: '\*\.tar\.gz'
+    message: "Match tar archives with a pattern such as *.tar.gz."
+  - pattern: '\|'
+    message: "Put .tar.gz and .tgz in one branch, separated by |."
+test_cases:
+  - name: gzipped tarball
+    args: [site-export.tar.gz]
+    expected_stdout: "extract with: tar -xzf site-export.tar.gz"
+  - name: short tarball name
+    args: [orders.tgz]
+    expected_stdout: "extract with: tar -xzf orders.tgz"
+  - name: plain tar
+    args: [photos.tar]
+    expected_stdout: "extract with: tar -xf photos.tar"
+  - name: zip archive
+    args: [menu.zip]
+    expected_stdout: "extract with: unzip menu.zip"
+  - name: single gzip file
+    args: [syslog.gz]
+    expected_stdout: "extract with: gunzip syslog.gz"
+  - name: unknown format
+    args: [notes.txt]
+    expected_stdout: ""
+    expected_stderr: "unknown archive type: notes.txt"
+    expected_exit: 1
+  - name: ending in the middle does not count
+    args: [backup.tar.gz.bak]
+    expected_stdout: ""
+    expected_stderr: "unknown archive type: backup.tar.gz.bak"
+    expected_exit: 1

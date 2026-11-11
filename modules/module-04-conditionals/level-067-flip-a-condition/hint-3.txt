@@ -1,0 +1,6 @@
+ip="$1"
+if ! grep -qxF "$ip" allowlist.txt; then
+  echo "BLOCK $ip"
+else
+  echo "..."   # the allow line
+fi

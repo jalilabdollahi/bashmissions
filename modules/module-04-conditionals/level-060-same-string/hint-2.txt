@@ -1,0 +1,5 @@
+Inside [[ ]], == compares two strings. The left side is taken as the value, but the right side of == is treated as a pattern unless you put it in double quotes. So quote the variable on the right. Generic example:
+
+  if [[ $answer == "$secret" ]]; then
+    echo "match"
+  fi

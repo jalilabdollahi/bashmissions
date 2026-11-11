@@ -1,0 +1,65 @@
+id: 71
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Which File Is Newer?
+difficulty: beginner
+xp: 120
+story: |
+  Every night a job copies the customer database dump to the backup folder, and
+  every morning Mara wonders whether that copy is still from last night or from
+  last month. "Don't tell me it ran," she says. "Tell me whether the backup is
+  older than the thing it is supposed to protect." Time to compare two
+  timestamps.
+objective: |
+  Write solution.sh that takes two arguments: a SOURCE file and a BACKUP file.
+  Print
+    STALE: <backup> is older than <source>
+  if the backup does not exist or its modification time is older than the
+  source's. Otherwise (same age or newer) print
+    fresh: <backup> is up to date
+  Use `-nt` (newer than) or `-ot` (older than) in `[[ ]]`.
+concepts:
+  - "-nt (newer than)"
+  - "-ot (older than)"
+required_patterns:
+  - pattern: '-(nt|ot)\b'
+    message: "Compare modification times with [[ a -nt b ]] or [[ a -ot b ]]."
+test_cases:
+  - name: backup is older
+    args: [customers.sql, backup/customers.sql]
+    files:
+      customers.sql:
+        content: "INSERT 1;\n"
+        mtime: 1700000500
+      backup/customers.sql:
+        content: "INSERT 1;\n"
+        mtime: 1700000000
+    expected_stdout: "STALE: backup/customers.sql is older than customers.sql"
+  - name: backup is newer
+    args: [customers.sql, backup/customers.sql]
+    files:
+      customers.sql:
+        content: "INSERT 1;\n"
+        mtime: 1700000000
+      backup/customers.sql:
+        content: "INSERT 1;\n"
+        mtime: 1700009999
+    expected_stdout: "fresh: backup/customers.sql is up to date"
+  - name: same timestamp counts as fresh
+    args: [orders.sql, orders.bak]
+    files:
+      orders.sql:
+        content: "x\n"
+        mtime: 1700000000
+      orders.bak:
+        content: "x\n"
+        mtime: 1700000000
+    expected_stdout: "fresh: orders.bak is up to date"
+  - name: backup never made
+    args: [orders.sql, orders.bak]
+    files:
+      orders.sql:
+        content: "x\n"
+        mtime: 1700000000
+    expected_stdout: "STALE: orders.bak is older than orders.sql"

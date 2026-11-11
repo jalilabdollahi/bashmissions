@@ -1,0 +1,7 @@
+Inside [[ ]] the numeric operators are -eq (equal), -ne (not equal), -lt (less), -le (less or equal), -gt (greater), -ge (greater or equal). Chain them with elif. Generic example:
+
+  if [[ $score -ge 50 ]]; then
+    echo "pass"
+  else
+    echo "fail"
+  fi

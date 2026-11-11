@@ -1,0 +1,1 @@
+One condition is not enough here: the rule has two parts and each must hold. There are four combinations of (right group, wrong group) and (factor, no factor), and only one of them opens the door. Look for a way to say "this and that" inside a single test.

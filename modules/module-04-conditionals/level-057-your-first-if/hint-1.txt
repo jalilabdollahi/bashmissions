@@ -1,0 +1,1 @@
+You need a question with a yes/no answer: "is the environment prod?". Ask it first, and only print the warning when the answer is yes. When the answer is no, the script simply reaches its end without printing anything.

@@ -1,1 +1,0 @@
-Set known timestamps before comparing the files.

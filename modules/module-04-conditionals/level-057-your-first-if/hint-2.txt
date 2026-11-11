@@ -1,0 +1,5 @@
+Bash asks a question with if, then a test in double brackets, then the word then. The block ends with fi (if backwards). Spaces inside the brackets are required. A generic example:
+
+  if [[ $colour == red ]]; then
+    echo "stop"
+  fi

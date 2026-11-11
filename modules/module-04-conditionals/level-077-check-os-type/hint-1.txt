@@ -1,1 +1,0 @@
-`uname -s` reports the operating system kernel name.

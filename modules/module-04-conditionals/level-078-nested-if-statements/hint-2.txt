@@ -1,1 +1,0 @@
-Check the role first, then check the environment only for admins.

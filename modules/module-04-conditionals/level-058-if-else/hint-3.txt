@@ -1,1 +1,0 @@
-Both branches should print exactly one line.

@@ -1,0 +1,14 @@
+The shape is case WORD in, then one or more pattern) command ;; branches, closing with esac. The pattern * matches anything, so put it last as the default. Generic example:
+
+  case "$colour" in
+    red)
+      echo "stop"
+      ;;
+    green)
+      echo "go"
+      ;;
+    *)
+      echo "unknown colour" >&2
+      exit 2
+      ;;
+  esac

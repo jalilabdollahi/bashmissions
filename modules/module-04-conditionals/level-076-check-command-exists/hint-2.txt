@@ -1,1 +1,0 @@
-Redirect its output away; the mission only wants `found` or `missing`.

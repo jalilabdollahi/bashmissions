@@ -1,1 +1,0 @@
-Double brackets support shell pattern matching inside the condition.

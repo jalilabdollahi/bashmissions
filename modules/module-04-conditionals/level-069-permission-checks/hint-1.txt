@@ -1,0 +1,1 @@
+Three independent questions about the same file: can I read it, can I write it, can I run it? Each answer is separate (a file can be any combination), so each question deserves its own check, and the results get glued into one short string. First deal with the missing file.

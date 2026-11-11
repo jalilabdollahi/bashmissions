@@ -1,1 +1,0 @@
-Use `[ "$1" = "yes" ]` as the condition.

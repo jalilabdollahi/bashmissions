@@ -1,0 +1,4 @@
+target="${1:-}"
+if [[ $target == prod ]]; then
+  echo "CAUTION: ..."   # copy the exact line from the objective
+fi

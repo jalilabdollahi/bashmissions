@@ -1,0 +1,58 @@
+id: 68
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Does It Exist?
+difficulty: beginner
+xp: 110
+story: |
+  Ollie wrote a cleanup script last week and pointed it at a path that did not
+  exist. It deleted nothing and printed nothing, and Ollie declared it a success.
+  Mara's lesson: a script should look before it leaps. Write the little
+  inspector every cleanup job should call first.
+objective: |
+  Write solution.sh that takes one argument: a path. Print exactly one line,
+  in the format `<path>: <kind>`, where kind is:
+    regular file     if the path is a regular file
+    directory        if the path is a directory
+    something else   if it exists but is neither (a device, for example)
+    not found        if nothing exists at that path
+  Use the file tests -f, -d and -e, and quote the path (it may contain spaces).
+concepts:
+  - "-e exists"
+  - "-f regular file"
+  - "-d directory"
+required_patterns:
+  - pattern: '-f\b'
+    message: "Use [[ -f ... ]] to recognise a regular file."
+  - pattern: '-d\b'
+    message: "Use [[ -d ... ]] to recognise a directory."
+  - pattern: '-e\b'
+    message: "Use [[ -e ... ]] to detect that something exists."
+test_cases:
+  - name: regular file
+    args: [inbox/note.txt]
+    files:
+      inbox/note.txt: "call the bakery back\n"
+    expected_stdout: "inbox/note.txt: regular file"
+  - name: directory
+    args: [inbox]
+    files:
+      inbox/note.txt: "call the bakery back\n"
+    expected_stdout: "inbox: directory"
+  - name: nothing there
+    args: [inbox/ghost.txt]
+    files:
+      inbox/note.txt: "call the bakery back\n"
+    expected_stdout: "inbox/ghost.txt: not found"
+  - name: path with a space
+    args: ["old reports/q1 totals.csv"]
+    files:
+      "old reports/q1 totals.csv": "a,b\n"
+    expected_stdout: "old reports/q1 totals.csv: regular file"
+  - name: the current directory
+    args: ["."]
+    expected_stdout: ".: directory"
+  - name: a device is neither
+    args: [/dev/null]
+    expected_stdout: "/dev/null: something else"

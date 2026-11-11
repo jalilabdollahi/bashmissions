@@ -1,0 +1,1 @@
+This time the interesting question is the opposite one: "is the host something other than dory?". Handle that case first, complain on the error channel, and stop the script right there.

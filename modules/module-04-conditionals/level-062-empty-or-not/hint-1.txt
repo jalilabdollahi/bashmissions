@@ -1,0 +1,1 @@
+Two different questions about text: "is this empty?" for the name (empty is bad) and "does this have anything in it?" for the note (present is good). Bash has one short test for each. Also remember the script can be started with fewer arguments than it reads.

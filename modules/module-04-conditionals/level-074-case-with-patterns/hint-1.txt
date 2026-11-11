@@ -1,0 +1,1 @@
+The command depends on the end of the file name, and two different endings (.tar.gz and .tgz) lead to the same command. Think about how to let one branch accept several shapes, and about which branch should be checked first when one ending (.gz) is hidden inside another (.tar.gz).

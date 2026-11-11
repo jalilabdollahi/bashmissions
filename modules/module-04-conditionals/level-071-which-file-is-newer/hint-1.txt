@@ -1,0 +1,1 @@
+Files carry a "last modified" time, and Bash can compare two of them directly without any date maths. Ask whether the source changed after the backup was made. Also think about the missing-backup case; there is a pleasant surprise in how the comparison treats a file that does not exist.

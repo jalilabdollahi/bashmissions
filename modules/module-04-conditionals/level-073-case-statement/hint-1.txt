@@ -1,1 +1,0 @@
-A `case` statement is often clearer than many `elif` checks.

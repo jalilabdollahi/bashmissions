@@ -1,1 +1,0 @@
-`-r` checks whether a path can be read.

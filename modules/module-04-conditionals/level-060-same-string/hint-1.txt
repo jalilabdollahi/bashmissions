@@ -1,0 +1,1 @@
+You need a test that says "these two pieces of text are identical, character for character". Everything is case-sensitive, and the tags may contain spaces or a star, so think about how the values are written into the test.

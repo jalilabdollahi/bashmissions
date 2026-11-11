@@ -1,0 +1,51 @@
+id: 77
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Platform Branches
+difficulty: intermediate
+xp: 150
+story: |
+  Half of Lanternfish runs on Linux servers and the other half, including the
+  whole office, runs on Macs. The runbook tells people to "count the CPU cores
+  first", and Ollie tripped on the fact that the command for that is different
+  on each side. One script, two platforms: let it pick the right command for
+  wherever it is running.
+objective: |
+  Write solution.sh (no arguments). Find out the operating system with
+  `uname -s` and print the command that counts CPU cores there:
+    Linux   ->  cpu count: nproc
+    Darwin  ->  cpu count: sysctl -n hw.ncpu
+  On any other system print to stderr
+    unsupported platform: <uname output>
+  and exit with status 1.
+  Use `uname -s` inside your decision (a variable or directly in a test).
+concepts:
+  - "uname -s in a condition"
+  - "one script, several platforms"
+required_patterns:
+  - pattern: 'uname\s+-s'
+    message: "Ask the system with uname -s."
+test_cases:
+  - name: linux server
+    env:
+      FAKE_UNAME: Linux
+    expected_stdout: "cpu count: nproc"
+  - name: mac laptop
+    env:
+      FAKE_UNAME: Darwin
+    expected_stdout: "cpu count: sysctl -n hw.ncpu"
+  - name: default is linux
+    expected_stdout: "cpu count: nproc"
+  - name: other unix is unsupported
+    env:
+      FAKE_UNAME: FreeBSD
+    expected_stdout: ""
+    expected_stderr: "unsupported platform: FreeBSD"
+    expected_exit: 1
+  - name: windows layer is unsupported
+    env:
+      FAKE_UNAME: MINGW64_NT-10.0
+    expected_stdout: ""
+    expected_stderr: "unsupported platform: MINGW64_NT-10.0"
+    expected_exit: 1

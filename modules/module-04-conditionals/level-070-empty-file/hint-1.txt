@@ -1,0 +1,1 @@
+Both failure cases, a file that does not exist and a file with zero bytes, are really one question: "is there anything in it?". There is a single file test that answers it, so you do not need an existence check first.

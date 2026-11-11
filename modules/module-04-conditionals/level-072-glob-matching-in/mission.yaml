@@ -1,0 +1,53 @@
+id: 72
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Glob Matching in [[ ]]
+difficulty: beginner
+xp: 120
+story: |
+  The /var/spool folder on eel is a junk drawer: temp files nobody removed, logs
+  that should be archived, and crash dumps that Theo wants attached to tickets.
+  Ollie has a list of file names and no idea what to do with each. Teach the
+  script the naming conventions so it can sort the drawer one name at a time.
+objective: |
+  Write solution.sh that takes one argument: a file name (not a path to check,
+  just the name). Print `<name> -> <action>` where the action is chosen by the
+  FIRST rule that matches:
+    1. name starts with `tmp-`                         -> delete
+    2. name ends with `.log`                           -> archive
+    3. name is `crash-`, one single character, `.dump`  -> ticket
+    4. anything else                                   -> ignore
+  Use wildcard patterns on the right-hand side of `==` inside `[[ ]]`; do not
+  quote the patterns. Do not use `case` (that comes soon).
+concepts:
+  - "[[ $name == *.log ]] glob on the right"
+  - "* and ? in patterns"
+required_patterns:
+  - pattern: '==\s*[^"\s]*[*?]'
+    message: "Put an unquoted wildcard pattern (like *.log) on the right of ==."
+forbidden_patterns:
+  - pattern: '\bcase\b'
+    message: "Use if / elif with == patterns in this level."
+test_cases:
+  - name: temp file
+    args: [tmp-4821]
+    expected_stdout: "tmp-4821 -> delete"
+  - name: log file
+    args: [access.log]
+    expected_stdout: "access.log -> archive"
+  - name: crash dump with one digit
+    args: [crash-7.dump]
+    expected_stdout: "crash-7.dump -> ticket"
+  - name: two characters is not one
+    args: [crash-12.dump]
+    expected_stdout: "crash-12.dump -> ignore"
+  - name: first rule wins
+    args: [tmp-old.log]
+    expected_stdout: "tmp-old.log -> delete"
+  - name: spaces in the name
+    args: ["my app.log"]
+    expected_stdout: "my app.log -> archive"
+  - name: rotated log has a different ending
+    args: [access.log.1]
+    expected_stdout: "access.log.1 -> ignore"

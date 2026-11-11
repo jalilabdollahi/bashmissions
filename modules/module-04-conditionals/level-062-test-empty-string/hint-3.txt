@@ -1,1 +1,0 @@
-An empty argument and a missing argument should both print `empty`.

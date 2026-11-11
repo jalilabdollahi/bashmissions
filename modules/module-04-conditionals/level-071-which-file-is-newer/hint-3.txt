@@ -1,0 +1,7 @@
+source_file="$1"
+backup="$2"
+if [[ $source_file -nt $backup ]]; then
+  echo "STALE: ..."   # use $backup and $source_file as in the objective
+else
+  echo "fresh: ..."
+fi

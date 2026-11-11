@@ -1,0 +1,52 @@
+id: 62
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Empty or Not
+difficulty: beginner
+xp: 90
+story: |
+  Noor's helpdesk form sends tickets to a tiny script. Twice this week a ticket
+  arrived with no customer name, so nobody knew whose shop was offline. Notes are
+  optional, but a name is not. Teach the script to insist on the one and
+  gracefully handle the other.
+objective: |
+  Write solution.sh that takes a customer name ($1) and an optional note ($2).
+  If the name is missing or empty, print to stderr
+    error: customer name required
+  and exit with status 2 (print nothing to stdout).
+  Otherwise print
+    ticket for: <name>
+  and, only when the note is not empty, a second line
+    note: <note>
+  Use `-z` to detect an empty name and `-n` to detect a present note.
+concepts:
+  - "-z (string is empty)"
+  - "-n (string is not empty)"
+required_patterns:
+  - pattern: '-z\b'
+    message: "Use [[ -z ... ]] to detect the empty name."
+  - pattern: '-n\b'
+    message: "Use [[ -n ... ]] to detect that a note was given."
+test_cases:
+  - name: name and note
+    args: ["Harbour Bakery", "oven controller offline"]
+    expected_stdout: |-
+      ticket for: Harbour Bakery
+      note: oven controller offline
+  - name: name only
+    args: ["Tidewater Books"]
+    expected_stdout: "ticket for: Tidewater Books"
+  - name: empty note is the same as no note
+    args: ["North Pier Dental", ""]
+    expected_stdout: "ticket for: North Pier Dental"
+  - name: empty name is an error
+    args: ["", "site is down"]
+    expected_stdout: ""
+    expected_stderr: "error: customer name required"
+    expected_exit: 2
+  - name: no arguments at all
+    args: []
+    expected_stdout: ""
+    expected_stderr: "error: customer name required"
+    expected_exit: 2

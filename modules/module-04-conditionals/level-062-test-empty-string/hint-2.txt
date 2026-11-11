@@ -1,1 +1,0 @@
-Use `${1:-}` so missing input does not break under `set -u`.

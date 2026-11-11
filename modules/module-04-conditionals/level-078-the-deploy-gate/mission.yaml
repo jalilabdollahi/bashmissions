@@ -1,0 +1,78 @@
+id: 78
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: The Deploy Gate
+difficulty: intermediate
+xp: 200
+story: |
+  After the pager-and-freeze incident, Mara and Priya sit down and write the
+  Lanternfish deploy policy on a napkin: nothing ships with red tests; staging
+  ships as soon as tests are green; production also needs two approvals and must
+  not be in a change freeze. Gus asks that it be turned into code before anyone
+  spills coffee on the napkin. This is the final test of the module: decisions
+  inside decisions.
+objective: |
+  Write solution.sh that takes three arguments: ENV (`staging` or `prod`),
+  TESTS (`pass` or `fail`) and APPROVALS (a whole number).
+  - Wrong number of arguments: print `usage: solution.sh ENV TESTS APPROVALS`
+    to stderr and exit 2.
+  - ENV other than `staging` or `prod`: print `unknown environment: <env>` to
+    stderr and exit 2.
+  - Otherwise print exactly one line, using this policy:
+      1. TESTS is not `pass`           -> BLOCKED: tests are not passing
+      2. ENV is `staging`              -> DEPLOY: staging
+      3. ENV is `prod` and the file `freeze.flag` exists
+                                       -> BLOCKED: change freeze is active
+      4. ENV is `prod` and APPROVALS < 2
+                                       -> BLOCKED: prod needs 2 approvals, has <n>
+      5. ENV is `prod` otherwise       -> DEPLOY: prod
+  Nest the decisions: an outer if about tests and environment, inner ones for
+  the production rules.
+concepts:
+  - "if inside if"
+  - "combining string, number and file tests"
+required_patterns:
+  - pattern: '\bif\b[\s\S]*\bif\b'
+    message: "Nest at least one if inside another."
+  - pattern: '\bfreeze\.flag\b'
+    message: "Check for the freeze.flag file in the current directory."
+test_cases:
+  - name: staging with green tests
+    args: [staging, pass, "0"]
+    expected_stdout: "DEPLOY: staging"
+  - name: staging with red tests
+    args: [staging, fail, "0"]
+    expected_stdout: "BLOCKED: tests are not passing"
+  - name: prod with everything in order
+    args: [prod, pass, "2"]
+    expected_stdout: "DEPLOY: prod"
+  - name: prod with more than enough approvals
+    args: [prod, pass, "10"]
+    expected_stdout: "DEPLOY: prod"
+  - name: prod with one approval
+    args: [prod, pass, "1"]
+    expected_stdout: "BLOCKED: prod needs 2 approvals, has 1"
+  - name: prod with red tests and many approvals
+    args: [prod, fail, "5"]
+    expected_stdout: "BLOCKED: tests are not passing"
+  - name: prod during a freeze
+    args: [prod, pass, "3"]
+    files:
+      freeze.flag: "harbour festival week\n"
+    expected_stdout: "BLOCKED: change freeze is active"
+  - name: freeze does not affect staging
+    args: [staging, pass, "0"]
+    files:
+      freeze.flag: "harbour festival week\n"
+    expected_stdout: "DEPLOY: staging"
+  - name: unknown environment
+    args: [qa, pass, "2"]
+    expected_stdout: ""
+    expected_stderr: "unknown environment: qa"
+    expected_exit: 2
+  - name: too few arguments
+    args: [prod, pass]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh ENV TESTS APPROVALS"
+    expected_exit: 2

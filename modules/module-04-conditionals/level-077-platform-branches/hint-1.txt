@@ -1,0 +1,1 @@
+Your script has to look around before it decides: which operating system is this? There is a standard command that answers with the kernel's name. Store its answer once and then branch on it, with a final branch for systems you do not know.

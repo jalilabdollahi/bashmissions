@@ -1,0 +1,14 @@
+file="$1"
+case "$file" in
+  *.tar.gz | *.tgz)
+    echo "extract with: tar -xzf $file"
+    ;;
+  *.tar)
+    echo "extract with: tar -xf $file"
+    ;;
+  # ... *.zip and then *.gz (after the tar.gz branch!) ...
+  *)
+    echo "unknown archive type: $file" >&2
+    exit 1
+    ;;
+esac

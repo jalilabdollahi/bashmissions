@@ -1,0 +1,70 @@
+id: 67
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Flip a Condition
+difficulty: beginner
+xp: 110
+story: |
+  The staging firewall has an allowlist: one IP address per line in a file called
+  allowlist.txt. Priya's rule is the inverse of what you would think. She does not
+  care who is on the list; she cares who is not, because those get blocked and
+  those are the ones that wake her up. Write the check from her point of view.
+objective: |
+  Write solution.sh that takes one argument: an IP address. The file
+  `allowlist.txt` (in the current directory) lists the allowed addresses, one
+  per line.
+  If the address is NOT listed, print
+    BLOCK <ip>
+  If it is listed, print
+    allow <ip>
+  The address must match a whole line exactly, and the dots are ordinary
+  characters (10.0.0.1 is not 10.0.0.15, and not 10x0x0x1).
+  Build the decision around `!` (not).
+concepts:
+  - "! negates a condition"
+  - "if ! command; then"
+required_patterns:
+  - pattern: '!\s*(grep|\[\[)|\[\[\s*!'
+    message: "Use ! to negate the test, e.g. if ! grep ...; then (or [[ ! ... ]])."
+test_cases:
+  - name: listed address
+    args: [192.168.1.20]
+    files:
+      allowlist.txt: |
+        10.0.0.15
+        192.168.1.20
+        10.1.0.1
+    expected_stdout: "allow 192.168.1.20"
+  - name: unknown address
+    args: [172.16.9.9]
+    files:
+      allowlist.txt: |
+        10.0.0.15
+        192.168.1.20
+        10.1.0.1
+    expected_stdout: "BLOCK 172.16.9.9"
+  - name: prefix of a listed address
+    args: [10.0.0.1]
+    files:
+      allowlist.txt: |
+        10.0.0.15
+        192.168.1.20
+        10.1.0.1
+    expected_stdout: "BLOCK 10.0.0.1"
+  - name: dots are not wildcards
+    args: [10x1x0x1]
+    files:
+      allowlist.txt: |
+        10.0.0.15
+        192.168.1.20
+        10.1.0.1
+    expected_stdout: "BLOCK 10x1x0x1"
+  - name: last line of the list
+    args: [10.1.0.1]
+    files:
+      allowlist.txt: |
+        10.0.0.15
+        192.168.1.20
+        10.1.0.1
+    expected_stdout: "allow 10.1.0.1"

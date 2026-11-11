@@ -1,0 +1,7 @@
+day="$1"
+holiday="$2"
+if [[ $day == sat || $day == sun || $holiday == yes ]]; then
+  echo "weekend rota: ..."   # who has the pager? see the objective
+else
+  echo "weekday rota: ..."
+fi

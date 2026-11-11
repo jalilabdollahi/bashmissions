@@ -1,0 +1,3 @@
+In A && B || C, the || branch runs whenever the left side as a whole fails, and that includes B failing. To protect it, wrap B in braces together with its own fallback that always succeeds; remember the space after { and the semicolon or newline before }. Generic example:
+
+  [[ $ready == yes ]] && { start_it || echo "start failed" >&2; } || echo "not ready"

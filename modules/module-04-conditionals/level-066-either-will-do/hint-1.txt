@@ -1,0 +1,1 @@
+There are three different reasons to choose the weekend rota, and any single one of them is enough. You want one condition that is true when at least one of the three reasons is true.

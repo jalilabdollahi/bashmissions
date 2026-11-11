@@ -1,1 +1,0 @@
-An `else` branch handles every case where the `if` test fails.

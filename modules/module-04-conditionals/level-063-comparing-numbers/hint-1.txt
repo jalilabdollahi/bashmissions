@@ -1,0 +1,1 @@
+You are sorting a number into bands. Because the bands overlap (95 is also "at least 70"), the order of your checks matters: start with the most severe band. And remember that numbers need their own comparison words: "9" is not bigger than "70" as a number, even though it sorts later as text.

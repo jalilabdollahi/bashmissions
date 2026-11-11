@@ -1,0 +1,9 @@
+Inside [[ ]], the right-hand side of == is a pattern when you do not quote it. * matches any run of characters (even none) and ? matches exactly one. Generic example:
+
+  if [[ $file == backup-* ]]; then
+    echo "starts with backup-"
+  elif [[ $file == *.zip ]]; then
+    echo "ends with .zip"
+  elif [[ $file == img-??.png ]]; then
+    echo "img- plus two characters"
+  fi

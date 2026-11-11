@@ -1,1 +1,0 @@
-Negate the test for the exact string `admin`.

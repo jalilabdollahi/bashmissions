@@ -1,1 +1,0 @@
-Use `[[ ${1:-} == "ok" ]]` as the condition.

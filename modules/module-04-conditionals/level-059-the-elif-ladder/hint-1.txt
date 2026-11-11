@@ -1,0 +1,1 @@
+Two branches are not enough now: there are four known codes plus a catch-all. Think of a ladder where Bash checks one rung after another and stops at the first rung that fits, with a final rung for "none of the above".

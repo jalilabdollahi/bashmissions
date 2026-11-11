@@ -1,1 +1,0 @@
-The pattern is condition, then success command, then fallback command.

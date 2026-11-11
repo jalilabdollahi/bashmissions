@@ -1,1 +1,0 @@
-Inside `[[ ]]`, `||` means either condition may be true.

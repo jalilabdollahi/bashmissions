@@ -1,0 +1,56 @@
+id: 75
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: One-Line Decisions
+difficulty: intermediate
+xp: 140
+story: |
+  Theo shows off his favourite one-liner: `[[ $sev == critical ]] && notify
+  page-oncall || echo "logged"`. It looks lovely. Last Friday the pager service
+  was down, `notify` failed, and the script cheerfully logged the incident as
+  if nobody needed to know. Theo calls this "an unfortunate edge case". Mara
+  calls it a lesson. Write the one-liner properly.
+objective: |
+  Write solution.sh that takes one argument: a severity. A stub command
+  `notify` is available.
+  - If the severity is exactly `critical`, run `notify page-oncall`
+    (on success it prints `paged on-call`).
+    If `notify` fails, print `pager failed` to stderr; the script still ends
+    with exit status 0 and prints NOTHING to stdout in that case.
+  - For any other severity, print `logged: <severity>`.
+  The decision must be ONE line built from `&&` and `||`, no `if` or `case`.
+  Careful: in `A && B || C`, C also runs when B fails. Make sure the middle part
+  cannot fail.
+concepts:
+  - "cmd && a || b one-liner"
+  - "the trap: b runs when a fails"
+required_patterns:
+  - pattern: '&&'
+    message: "Use && for the \"then\" part of the one-liner."
+  - pattern: '\|\|'
+    message: "Use || for the \"else\" part of the one-liner."
+forbidden_patterns:
+  - pattern: '\b(if|case)\b'
+    message: "This level is about the one-line style: no if or case."
+test_cases:
+  - name: critical and pager works
+    args: [critical]
+    expected_stdout: "paged on-call"
+  - name: low severity is logged
+    args: [low]
+    expected_stdout: "logged: low"
+  - name: warning is logged too
+    args: [warning]
+    expected_stdout: "logged: warning"
+  - name: capital C is not critical
+    args: [Critical]
+    expected_stdout: "logged: Critical"
+  - name: critical but the pager is down
+    args: [critical]
+    env:
+      FAKE_NOTIFY_FAIL: "1"
+    expected_stdout: ""
+    expected_stderr: "pager failed"
+    stderr_comparison: contains
+    expected_exit: 0

@@ -1,0 +1,5 @@
+Put ! in front of a command or a test to reverse its result: "if not". For the search, grep -q is silent, -x demands a whole-line match, and -F treats the pattern as plain text. Generic example:
+
+  if ! grep -qxF "bob" guests.txt; then
+    echo "bob is not invited"
+  fi

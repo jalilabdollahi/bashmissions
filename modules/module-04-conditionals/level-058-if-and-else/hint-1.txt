@@ -1,0 +1,1 @@
+Think of a fork: one road when the word is found, another when it is not. You need a way to ask "does this file contain ERROR?" whose answer an if can use, and a second branch for the "no" case.

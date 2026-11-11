@@ -1,1 +1,0 @@
-`-s` is true for an existing file whose size is greater than zero.

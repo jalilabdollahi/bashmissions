@@ -1,0 +1,7 @@
+Bash has file tests for [[ ]]: -e is true if anything exists at the path, -f if it is a regular file, -d if it is a directory. Quote the path so spaces survive. Generic example:
+
+  if [[ -d "$target" ]]; then
+    echo "a folder"
+  elif [[ -e "$target" ]]; then
+    echo "exists, but not a folder"
+  fi

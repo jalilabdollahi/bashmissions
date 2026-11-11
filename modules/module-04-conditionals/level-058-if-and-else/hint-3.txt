@@ -1,0 +1,6 @@
+logfile="$1"
+if grep -q 'ERROR' "$logfile"; then
+  echo "needs attention: ERROR found in $logfile"
+else
+  echo "..."   # the clean line from the objective
+fi

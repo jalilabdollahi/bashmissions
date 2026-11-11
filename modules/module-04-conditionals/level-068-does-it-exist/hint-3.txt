@@ -1,0 +1,10 @@
+path="$1"
+if [[ -f $path ]]; then
+  echo "$path: regular file"
+elif [[ -d $path ]]; then
+  echo "$path: directory"
+elif [[ -e $path ]]; then
+  echo "$path: something else"
+else
+  echo "..."   # the not-found line
+fi

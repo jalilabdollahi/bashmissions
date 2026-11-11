@@ -1,0 +1,1 @@
+Draw the policy as a tree before you write any code. The first question (are the tests green?) applies to everyone. Only if the answer is yes do you ask the second question (which environment?), and only for production do you ask the third set (freeze, approvals). Each later question lives inside the "yes" branch of the one before.

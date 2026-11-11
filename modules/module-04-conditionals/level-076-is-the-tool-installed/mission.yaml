@@ -1,0 +1,53 @@
+id: 76
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Is the Tool Installed?
+difficulty: intermediate
+xp: 140
+story: |
+  Ollie's laptop setup script died halfway through with "command not found" and
+  left half-configured files behind. Priya's rule for every Lanternfish script:
+  check that the tools you need exist before you start, and say clearly which
+  one is missing. Build the check that every setup script will call first.
+objective: |
+  Write solution.sh that takes one argument: the name of a command-line tool.
+  If the tool is installed (Bash can find it), print
+    found: <output of running the tool with --version>
+  for example `found: lanternctl 2.4.1`.
+  If it is not installed, print to stderr
+    missing: <tool>
+  and exit with status 1 (nothing on stdout).
+  If no argument is given, print `usage: solution.sh TOOL` to stderr and exit 2.
+  Detect the tool with `command -v`; do not use `which`.
+concepts:
+  - "command -v tool"
+  - "if cmd >/dev/null; then"
+required_patterns:
+  - pattern: 'command\s+-v\b'
+    message: "Use command -v to ask Bash whether a tool can be found."
+forbidden_patterns:
+  - pattern: '\bwhich\b'
+    message: "Use the built-in command -v instead of which."
+test_cases:
+  - name: lanternctl is installed
+    args: [lanternctl]
+    expected_stdout: "found: lanternctl 2.4.1"
+  - name: tidepool is installed
+    args: [tidepool]
+    expected_stdout: "found: tidepool 0.9"
+  - name: tool that does not exist
+    args: [flux-capacitor]
+    expected_stdout: ""
+    expected_stderr: "missing: flux-capacitor"
+    expected_exit: 1
+  - name: another missing tool
+    args: [kubectl-fish]
+    expected_stdout: ""
+    expected_stderr: "missing: kubectl-fish"
+    expected_exit: 1
+  - name: no tool name
+    args: []
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh TOOL"
+    expected_exit: 2

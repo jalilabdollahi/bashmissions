@@ -1,0 +1,46 @@
+id: 65
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Both Must Be True
+difficulty: beginner
+xp: 100
+story: |
+  Priya has finally written down the VPN policy on one line of a whiteboard:
+  "Staff only, and only with a second factor." Ollie asked what happens to a
+  contractor with MFA, or a staffer without it. "Both rules must pass, Ollie,"
+  said Priya. "Not one. Both." Make the access script obey the whiteboard.
+objective: |
+  Write solution.sh that takes three arguments: a user name, a group, and an MFA
+  flag (`yes` or `no`).
+  Access is granted only when the group is exactly `staff` AND the MFA flag is
+  exactly `yes`. Print
+    granted: <user>
+  when access is granted and
+    denied: <user>
+  in every other case. Combine both checks into a single condition with `&&`.
+concepts:
+  - "&& inside [[ ]]"
+  - "all conditions must hold"
+required_patterns:
+  - pattern: '&&'
+    message: "Combine the two checks with &&."
+forbidden_patterns:
+  - pattern: '\bif\b[\s\S]*\bif\b'
+    message: "Use one if with && instead of nesting two ifs."
+test_cases:
+  - name: staff with mfa
+    args: [ana, staff, "yes"]
+    expected_stdout: "granted: ana"
+  - name: staff without mfa
+    args: [ben, staff, "no"]
+    expected_stdout: "denied: ben"
+  - name: contractor with mfa
+    args: [cleo, contractor, "yes"]
+    expected_stdout: "denied: cleo"
+  - name: contractor without mfa
+    args: [dan, contractor, "no"]
+    expected_stdout: "denied: dan"
+  - name: mfa flag must be exactly yes
+    args: [eve, staff, "YES"]
+    expected_stdout: "denied: eve"

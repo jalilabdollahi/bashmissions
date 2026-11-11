@@ -1,0 +1,46 @@
+id: 60
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Same String?
+difficulty: beginner
+xp: 80
+story: |
+  Priya audits what is actually running against what the release sheet says
+  should be running. Last week a server was found on "V2.4.1" while the sheet
+  said "v2.4.1", and nobody noticed because the humans' eyes skipped the capital.
+  Computers do not skip. Build the drift checker.
+objective: |
+  Write solution.sh that takes two arguments: the EXPECTED release tag and the
+  RUNNING release tag.
+  If the two are exactly the same string, print:
+    in sync: <tag>
+  Otherwise print:
+    DRIFT: expected <expected> but found <running>
+  Comparison is literal and case-sensitive. A `*` or a space in a tag is just a
+  character, never a pattern. Use `==` inside `[[ ]]`.
+concepts:
+  - "[[ $a == $b ]] string equality"
+  - "quote the right-hand side to compare literally"
+required_patterns:
+  - pattern: '==\s*"\$'
+    message: "Quote the right-hand side of == (\"$var\") so it is compared literally, not as a pattern."
+test_cases:
+  - name: same tag
+    args: [v2.4.1, v2.4.1]
+    expected_stdout: "in sync: v2.4.1"
+  - name: different tag
+    args: [v2.4.1, v2.4.2]
+    expected_stdout: "DRIFT: expected v2.4.1 but found v2.4.2"
+  - name: case matters
+    args: [v2.4.1, V2.4.1]
+    expected_stdout: "DRIFT: expected v2.4.1 but found V2.4.1"
+  - name: tags with a space
+    args: ["blue green", "blue green"]
+    expected_stdout: "in sync: blue green"
+  - name: a star is not a wildcard
+    args: ["*", "v2.4.1"]
+    expected_stdout: "DRIFT: expected * but found v2.4.1"
+  - name: a star only equals a star
+    args: ["*", "*"]
+    expected_stdout: "in sync: *"

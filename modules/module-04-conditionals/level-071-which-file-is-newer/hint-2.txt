@@ -1,0 +1,5 @@
+In [[ ]], "a -nt b" is true when file a is newer than file b, and "a -ot b" is true when a is older. If b does not exist, "a -nt b" is true when a exists. Generic example:
+
+  if [[ $report -nt $summary ]]; then
+    echo "summary needs regenerating"
+  fi

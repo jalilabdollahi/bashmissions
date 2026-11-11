@@ -1,0 +1,77 @@
+id: 69
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Permission Checks
+difficulty: beginner
+xp: 120
+story: |
+  A deploy failed at midnight because someone copied a script to the server and
+  forgot to make it executable. Priya wants a pre-flight tool that tells you
+  what YOU, the user running it, can do with a file, in the same compact style
+  as `ls -l` does: three characters, one per right.
+objective: |
+  Write solution.sh that takes one argument: a path.
+  If nothing exists at the path, print to stderr
+    no such file: <path>
+  and exit with status 1.
+  Otherwise print `<path>: ` followed by three characters describing what the
+  current user can do:
+    r or -   (can read?)     w or -   (can write?)     x or -   (can execute?)
+  For example `deploy.sh: rwx` or `notes.txt: rw-` or `locked.key: ---`.
+  Test with -r, -w and -x (not by parsing ls).
+concepts:
+  - "-r readable"
+  - "-w writable"
+  - "-x executable"
+required_patterns:
+  - pattern: '-r\b'
+    message: "Use [[ -r ... ]] to test readability."
+  - pattern: '-w\b'
+    message: "Use [[ -w ... ]] to test writability."
+  - pattern: '-x\b'
+    message: "Use [[ -x ... ]] to test executability."
+forbidden_patterns:
+  - pattern: '\bls\b'
+    message: "Test the rights with -r -w -x instead of parsing ls."
+test_cases:
+  - name: executable script
+    args: [deploy.sh]
+    files:
+      deploy.sh:
+        content: "#!/bin/sh\necho deploying\n"
+        mode: "0755"
+    expected_stdout: "deploy.sh: rwx"
+  - name: ordinary text file
+    args: [notes.txt]
+    files:
+      notes.txt:
+        content: "remember the milk\n"
+        mode: "0644"
+    expected_stdout: "notes.txt: rw-"
+  - name: read-only config
+    args: [app.conf]
+    files:
+      app.conf:
+        content: "port=8080\n"
+        mode: "0444"
+    expected_stdout: "app.conf: r--"
+  - name: locked key
+    args: [locked.key]
+    files:
+      locked.key:
+        content: "secret\n"
+        mode: "0000"
+    expected_stdout: "locked.key: ---"
+  - name: execute and read only
+    args: [run-only.sh]
+    files:
+      run-only.sh:
+        content: "#!/bin/sh\ntrue\n"
+        mode: "0500"
+    expected_stdout: "run-only.sh: r-x"
+  - name: missing path
+    args: [ghost.sh]
+    expected_stdout: ""
+    expected_stderr: "no such file: ghost.sh"
+    expected_exit: 1
