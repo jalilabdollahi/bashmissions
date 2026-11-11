@@ -1,0 +1,6 @@
+customer=$1
+target="tickets/$customer.txt"
+cp fixtures/ticket-template.txt "$target"
+printf 'filed: %s\n' "$target"
+
+Every place the path appears (cp, the message) uses "$target" with the quotes.

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Practice stand-in for Lanternfish's support-bundle tool. It records the
+# environment it was started with, exactly like the real one does, into the
+# file named by --out.
+if [[ ${1:-} == "--out" && $# -eq 2 ]]; then
+  env | sort > "$2"
+  echo "bundle saved to $2"
+  exit 0
+fi
+echo "usage: support-bundle --out FILE" >&2
+exit 2

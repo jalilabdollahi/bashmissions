@@ -1,0 +1,84 @@
+id: 357
+module: 20
+module_name: script-security
+module_display: Security
+title: Allow-List Input
+difficulty: advanced
+xp: 170
+story: |
+  Ollie wrote a tiny "please restart this service" form handler for the support
+  desk. To stay safe he blocks the characters `;` and `&`. Priya pastes
+  `web$(touch pwned)` into the form and nothing stops it. "You cannot list every
+  bad thing," she says. "You can list every good thing, because there are four."
+objective: |
+  Write solution.sh that queues a restart request. The argument is SERVICE.
+
+  The services that may be restarted are listed one per line in
+  `fixtures/allowed-services.txt`.
+
+  1. No argument: print `usage: solution.sh SERVICE` to stderr, exit 2.
+  2. If SERVICE is exactly one of the lines in the allow-list file (whole
+     line, same letters, no pattern matching): append SERVICE as a line to
+     `queue.txt` and print `queued: SERVICE`.
+  3. Otherwise print `denied: SERVICE` to stderr, exit 1, and do not create or
+     change `queue.txt`.
+
+  Decide by looking SERVICE up in the allow-list. Do not try to detect bad
+  characters. Names such as `we`, `.*` or `-v` must be denied too.
+concepts:
+  - "allow-list beats block-list"
+  - "grep -Fxq -- \"$value\" file: exact whole-line lookup"
+  - "-- ends options so a value cannot be read as a flag"
+required_patterns:
+  - pattern: 'grep\s+-[A-Za-z]*F[A-Za-z]*x|grep\s+-[A-Za-z]*x[A-Za-z]*F'
+    message: "Look the value up with grep -Fxq (fixed text, whole line, quiet)."
+test_cases:
+  - name: a listed service is queued
+    args: [cache]
+    expected_stdout: "queued: cache"
+    expected_files:
+      queue.txt: "cache"
+  - name: names with a dash and digits work when listed
+    args: [mail-relay]
+    files:
+      queue.txt: "db\n"
+    expected_stdout: "queued: mail-relay"
+    expected_files:
+      queue.txt: |-
+        db
+        mail-relay
+  - name: a prefix of a good name is not good
+    args: [we]
+    expected_stderr: "denied: we"
+    expected_exit: 1
+    expected_files:
+      queue.txt: null
+  - name: a regex that would match everything
+    args: [".*"]
+    expected_stderr: "denied: .*"
+    expected_exit: 1
+    expected_files:
+      queue.txt: null
+  - name: command substitution glued to a good name
+    args: ['web$(touch pwned)']
+    expected_stderr: 'denied: web$(touch pwned)'
+    expected_exit: 1
+    expected_files:
+      pwned: null
+      queue.txt: null
+  - name: option-looking value
+    args: ["-v"]
+    expected_stderr: "denied: -v"
+    expected_exit: 1
+    expected_files:
+      queue.txt: null
+  - name: empty string
+    args: [""]
+    expected_stderr: "denied: "
+    expected_exit: 1
+    expected_files:
+      queue.txt: null
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh SERVICE"
+    expected_exit: 2

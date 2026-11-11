@@ -1,0 +1,90 @@
+id: 365
+module: 20
+module_name: script-security
+module_display: Security
+title: Symlink Checks
+difficulty: expert
+xp: 200
+story: |
+  The support desk has a shared `notes` folder, and Noor's helper script appends
+  a line to a customer's note file. A customer with shell access on the same box
+  replaced `notes/halibut.txt` with a symbolic link to the billing price list.
+  The next note Noor saved went straight into the price list. Priya wants the
+  helper to look at what it is about to write to before it writes.
+objective: |
+  Write solution.sh that appends a note. Arguments: FILE and TEXT.
+
+  1. Fewer than two arguments: `usage: solution.sh FILE TEXT` to stderr,
+     exit 2.
+  2. If FILE is a symbolic link (even one pointing nowhere), print
+     `refusing: FILE is a symlink` to stderr and exit 1.
+  3. If the folder that holds FILE is a symbolic link, print
+     `refusing: FOLDER is a symlink` to stderr (FOLDER is the folder part of
+     FILE as written) and exit 1.
+  4. Otherwise append TEXT and a newline to FILE (creating it if needed) and
+     print `noted: FILE`.
+
+  Nothing may be written anywhere when a check fails. Test with `-L`; plain
+  `-e` or `-f` tests follow links and are not enough.
+concepts:
+  - "[[ -L path ]] is true for a symlink, even a dangling one"
+  - "-e and -f follow the link; -L does not"
+  - "check the file and its folder before writing"
+required_patterns:
+  - pattern: '-L\s'
+    message: "Test for symbolic links with [[ -L path ]]."
+test_cases:
+  - name: plain file gets a new line
+    args: [notes/dory.txt, "called back"]
+    files:
+      notes/dory.txt: "first call\n"
+    expected_stdout: "noted: notes/dory.txt"
+    expected_files:
+      notes/dory.txt: |-
+        first call
+        called back
+  - name: new file is created
+    args: [notes/eel.txt, "new customer"]
+    files:
+      "notes/": ""
+    expected_stdout: "noted: notes/eel.txt"
+    expected_files:
+      notes/eel.txt: "new customer"
+  - name: symlink to an existing file is refused
+    args: [notes/halibut.txt, "paid in full"]
+    files:
+      billing/prices.txt: "bread 3\n"
+      notes/halibut.txt: {symlink: "../billing/prices.txt"}
+    expected_stderr: "refusing: notes/halibut.txt is a symlink"
+    expected_exit: 1
+    expected_files:
+      billing/prices.txt: "bread 3"
+  - name: dangling symlink is refused too
+    args: [notes/marlin.txt, "hello"]
+    files:
+      notes/marlin.txt: {symlink: "../outside/created-by-attack.txt"}
+      "outside/": ""
+    expected_stderr: "refusing: notes/marlin.txt is a symlink"
+    expected_exit: 1
+    expected_files:
+      outside/created-by-attack.txt: null
+  - name: folder that is a symlink is refused
+    args: [shared/grouper.txt, "hello"]
+    files:
+      "elsewhere/": ""
+      shared: {symlink: "elsewhere"}
+    expected_stderr: "refusing: shared is a symlink"
+    expected_exit: 1
+    expected_files:
+      elsewhere/grouper.txt: null
+  - name: text with options and percent signs is just text
+    args: [notes/octopus.txt, "-n 100%s done"]
+    files:
+      "notes/": ""
+    expected_stdout: "noted: notes/octopus.txt"
+    expected_files:
+      notes/octopus.txt: "-n 100%s done"
+  - name: missing text
+    args: [notes/dory.txt]
+    expected_stderr: "usage: solution.sh FILE TEXT"
+    expected_exit: 2

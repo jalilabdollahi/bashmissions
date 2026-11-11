@@ -1,0 +1,1 @@
+Asking "does it exist?" and then "create it" gives somebody else the time between the two questions. You want a single operation that creates the file only if nothing is there, and fails otherwise. The shell has a switch that turns the plain `>` into exactly that.

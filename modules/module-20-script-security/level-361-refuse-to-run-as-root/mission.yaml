@@ -1,0 +1,78 @@
+id: 361
+module: 20
+module_name: script-security
+module_display: Security
+title: Refuse to Run as Root
+difficulty: advanced
+xp: 170
+story: |
+  Mara found a log-rotation script that someone ran with root's powers "just to
+  make the permission errors go away". It now owns half of /var/log, and the web
+  server cannot write there any more. Priya's rule is short: a script that does
+  not need root must refuse to run with it, and say so before touching anything.
+objective: |
+  Write solution.sh, a log rotator for the `logs` folder.
+
+  1. If the effective user id is 0 (root), print
+     `refusing to run as root: use a normal account` to stderr, exit 1, and do
+     not touch any file.
+  2. Otherwise move `logs/app.log` to `logs/app.log.1` (replacing an older
+     `app.log.1`), create a fresh empty `logs/app.log`, and print
+     `rotated as uid UID`, where UID is the number you checked.
+
+  Find the user id with `id -u`, and compare it as a number.
+  (Here `id` is a practice stand-in so the tests can pretend to be root.)
+concepts:
+  - "id -u prints the numeric user id; 0 is root"
+  - "(( $(id -u) == 0 )) numeric comparison"
+  - "check privileges first, act second"
+required_patterns:
+  - pattern: 'id\s+-u'
+    message: "Ask for the numeric user id with id -u."
+forbidden_patterns:
+  - pattern: '\$EUID|\$UID|\$\{EUID\}|\$\{UID\}|\bwhoami\b'
+    message: "Use id -u here: the practice id can be switched per test, EUID cannot be faked."
+test_cases:
+  - name: normal user rotates
+    args: []
+    env:
+      FAKE_UID: "1000"
+    files:
+      logs/app.log: "line one\nline two\n"
+    expected_stdout: "rotated as uid 1000"
+    expected_files:
+      logs/app.log.1: |-
+        line one
+        line two
+      logs/app.log: ""
+  - name: another normal id, old backup replaced
+    args: []
+    env:
+      FAKE_UID: "501"
+    files:
+      logs/app.log: "fresh\n"
+      logs/app.log.1: "stale\n"
+    expected_stdout: "rotated as uid 501"
+    expected_files:
+      logs/app.log.1: "fresh"
+      logs/app.log: ""
+  - name: root is refused and nothing moves
+    args: []
+    env:
+      FAKE_UID: "0"
+    files:
+      logs/app.log: "keep me where I am\n"
+    expected_stderr: "refusing to run as root: use a normal account"
+    expected_exit: 1
+    expected_files:
+      logs/app.log: "keep me where I am"
+      logs/app.log.1: null
+  - name: a uid that merely contains a zero is not root
+    args: []
+    env:
+      FAKE_UID: "1001"
+    files:
+      logs/app.log: "x\n"
+    expected_stdout: "rotated as uid 1001"
+    expected_files:
+      logs/app.log.1: "x"

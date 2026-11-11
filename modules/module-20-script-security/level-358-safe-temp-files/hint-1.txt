@@ -1,1 +1,1 @@
-Use this curriculum concept: mktemp, not predictable names.
+A fixed file name in a shared folder is something an attacker can prepare in advance. You want the operating system to invent a name nobody could guess and to create the file for you in the same instant, so there is no gap to slip into.

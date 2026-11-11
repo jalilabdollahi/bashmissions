@@ -1,0 +1,75 @@
+id: 367
+module: 20
+module_name: script-security
+module_display: Security
+title: Forget Secrets
+difficulty: expert
+xp: 200
+story: |
+  Theo's nightly job reads the API token from the environment, signs one request
+  and then calls `support-bundle`, which snapshots its own environment for the
+  vendor's support team. Last month a bundle containing a live token went out by
+  email. Priya does not want the token rotated again; she wants the script to
+  forget it the moment it is finished with it.
+objective: |
+  Write solution.sh. The secret arrives in the environment variable API_TOKEN.
+
+  1. If API_TOKEN is unset or empty: print `API_TOKEN is not set` to stderr,
+     exit 1, and do nothing else.
+  2. Write the file `request.txt` containing exactly one line,
+     `Authorization: Bearer <the token>`.
+  3. As soon as the request file is written, discard the secret: `unset`
+     the variable (and any copy of it you made).
+  4. Then run `support-bundle --out bundle.txt` (it records the environment
+     it sees) and print `request signed, bundle sent`.
+
+  The tests read bundle.txt: it must still list the other variables (such as
+  REGION) but must not contain the token anywhere. Do not wipe the whole
+  environment with `env -i`.
+concepts:
+  - "unset VAR removes a variable (and its export)"
+  - "child processes inherit exported variables"
+  - "keep a secret's lifetime as short as its use"
+required_patterns:
+  - pattern: '\bunset\b[^\n]*API_TOKEN'
+    message: "Discard the secret with unset API_TOKEN as soon as you are done with it."
+forbidden_patterns:
+  - pattern: '\benv\s+-i\b'
+    message: "Do not wipe the whole environment; forget only the secret."
+test_cases:
+  - name: token is used, then forgotten
+    args: []
+    env:
+      API_TOKEN: "tok-9f8e7d6c"
+      REGION: "dory-north"
+    expected_stdout: "request signed, bundle sent"
+    expected_files:
+      request.txt: "Authorization: Bearer tok-9f8e7d6c"
+      bundle.txt: true
+  - name: a different token with odd characters
+    args: []
+    env:
+      API_TOKEN: "pk/live+AbC==x y"
+      REGION: "eel-south"
+    expected_stdout: "request signed, bundle sent"
+    expected_files:
+      request.txt: "Authorization: Bearer pk/live+AbC==x y"
+      bundle.txt: true
+  - name: missing token
+    args: []
+    env:
+      REGION: "dory-north"
+    expected_stderr: "API_TOKEN is not set"
+    expected_exit: 1
+    expected_files:
+      request.txt: null
+      bundle.txt: null
+  - name: empty token counts as missing
+    args: []
+    env:
+      API_TOKEN: ""
+    expected_stderr: "API_TOKEN is not set"
+    expected_exit: 1
+    expected_files:
+      request.txt: null
+      bundle.txt: null

@@ -1,0 +1,5 @@
+[[ -z ${API_TOKEN:-} ]] && ...message, exit 1...
+printf 'Authorization: Bearer %s\n' "$API_TOKEN" > request.txt
+unset API_TOKEN
+support-bundle --out bundle.txt > /dev/null
+echo "request signed, bundle sent"

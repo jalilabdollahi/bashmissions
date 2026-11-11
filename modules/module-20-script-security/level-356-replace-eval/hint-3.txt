@@ -1,0 +1,12 @@
+flags=()
+for word in "$@"; do
+  case $word in
+    ignore-case) flags+=(-i) ;;
+    count)       flags+=(-c) ;;
+    invert)      flags+=(-v) ;;
+    *) ...print "unknown option: $word" to stderr and exit 2... ;;
+  esac
+done
+grep "${flags[@]}" -F -e "$pattern" logs/app.log
+
+(-F is fixed text, -e marks the pattern so a leading dash is not read as a flag.)

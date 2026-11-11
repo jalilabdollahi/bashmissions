@@ -1,0 +1,1 @@
+Every user on a Unix system has a number, and root's number is zero. Your script can ask who it is running as, and the very first thing it does should be to compare that answer with zero and quit if it matches, before any file is touched.

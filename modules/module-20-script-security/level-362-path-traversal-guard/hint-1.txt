@@ -1,0 +1,1 @@
+A path is a list of components separated by slashes, and the component `..` means "go up one level". Your script glues the user's text after `public/`, so the user decides how many levels to climb. Reject the dangerous shapes before any file is opened, and be careful to reject components, not just any appearance of two dots.

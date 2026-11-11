@@ -1,0 +1,7 @@
+Build the optional part of a command in an array, then expand it with "${name[@]}" so every element stays one word:
+
+  opts=()
+  opts+=(-l)
+  ls "${opts[@]}" /tmp
+
+Use case to turn a word the user typed into a flag you chose yourself, and send everything else to the *) branch. No user text ever becomes a flag, only your own literals do.

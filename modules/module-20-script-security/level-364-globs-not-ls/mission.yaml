@@ -1,0 +1,95 @@
+id: 364
+module: 20
+module_name: script-security
+module_display: Security
+title: Globs Not ls
+difficulty: advanced
+xp: 190
+story: |
+  Noor asks for a one-glance "what does each customer log start with?" report.
+  Theo's version loops over `$(ls dir/*.log)`. It works until a customer uploads
+  a file called `Harbour Bakery.log`, and it prints an error when nobody has
+  uploaded anything yet. Priya adds a cruel test file named `-n.log` and a
+  folder named `old.log`, then asks for a version that survives all of it.
+objective: |
+  Write solution.sh that takes a folder DIR and summarises its `.log` files.
+
+  1. No argument: `usage: solution.sh DIR` to stderr, exit 2.
+  2. DIR is not a folder: `no such folder: DIR` to stderr, exit 1.
+  3. For every regular file in DIR whose name ends in `.log`, in glob order,
+     print `NAME: FIRST_LINE`, where NAME is the file name without the folder
+     and FIRST_LINE is the first line of the file (an empty file gives an
+     empty text after the colon and space).
+     Folders that happen to end in `.log` are skipped.
+  4. Then print `logs: N`, N being how many files were summarised. With no
+     matching files print only `logs: 0`.
+
+  Loop over a glob (`"$dir"/*.log`). Do not use ls or find, and do not loop
+  over command substitution.
+concepts:
+  - "for f in \"$dir\"/*.log: names stay whole"
+  - "shopt -s nullglob: no match means an empty list"
+  - "[[ -f $f ]] skips folders"
+  - "never parse ls"
+required_patterns:
+  - pattern: 'for\s+\w+\s+in\s+"\$\{?\w+\}?"/\*\.log'
+    message: "Loop with: for f in \"$dir\"/*.log (quoted variable, unquoted star)."
+  - pattern: 'nullglob'
+    message: "Use shopt -s nullglob so an unmatched glob gives an empty list."
+forbidden_patterns:
+  - pattern: '\b(ls|find)\b'
+    message: "No ls or find here: a glob hands you each name as one safe word."
+  - pattern: 'for\s+\w+\s+in\s+\$\('
+    message: "Do not loop over $( ... ): command output is split on spaces."
+test_cases:
+  - name: ordinary logs
+    args: [logs]
+    files:
+      logs/app.log: "booted at six\nsecond line\n"
+      logs/db.log: "ready\n"
+      logs/notes.txt: "ignore me\n"
+    expected_stdout: |-
+      app.log: booted at six
+      db.log: ready
+      logs: 2
+  - name: spaces in a name
+    args: [uploads]
+    files:
+      "uploads/Harbour Bakery.log": "orders: 14\n"
+      "uploads/Tidewater Books.log": "orders: 3\n"
+    expected_stdout: |-
+      Harbour Bakery.log: orders: 14
+      Tidewater Books.log: orders: 3
+      logs: 2
+  - name: dash-leading name, empty file, folder named like a log
+    args: [odd]
+    files:
+      odd/-n.log: "minus n\n"
+      odd/empty.log: ""
+      odd/old.log/inside.txt: "x"
+    expected_stdout: |-
+      -n.log: minus n
+      empty.log: 
+      logs: 2
+  - name: file names with glob characters
+    args: [weird]
+    files:
+      "weird/a*b.log": "star\n"
+      "weird/q?.log": "question\n"
+    expected_stdout: |-
+      a*b.log: star
+      q?.log: question
+      logs: 2
+  - name: nothing to summarise
+    args: [empty]
+    files:
+      empty/readme.txt: "no logs here\n"
+    expected_stdout: "logs: 0"
+  - name: no such folder
+    args: [ghost]
+    expected_stderr: "no such folder: ghost"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

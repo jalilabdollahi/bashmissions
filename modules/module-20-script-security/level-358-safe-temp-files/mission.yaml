@@ -1,18 +1,109 @@
 id: 358
 module: 20
 module_name: script-security
-module_display: Script Security
+module_display: Security
 title: Safe Temp Files
 difficulty: advanced
-xp: 230
-objective: Create a safe temporary file with mktemp.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: created=yes
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 170
+story: |
+  Gus wants the three biggest invoices every Monday, and Theo's script sorts
+  them through a scratch file called `report.tmp` in the shared temp folder.
+  Priya shows how an attacker on the same machine waits for that name: they
+  create `report.tmp` first, as a symlink to a file they want destroyed, and
+  Theo's script obediently overwrites it. "A predictable name is an invitation.
+  Let the system pick the name."
+objective: |
+  Write solution.sh that reads invoice amounts from stdin, one whole number
+  per line, and prints the three largest, biggest first. If fewer than three
+  numbers arrive, print as many as there are.
+
+  The work must go through a scratch file in the folder named by `$TMPDIR`:
+
+  - create it with mktemp, using a template that ends in X characters
+    inside "$TMPDIR" (for example "$TMPDIR/invoices.XXXXXX"). Never pick the
+    name yourself, and do not use `$$` or the date as the "random" part;
+  - write the input into it, then `sort -rn` it and keep the first three lines;
+  - remove the scratch file when the script ends, however it ends (use a
+    `trap ... EXIT`).
+
+  The tests plant a file called `report.tmp` and `invoices.tmp` in the temp
+  folder as traps, and check that nothing is left behind.
 concepts:
-- mktemp, not predictable names
-scaffold: true
+  - "mktemp creates the file atomically with an unpredictable name"
+  - "trap 'rm -f \"$work\"' EXIT"
+  - "predictable names in shared folders can be hijacked"
+required_patterns:
+  - pattern: '\bmktemp\b[^\n]*XXXX'
+    message: "Create the scratch file with mktemp \"$TMPDIR/something.XXXXXX\"."
+  - pattern: '\btrap\b[^\n]*\bEXIT\b'
+    message: "Clean up with trap '...' EXIT so the file never lingers."
+forbidden_patterns:
+  - pattern: '\$\$|\$\(date|\$RANDOM'
+    message: "$$, the date and $RANDOM are guessable. Let mktemp choose the name."
+test_cases:
+  - name: top three of five
+    stdin: |
+      120
+      45
+      980
+      310
+      77
+    env:
+      TMPDIR: "{RUN_DIR}/tmp"
+    files:
+      "tmp/": ""
+    expected_stdout: |-
+      980
+      310
+      120
+  - name: fewer than three
+    stdin: |
+      15
+      200
+    env:
+      TMPDIR: "{RUN_DIR}/tmp"
+    files:
+      "tmp/": ""
+    expected_stdout: |-
+      200
+      15
+  - name: numbers sort as numbers
+    stdin: |
+      9
+      100
+      25
+      1000
+    env:
+      TMPDIR: "{RUN_DIR}/tmp"
+    files:
+      "tmp/": ""
+    expected_stdout: |-
+      1000
+      100
+      25
+  - name: a planted symlink must not be followed
+    stdin: |
+      5
+      6
+      7
+      8
+    env:
+      TMPDIR: "{RUN_DIR}/tmp"
+    files:
+      victim.txt: "the signed contract"
+      other.txt: "the price list"
+      tmp/report.tmp: {symlink: "../victim.txt"}
+      tmp/invoices.tmp: {symlink: "../other.txt"}
+    expected_stdout: |-
+      8
+      7
+      6
+    expected_files:
+      victim.txt: "the signed contract"
+      other.txt: "the price list"
+  - name: empty input
+    env:
+      TMPDIR: "{RUN_DIR}/tmp"
+    files:
+      "tmp/": ""
+    expected_stdout: ""

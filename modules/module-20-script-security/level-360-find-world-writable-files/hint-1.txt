@@ -1,0 +1,1 @@
+The permission bits are stored in the file's metadata, and find can test them directly. That is more reliable than reading the text table that ls prints, which is meant for humans and changes with names and locales. Think about which single bit means "other users can write".

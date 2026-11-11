@@ -1,0 +1,1 @@
+Stop asking "does this look dangerous?" and ask "is this on the list of things I expect?". The list already exists in a file, so your script only has to check whether the value is one of its lines, and say no to everything else.

@@ -1,0 +1,1 @@
+`ls` prints names as plain text separated by newlines, so a name with a space looks like two names once the shell splits it. The shell itself can already produce a list of matching file names where each name stays one item. Let it do the matching, and look at each result before using it.

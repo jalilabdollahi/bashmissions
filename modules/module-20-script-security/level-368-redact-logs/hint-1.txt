@@ -1,0 +1,1 @@
+There are three different shapes of secret, so think of three small substitutions run on every line, each replacing only the secret part and keeping the rest. A filter like this reads stdin and writes stdout, which is what sed does by default.

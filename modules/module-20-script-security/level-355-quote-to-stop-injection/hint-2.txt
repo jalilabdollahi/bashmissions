@@ -1,0 +1,6 @@
+Double quotes around an expansion keep the value as exactly one word and switch globbing off for it:
+
+  cp one.txt $dest      # breaks if dest is "my docs/a*"
+  cp one.txt "$dest"    # always one destination
+
+Quote the whole path, not just the variable: "tickets/$customer.txt". Printing with printf '%s\n' also stops echo from reading a name such as -n as an option.

@@ -1,0 +1,6 @@
+set -o noclobber
+if { printf '%s\n' "$owner" > "$file"; } 2>/dev/null; then
+  printf 'claimed: %s\n' "$job"
+else
+  ...print "claim failed: $job is already taken" to stderr, exit 1...
+fi

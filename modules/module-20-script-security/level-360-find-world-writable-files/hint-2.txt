@@ -1,0 +1,7 @@
+find has a permission test with three spellings of the number:
+
+  find . -perm 644     # mode is exactly 644
+  find . -perm -644    # at least these bits set (others may be set too)
+  find . -perm /222    # any of these bits set
+
+The write bit for "others" is 002 (the last octal digit: 4 read, 2 write, 1 execute). Combine the right spelling with -type f so folders and links are skipped, and pipe to sort.

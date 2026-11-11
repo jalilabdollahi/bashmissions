@@ -1,0 +1,102 @@
+id: 362
+module: 20
+module_name: script-security
+module_display: Security
+title: Path Traversal Guard
+difficulty: advanced
+xp: 190
+story: |
+  North Pier Dental downloads its appointment sheets from a little "fetch" script
+  that prints a file from the `public` folder. Priya asks it for
+  `../private/keys.txt` and the keys come straight back. "Everything the user
+  types after `public/` is part of the path," she says. "Including the dots."
+  Theo's quick fix, refusing any name containing two dots, blocked a legitimate
+  file called `summary..final.txt` and the dentists complained.
+objective: |
+  Write solution.sh that prints a file from the folder `public`. The argument
+  is NAME, a path relative to `public`.
+
+  1. No argument: `usage: solution.sh NAME` to stderr, exit 2.
+  2. Refuse with `denied: NAME` on stderr and exit 1 when NAME is empty, starts
+     with `/`, or contains a path component that is exactly `..` (that is
+     `..` alone, `../x`, `x/../y` or `x/..`). Do this check *before* looking
+     at any file. A name such as `summary..final.txt` has no `..` component
+     and is allowed.
+  3. If the file `public/NAME` does not exist as a regular file, print
+     `not found: NAME` on stderr and exit 1.
+  4. Otherwise print the file's contents.
+
+  Use a `case` pattern for the refusal rules. Do not call realpath or readlink.
+concepts:
+  - "a user path is untrusted: reject .. components and absolute paths"
+  - "case patterns: ../*|*/../*|*/..|..|/*"
+  - "check by path component, not by substring"
+required_patterns:
+  - pattern: '\bcase\b'
+    message: "Express the refusal rules as a case statement."
+forbidden_patterns:
+  - pattern: '\b(realpath|readlink)\b'
+    message: "Not here: reject the dangerous names by their shape, before touching the disk."
+test_cases:
+  - name: ordinary nested file
+    args: [docs/guide.txt]
+    files:
+      public/docs/guide.txt: "Welcome to North Pier Dental\n"
+      private/keys.txt: "swordfish\n"
+    expected_stdout: "Welcome to North Pier Dental"
+  - name: two dots inside a file name are fine
+    args: [summary..final.txt]
+    files:
+      public/summary..final.txt: "all good\n"
+    expected_stdout: "all good"
+  - name: climbing out is denied
+    args: ["../private/keys.txt"]
+    files:
+      public/a.txt: "a"
+      private/keys.txt: "swordfish\n"
+    expected_stderr: "denied: ../private/keys.txt"
+    expected_exit: 1
+  - name: climbing out from a sub-folder is denied
+    args: ["docs/../../private/keys.txt"]
+    files:
+      public/docs/guide.txt: "g"
+      private/keys.txt: "swordfish\n"
+    expected_stderr: "denied: docs/../../private/keys.txt"
+    expected_exit: 1
+  - name: harmless dot-dot is still denied
+    args: ["docs/../guide.txt"]
+    files:
+      public/guide.txt: "g"
+      "public/docs/": ""
+    expected_stderr: "denied: docs/../guide.txt"
+    expected_exit: 1
+  - name: name ending in dot-dot
+    args: ["docs/.."]
+    files:
+      "public/docs/": ""
+    expected_stderr: "denied: docs/.."
+    expected_exit: 1
+  - name: absolute path is denied
+    args: ["/etc/hosts"]
+    expected_stderr: "denied: /etc/hosts"
+    expected_exit: 1
+  - name: empty name is denied
+    args: [""]
+    expected_stderr: "denied: "
+    expected_exit: 1
+  - name: missing file
+    args: [nothing.txt]
+    files:
+      "public/": ""
+    expected_stderr: "not found: nothing.txt"
+    expected_exit: 1
+  - name: a folder is not a file
+    args: [docs]
+    files:
+      "public/docs/": ""
+    expected_stderr: "not found: docs"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh NAME"
+    expected_exit: 2

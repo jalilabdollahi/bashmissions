@@ -1,0 +1,6 @@
+Assigning to PATH changes where this script (and everything it starts) looks for commands:
+
+  PATH=/usr/bin:/bin
+  ls            # now only found in /usr/bin or /bin
+
+Assign a fixed list; do not write PATH="$PATH:..." or PATH="/usr/bin:$PATH", because that keeps whatever the caller put in there. Do it before the first external command, including the usage check if it used one.

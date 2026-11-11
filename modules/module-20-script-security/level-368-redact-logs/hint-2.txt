@@ -1,0 +1,5 @@
+sed -E enables extended regular expressions. A group in parentheses can be reused in the replacement as \1, so you can keep the key and swap the value:
+
+  sed -E 's/(color)=[^ ]+/\1=hidden/g'
+
+[^ ]+ means "one or more characters that are not a space"; in a portable script write the class [[:space:]]. The g flag replaces every match on a line. Use several -e options, one per shape. When the pattern contains slashes (URLs), use another delimiter: s#...#...#.

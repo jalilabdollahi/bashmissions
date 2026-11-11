@@ -1,0 +1,1 @@
+A symbolic link is a tiny file that says "go look over there". When a script writes to it, the write lands at the destination, which may be a file the writer never meant to touch. So before writing, ask whether the path itself is a link, and do not forget that a folder in the path can be a link as well.

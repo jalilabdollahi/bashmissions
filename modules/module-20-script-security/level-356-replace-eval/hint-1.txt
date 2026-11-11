@@ -1,0 +1,1 @@
+eval takes a string and runs it through the whole shell parser again, so anything inside the string (a semicolon, a $(...)) becomes live code. You do not need a string at all: a command is just a list of words, and Bash has a list type for exactly that.

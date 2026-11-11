@@ -1,0 +1,7 @@
+mapfile -t hits < <(find "$dir" -type f -perm -002 | sort)
+for path in "${hits[@]}"; do
+  printf '%s\n' "$path"
+done
+printf 'world-writable: %d\n' "${#hits[@]}"
+
+Add the usage and "no such folder" checks before the find.

@@ -1,0 +1,1 @@
+Permissions are decided at the moment a file is created, from a per-process setting called the umask. Instead of fixing a file afterwards, change that setting first so every file your script creates is private from the start. Remember the setting also applies to everything else you create later.

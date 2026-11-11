@@ -1,0 +1,84 @@
+id: 363
+module: 20
+module_name: script-security
+module_display: Security
+title: Lock Down PATH
+difficulty: advanced
+xp: 190
+story: |
+  The nightly spool report runs from cron with whatever PATH the caller happened
+  to have. Priya shows the team how little it takes: she drops a program named
+  `ls` into a folder that comes first on the PATH, and the next run executes her
+  program instead of the real one. "Your script trusts the word `ls`," she says.
+  "Tell it exactly where words are allowed to come from."
+objective: |
+  Write solution.sh that reports on a folder. The argument is DIR.
+
+  1. No argument: `usage: solution.sh DIR` to stderr, exit 2.
+  2. Otherwise print two things, using the commands `ls -1`, `wc -l`, `tr` and
+     `cat` (as external commands):
+       entries: N        (how many names `ls -1 DIR` lists)
+     followed by the content of `DIR/motd.txt`.
+
+  Before running any external command, replace PATH with exactly
+  `/usr/bin:/bin`. Do not add the caller's PATH to it. The tests start your
+  script with hostile folders first on PATH, and a fake `ls` or `cat` in them
+  must never run.
+concepts:
+  - "PATH=/usr/bin:/bin at the top of the script"
+  - "an empty PATH entry means the current directory"
+  - "never append the caller's PATH to a trusted one"
+required_patterns:
+  - pattern: '^\s*(export\s+)?PATH=["'']?/usr/bin:/bin["'']?\s*$'
+    message: "Set PATH=/usr/bin:/bin exactly, on a line of its own, before any command runs."
+forbidden_patterns:
+  - pattern: 'PATH=[^\n]*\$\{?PATH'
+    message: "Do not append the old PATH; that keeps the attacker's folders."
+test_cases:
+  - name: honest PATH, normal report
+    args: [spool]
+    env:
+      PATH: "/usr/bin:/bin"
+    files:
+      spool/a.job: "1"
+      spool/b.job: "2"
+      spool/motd.txt: "queue is calm\n"
+    expected_stdout: |-
+      entries: 3
+      queue is calm
+  - name: evil folder first on PATH
+    args: [spool]
+    env:
+      PATH: "{RUN_DIR}/evil:/usr/bin:/bin"
+    files:
+      evil/ls: {content: "#!/bin/sh\ntouch pwned\necho fake-listing\n", mode: "0755"}
+      evil/cat: {content: "#!/bin/sh\ntouch pwned\necho fake-cat\n", mode: "0755"}
+      evil/wc: {content: "#!/bin/sh\ntouch pwned\necho 999\n", mode: "0755"}
+      evil/tr: {content: "#!/bin/sh\ntouch pwned\necho 999\n", mode: "0755"}
+      spool/x.job: "1"
+      spool/motd.txt: "all clear\n"
+    expected_stdout: |-
+      entries: 2
+      all clear
+    expected_files:
+      pwned: null
+  - name: empty PATH entry means the current folder
+    args: [spool]
+    env:
+      PATH: ":/usr/bin:/bin"
+    files:
+      ls: {content: "#!/bin/sh\ntouch pwned\necho fake-listing\n", mode: "0755"}
+      cat: {content: "#!/bin/sh\ntouch pwned\necho fake-cat\n", mode: "0755"}
+      spool/only.job: "1"
+      spool/motd.txt: "dot is not trusted\n"
+    expected_stdout: |-
+      entries: 2
+      dot is not trusted
+    expected_files:
+      pwned: null
+  - name: no argument
+    args: []
+    env:
+      PATH: "/usr/bin:/bin"
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

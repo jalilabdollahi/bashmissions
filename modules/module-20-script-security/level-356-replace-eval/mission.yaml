@@ -1,0 +1,115 @@
+id: 356
+module: 20
+module_name: script-security
+module_display: Security
+title: Replace eval
+difficulty: advanced
+xp: 170
+story: |
+  Theo built `logsearch` for the support desk. Noor types a word and some
+  options, and the script assembles a grep command line in a string and runs it
+  with `eval`. Priya read it in under a minute, typed `$(touch pwned)` as the
+  search word, and a file called pwned appeared on the log server. "eval is
+  not a feature," she says, "it is a second front door."
+objective: |
+  Write solution.sh that searches the file `logs/app.log`.
+
+  Usage: solution.sh PATTERN [OPTION...]
+
+  PATTERN is searched for as a fixed-text word, even if it starts with a dash.
+  Each OPTION is one of these words, which you map to a grep flag:
+
+      ignore-case  ->  -i
+      count        ->  -c
+      invert       ->  -v
+
+  Run grep once with the chosen flags and let its output and exit status be
+  the script's own (grep exits 1 when nothing matches, that is fine).
+
+  - With no argument: print `usage: solution.sh PATTERN [OPTION...]` to
+    stderr, exit 2.
+  - Any other option word: print `unknown option: WORD` to stderr, exit 2,
+    and run nothing.
+
+  Do not use eval. Collect the flags in an array and expand it as
+  "${flags[@]}". Use `case` to translate option words.
+concepts:
+  - "eval re-parses text as code"
+  - "flags=(); flags+=(-i) builds a command safely"
+  - "case maps words to known-good flags"
+required_patterns:
+  - pattern: '\bcase\b'
+    message: "Translate the option words with a case statement."
+  - pattern: '"\$\{[A-Za-z_][A-Za-z0-9_]*\[@\]\}"'
+    message: "Expand your flag array as \"${flags[@]}\"."
+forbidden_patterns:
+  - pattern: '\beval\b'
+    message: "No eval, please. Build the command from an array instead."
+  - pattern: '\b(bash|sh)\s+-c\b'
+    message: "bash -c is eval in disguise."
+test_cases:
+  - name: plain search
+    args: [ERROR]
+    files:
+      logs/app.log: |
+        INFO boot ok
+        ERROR disk full
+        info retry
+        ERROR disk slow
+    expected_stdout: |-
+      ERROR disk full
+      ERROR disk slow
+  - name: ignore case and count
+    args: [error, ignore-case, count]
+    files:
+      logs/app.log: |
+        INFO boot ok
+        ERROR disk full
+        info retry
+        ERROR disk slow
+    expected_stdout: "2"
+  - name: invert
+    args: [INFO, invert]
+    files:
+      logs/app.log: |
+        INFO boot ok
+        ERROR disk full
+        info retry
+    expected_stdout: |-
+      ERROR disk full
+      info retry
+  - name: pattern that looks like a command substitution
+    args: ['$(touch pwned)']
+    files:
+      logs/app.log: |
+        INFO boot ok
+        user typed $(touch pwned) here
+    expected_stdout: "user typed $(touch pwned) here"
+    expected_files:
+      pwned: null
+  - name: pattern with a semicolon
+    args: ['ok; touch pwned']
+    files:
+      logs/app.log: "INFO boot ok\n"
+    expected_exit: 1
+    expected_files:
+      pwned: null
+  - name: pattern that starts with a dash
+    args: ["-v"]
+    files:
+      logs/app.log: |
+        run with -v for details
+        nothing here
+    expected_stdout: "run with -v for details"
+  - name: hostile option word is refused
+    args: [ERROR, "count; touch pwned"]
+    files:
+      logs/app.log: "ERROR x\n"
+    expected_stderr: "unknown option: count; touch pwned"
+    expected_exit: 2
+    expected_files:
+      pwned: null
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh PATTERN [OPTION...]"
+    expected_exit: 2
