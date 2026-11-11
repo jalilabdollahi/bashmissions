@@ -239,23 +239,30 @@ def uniqueness_problems(all_levels: list[dict], selected_ids: set[int]) -> list[
         "solution.sh": lambda lv, d: (d / "solution.sh").read_text(encoding="utf-8") if (d / "solution.sh").exists() else "",
     }
     thresholds = {"answer.sh": 0.92, "solution.sh": 0.97}
-    texts = {name: [] for name in fields}
+    # Word-level comparison. A cheap shingle (3-word) Jaccard filter skips the
+    # vast majority of pairs before the exact SequenceMatcher ratio runs.
+    prepared: dict[str, list[tuple[int, list[str], set]]] = {name: [] for name in fields}
     for lv in all_levels:
         d = REPO_ROOT / lv["path"]
         for name, getter in fields.items():
-            texts[name].append((lv["id"], _norm(getter(lv, d))))
+            words = _norm(getter(lv, d)).split()
+            shingles = {tuple(words[i:i + 3]) for i in range(max(len(words) - 2, 1))} if words else set()
+            prepared[name].append((lv["id"], words, shingles))
 
-    for name, items in texts.items():
+    for name, items in prepared.items():
         limit = thresholds.get(name, 0.85)
-        for i, (id_a, a) in enumerate(items):
-            if id_a not in selected_ids or not a:
+        for id_a, words_a, sh_a in items:
+            if id_a not in selected_ids or not words_a:
                 continue
-            for id_b, b in items:
-                if id_b == id_a or not b or (id_b in selected_ids and id_b < id_a):
+            for id_b, words_b, sh_b in items:
+                if id_b == id_a or not words_b or (id_b in selected_ids and id_b < id_a):
                     continue
-                if name == "solution.sh" and len(a) < 120 and len(b) < 120:
+                if name == "solution.sh" and len(words_a) < 25 and len(words_b) < 25:
                     continue  # tiny starters are allowed to look alike
-                sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
+                union = len(sh_a | sh_b)
+                if union and len(sh_a & sh_b) / union < limit - 0.35:
+                    continue
+                sm = difflib.SequenceMatcher(None, words_a, words_b, autojunk=False)
                 if sm.real_quick_ratio() < limit or sm.quick_ratio() < limit:
                     continue
                 ratio = sm.ratio()
