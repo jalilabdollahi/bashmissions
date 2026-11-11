@@ -1,5 +1,0 @@
-A compact solution can be shaped like this:
-
-read -r -s password < "$1"
-printf 'Password length: %s
-' "${#password}"

@@ -1,1 +1,1 @@
-In a getopts string, a letter followed by : requires an option argument.
+Last level you wrote the loop that walks the options by hand. For single-letter options Bash has a built-in that does the walking, the shifting and the bundling (like `-vn 2`) for you. You only describe which letters exist and which of them need a value, and then react to each one.

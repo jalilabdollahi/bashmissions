@@ -1,0 +1,6 @@
+`read -ra name` splits the line into array `name`. Put `IFS=,` directly in front to cut on commas for that one command:
+
+  IFS=, read -ra parts      # input: x,y,z
+  echo "${parts[0]}"        # x      (first element)
+  echo "${#parts[@]}"       # 3      (how many elements)
+  echo "${parts[-1]}"       # z      (last element)

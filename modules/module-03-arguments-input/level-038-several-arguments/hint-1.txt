@@ -1,0 +1,1 @@
+You already know that the first word after the script name is `$1`. The second word has its own variable, and so does the third. Work out which fact is which by looking at the order in the objective, not at the order you want in the output sentence.

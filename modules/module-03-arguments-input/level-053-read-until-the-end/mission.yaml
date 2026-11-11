@@ -1,0 +1,44 @@
+id: 53
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Read Until the End
+difficulty: intermediate
+xp: 120
+story: |
+  Gus pastes the month's hardware expenses into a terminal, one per line, as
+  "item cost", for example "usb-cable 12". He has never once pasted the same
+  number of lines, so a script that reads exactly three lines is no use. He wants
+  it to keep going until the paste ends and then give him the totals, which he
+  will copy straight into the board report.
+objective: |
+  Write solution.sh that reads lines from stdin until the input ends. Each line is
+  an item name and a whole-number cost separated by whitespace, for example
+  "usb-cable 12". Print one final line:
+    items=<number of lines> total=<sum of all costs>
+  With empty input print  items=0 total=0
+  The last line of input may be missing its trailing newline; it must still be
+  counted. Use a while loop around read.
+concepts:
+  - "while read -r ...; do ...; done loops until EOF"
+  - "a final line without newline"
+  - "variables built up inside the loop"
+required_patterns:
+  - pattern: '\bwhile\b[^\n]*\bread\b'
+    message: "Loop with while read -r ... until the input is exhausted."
+test_cases:
+  - name: three expenses
+    stdin: "usb-cable 12\nswitch 340\nrack-rail 48\n"
+    expected_stdout: |-
+      items=3 total=400
+  - name: empty input
+    expected_stdout: |-
+      items=0 total=0
+  - name: last line has no newline
+    stdin: "ssd 120\nfan 8"
+    expected_stdout: |-
+      items=2 total=128
+  - name: many lines
+    stdin: "a 1\nb 2\nc 3\nd 4\ne 5\nf 6\ng 7\nh 8\n"
+    expected_stdout: |-
+      items=8 total=36

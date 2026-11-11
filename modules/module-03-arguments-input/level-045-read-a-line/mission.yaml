@@ -1,0 +1,42 @@
+id: 45
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Read a Line
+difficulty: beginner
+xp: 80
+story: |
+  The support desk pipes ticket titles into a pager script straight from the
+  ticketing system: one title arrives on standard input, and nobody types it as an
+  argument. Some titles contain Windows paths such as C:\backups\nightly, and the
+  last pager mangled every backslash into thin air, which made the on-call engineer
+  hunt for a folder that does not exist.
+objective: |
+  Write solution.sh that reads ONE line from standard input into a variable and
+  prints:
+    paging on-call about: <the line>
+  The line must come out exactly as it went in, including any backslashes.
+  Standard input always holds at least one line in these tests.
+concepts:
+  - "read VAR takes one line from stdin"
+  - "read -r keeps backslashes literal"
+required_patterns:
+  - pattern: '\bread\s+(-[A-Za-z]*r[A-Za-z]*)\b'
+    message: "Use read -r so backslashes are kept as typed."
+test_cases:
+  - name: plain title
+    stdin: "database is slow\n"
+    expected_stdout: |-
+      paging on-call about: database is slow
+  - name: title with spaces and punctuation
+    stdin: "Harbour Bakery: checkout 500 error!\n"
+    expected_stdout: |-
+      paging on-call about: Harbour Bakery: checkout 500 error!
+  - name: backslashes survive
+    stdin: "restore C:\\backups\\nightly failed\n"
+    expected_stdout: |-
+      paging on-call about: restore C:\backups\nightly failed
+  - name: only the first line is read
+    stdin: "first ticket\nsecond ticket\n"
+    expected_stdout: |-
+      paging on-call about: first ticket

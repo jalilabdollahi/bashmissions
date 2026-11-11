@@ -1,1 +1,1 @@
-The first positional argument is available as `$1`.
+When someone runs a script like `./welcome.sh Maple`, the word after the script name is handed to the script automatically. Bash stores it in a special variable with a very short name. You do not have to read it from anywhere, it is simply already there.

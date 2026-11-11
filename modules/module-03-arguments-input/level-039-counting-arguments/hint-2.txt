@@ -1,0 +1,4 @@
+The count of arguments is `$#`. Do not confuse it with `$1`, `$2`, which are the arguments themselves:
+
+  ./show.sh a b c      # inside: $1=a  $#=3
+  echo "got $# items"  # got 3 items

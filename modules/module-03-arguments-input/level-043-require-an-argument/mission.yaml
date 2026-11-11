@@ -1,0 +1,46 @@
+id: 43
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Require an Argument
+difficulty: beginner
+xp: 80
+story: |
+  Noor's lookup tool is called with a customer name. Yesterday the junior desk
+  ran it with nothing at all, it printed "Looking up customer: " and happily
+  carried on to the billing database with a blank name. Priya would like scripts
+  that refuse to start when their input is missing, and that say how to be used.
+objective: |
+  Write solution.sh that needs exactly one argument, the customer name.
+  - With an argument: print  Looking up customer: <name>  to stdout and exit 0.
+  - With no arguments: print nothing to stdout, print
+      usage: solution.sh CUSTOMER
+    to stderr and exit with status 2.
+  Exit status 2 is the convention for "the command was used wrongly".
+  Hint for the check, since if/else comes later: this one-liner is enough:
+    [[ $# -lt 1 ]] && { echo "message" >&2; exit 2; }
+concepts:
+  - "usage message on stderr"
+  - "exit 2 for wrong usage"
+  - "[[ $# -lt 1 ]] guard"
+required_patterns:
+  - pattern: '\$#'
+    message: "Check the argument count with $# before using $1."
+  - pattern: '>&2'
+    message: "The usage message belongs on stderr: add >&2 to the echo."
+  - pattern: '\bexit\s+2\b'
+    message: "Leave with exit 2 so callers can tell it was a usage error."
+test_cases:
+  - name: customer given
+    args: [Harbour Bakery]
+    expected_stdout: |-
+      Looking up customer: Harbour Bakery
+  - name: another customer
+    args: [Tidewater Books]
+    expected_stdout: |-
+      Looking up customer: Tidewater Books
+  - name: nothing given
+    args: []
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh CUSTOMER"
+    expected_exit: 2

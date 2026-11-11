@@ -1,0 +1,1 @@
+`read` is not limited to one variable. If you give it several names, it splits the line on spaces and hands the first word to the first name, the second word to the second name, and so on. Think about what the last name receives when the line has more words than names.

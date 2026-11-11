@@ -1,0 +1,6 @@
+Two lines, the first one is the whole question-and-answer:
+
+  read -rp "Server to restart: " server
+  echo "restart queued for $server"
+
+Try it from a terminal to see the prompt, then with `echo anchovy | ./solution.sh` to see that the prompt vanishes from the pipe.

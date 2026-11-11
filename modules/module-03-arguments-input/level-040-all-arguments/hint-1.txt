@@ -1,1 +1,0 @@
-Use for arg in "$@" to preserve each argument exactly, even when it contains spaces.

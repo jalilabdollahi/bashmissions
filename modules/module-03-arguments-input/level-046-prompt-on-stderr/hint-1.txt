@@ -1,0 +1,1 @@
+You can ask the question with a separate echo, but `read` can do it for you in one go. It has an option that takes the text to show before waiting. Mind that the question is not data: it should not travel down the pipe with the answer.

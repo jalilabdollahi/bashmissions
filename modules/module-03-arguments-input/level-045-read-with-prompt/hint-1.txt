@@ -1,1 +1,0 @@
-read -p combines prompting and reading; redirected tests provide the input non-interactively.

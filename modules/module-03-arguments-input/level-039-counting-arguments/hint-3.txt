@@ -1,0 +1,5 @@
+One line is enough:
+
+  echo "batch size: $#"
+
+If your output looks wrong for the quoted-name test, check how you typed the arguments by hand: `"blue whale"` is one argument, `blue whale` is two.

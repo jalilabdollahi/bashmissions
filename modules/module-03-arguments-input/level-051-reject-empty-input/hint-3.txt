@@ -1,0 +1,8 @@
+Three parts, in this order:
+
+  code=""
+  read -r code || true
+  [[ -z $code ]] && { echo "error: customer code is empty" >&2; exit 1; }
+  echo "code accepted: $code"
+
+Check the exact words of the error message against the objective.

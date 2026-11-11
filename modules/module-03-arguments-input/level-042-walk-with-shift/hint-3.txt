@@ -1,0 +1,8 @@
+The order of the lines matters: save, shift, then print.
+
+  environment=$1
+  shift
+  echo "environment: $environment"
+  echo "targets=... [...]"
+
+In the last line use the count variable and the joined-arguments variable (both are already updated by shift).

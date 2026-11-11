@@ -1,0 +1,5 @@
+Inside `[[ ]]`, the operator `=~` tests a value against a regular expression:
+
+  [[ $code =~ ^[A-Z][0-9]+$ ]]    # one capital letter, then digits only
+
+`^` is the start, `$` the end, `[0-9]` one digit, `+` "one or more". Put `!` in front of the expression to turn "matches" into "does not match", then use the guard from level 43: `... && { ...; exit 1; }`.

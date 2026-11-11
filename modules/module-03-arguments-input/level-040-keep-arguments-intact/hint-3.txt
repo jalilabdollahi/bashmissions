@@ -1,0 +1,5 @@
+The command you want to run is the printer, started with bash, followed by all your own arguments in their quoted form:
+
+  bash fixtures/tag.sh ...
+
+Fill the dots with the quoted all-arguments variable (four characters, including the quotes).

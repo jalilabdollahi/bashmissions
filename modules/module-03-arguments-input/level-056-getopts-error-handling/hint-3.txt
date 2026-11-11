@@ -1,0 +1,12 @@
+Your option string is `":h:p:q"`. Both h and p take a value, q is a switch:
+
+  host=""; port=443; quiet="no"
+  while getopts ":h:p:q" opt; do
+    case $opt in
+      h) ... ;;  p) ... ;;  q) ... ;;
+      \?) echo "error: unknown option: -$OPTARG" >&2; exit 2 ;;
+      :)  ... ;;
+    esac
+  done
+
+After the loop: refuse an empty host with the usage message, then print either `$host:$port` or the sentence, depending on quiet.

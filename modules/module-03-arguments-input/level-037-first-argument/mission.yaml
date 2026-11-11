@@ -4,25 +4,38 @@ module_name: arguments-input
 module_display: Arguments & Input
 title: First Argument
 difficulty: beginner
-xp: 70
-objective: Print only the first positional argument. Use `$1`, quote it, and do not
-  print any other arguments.
-expected_script_name: solution.sh
-test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: alpha
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: spaces allowed
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 60
+story: |
+  Until today your scripts talked to nobody. Then Noor walked over with a sticky
+  note: every time a new customer signs up, she types their name into a welcome
+  message by hand, and last week "Tidewater Books" became "Tidewater Boks".
+  She wants a script she can hand the name to once.
+objective: |
+  Write solution.sh so that it takes ONE argument, the customer name, and prints
+  exactly one line:
+    Ahoy, <name>! Your Lanternfish account is ready.
+  The name may contain spaces when the caller quotes it, for example
+  ./solution.sh "Tidewater Books" must print:
+    Ahoy, Tidewater Books! Your Lanternfish account is ready.
 concepts:
-- '`$1`'
-scaffold: true
+  - "$1 holds the first argument"
+required_patterns:
+  - pattern: '\$1|\$\{1\}'
+    message: "Read the customer name from the first positional parameter, $1."
+test_cases:
+  - name: one-word customer
+    args: [Harbour]
+    expected_stdout: |-
+      Ahoy, Harbour! Your Lanternfish account is ready.
+  - name: name with spaces
+    args: ["Tidewater Books"]
+    expected_stdout: |-
+      Ahoy, Tidewater Books! Your Lanternfish account is ready.
+  - name: symbols survive
+    args: ["Gull & Anchor Pub"]
+    expected_stdout: |-
+      Ahoy, Gull & Anchor Pub! Your Lanternfish account is ready.
+  - name: extra arguments are ignored
+    args: [Dory, ignored, also-ignored]
+    expected_stdout: |-
+      Ahoy, Dory! Your Lanternfish account is ready.

@@ -1,0 +1,9 @@
+Use `read` as the condition of a `while` loop, and update counters in the body with `$(( ))` arithmetic:
+
+  count=0
+  while read -r word number; do
+    count=$((count + 1))
+  done
+  echo "$count"
+
+A final line without a newline makes `read` fail even though it received text, so extend the condition: `|| [[ -n $number ]]`.

@@ -1,0 +1,53 @@
+id: 40
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Keep Arguments Intact
+difficulty: beginner
+xp: 70
+story: |
+  Theo wrote a wrapper around the label printer in fixtures/tag.sh. Customers like
+  "Tidewater Books" keep coming out of the printer as two labels, "Tidewater" and
+  "Books", and one empty customer vanished entirely. Theo swears the printer is
+  fine. He is right, and the bug is in how his wrapper passes things along.
+objective: |
+  Write solution.sh as a wrapper: it must call the label printer and hand it
+  every argument it received, unchanged, in the same order.
+  The printer is run as
+    bash fixtures/tag.sh ARGUMENTS...
+  and prints one line per argument it got, as <argument>. Your wrapper prints
+  whatever the printer prints, nothing more. An argument with spaces must stay one
+  label, and an empty argument ("") must stay one empty label: <>.
+concepts:
+  - '"$@" keeps every argument as its own word'
+  - '$@ without quotes re-splits them'
+required_patterns:
+  - pattern: '"\$@"'
+    message: 'Pass the arguments on with the quoted form "$@".'
+forbidden_patterns:
+  - pattern: '(^|[^"])\$@|\$\*'
+    message: 'An unquoted $@ (or $*) splits arguments on spaces. Use "$@".'
+test_cases:
+  - name: plain names
+    args: [anchovy, barracuda]
+    expected_stdout: |-
+      <anchovy>
+      <barracuda>
+  - name: spaces stay inside one label
+    args: ["Tidewater Books", "Gull & Anchor Pub", dory]
+    expected_stdout: |-
+      <Tidewater Books>
+      <Gull & Anchor Pub>
+      <dory>
+  - name: empty argument survives
+    args: ["", flounder]
+    expected_stdout: |-
+      <>
+      <flounder>
+  - name: globs are not expanded
+    args: ["*.txt", "a  b"]
+    expected_stdout: |-
+      <*.txt>
+      <a  b>
+fixtures:
+  - tag.sh

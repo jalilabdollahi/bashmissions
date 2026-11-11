@@ -1,0 +1,8 @@
+Optionally give each argument a readable name first, then build the sentence:
+
+  customer=$1
+  plan=$2
+  seats=...        # which number is this one?
+  echo "$customer -> $seats seats on the $plan plan"
+
+Notice that the plan comes second on the command line but last in the sentence.

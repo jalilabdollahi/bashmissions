@@ -1,1 +1,0 @@
-read -a fills an indexed array from words on one input line.

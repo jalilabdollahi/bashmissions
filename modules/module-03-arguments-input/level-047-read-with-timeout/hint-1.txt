@@ -1,1 +1,0 @@
-read -t N fails if input is not available before the timeout.

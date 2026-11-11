@@ -1,0 +1,1 @@
+Using `$2` directly will crash when it is not provided, and an empty value would produce a blank port. Bash has a built-in way to say "use this variable, but if it has nothing, use this other value", all in a single expression. You saw its cousin back in the variables module.

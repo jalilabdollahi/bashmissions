@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-a="false"
-b="none"
+count=3
+verbose="no"
 
-while getopts "ab:" opt; do
-  case "$opt" in
-    a) a="true" ;;
-    b) b="$OPTARG" ;;
+# "vn:" lists the accepted letters; the colon after n means -n takes a value.
+# Each loop turn puts the next option letter into $opt, and its value into $OPTARG.
+while getopts "vn:" opt; do
+  case $opt in
+    v) verbose="yes" ;;
+    n) count=$OPTARG ;;
   esac
 done
 
-printf 'a=%s b=%s
-' "$a" "$b"
+[[ $verbose == "yes" ]] && echo "showing first $count lines"
+
+head -n "$count"

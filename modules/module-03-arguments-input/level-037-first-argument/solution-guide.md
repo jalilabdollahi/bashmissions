@@ -1,19 +1,42 @@
-# Guide for First Argument
+# Walkthrough: First Argument
 
-Goal: Print only the first positional argument. Use `$1`, quote it, and do not print any other arguments.
+## The plan
+The script has one input, the customer name, and one output, a greeting. Bash
+hands every word typed after the script name to the script as a numbered
+variable. The first word is `$1`.
 
-Work in this order:
+## Building it
+Start with the greeting you want, written with a fixed name:
 
-1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
-2. Read the input using the curriculum concept for this level: `$1`.
-3. Print only the required output, with quoted variable expansions.
-4. Run the mission tests, including the failure or empty-input case when one is listed.
+```bash
+echo "Ahoy, Harbour! Your Lanternfish account is ready."
+```
 
-Reference shape:
+Now swap the fixed name for the variable that holds whatever the caller typed:
 
+```bash
+echo "Ahoy, $1! Your Lanternfish account is ready."
+```
+
+Variables expand inside double quotes, so the text around `$1` stays as written.
+
+## Complete solution
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-echo "$1"
+echo "Ahoy, $1! Your Lanternfish account is ready."
 ```
+
+## Try it by hand
+```bash
+./solution.sh Harbour
+./solution.sh "Tidewater Books"
+./solution.sh Tidewater Books    # only "Tidewater" is $1 here!
+```
+The last call shows why Noor must quote names with spaces: the shell splits the
+line into words before your script ever runs, and `Books` becomes `$2`.
+
+## Alternative
+You could copy the argument into a named variable first (`customer=$1`) and print
+`$customer`. That is nicer in long scripts because the name explains itself; for a
+one-liner, using `$1` directly is perfectly fine.

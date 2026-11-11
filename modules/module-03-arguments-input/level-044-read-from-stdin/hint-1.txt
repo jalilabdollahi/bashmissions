@@ -1,1 +1,0 @@
-read -r value < "$1" reads one line without treating backslashes specially.

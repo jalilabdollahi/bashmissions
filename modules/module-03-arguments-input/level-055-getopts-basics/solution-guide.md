@@ -1,30 +1,65 @@
-# Guide for Getopts Basics
+# Walkthrough: getopts Basics
 
-Goal: Use `getopts "ab:" opt` to parse `-a` as a boolean flag and `-b VALUE` as an option with an argument. Print `a=<true|false> b=<value>`, defaulting to `a=false b=none`.
+## The plan
+Same shape as the long-flag parser: defaults, a loop over options, then the real
+work. The difference is that `getopts` does the walking, so no `shift` and no
+`$#` test.
 
-Work in this order:
+## Building it
+Defaults:
 
-1. Start from `#!/usr/bin/env bash` and `set -euo pipefail`.
-2. Read the input using the curriculum concept for this level: `getopts "ab:" opt`.
-3. Print only the required output, with quoted variable expansions.
-4. Run the mission tests, including the failure or empty-input case when one is listed.
+```bash
+count=3
+verbose="no"
+```
 
-Reference shape:
+The option string `"vn:"` tells `getopts` that `-v` and `-n` exist and that `-n`
+takes a value (the colon). Each time the loop condition runs, `opt` receives the
+next option letter:
 
+```bash
+while getopts "vn:" opt; do
+  case $opt in
+    v) verbose="yes" ;;
+    n) count=$OPTARG ;;
+  esac
+done
+```
+
+`$OPTARG` is where `getopts` stores the value that followed `-n`. Bundles such as
+`-vn 2` are split for you: `v` first, then `n` with value `2`.
+
+After the loop, the work. The header is printed only when verbose is on, and
+`head` copies from stdin:
+
+```bash
+[[ $verbose == "yes" ]] && echo "showing first $count lines"
+head -n "$count"
+```
+
+## Complete solution
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
-a="false"
-b="none"
-
-while getopts "ab:" opt; do
-  case "$opt" in
-    a) a="true" ;;
-    b) b="$OPTARG" ;;
+count=3
+verbose="no"
+while getopts "vn:" opt; do
+  case $opt in
+    v) verbose="yes" ;;
+    n) count=$OPTARG ;;
   esac
 done
-
-printf 'a=%s b=%s
-' "$a" "$b"
+[[ $verbose == "yes" ]] && echo "showing first $count lines"
+head -n "$count"
 ```
+
+## Try it by hand
+```bash
+printf 'a\nb\nc\nd\n' | ./solution.sh
+printf 'a\nb\nc\nd\n' | ./solution.sh -vn 2
+```
+
+## Alternative
+The hand-written `while`/`case`/`shift` loop from level 54 can parse the same
+options, and is the only way to support `--long` names. For short options
+`getopts` is shorter and understands bundling and `--` for free.

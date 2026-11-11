@@ -1,0 +1,11 @@
+Skeleton:
+
+  items=0
+  total=0
+  while read -r name cost || [[ -n $cost ]]; do
+    items=...
+    total=...
+  done
+  echo "items=$items total=$total"
+
+In the body add one to the first counter, and the cost to the second.

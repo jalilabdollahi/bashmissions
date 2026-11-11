@@ -1,0 +1,7 @@
+Guard first, then the happy path:
+
+  quota=$1
+  [[ ! $quota =~ ^[0-9]+$ ]] && { echo "error: not a whole number: $quota" >&2; exit 1; }
+  echo "quota set to $quota GB"
+
+Do not put quotes around the pattern on the right of `=~`, or Bash treats it as literal text.

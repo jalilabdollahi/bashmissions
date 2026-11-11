@@ -1,1 +1,0 @@
-read -s avoids echoing the input, which is useful for secrets.

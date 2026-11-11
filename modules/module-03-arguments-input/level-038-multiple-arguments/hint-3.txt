@@ -1,4 +1,0 @@
-A compact solution can be shaped like this:
-
-printf 'first=%s second=%s third=%s
-' "$1" "$2" "$3"

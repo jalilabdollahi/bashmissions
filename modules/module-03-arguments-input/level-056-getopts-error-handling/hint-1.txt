@@ -1,0 +1,1 @@
+Plain `getopts` complains in its own words and carries on. To answer mistakes yourself, switch it to silent mode with one tiny change to the option string. Then two special cases appear as ordinary values of the loop variable: "I don't know this option" and "this option wanted a value". Remember that the required host is a separate check after the loop.

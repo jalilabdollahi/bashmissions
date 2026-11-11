@@ -1,0 +1,1 @@
+The read command you already know has an option that tells the terminal not to show what is typed, exactly like a login screen. You will also need to tell the user how many characters they typed without ever printing the characters themselves. Bash can measure a value without displaying it.

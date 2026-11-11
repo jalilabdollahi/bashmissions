@@ -1,1 +1,0 @@
-Manual long-option parsing usually combines while, case, and shift.

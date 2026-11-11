@@ -1,0 +1,6 @@
+`read -p "text" NAME` shows `text` and then reads into `NAME`. Combine it with `-r` as `-rp`; the prompt string must come right after the `p`:
+
+  read -rp "Your name: " who
+  echo "Hello, $who"
+
+Put a space at the end of the prompt so the cursor does not touch the colon.

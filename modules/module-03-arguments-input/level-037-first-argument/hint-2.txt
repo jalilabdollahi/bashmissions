@@ -1,1 +1,5 @@
-Use quotes around `$1` so an argument like `spaces allowed` stays one value.
+The first argument lives in `$1`, the second in `$2`, and so on. You use it like any other variable:
+
+  echo "Hello, $1"
+
+Put the variable inside double quotes so a value with spaces stays in one piece.

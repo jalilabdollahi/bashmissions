@@ -1,0 +1,8 @@
+Your three steps, with the first one given:
+
+  host=${1:-}
+  [[ -z $host ]] && { read -r host || true; }
+  [[ -z $host ]] && { echo "usage: solution.sh [HOSTNAME]" >&2; exit 2; }
+  echo "checking $host"
+
+Copy the usage text exactly; its square brackets mean "optional".

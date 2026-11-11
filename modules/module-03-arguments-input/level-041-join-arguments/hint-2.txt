@@ -1,0 +1,6 @@
+`"$*"` joins the arguments into one string. The separator is the first character of the special variable `IFS`, which normally is a space. Change it first:
+
+  IFS=-
+  echo "$*"        # ./x.sh a b c  prints  a-b-c
+
+Only the first character of IFS is used, so a two-character glue like `", "` gives just `,`.

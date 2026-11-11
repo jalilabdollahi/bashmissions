@@ -1,0 +1,7 @@
+Skeleton:
+
+  read -rsp "Admin password: " password
+  echo >&2
+  echo "password stored (... characters)"
+
+Inside the parentheses use the length expansion of your variable. Do not print `$password` anywhere.

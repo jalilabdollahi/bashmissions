@@ -1,0 +1,7 @@
+Name both inputs, giving the second one its default as you copy it:
+
+  host=$1
+  port=${2:-...}
+  echo "connect $host on port $port"
+
+Replace the dots with the standard login port from the story.

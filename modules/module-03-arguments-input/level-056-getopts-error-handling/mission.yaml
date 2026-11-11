@@ -1,0 +1,65 @@
+id: 56
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: getopts Error Handling
+difficulty: intermediate
+xp: 150
+story: |
+  The port-probe tool you are about to finish will be used by the whole support
+  desk, and the desk makes typos. Last week "-P 443" produced a cryptic message
+  from getopts, and "-p" with no number went on to probe port nothing. Mara wants
+  every user mistake explained in the tool's own words, with a clear exit status
+  the monitoring scripts can react to.
+objective: |
+  Write solution.sh with these options, parsed by getopts in silent error mode
+  (an option string that starts with a colon):
+    -h HOST   required, takes a value
+    -p PORT   optional, takes a value, default 443
+    -q        optional switch: quiet
+  Output on success (exit 0):
+    normal:  probing <HOST> on port <PORT>
+    quiet:   <HOST>:<PORT>
+  Errors (nothing on stdout, exit status 2), each one line on stderr:
+    unknown option, for example -x:     error: unknown option: -x
+    option missing its value, e.g. -p:  error: option -p needs a value
+    no -h given at all:                 usage: solution.sh -h HOST [-p PORT] [-q]
+concepts:
+  - 'leading colon in ":h:p:q" turns on silent error reporting'
+  - '\? branch for unknown options, : branch for missing values'
+  - "$OPTARG names the offending option in error branches"
+required_patterns:
+  - pattern: '\bgetopts\s+["'']:'
+    message: 'Start the option string with a colon, e.g. getopts ":h:p:q" opt.'
+  - pattern: '\\\?\)'
+    message: 'Add a \?) branch in the case for unknown options.'
+  - pattern: '(^|\s|;):\)'
+    message: 'Add a :) branch in the case for options that are missing their value.'
+test_cases:
+  - name: defaults with host only
+    args: [-h, anchovy]
+    expected_stdout: |-
+      probing anchovy on port 443
+  - name: custom port
+    args: [-h, barracuda, -p, "8443"]
+    expected_stdout: |-
+      probing barracuda on port 8443
+  - name: quiet mode, options in another order
+    args: [-q, -p, "22", -h, dory]
+    expected_stdout: |-
+      dory:22
+  - name: unknown option
+    args: [-h, eel, -x]
+    expected_stdout: ""
+    expected_stderr: "error: unknown option: -x"
+    expected_exit: 2
+  - name: port without a value
+    args: [-h, flounder, -p]
+    expected_stdout: ""
+    expected_stderr: "error: option -p needs a value"
+    expected_exit: 2
+  - name: host is required
+    args: [-q]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh -h HOST [-p PORT] [-q]"
+    expected_exit: 2

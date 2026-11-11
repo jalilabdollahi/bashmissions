@@ -1,14 +1,12 @@
-A compact solution can be shaped like this:
+Your option string is `"vn:"` (v is a switch, n has a value):
 
-a="false"
-b="none"
+  count=3
+  verbose="no"
+  while getopts "vn:" opt; do
+    case $opt in
+      v) ... ;;
+      n) ... ;;
+    esac
+  done
 
-while getopts "ab:" opt; do
-  case "$opt" in
-    a) a="true" ;;
-    b) b="$OPTARG" ;;
-  esac
-done
-
-printf 'a=%s b=%s
-' "$a" "$b"
+After the loop print the header only when verbose is on, then run `head -n "$count"`, which reads your stdin.
