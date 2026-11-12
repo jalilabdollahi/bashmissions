@@ -413,7 +413,7 @@ def show_run_result(report: dict) -> None:
             expected = "[dim]—[/dim]"
             got      = "[dim]—[/dim]"
         else:
-            expected = _result_streams(r, "expected")
+            expected = _result_streams(r, "expected") if "actual_stdout" in r else "[dim]—[/dim]"
             got      = _result_streams(r, "actual") if "actual_stdout" in r else ""
             if r.get("message"):
                 msg = str(r["message"]).replace("[", "\\[")
