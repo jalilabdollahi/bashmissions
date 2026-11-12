@@ -1,0 +1,1 @@
+Putting an exclamation mark in front of the name gives the indexes: for i in "${!list[@]}"; do ... done sets i to 0, 1, 2 ... and ${list[i]} is the value at that position. Inside the loop, arithmetic such as $(( i + 1 )) converts a zero-based index to a human slot number, and continue jumps to the next round.

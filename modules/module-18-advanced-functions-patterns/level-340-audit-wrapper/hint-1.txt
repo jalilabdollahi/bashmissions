@@ -1,0 +1,1 @@
+Put one function between the bot and every command. It runs the command, notes how it went, writes one line to a log, and passes the exit status back so the caller still knows. A failing command must be recorded, not allowed to end the run.

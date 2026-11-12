@@ -1,0 +1,13 @@
+  for name in "$@"; do
+    if ! answers=$(dig +short "$name" 2>/dev/null); then
+      echo "$name -> lookup failed"; bad=...; continue
+    fi
+    addrs=$(printf '%s\n' "$answers" | grep -E '...' | paste -sd, - || true)
+    if [[ -z $addrs ]]; then
+      # no answer
+    else
+      # print it
+    fi
+  done
+
+`continue` skips to the next name after a failure.

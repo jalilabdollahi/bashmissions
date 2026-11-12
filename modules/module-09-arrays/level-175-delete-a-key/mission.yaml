@@ -1,0 +1,76 @@
+id: 175
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Delete a Key
+difficulty: advanced
+xp: 150
+story: |
+  It is the first of the month and Priya runs the access review. The roster maps
+  every login to a role, and some people have left the harbour for the
+  lighthouse job across the bay. Their logins must disappear from the roster
+  completely, not be blanked, because the next script reads every key as a
+  valid user. She also wants to know how many revocations really took effect,
+  since people sometimes list a user twice.
+objective: |
+  Write solution.sh. The first argument is a roster file of lines "login=role"
+  (split at the first equals sign; blank lines are ignored). The remaining
+  arguments are logins to revoke. Load the roster into an associative array,
+  and remove each revoked login from it with unset.
+  Print:
+    revoked: <number of arguments that actually existed in the roster at the
+              time they were removed>
+  followed by the surviving entries, one per line as login=role, sorted by
+  login in byte order. A login that is not in the roster, or is listed twice,
+  counts only once (the second time it is already gone).
+  If no file argument is given, print "usage: solution.sh ROSTER [LOGIN...]"
+  to stderr and exit with status 2.
+concepts:
+  - "unset 'map[$key]' removes a key"
+  - "removed is not the same as emptied"
+required_patterns:
+  - pattern: "unset\\s+['\"]\\w+\\[\\$\\{?\\w+\\}?\\]['\"]"
+    message: "Remove the key with unset 'roster[$login]', in quotes."
+test_cases:
+  - name: revoke two
+    files:
+      "roster.txt": "anchovy=admin\nmara=sre\npriya=security\ntheo=dev\n"
+    args: ["roster.txt", theo, anchovy]
+    expected_stdout: |-
+      revoked: 2
+      mara=sre
+      priya=security
+  - name: unknown and repeated logins
+    files:
+      "r.txt": "gus=finance\nnoor=support\nollie=intern\n"
+    args: ["r.txt", ghost, noor, noor]
+    expected_stdout: |-
+      revoked: 1
+      gus=finance
+      ollie=intern
+  - name: a login with a space and an equals sign in the role
+    files:
+      "odd.txt": "night shift=on call\nmara=sre\ndeploy=ci=cd\n"
+    args: ["odd.txt", "night shift"]
+    expected_stdout: |-
+      revoked: 1
+      deploy=ci=cd
+      mara=sre
+  - name: revoke everyone
+    files:
+      "all.txt": "a=1\nb=2\n"
+    args: ["all.txt", a, b]
+    expected_stdout: |-
+      revoked: 2
+  - name: nobody to revoke
+    files:
+      "keep.txt": "mara=sre\n\nanchovy=admin\n"
+    args: ["keep.txt"]
+    expected_stdout: |-
+      revoked: 0
+      anchovy=admin
+      mara=sre
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh ROSTER [LOGIN...]"
+    expected_exit: 2

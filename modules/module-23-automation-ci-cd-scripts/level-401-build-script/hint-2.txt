@@ -1,1 +1,0 @@
-Keep the script safe and deterministic inside the mission workspace.

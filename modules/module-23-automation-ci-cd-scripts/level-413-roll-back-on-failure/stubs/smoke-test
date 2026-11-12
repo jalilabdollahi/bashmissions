@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake post-deploy smoke test. It looks inside whatever "current" points to and
+# passes only if that release contains a file named .healthy.
+echo "smoke-test" >> .calls.log
+if (( $# != 0 )); then
+  echo "smoke-test: takes no arguments" >&2
+  exit 2
+fi
+if [[ ! -f current/.healthy ]]; then
+  echo "smoke-test: current/.healthy is missing" >&2
+  exit 1
+fi

@@ -1,1 +1,0 @@
-Use the array concept from the curriculum for this level: `map[key]=value`.

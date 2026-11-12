@@ -1,0 +1,1 @@
+Order: cat <<EOF with the two header lines and EOF; printf for "uptime days" and "$UPTIME"; printf for "open alerts" and "$ALERTS"; echo "$(basename "$0"): card printed for $SERVER" >&2; and last line exit "$STATUS_CODE".

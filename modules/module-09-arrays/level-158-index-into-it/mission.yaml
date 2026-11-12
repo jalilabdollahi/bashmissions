@@ -1,0 +1,53 @@
+id: 158
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Index into It
+difficulty: beginner
+xp: 100
+story: |
+  Ollie is labelling the racks in the machine room and keeps asking which
+  box sits in which slot. The inventory script receives the machines in slot
+  order, top to bottom. He only needs three of them on his label: the one at
+  the top, the third one down, and the one at the very bottom of the rack.
+objective: |
+  Write solution.sh. Its arguments are the machines in a rack, listed from the
+  top slot to the bottom slot. Store them in an array, then print exactly:
+    top: <first machine>
+    third: <third machine>
+    bottom: <last machine>
+  "Third" means the element at index 2. The last machine must be read with a
+  negative index, because the rack can have any number of slots.
+  A machine name may contain spaces. If there are fewer than 3 arguments,
+  print "usage: solution.sh MACHINE MACHINE MACHINE..." to stderr and exit
+  with status 2.
+concepts:
+  - "${arr[0]} the first element"
+  - "${arr[2]} counts from zero"
+  - "${arr[-1]} the last element"
+required_patterns:
+  - pattern: '\[-1\]'
+    message: "Read the last element with a negative index: ${rack[-1]}."
+test_cases:
+  - name: four machines
+    args: [anchovy, barracuda, cuttlefish, dory]
+    expected_stdout: |-
+      top: anchovy
+      third: cuttlefish
+      bottom: dory
+  - name: exactly three, top and third differ from bottom
+    args: [eel, flounder, grouper]
+    expected_stdout: |-
+      top: eel
+      third: grouper
+      bottom: grouper
+  - name: seven slots with spaces
+    args: [halibut, "marlin two", octopus, "pike (spare)", quahog, ray, "sea bass"]
+    expected_stdout: |-
+      top: halibut
+      third: octopus
+      bottom: sea bass
+  - name: too few machines
+    args: [anchovy, barracuda]
+    expected_stderr: "usage: solution.sh MACHINE MACHINE MACHINE..."
+    expected_exit: 2

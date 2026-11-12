@@ -1,0 +1,6 @@
+host="$1"
+if [[ $host != dory ]]; then
+  echo "refusing to run on $host: this job belongs to dory" >&2
+  exit 1
+fi
+echo "..."   # the starting line, only reached on dory

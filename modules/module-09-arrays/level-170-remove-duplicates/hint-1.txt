@@ -1,0 +1,1 @@
+Keep a second list of the names you have already kept. For every incoming name, look in that list: if it is there, ignore the name; if it is not, add it. Because you go through the input once from the front, the first occurrence always wins and the order is preserved.

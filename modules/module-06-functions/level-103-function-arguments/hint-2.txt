@@ -1,1 +1,0 @@
-Pass the script arguments into the function when you call it.

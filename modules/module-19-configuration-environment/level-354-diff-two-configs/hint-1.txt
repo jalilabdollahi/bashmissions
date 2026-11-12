@@ -1,0 +1,1 @@
+Comparing the files as text is exactly what you want to avoid. Load each file into its own lookup table first (name to value), so order, comments and spacing disappear. Then go through every name that appears in either table, in sorted order, and ask: only in the new one, only in the old one, or in both with different values?

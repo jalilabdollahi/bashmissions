@@ -1,0 +1,94 @@
+id: 454
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Account Audit
+difficulty: expert
+xp: 420
+story: |
+  Priya's yearly audit always finds the same four things: a second account
+  with UID 0, service accounts that quietly got a real shell, two people
+  sharing a UID, and a password field that is simply empty. She has copies of
+  /etc/passwd and /etc/shadow from every host. Reading them by eye is how the
+  last "backdoor" account went unnoticed for a year. Your job: let the script
+  do the squinting.
+objective: |
+  Write solution.sh PASSWD SHADOW. PASSWD is in /etc/passwd format
+  (`name:x:UID:GID:comment:home:shell`, 7 fields), SHADOW in /etc/shadow
+  format (`name:hash:...`, the hash is field 2).
+
+  Ignore blank lines and lines starting with `#`. Then report, grouped by
+  check in exactly this order, and inside a check in file order:
+  1. `MALFORMED line N`  a passwd line that does not have exactly 7 fields
+     (N = line number in PASSWD). Malformed lines are not accounts and take
+     no part in the other checks.
+  2. `EXTRA-ROOT NAME`  UID 0 but the name is not `root`.
+  3. `DUP-UID UID NAME1 NAME2 ...`  a UID used by more than one account, names
+     in file order; one line per UID, ordered by first appearance.
+  4. `SERVICE-SHELL NAME SHELL`  UID from 1 to 999 whose shell's file name
+     (last path component) is one of sh, bash, dash, zsh, ksh.
+  5. `EMPTY-PASSWORD NAME`  the account's SHADOW entry has an empty hash field.
+  6. `NO-SHADOW NAME`  an account with no entry in SHADOW at all.
+
+  Finish with `audited N accounts, F findings` (N counts well-formed accounts,
+  F counts reported lines) and exit 1 if F is greater than 0, else 0.
+  An unreadable file: `cannot read FILE` on stderr, exit 1. Wrong argument
+  count: `usage: solution.sh PASSWD SHADOW` on stderr, exit 2.
+concepts:
+  - "awk -F: or IFS=: for colon-separated system files"
+  - "grouping with associative arrays (UID -> names)"
+  - "one pass to collect, several passes to report in a fixed order"
+required_patterns:
+  - pattern: 'IFS=:|-F:|-F\s+:'
+    message: "These files are colon-separated: use IFS=: read, or awk -F:."
+test_cases:
+  - name: the audit finds everything
+    args: [passwd, shadow]
+    files:
+      passwd: "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nftp:x:110:110:ftp:/srv/ftp:/bin/bash\ntoor:x:0:0:backdoor:/root:/bin/sh\nalice:x:1001:1001:Alice:/home/alice:/bin/bash\nbob:x:1001:1002:Bob:/home/bob:/bin/bash\nbroken line here\ntemp:x:1003:1003:Temp:/home/temp:/bin/bash\nghost:x:1004:1004:Ghost:/home/ghost:/bin/bash\n"
+      shadow: "root:$6$abc:19000:0:99999:7:::\ndaemon:*:19000:0:99999:7:::\nwww-data:*:19000:0:99999:7:::\nftp:!:19000::::::\ntoor:$6$zzz:19000:0:99999:7:::\nalice:$6$def:19000:0:99999:7:::\nbob:$6$ghi:19000:0:99999:7:::\ntemp::19000:0:99999:7:::\n"
+    expected_stdout: |-
+      MALFORMED line 8
+      EXTRA-ROOT toor
+      DUP-UID 0 root toor
+      DUP-UID 1001 alice bob
+      SERVICE-SHELL ftp /bin/bash
+      EMPTY-PASSWORD temp
+      NO-SHADOW ghost
+      audited 9 accounts, 7 findings
+    expected_exit: 1
+  - name: a tidy system
+    args: [passwd, shadow]
+    files:
+      passwd: "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nmara:x:1001:1001:Mara:/home/mara:/bin/bash\n"
+      shadow: "root:$6$a:19000:0:99999:7:::\ndaemon:*:19000:0:99999:7:::\nmara:$6$b:19000:0:99999:7:::\n"
+    expected_stdout: "audited 3 accounts, 0 findings"
+  - name: comments and blank lines are not malformed, six fields are
+    args: [passwd, shadow]
+    files:
+      passwd: "# header\n\nroot:x:0:0:root:/root:/bin/bash\nsync:x:4:65534:sync:/bin:/bin/sync\nshort:x:1005:1005:Short:/home/short\n"
+      shadow: "root:$6$a:19000:0:99999:7:::\nsync:*:19000:0:99999:7:::\n"
+    expected_stdout: |-
+      MALFORMED line 5
+      audited 2 accounts, 1 findings
+    expected_exit: 1
+  - name: three accounts share a UID, and a shell is a path
+    args: [passwd, shadow]
+    files:
+      passwd: "root:x:0:0:root:/root:/bin/bash\na:x:2000:2000::/home/a:/bin/bash\nb:x:2000:2001::/home/b:/bin/bash\nc:x:2000:2002::/home/c:/bin/bash\nmail:x:8:8:mail:/var/mail:/usr/bin/zsh\n"
+      shadow: "root:$6$a::::::\na:$6$a::::::\nb:$6$a::::::\nc:$6$a::::::\nmail:*::::::\n"
+    expected_stdout: |-
+      DUP-UID 2000 a b c
+      SERVICE-SHELL mail /usr/bin/zsh
+      audited 5 accounts, 2 findings
+    expected_exit: 1
+  - name: shadow file unreadable
+    args: [passwd, none]
+    files:
+      passwd: "root:x:0:0:root:/root:/bin/bash\n"
+    expected_stderr: "cannot read none"
+    expected_exit: 1
+  - name: one argument
+    args: [passwd]
+    expected_stderr: "usage: solution.sh PASSWD SHADOW"
+    expected_exit: 2

@@ -1,0 +1,1 @@
+Ask before every action: is this already done? Create the folder only if it is missing, write the page only if it is missing, add the list entry only if it is not already there. Each step reports what it found, so the second run prints "exists" three times and touches nothing.

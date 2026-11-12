@@ -1,0 +1,10 @@
+if ! [[ $need =~ ^([0-9]+)(\.([0-9]+))?$ ]]; then usage message, exit 2; fi
+need_major=${BASH_REMATCH[1]}
+need_minor=${BASH_REMATCH[3]:-0}
+
+if (( BASH_VERSINFO[0] > need_major )) ||
+   (( BASH_VERSINFO[0] == need_major && BASH_VERSINFO[1] >= need_minor )); then
+  # ok line
+else
+  # message with the running version on stderr, exit 1
+fi

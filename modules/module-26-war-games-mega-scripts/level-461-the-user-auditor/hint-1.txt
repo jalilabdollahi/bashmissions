@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Load the small side files first (shadow hashes, last-login days) into associative arrays so the main loop over passwd can answer every question with a lookup. Collect findings in one array as uniform records instead of printing as you go: a record needs a rank for sorting, a kind, a user, a severity and a detail. Printing happens once at the end, after sorting, which also gives you the counts for the summary and the exit status.

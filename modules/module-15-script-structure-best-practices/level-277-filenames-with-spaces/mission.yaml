@@ -1,0 +1,76 @@
+id: 277
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Filenames with Spaces
+difficulty: advanced
+xp: 170
+story: |
+  Customers do not name files the way engineers do. Tidewater Books uploads
+  "Q3 sales.txt", the Gull & Anchor Pub sends "Pub *final*.txt", and the archiver
+  script Theo wrote handles exactly none of them. Noor has a ticket open: three
+  reports "disappeared" last night, and the script that was supposed to archive
+  them printed errors about files called "Q3" and "sales.txt".
+objective: |
+  solution.sh takes one argument, a directory. It must create the folder
+  archive/ in the current directory (if it does not exist), copy every file
+  ending in .txt from the given directory into archive/ under the same name,
+  and print one line per file:
+    archived: <file name without the directory>
+  in the order the shell's glob lists them. If the directory contains no .txt
+  files, print "no reports" and copy nothing. The directory argument and the
+  file names may contain spaces and glob characters such as * and ?; quote
+  every expansion so each stays one word.
+concepts:
+  - "quote every expansion"
+  - "unquoted variables are split and globbed"
+  - "a glob in the pattern, a quoted variable around it"
+required_patterns:
+  - pattern: '"\$1"/\*\.txt'
+    message: "Glob inside the directory like this: \"$1\"/*.txt (quote the variable, leave the * outside the quotes)."
+test_cases:
+  - name: ordinary names
+    args: [inbox]
+    files:
+      inbox/jan.txt: "january\n"
+      inbox/feb.txt: "february\n"
+      inbox/readme.md: "not a report\n"
+    expected_stdout: |-
+      archived: feb.txt
+      archived: jan.txt
+    expected_files:
+      archive/jan.txt: "january\n"
+      archive/feb.txt: "february\n"
+      archive/readme.md: null
+  - name: spaces in file names
+    args: [inbox]
+    files:
+      inbox/Q3 sales.txt: "q3\n"
+      inbox/Harbour Bakery.txt: "hb\n"
+    expected_stdout: |-
+      archived: Harbour Bakery.txt
+      archived: Q3 sales.txt
+    expected_files:
+      "archive/Q3 sales.txt": "q3\n"
+      "archive/Harbour Bakery.txt": "hb\n"
+  - name: spaces in the directory and glob characters in a name
+    args: [Tide Books]
+    files:
+      "Tide Books/Pub *final*.txt": "star\n"
+      "Tide Books/other.txt": "other\n"
+      "Tide Books/Pub x.txt": "must not be touched twice\n"
+    expected_stdout: |-
+      archived: Pub *final*.txt
+      archived: Pub x.txt
+      archived: other.txt
+    expected_files:
+      "archive/Pub *final*.txt": "star\n"
+      "archive/Pub x.txt": "must not be touched twice\n"
+      "archive/other.txt": "other\n"
+  - name: empty directory
+    args: [empty]
+    files:
+      empty/notes.md: "no txt here\n"
+    expected_stdout: "no reports"
+    expected_files:
+      archive/notes.md: null

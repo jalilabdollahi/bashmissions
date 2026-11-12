@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake compile-site for BashMissions: a chatty static site generator (stdout only).
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: compile-site SITE" >&2
+  exit 2
+fi
+echo "[1/3] reading templates for $1"
+echo "[2/3] optimising ${#1} images"
+echo "[3/3] writing sitemap.xml for $1"

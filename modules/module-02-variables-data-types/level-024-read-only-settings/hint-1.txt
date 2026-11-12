@@ -1,0 +1,1 @@
+Bash can mark a variable as "final": after that, any attempt to give it a new value is an error. Lock the value before the careless line comes along.

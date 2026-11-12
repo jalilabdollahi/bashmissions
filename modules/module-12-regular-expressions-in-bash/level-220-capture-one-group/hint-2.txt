@@ -1,0 +1,6 @@
+Parentheses in a regex remember what they matched. After a successful [[ =~ ]] the remembered pieces are in the array BASH_REMATCH: index 0 is the whole match, index 1 the first group.
+
+  re='^host=([a-z]+) '
+  if [[ $row =~ $re ]]; then echo "${BASH_REMATCH[1]}"; fi
+
+"One word with no spaces" is spelled [^ ]+ (one or more characters that are not a space).

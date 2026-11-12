@@ -1,0 +1,1 @@
+Set the meter before the loop, add to it inside: sum=0; while read -r word n; do sum=$(( sum + n )); echo "$sum"; done. The variable keeps its value between rounds. Print the final value after done, so it is also correct when the input was empty.

@@ -1,3 +1,0 @@
-Match exactly two lines:
-single: $name
-double: <arg1>

@@ -1,0 +1,5 @@
+Plain grep uses an older, backslash-heavy syntax. The -E flag selects extended regex, the same flavour as in [[ =~ ]]:
+
+  grep -E ' (ok|fail) ' file.txt
+
+grep's exit status is 0 when something matched, 1 when nothing did, 2 on errors. Under set -e an exit status of 1 ends your script, so add a fallback after the command: grep ... || true

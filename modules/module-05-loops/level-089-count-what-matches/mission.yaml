@@ -1,0 +1,51 @@
+id: 89
+module: 5
+module_name: loops
+module_display: Loops
+title: Count What Matches
+difficulty: beginner
+xp: 110
+story: |
+  Theo swears the new checkout page is "basically perfect". The access log
+  disagrees, but nobody has counted. Noor pastes a slice of the log into the
+  team chat: one request per line, with the client address, the HTTP status
+  and the path. "How many of these were server errors?" she asks. "And out of
+  how many?"
+objective: |
+  Write solution.sh that reads lines from standard input. Each line has three
+  fields separated by spaces: client address, HTTP status, path.
+  Count all requests, and count those whose status starts with 5 (server
+  errors). After the input ends print exactly one line:
+    server errors: <errors> of <total> requests
+  Empty input gives "server errors: 0 of 0 requests".
+  Read with `while read -r client status path` and keep two counters.
+concepts:
+  - "counters that grow only when a test passes"
+  - "read -r a b c splits a line into fields"
+required_patterns:
+  - pattern: '\bwhile\b[^\n]*\bread\b'
+    message: "Read the log with a while read loop."
+test_cases:
+  - name: two server errors out of six
+    stdin: |
+      10.0.0.4 200 /
+      10.0.0.9 500 /checkout
+      10.0.0.4 404 /old-page
+      10.0.0.7 200 /prices
+      10.0.0.9 503 /checkout
+      10.0.0.2 301 /blog
+    expected_stdout: "server errors: 2 of 6 requests"
+  - name: no errors at all
+    stdin: |
+      192.168.1.5 200 /a
+      192.168.1.6 200 /b
+    expected_stdout: "server errors: 0 of 2 requests"
+  - name: every request failed
+    stdin: |
+      172.16.0.1 502 /x
+      172.16.0.2 500 /y
+      172.16.0.3 599 /z
+    expected_stdout: "server errors: 3 of 3 requests"
+  - name: empty log
+    stdin: ""
+    expected_stdout: "server errors: 0 of 0 requests"

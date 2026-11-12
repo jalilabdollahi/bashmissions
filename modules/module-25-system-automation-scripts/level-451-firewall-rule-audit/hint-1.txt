@@ -1,0 +1,1 @@
+An iptables-save line is a sequence of option words: `-s 10.0.0.0/8`, `-p tcp`, `--dport 22`, `-j ACCEPT`. To audit a rule, first collect what it says (source, interface, protocol, ports, target) and then ask simple yes/no questions about the result. awk walks fields and knows the line number, which is what you need.

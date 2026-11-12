@@ -1,0 +1,1 @@
+A `cd` normally changes the folder for the rest of the script, so the next relative path stops making sense. Do the `cd` somewhere it cannot hurt: a short-lived copy of the shell that disappears together with its current folder.

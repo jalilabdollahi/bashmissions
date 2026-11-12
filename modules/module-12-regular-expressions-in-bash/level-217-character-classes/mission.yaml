@@ -1,0 +1,84 @@
+id: 217
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Character Classes
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie spent the afternoon labelling hardware, and now the inventory sheet is a
+  mix of proper tags and creative spelling. Every server rack tag at Lanternfish
+  follows one rule: the word "rack", a dash, one lowercase letter for the aisle,
+  and two digits for the slot, like rack-b07. Priya wants the bad ones listed
+  before the next audit walk-through.
+objective: |
+  Write solution.sh that reads tags from standard input, one per line. For each
+  line print
+
+    <tag>: ok       if the whole line is a valid tag
+    <tag>: bad      otherwise
+
+  A valid tag is "rack-", then ONE lowercase letter a-z, then EXACTLY TWO
+  digits, and nothing else before or after. Build the regex from character
+  classes: [a-z] for the letter and [[:digit:]] for each digit. Anchor both
+  ends. Do not use \d, which is not portable.
+concepts:
+  - "[a-z] matches one character from a range"
+  - "[[:digit:]] and other POSIX classes"
+  - "a class matches exactly one character"
+required_patterns:
+  - pattern: '\[a-z\]'
+    message: "Use the range [a-z] for the aisle letter."
+  - pattern: '\[\[:digit:\]\]'
+    message: "Use the POSIX class [[:digit:]] for the digits."
+forbidden_patterns:
+  - pattern: '\\d|\bgrep\b|\bsed\b|\bawk\b'
+    message: "Use bracket classes with =~; \\d is not portable and no external tool is needed."
+test_cases:
+  - name: good and bad tags
+    stdin: |
+      rack-b07
+      rack-z99
+      rack-a1
+      rack-c123
+    expected_stdout: |-
+      rack-b07: ok
+      rack-z99: ok
+      rack-a1: bad
+      rack-c123: bad
+  - name: uppercase and wrong characters
+    stdin: |
+      rack-B07
+      rack-707
+      rack-bxx
+      Rack-b07
+    expected_stdout: |-
+      rack-B07: bad
+      rack-707: bad
+      rack-bxx: bad
+      Rack-b07: bad
+  - name: nothing around the tag
+    stdin: |
+      rack-d42 
+      xrack-d42
+      rack-d42x
+      rack-d42
+    expected_stdout: |-
+      rack-d42 : bad
+      xrack-d42: bad
+      rack-d42x: bad
+      rack-d42: ok
+  - name: missing pieces
+    stdin: |
+      rack-
+      rack-e
+      rack-17
+      rack
+    expected_stdout: |-
+      rack-: bad
+      rack-e: bad
+      rack-17: bad
+      rack: bad
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

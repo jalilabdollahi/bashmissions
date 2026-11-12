@@ -1,1 +1,19 @@
-Print only the transformed records or report lines expected by the tests.
+  awk -F, '
+    function dollars(c,   sign) {
+      sign = ""
+      if (c < 0) { sign = "-"; c = -c }
+      return sprintf("%s%.0f.%02d", sign, int(c / 100), c % 100)
+    }
+    { sub(/\r$/, "") }
+    NR == 1 { print "ts,amount,running"; next }
+    $0 == "" { next }
+    # bad row (empty ts, cents not ^-?[0-9]+$): message with NR and the line to stderr; next
+    {
+      running += $2
+      rows++
+      print $1 "," dollars($2) "," dollars(running)
+    }
+    END { if (NR > 0) printf "# rows=%d total=%s\n", rows, dollars(running + 0) }
+  '
+
+The awk call has no file name: it reads the script's standard input. Nothing is stored except running, rows and NR.

@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Think of the pipeline as four small stages that all follow the same pattern: run a command, print one status line, write one log line, and report success or failure. Build that pattern once as a function, then give the pipeline a single failure policy: before the deploy stage a failure just stops; from the deploy stage on, a failure means rollback. Set up the lock and the trap first, so that every later exit path is covered without extra code.

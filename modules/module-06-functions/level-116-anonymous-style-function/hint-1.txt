@@ -1,1 +1,0 @@
-Bash does not have true anonymous functions, but you can define a tiny function inline near its call site.

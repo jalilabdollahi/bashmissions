@@ -1,0 +1,1 @@
+Two small commands can fetch what you need: one reads the top of a file, one reads the bottom. The trick is getting their output into the middle of your own sentence, instead of printing it separately.

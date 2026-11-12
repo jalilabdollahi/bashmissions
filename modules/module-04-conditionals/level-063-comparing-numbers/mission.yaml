@@ -1,0 +1,54 @@
+id: 63
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Comparing Numbers
+difficulty: beginner
+xp: 90
+story: |
+  Grouper's disk filled up at 4 a.m. and took three customer sites with it.
+  Mara's post-mortem has one action item: a disk check that talks in levels, not
+  raw percentages, so that whoever reads the alert knows how worried to be.
+objective: |
+  Write solution.sh that takes one argument: the disk usage in percent (a whole
+  number from 0 to 100). Print exactly one line:
+    <n>% used: FULL        if the number is exactly 100
+    <n>% used: CRITICAL    if it is 90 or more (but not 100)
+    <n>% used: WARNING     if it is 70 or more (but under 90)
+    <n>% used: OK          otherwise
+  Compare with the numeric operators -eq, -ge (and friends) inside [[ ]].
+  Do not use (( )) in this level; it is the next level's tool.
+concepts:
+  - "-lt -le -gt -ge -eq -ne"
+  - "numbers are not strings"
+required_patterns:
+  - pattern: '-(lt|le|gt|ge|eq|ne)\b'
+    message: "Compare the number with -lt, -le, -gt, -ge, -eq or -ne."
+forbidden_patterns:
+  - pattern: '\(\('
+    message: "Save (( )) for the next level; use [[ ... -ge ... ]] here."
+test_cases:
+  - name: plenty of room
+    args: ["12"]
+    expected_stdout: "12% used: OK"
+  - name: single digit is small
+    args: ["9"]
+    expected_stdout: "9% used: OK"
+  - name: just below warning
+    args: ["69"]
+    expected_stdout: "69% used: OK"
+  - name: warning starts at 70
+    args: ["70"]
+    expected_stdout: "70% used: WARNING"
+  - name: last warning value
+    args: ["89"]
+    expected_stdout: "89% used: WARNING"
+  - name: critical starts at 90
+    args: ["90"]
+    expected_stdout: "90% used: CRITICAL"
+  - name: almost full
+    args: ["99"]
+    expected_stdout: "99% used: CRITICAL"
+  - name: full disk
+    args: ["100"]
+    expected_stdout: "100% used: FULL"

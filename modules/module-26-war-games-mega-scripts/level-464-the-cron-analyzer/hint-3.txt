@@ -1,1 +1,14 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  out=$(awk -v month="$month" -v dom="$dom" -v dow="$dow" -v min="$min" '
+    function expand(f, lo, hi, set,   ...) { split("", set); for each comma part: step, "*" / N / A-B, range check, fill set; return 1 }
+    function hhmm(t) { return sprintf("%02d:%02d", int(t / 60), t % 60) }
+    skip blanks, comments, NAME=value lines and @reboot
+    { handle "# runs 25m" with match(); handle @hourly etc. by setting spec; else need 6+ words
+      expand the five fields (warn + next on failure); if (7 in dows) dows[0] = 1
+      name = basename of the command word, "#2" for repeats
+      runs_today = (month in mons) && ((domstar || dowstar) ? d_ok && w_ok : d_ok || w_ok)
+      for hours, minutes in sets: starts[j]++, remember first/last, occ[j, t]++ over the run }
+    END { print the T| table; loops t, a, b -> shared[a SUBSEP b]++, firstat; print O| lines with a sortable key }' "$tab")
+
+Then: sed the T| rows out, print "== Overlaps ==", sort the O| rows (-k1,1n -k2,2n), cut the text, exit 1 if any.

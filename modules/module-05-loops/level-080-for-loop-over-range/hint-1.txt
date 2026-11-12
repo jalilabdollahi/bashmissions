@@ -1,1 +1,0 @@
-Brace expansion can generate a fixed numeric range.

@@ -1,0 +1,9 @@
+path="$1"
+if [[ ! -e $path ]]; then
+  echo "no such file: $path" >&2
+  exit 1
+fi
+r="-"; w="-"; x="-"
+if [[ -r $path ]]; then r="r"; fi
+# ... the same for -w and -x ...
+echo "$path: $r$w$x"

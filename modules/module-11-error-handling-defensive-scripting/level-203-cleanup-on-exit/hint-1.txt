@@ -1,0 +1,1 @@
+The cleanup has to run on the happy path and on the crash path, and you do not know in advance where the script will end. Bash can run a command for you at the moment the script exits, whatever the reason.

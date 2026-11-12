@@ -1,0 +1,1 @@
+Put the files in an array: `files=("$dir"/*.tar.gz)`. Globs expand in sorted order. `${#files[@]}` is the count and `${!files[@]}` gives the indexes. Add `shopt -s nullglob` so an empty folder gives an empty array instead of the literal text `*.tar.gz`. Test names with `[[ $name == *-Sun.tar.gz ]]`, and strip the folder with `${path##*/}`.

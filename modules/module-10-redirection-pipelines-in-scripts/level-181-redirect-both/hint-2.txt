@@ -1,1 +1,0 @@
-Keep temporary output in a named file in the current workspace so the checker can inspect the final stdout.

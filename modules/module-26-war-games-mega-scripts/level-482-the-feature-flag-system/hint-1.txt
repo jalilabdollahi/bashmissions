@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Split the job in two: first load the whole file into memory and complain about every bad line (so a typo is found before anyone relies on the file), then evaluate. Evaluation is a short chain of rules where the first one that matches decides, which maps neatly onto an if / elif ladder inside one function that all three commands share. The percentage rollout must give the same user the same answer every time, so it cannot use a random number; derive a stable number from the flag and user names instead.

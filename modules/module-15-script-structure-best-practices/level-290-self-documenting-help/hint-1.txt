@@ -1,0 +1,1 @@
+A script is just a text file, and the shell tells it where that file is. Let the script read itself: take the lines at the top that are comments, tidy them up, and print them. Then the help can never drift from the documentation, because they are the same lines.

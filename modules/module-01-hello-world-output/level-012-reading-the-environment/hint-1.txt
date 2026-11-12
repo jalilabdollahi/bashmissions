@@ -1,0 +1,1 @@
+When you log in, the system leaves a set of named values in the environment of every program you start: your user name, your home folder, and more. Bash lets you drop those values into text.

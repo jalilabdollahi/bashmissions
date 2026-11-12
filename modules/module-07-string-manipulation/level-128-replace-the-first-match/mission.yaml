@@ -1,0 +1,56 @@
+id: 128
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Replace the First Match
+difficulty: intermediate
+xp: 115
+story: |
+  Marlin is replacing the old database host "eel". The connection list in a
+  customer's config is a comma-separated string of host:port entries, and the
+  first entry is the primary. Theo wants to move only the primary to the new
+  machine and leave the read replicas pointing where they are, even though they
+  may share the old name.
+objective: |
+  Write solution.sh taking three arguments: LIST, OLD and NEW. LIST is a
+  comma-separated string such as "eel:5432,eel:5433". Print LIST with the FIRST
+  occurrence of OLD replaced by NEW and every later occurrence untouched.
+  If OLD does not occur, print LIST as it was. OLD is plain text, not a pattern
+  (it may contain characters like [ or *), so quote it inside the expansion.
+  Use ${var/pattern/replacement}; no sed, awk or tr.
+concepts:
+  - "${var/old/new} replaces the first match only"
+  - "quoting \"$old\" makes the search text literal"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*/[^/#%]'
+    message: 'Replace the first match with ${name/old/new} (a single slash).'
+forbidden_patterns:
+  - pattern: '\b(sed|awk|tr)\b'
+    message: "Do the replacement with ${name/old/new} instead of an external tool."
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*//'
+    message: "A double slash would replace every match; this level wants only the first."
+test_cases:
+  - name: primary moves, replica stays
+    args: ["eel:5432,eel:5433", eel, marlin]
+    expected_stdout: |-
+      marlin:5432,eel:5433
+  - name: three entries
+    args: ["eel:5432,cuttlefish:5432,eel:5434", eel, halibut]
+    expected_stdout: |-
+      halibut:5432,cuttlefish:5432,eel:5434
+  - name: old host not present
+    args: ["dory:5432,dory:5433", eel, marlin]
+    expected_stdout: |-
+      dory:5432,dory:5433
+  - name: match in the middle only
+    args: ["cuttlefish:5432,eel:5433", eel, grouper]
+    expected_stdout: |-
+      cuttlefish:5432,grouper:5433
+  - name: search text is literal, not a pattern
+    args: ["db[1]:5432,db[1]:5433", "db[1]", "db-primary"]
+    expected_stdout: |-
+      db-primary:5432,db[1]:5433
+  - name: star is not a wildcard here
+    args: ["a*b:1,axxb:2", "a*b", "z"]
+    expected_stdout: |-
+      z:1,axxb:2

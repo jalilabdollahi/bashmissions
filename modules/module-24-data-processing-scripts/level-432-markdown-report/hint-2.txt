@@ -1,0 +1,7 @@
+Everything can be printed in the END block, once you know the counts. Collect the rows you want into arrays while reading, then print:
+
+  { total++; if ($3 + 0 <= $4 + 0) { n++; row[n] = "| " $1 " | " $2 " |" } }
+  END { if (n > 0) { print "| A | B |"; print "|---|---:|"; for (i = 1; i <= n; i++) print row[i] }
+        else print "_none_" }
+
+In the separator row, `---:` right-aligns a column. To escape the bar, loop with index(s, "|"): copy the text before it, add `\|`, continue with the rest. Rows come out in file order, so sort them yourself (insertion sort, comparing `a[j] "" > t ""` as text) and move the arrays together. Skipping invalid rows: `$3 !~ /^[0-9]+$/`.

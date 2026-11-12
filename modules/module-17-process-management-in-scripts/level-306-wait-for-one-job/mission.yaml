@@ -1,0 +1,56 @@
+id: 306
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Wait for One Job
+difficulty: advanced
+xp: 175
+story: |
+  Priya's `integrity-check` scans one server's disks for rot. It prints
+  nothing at all; the only answer it gives is how it exits: 0 when the disks
+  are clean, something else when they are not. Priya wants the check running
+  in the background so the script can keep talking to the console, and she
+  wants the verdict at the end.
+objective: |
+  Write solution.sh that takes one argument, SERVER. With no argument print
+  `usage: solution.sh SERVER` to stderr and exit with status 2.
+
+  Otherwise:
+    1. start `integrity-check SERVER` in the background and save its PID;
+    2. print `checking SERVER` while it runs;
+    3. wait for that one job with `wait "$pid"` and capture its exit status;
+    4. print `SERVER: status N` (N is the job's exit status);
+    5. exit with that same status N.
+
+  A failing check must not abort the script before step 4: the status is the
+  thing you are collecting, so handle it yourself.
+concepts:
+  - "wait PID blocks until that job ends"
+  - "wait returns the job's exit status in $?"
+required_patterns:
+  - pattern: '\$!'
+    message: "Save the background job's PID from $!."
+  - pattern: 'wait\s+"?\$\{?[A-Za-z_]'
+    message: "Wait for that specific job: wait \"$pid\"."
+test_cases:
+  - name: clean disks
+    args: [halibut]
+    expected_stdout: |-
+      checking halibut
+      halibut: status 0
+  - name: corruption found
+    args: [marlin]
+    expected_stdout: |-
+      checking marlin
+      marlin: status 3
+    expected_exit: 3
+  - name: server unreachable
+    args: [octopus]
+    expected_stdout: |-
+      checking octopus
+      octopus: status 4
+    expected_exit: 4
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh SERVER"
+    expected_exit: 2

@@ -1,0 +1,7 @@
+`source file` loads the functions. `compgen -A function PREFIX` prints the names of functions starting with PREFIX, one per line. `( cmd )` runs in a child copy of the shell, so an `exit` inside only ends the copy. Used as an `if` condition the status is a plain answer, even with `set -e`:
+
+  while IFS= read -r name; do
+    if ( "$name" ) > /dev/null 2>&1; then echo "ok $name"; else echo "bad $name"; fi
+  done < <(compgen -A function prefix_ | sort)
+
+Count with `n=$(( n + 1 ))`, because `((n++))` returns 1 on the first count and trips `set -e`.

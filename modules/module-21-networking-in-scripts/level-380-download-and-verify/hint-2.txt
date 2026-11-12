@@ -1,0 +1,6 @@
+`cksum FILE` prints `CRC SIZE FILE`. Reading from stdin (`cksum < FILE`) drops the file name, which makes comparing easy:
+
+  actual=$(cksum < "$tmp")             # 404986173 73
+  expected=$(cut -d' ' -f1,2 sums.txt) # first two fields of "404986173 73 name"
+
+`mktemp` creates a unique empty file and prints its name. `trap 'rm -f "$tmp"' EXIT` removes it however the script ends. `mv` publishes the file once it passes. For downloads use `curl -sS --fail -o "$tmp" URL`, so a 404 page is never saved as if it were the file.

@@ -1,0 +1,61 @@
+id: 197
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Check the Status
+difficulty: intermediate
+xp: 120
+story: |
+  Theo's deploy script deleted the wrong folder last night, and Mara has called a
+  meeting titled "Never again." Her first rule: before a script does anything
+  risky, it must know what the previous command really did. Today's warm-up is
+  small. Noor wants to know whether Harbour Bakery's site is in maintenance mode,
+  and "the script ran" is not an answer. Every command leaves a number behind
+  saying how it went. Learn to read it.
+objective: |
+  Write solution.sh that takes one argument: a status file. Look for a line that
+  is exactly
+    maintenance=on
+  using `grep -qx` (quiet, whole-line match), then read the exit status of grep
+  with `$?`. Print, depending on that status:
+    status 0 (line found):      maintenance: ON            (stdout, exit 0)
+    status 1 (line not found):  maintenance: off           (stdout, exit 0)
+    anything else (grep could not read the file, usually status 2):
+        cannot read FILE (grep status N)                   (stderr, exit 2)
+  where FILE is the argument and N is grep's real status.
+  Hide grep's own error message with `2>/dev/null`. Save `$?` into a variable
+  on the very next line after grep, because the next command overwrites it.
+  Do not use `set -e` in this one: grep's status 1 is an answer here, not a crash.
+concepts:
+  - "$? holds the exit status of the last command"
+  - "0 means success, anything else means something happened"
+  - "grep tells 'not found' (1) apart from 'error' (2)"
+required_patterns:
+  - pattern: '\$\?'
+    message: "Read the status of grep with $?."
+  - pattern: 'grep\s+-[a-z]*q'
+    message: "Use grep -q so grep prints nothing and only reports through its status."
+forbidden_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*e'
+    message: "Leave set -e out: here grep's status 1 means 'not found' and you want to handle it yourself."
+test_cases:
+  - name: maintenance is on
+    args: [site.status]
+    files:
+      site.status: "name=harbourbakery\nmaintenance=on\nregion=north\n"
+    expected_stdout: "maintenance: ON"
+  - name: maintenance is off
+    args: [bakery.status]
+    files:
+      bakery.status: "name=harbourbakery\nmaintenance=off\n"
+    expected_stdout: "maintenance: off"
+  - name: partial match does not count
+    args: [pub.status]
+    files:
+      pub.status: "name=gullandanchor\nmaintenance=online\n# maintenance=on\n"
+    expected_stdout: "maintenance: off"
+  - name: file does not exist
+    args: [ghost.status]
+    expected_stdout: ""
+    expected_stderr: "cannot read ghost.status (grep status 2)"
+    expected_exit: 2

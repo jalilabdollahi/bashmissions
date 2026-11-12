@@ -1,0 +1,4 @@
+An associative array is a tally sheet: `declare -A count`, then `count[$key]=$(( ${count[$key]:-0} + 1 ))`. `${path##*/}` is the file name, `${name##*.}` the text after the last dot, `${name%.*}` the name without it, `${ext,,}` lowercases. Feed a loop from a command without a subshell with `done < <(find ...)`. To print a sorted table, print `key count` lines and use `sort -k2,2nr -k1,1`:
+
+  while IFS= read -r p; do ...; done < <(find "$dir" -type f)
+  for k in "${!count[@]}"; do echo "$k ${count[$k]}"; done | sort -k2,2nr -k1,1

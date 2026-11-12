@@ -1,0 +1,1 @@
+A normal page load is a GET: you only ask. Submitting a form is a POST: you ask and hand over data in the body of the request. curl has one option for "here is some data", and using it quietly changes the request type for you.

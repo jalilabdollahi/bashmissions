@@ -1,0 +1,11 @@
+`exit` inside a function ends the whole script (unlike `return`). The first argument can be the code, and `shift` removes it so `$*` holds only the message:
+
+  fail() {
+    local code=$1
+    shift
+    echo "problem: $*" >&2
+    exit "$code"
+  }
+  [[ -f $f ]] || fail 3 "cannot find $f"
+
+`A || B` runs B only when A fails, a compact way to write a check.

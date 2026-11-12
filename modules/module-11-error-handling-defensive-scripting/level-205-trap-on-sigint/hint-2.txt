@@ -1,1 +1,0 @@
-Keep the failure path controlled so the script prints the expected result instead of crashing unpredictably.

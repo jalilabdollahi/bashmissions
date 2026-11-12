@@ -1,1 +1,1 @@
-Use the curriculum concept for this level: `sed '/pattern/d'`.
+sed normally prints every line after applying your commands. Instead of rewriting lines, you can tell it to throw some away: pick the lines by a pattern and apply the delete command. You have two kinds of line to throw away, so you need two patterns, and both must allow for blanks at the start.

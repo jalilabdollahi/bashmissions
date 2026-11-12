@@ -1,0 +1,56 @@
+id: 145
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Division and Remainder
+difficulty: beginner
+xp: 120
+story: |
+  Gus loves the uptime page, but "263520 minutes" means nothing to him. "I need
+  to know how many days, hours and minutes that is," he says, "so I can write
+  it in the investor update. Please, in words a person can read." Ollie shyly
+  adds that he once did this by hand with a calculator and got it wrong twice.
+objective: |
+  Write solution.sh that takes one argument: a number of minutes of uptime
+  (a whole number, zero or more). Print a single line:
+
+    uptime: <D>d <H>h <M>m
+
+  where D is the number of whole days (1440 minutes each), H the whole hours
+  left over after the days (0 to 23) and M the minutes left over after that
+  (0 to 59). Always print all three parts, even when they are zero.
+
+  Use / for division and % for the remainder inside $(( ... )).
+concepts:
+  - "/ integer division"
+  - "% remainder (modulo)"
+required_patterns:
+  - pattern: '\$\(\([^)]*/'
+    message: "Use / inside $(( )) to divide."
+  - pattern: '\$\(\([^)]*%'
+    message: "Use % inside $(( )) to get the remainder."
+forbidden_patterns:
+  - pattern: '\b(date|expr|bc|awk)\b'
+    message: "Plain integer division and % are all you need here."
+test_cases:
+  - name: just under an hour
+    args: ["59"]
+    expected_stdout: "uptime: 0d 0h 59m"
+  - name: zero minutes
+    args: ["0"]
+    expected_stdout: "uptime: 0d 0h 0m"
+  - name: exactly one day
+    args: ["1440"]
+    expected_stdout: "uptime: 1d 0h 0m"
+  - name: mixed value
+    args: ["4507"]
+    expected_stdout: "uptime: 3d 3h 7m"
+  - name: a full year
+    args: ["525600"]
+    expected_stdout: "uptime: 365d 0h 0m"
+  - name: gus's number
+    args: ["263520"]
+    expected_stdout: "uptime: 183d 0h 0m"
+  - name: one minute short of a day
+    args: ["1439"]
+    expected_stdout: "uptime: 0d 23h 59m"

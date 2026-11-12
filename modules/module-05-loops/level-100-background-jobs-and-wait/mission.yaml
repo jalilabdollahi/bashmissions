@@ -1,0 +1,67 @@
+id: 100
+module: 5
+module_name: loops
+module_display: Loops
+title: Background Jobs and wait
+difficulty: intermediate
+xp: 150
+story: |
+  The health sweep takes one second per server, which is fine for one server
+  and a coffee break for fifty. Mara looks at the clock on the wall. "The
+  servers do not depend on each other. Ask all of them at the same moment,
+  then collect the answers." The probe tool, probe-host, answers after one
+  second. Your script must not take longer than the slowest single probe.
+objective: |
+  Write solution.sh that takes server names as arguments and checks them all
+  at the same time with `probe-host NAME` (it prints "up" or "down" after one
+  second). Start every probe in the background with `&`, then `wait` for all
+  of them. When all have finished, print one line per server IN THE ORDER OF
+  THE ARGUMENTS, whatever order the probes finished in:
+    <name>: <up or down>
+  and finally:
+    checked <N> hosts
+  The tests give you five seconds in total, so six probes one after another
+  would be too slow. Keep each probe's answer in a file inside a directory
+  made with mktemp -d, and remove that directory at the end.
+  With no arguments print "usage: solution.sh HOST..." to stderr and exit 2.
+concepts:
+  - "command & starts a background job"
+  - "wait blocks until all background jobs are done"
+  - "collect results in files, print in a fixed order"
+required_patterns:
+  - pattern: '[^&>]&\s*$'
+    message: "Start each probe in the background by ending its line with &."
+  - pattern: '\bwait\b'
+    message: "Use wait so the script collects the answers only after all probes finish."
+test_cases:
+  - name: six hosts in parallel with two down
+    env: {FAKE_DOWN: "dory flounder"}
+    args: [anchovy, barracuda, cuttlefish, dory, eel, flounder]
+    expected_stdout: |-
+      anchovy: up
+      barracuda: up
+      cuttlefish: up
+      dory: down
+      eel: up
+      flounder: down
+      checked 6 hosts
+  - name: a single host
+    env: {FAKE_DOWN: "marlin"}
+    args: [marlin]
+    expected_stdout: |-
+      marlin: down
+      checked 1 hosts
+  - name: all up and order follows the arguments
+    args: [octopus, grouper, halibut, anchovy, eel, dory]
+    expected_stdout: |-
+      octopus: up
+      grouper: up
+      halibut: up
+      anchovy: up
+      eel: up
+      dory: up
+      checked 6 hosts
+  - name: no servers given
+    args: []
+    expected_stderr: "usage: solution.sh HOST..."
+    expected_exit: 2

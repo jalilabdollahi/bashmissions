@@ -1,0 +1,6 @@
+unset name removes a variable completely. And ${name+word} expands to word if the variable exists (even when empty) and to nothing if it does not. Generic example:
+
+  unset colour
+  echo "[${colour+defined}]"     # prints []
+  colour=
+  echo "[${colour+defined}]"     # prints [defined]

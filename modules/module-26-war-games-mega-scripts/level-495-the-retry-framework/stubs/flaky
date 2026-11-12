@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Pretend unreliable command. Fails the first FAKE_FAILS calls (default 0) with
+# exit status FAKE_CODE (default 7), then succeeds. Calls are counted in
+# .flaky-count and recorded in .calls.log.
+n=0
+[[ -r .flaky-count ]] && n=$(< .flaky-count)
+n=$((n + 1))
+echo "$n" > .flaky-count
+echo "flaky call $n" >> .calls.log
+echo "flaky: attempt $n"
+if (( n <= ${FAKE_FAILS:-0} )); then
+  exit "${FAKE_CODE:-7}"
+fi

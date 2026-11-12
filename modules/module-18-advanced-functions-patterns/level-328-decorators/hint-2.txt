@@ -1,0 +1,7 @@
+`declare -f NAME` prints a function's complete source, starting with its name, and fails if there is no such function. Prefixing that text and evaluating it defines a renamed copy:
+
+  def=$(declare -f hello)        # hello () { echo hi; }
+  eval "old_$def"                # old_hello () { echo hi; }
+  eval "hello() { echo before; old_hello \"\$@\"; echo after; }"
+
+To keep the original's exit status under `set -e`, run it as `old_hello "$@" || rc=$?` with `rc=0` set earlier.

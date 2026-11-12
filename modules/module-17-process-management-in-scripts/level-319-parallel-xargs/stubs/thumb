@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Fake thumbnailer for BashMissions: thumb NAME takes half a second and prints
+# "done NAME". Names starting with "bad-" fail with status 1. Called without
+# any name it does nothing: GNU xargs (unlike BSD xargs) runs the command once
+# even when its input is empty.
+if [[ $# -eq 0 ]]; then
+  exit 0
+fi
+if [[ $# -ne 1 ]]; then
+  echo "usage: thumb NAME" >&2
+  exit 2
+fi
+echo "start $1" >> .calls.log
+sleep 0.5
+echo "end $1" >> .calls.log
+case $1 in
+  bad-*)
+    echo "thumb: cannot read $1" >&2
+    exit 1
+    ;;
+esac
+echo "done $1"

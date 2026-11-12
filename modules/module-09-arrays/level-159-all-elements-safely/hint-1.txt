@@ -1,0 +1,1 @@
+There is a special way to ask an array for all of its elements at once, and a quoting rule that makes each element arrive as one separate word. Without the quotes, Bash re-splits every element at its spaces and expands wildcards.

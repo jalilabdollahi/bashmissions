@@ -1,0 +1,1 @@
+while IFS= read -r line; do ... done < file feeds the file into the loop. IFS= (set just for that read) keeps leading and trailing whitespace; -r keeps backslashes as they are. Example: while IFS= read -r l; do echo "[$l]"; done < /etc/hostname. Check the file with [[ -r path ]] first.

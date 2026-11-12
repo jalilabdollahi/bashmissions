@@ -1,0 +1,9 @@
+declare -A rack=()
+for pair in "$@"; do
+  rack[${pair%%=*}]=${pair#*=}
+done
+# when the map is not empty, pick sort -n or sort -rn depending on $reverse:
+mapfile -t units < <(printf '%s\n' "${!rack[@]}" | sort -n)
+for unit in "${units[@]}"; do
+  echo "U$unit: ${rack[$unit]}"
+done

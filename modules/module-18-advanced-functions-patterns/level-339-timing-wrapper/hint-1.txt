@@ -1,0 +1,1 @@
+A stopwatch needs two readings of a clock: one before the command and one after. Bash has a built-in variable that always holds the current time with microseconds. Subtract, convert to milliseconds, and format. Run the command with its original arguments, and make sure a failing command still gets timed.

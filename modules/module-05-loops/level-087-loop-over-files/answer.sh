@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# Without nullglob, an unmatched pattern stays as the literal text "logs/*.log".
+shopt -s nullglob
 
-for file in fixtures/*.txt; do
-  basename "$file"
+for file in logs/*.log; do
+  # wc pads its number with spaces on macOS; $(( )) strips them.
+  lines=$(( $(wc -l < "$file") ))
+  echo "${file##*/}: $lines"
 done

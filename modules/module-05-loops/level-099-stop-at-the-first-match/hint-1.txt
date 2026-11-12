@@ -1,0 +1,1 @@
+This is a search: look at the files one by one, and as soon as one qualifies, remember it and stop looking. After the loop you still have to know whether the search succeeded, so something has to carry the result out of the loop.

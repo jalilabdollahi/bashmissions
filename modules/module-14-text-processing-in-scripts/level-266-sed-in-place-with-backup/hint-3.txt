@@ -1,0 +1,7 @@
+Name the arguments, patch, report:
+
+  old=$1 new=$2 file=$3
+  sed -i.bak "s/$old/$new/g" "$file"
+  echo "patched $file"
+
+The g flag replaces every occurrence on each line, not only the first.

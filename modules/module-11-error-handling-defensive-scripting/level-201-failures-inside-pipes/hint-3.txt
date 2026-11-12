@@ -1,0 +1,5 @@
+One added line is enough. Put it above the `if`:
+
+  set -o pipefail
+
+The `if fetchlog "$1" | sort -u > summary.txt; then` line then fails whenever fetchlog or sort fails, and the else branch prints the message and exits 3. Do not add set -e.

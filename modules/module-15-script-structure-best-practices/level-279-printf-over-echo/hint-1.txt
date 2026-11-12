@@ -1,0 +1,1 @@
+echo looks at its first words to see whether they are options, and some versions also interpret backslash sequences. When the text is data you do not control, that guesswork is a bug. You want a command that prints text and nothing else.

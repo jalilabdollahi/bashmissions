@@ -1,3 +1,0 @@
-A compact solution can be shaped like this:
-
-echo "count: $#"

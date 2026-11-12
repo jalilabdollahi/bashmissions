@@ -1,0 +1,11 @@
+A command can be the condition of an `if`, and an arithmetic `for` gives you a counter with a limit:
+
+  for (( try = 1; try <= limit; try++ )); do
+    if some-check >/dev/null 2>&1; then
+      echo "ok on try $try"; exit 0
+    fi
+    (( try < limit )) && sleep 2
+  done
+  echo "no luck" >&2; exit 1
+
+`curl -f` makes HTTP errors (like 503) a non-zero exit status; `-s` hides the progress meter. Check the optional argument with `[[ $x =~ ^[0-9]+$ ]]`.

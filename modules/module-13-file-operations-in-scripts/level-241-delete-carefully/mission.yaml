@@ -1,0 +1,128 @@
+id: 241
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Delete Carefully
+difficulty: intermediate
+xp: 140
+story: |
+  Priya keeps a framed printout above her desk. It is a postmortem from
+  another company: a cleanup script ran `rm -rf "$BUILD_DIR/"*` while
+  BUILD_DIR was empty, the shell saw `rm -rf /*`, and the rest is history.
+  Now Theo wants a "delete this customer's scratch folder" helper for the
+  file server, and Priya will review it with a very sharp pencil.
+objective: |
+  Write solution.sh that deletes one folder, but only if it is safely inside
+  the folder `shared` of the current directory. The argument is DIR, the
+  folder to delete. Apply these checks in this order and stop at the first
+  one that fails (all messages go to stderr):
+
+  1. No argument at all: `usage: solution.sh DIR`, exit 2.
+  2. DIR is an empty string: `refusing: empty path`, exit 2.
+  3. DIR is `/`: `refusing: that is the root folder`, exit 1.
+  4. DIR is not an existing directory: `refusing: DIR is not a folder`, exit 1.
+  5. Work out the real location of DIR with `cd` and `pwd -P` (this resolves
+     `..` and symlinks). If it is the `shared` folder itself:
+     `refusing: that is the shared folder itself`, exit 1.
+  6. If it is not somewhere below `shared`: `refusing: DIR is outside shared`,
+     exit 1.
+
+  Only if every check passes, delete the folder and everything in it with
+  `rm -rf`, using the resolved path, and print `deleted: DIR` (DIR exactly
+  as the user typed it). Do not use a `*` wildcard after a variable in the
+  `rm` command.
+concepts:
+  - "guarding rm: empty values, root, and a base folder"
+  - "pwd -P resolves .. and symlinks before checking"
+required_patterns:
+  - pattern: 'pwd\s+-P'
+    message: "Resolve the real path with (cd \"$dir\" && pwd -P) before deciding."
+  - pattern: '\brm\s+-[a-zA-Z]*[rR]'
+    message: "Delete with rm -rf (after all checks) using the resolved path."
+forbidden_patterns:
+  - pattern: '\brm\b[^\n]*\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/?"?\*'
+    message: "Do not write rm ... \"$var\"/* : with an empty $var that becomes /*. Delete the folder itself."
+test_cases:
+  - name: scratch folder is deleted
+    args: [shared/old-uploads]
+    files:
+      shared/old-uploads/a.tmp: "a"
+      shared/old-uploads/deep/b.tmp: "b"
+      shared/keep/report.txt: "keep me"
+    expected_stdout: "deleted: shared/old-uploads"
+    expected_files:
+      shared/old-uploads: null
+      shared/keep/report.txt: "keep me"
+  - name: name with spaces and a trailing slash
+    args: ["shared/Gull & Anchor/tmp/"]
+    files:
+      "shared/Gull & Anchor/tmp/x": "x"
+      "shared/Gull & Anchor/site/index.html": "page"
+    expected_stdout: "deleted: shared/Gull & Anchor/tmp/"
+    expected_files:
+      "shared/Gull & Anchor/tmp": null
+      "shared/Gull & Anchor/site/index.html": "page"
+  - name: dot-dot escape is caught
+    args: [shared/../secret]
+    files:
+      shared/ok.txt: "ok"
+      secret/keys.txt: "do not delete"
+    expected_stderr: "refusing: shared/../secret is outside shared"
+    expected_exit: 1
+    expected_files:
+      secret/keys.txt: "do not delete"
+  - name: a sneaky path that returns to shared is fine
+    args: [shared/a/../b]
+    files:
+      shared/a/f: "f"
+      shared/b/g: "g"
+    expected_stdout: "deleted: shared/a/../b"
+    expected_files:
+      shared/b: null
+      shared/a/f: "f"
+  - name: the shared folder itself
+    args: [shared/]
+    files:
+      shared/ok.txt: "ok"
+    expected_stderr: "refusing: that is the shared folder itself"
+    expected_exit: 1
+    expected_files:
+      shared/ok.txt: "ok"
+  - name: empty variable
+    args: [""]
+    files:
+      shared/ok.txt: "ok"
+    expected_stderr: "refusing: empty path"
+    expected_exit: 2
+    expected_files:
+      shared/ok.txt: "ok"
+  - name: the root folder
+    args: [/]
+    files:
+      shared/ok.txt: "ok"
+    expected_stderr: "refusing: that is the root folder"
+    expected_exit: 1
+    expected_files:
+      shared/ok.txt: "ok"
+  - name: absolute path elsewhere
+    args: [/usr]
+    expected_stderr: "refusing: /usr is outside shared"
+    expected_exit: 1
+  - name: not a folder
+    args: [shared/ghost]
+    files:
+      shared/ok.txt: "ok"
+    expected_stderr: "refusing: shared/ghost is not a folder"
+    expected_exit: 1
+  - name: a file is not a folder
+    args: [shared/ok.txt]
+    files:
+      shared/ok.txt: "ok"
+    expected_stderr: "refusing: shared/ok.txt is not a folder"
+    expected_exit: 1
+    expected_files:
+      shared/ok.txt: "ok"
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

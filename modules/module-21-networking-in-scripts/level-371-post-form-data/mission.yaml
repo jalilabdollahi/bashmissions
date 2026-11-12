@@ -1,0 +1,58 @@
+id: 371
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: POST Form Data
+difficulty: intermediate
+xp: 170
+story: |
+  Ollie has been signing new customers up by clicking through the billing
+  web form, forty times a morning. "It is just a form," he says, "can't a
+  script fill it in?" It can. A form submission is only an HTTP request that
+  carries data, and curl knows how to send one.
+objective: |
+  Write solution.sh. It takes two arguments, an EMAIL and a PLAN.
+
+  Submit the signup form with a POST request to
+    https://billing.lanternfish.example/signup
+  sending the form fields `email=EMAIL` and `plan=PLAN`, in that order
+  (the form encoding is `email=EMAIL&plan=PLAN`). Use curl's `-d` option;
+  do not write -X POST yourself, because -d already means POST.
+
+  Print the server's reply as a single line
+    reply: <body of the response>
+  With any other number of arguments print
+  `usage: solution.sh EMAIL PLAN` to stderr and exit with status 2.
+concepts:
+  - "-d sends form data in the request body and switches curl to POST"
+  - "fields are joined as name=value&name=value"
+required_patterns:
+  - pattern: '(^|\s)(-d|--data)\b'
+    message: "Send the form fields with curl's -d option."
+forbidden_patterns:
+  - pattern: '-X\s*POST'
+    message: "-d already makes the request a POST; -X POST is redundant here."
+test_cases:
+  - name: pro signup
+    args: ["ollie@lanternfish.example", pro]
+    expected_stdout: "reply: ok: ollie@lanternfish.example subscribed to pro"
+    expected_files:
+      .calls.log: |
+        POST https://billing.lanternfish.example/signup
+        data: email=ollie@lanternfish.example&plan=pro
+  - name: another customer, basic plan
+    args: ["hello@harbourbakery.example", basic]
+    expected_stdout: "reply: ok: hello@harbourbakery.example subscribed to basic"
+    expected_files:
+      .calls.log: |
+        POST https://billing.lanternfish.example/signup
+        data: email=hello@harbourbakery.example&plan=basic
+  - name: the server rejects an unknown plan
+    args: ["desk@northpierdental.example", platinum]
+    expected_stdout: "reply: error: unknown plan 'platinum'"
+  - name: missing plan
+    args: ["only@email.example"]
+    expected_stderr: "usage: solution.sh EMAIL PLAN"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null

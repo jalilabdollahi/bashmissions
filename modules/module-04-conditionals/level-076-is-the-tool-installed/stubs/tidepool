@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Fake tidepool for BashMissions: only --version is understood.
+if [[ ${1:-} == --version ]]; then
+  echo "tidepool 0.9"
+  exit 0
+fi
+echo "tidepool: unsupported option '${1:-}'" >&2
+exit 2

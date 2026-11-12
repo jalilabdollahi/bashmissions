@@ -1,0 +1,16 @@
+Skeleton:
+
+  lanternscan &
+  pid=$!
+  sleep "$limit"
+  if kill -0 "$pid" 2>/dev/null; then
+    kill "$pid"
+    wait "$pid" 2>/dev/null
+    echo "scan timed out after $limit seconds" >&2
+    exit 124
+  fi
+  wait "$pid"
+  status=$?
+  # nonzero -> "scan failed with status N" on stderr, exit N
+
+Do not add set -e: `wait` on a killed or failed job returns non-zero on purpose.

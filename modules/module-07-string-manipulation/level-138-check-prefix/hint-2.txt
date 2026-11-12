@@ -1,1 +1,0 @@
-`pre*` matches strings that start with `pre`.

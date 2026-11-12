@@ -1,0 +1,3 @@
+Top of the script: `stopping=0` and `trap 'stopping=1' TERM`. At the start of each iteration: `if (( stopping )); then break; fi`.
+
+After the loop, when stopping is set, the untouched jobs are `"${jobs[@]:done_count}"`, an array slice from index done_count to the end. Write them with `printf '%s\n' "${jobs[@]:done_count}" > queue.left`, count them with `$(( ${#jobs[@]} - done_count ))`, print the summary and `exit 0`.

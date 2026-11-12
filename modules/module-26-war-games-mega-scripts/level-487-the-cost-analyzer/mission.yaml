@@ -1,22 +1,249 @@
 id: 487
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Cost Analyzer
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Cost Analyzer` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Cost Analyzer
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 400
+story: |
+  The storm month is over and Gus is staring at a spreadsheet that is wrong in
+  three different ways: it forgets that the first 50 GB of bandwidth are free,
+  it charges the big storage customer the small-customer price, and it rounds
+  every line in the customer's favour. He asked the question out loud in the
+  office, "can't a script just do this?", and Ollie, the intern, was the only
+  one who answered. You can do better than a spreadsheet: read the price list
+  with its tiers, read the month's usage, and print real invoices, to the cent,
+  with the same rounding every single time.
+objective: |
+  Write solution.sh, an invoice generator.
+
+    solution.sh PRICES USAGE [DISCOUNTS]
+
+  PRICES, one item per line: `ITEM UNIT TIER [TIER ...]`. Blank lines and `#`
+  comments are ignored. A TIER is `UPTO:PRICE`: UPTO is the cumulative top of
+  the tier in units (or `*` for "everything beyond"), PRICE is dollars per unit
+  with up to 4 decimals (`0.0125`, `0.09`, `0`). Tiers are graduated: each
+  unit is charged at the price of the tier it falls in. Example:
+  `storage GB 100:0.08 1000:0.05 *:0.03` charges the first 100 GB at 0.08, the
+  next 900 at 0.05 and the rest at 0.03. UPTO values must strictly increase and
+  the last tier must be `*`; otherwise print `bad price line N` to stderr and
+  exit 2. Do the maths in integers: PRICE in ten-thousandths of a dollar.
+
+  USAGE is CSV: `CUSTOMER,ITEM,QUANTITY` (QUANTITY is a non-negative integer).
+  A first line equal to `customer,item,quantity` is a header and is skipped.
+  Rows for the same customer and item add up.
+
+  DISCOUNTS (optional): lines `CUSTOMER PERCENT`, PERCENT an integer 0..100,
+  `#` comments and blanks ignored; a bad line prints `bad discount line N` and
+  exits 2.
+
+  Environment (integers >= 0, default 0, else `invalid NAME` on stderr and
+  exit 2): TAX_PCT, the sales tax percentage, and MIN_CHARGE, the smallest
+  invoice in CENTS.
+
+  Rounding: the cost of one item line is rounded to whole cents, half up:
+  (tenthousandths + 50) / 100. Discount and tax are also rounded half up:
+  (cents * PERCENT + 50) / 100. Work in cents from there on.
+
+  For each customer (sorted by name, only customers with at least one valid
+  row) print an invoice. Item lines follow the PRICES order, only for items
+  the customer used, formatted with
+    printf '%-10s %6d %-5s %10s\n'   (item, quantity, unit, money)
+  and the summary lines with
+    printf '%-23s %10s\n'            (label, money)
+  Money is `$D.CC`, a negative amount `-$D.CC`. The invoice is:
+    `== CUSTOMER ==`
+    item lines
+    `subtotal`                       the sum of the item lines
+    `discount P%`      (negative)    only when P > 0
+    `minimum charge`   (positive)    only when the discounted subtotal is below
+                                     MIN_CHARGE: the difference that tops it up
+    `tax T%`                         only when TAX_PCT > 0, on the amount after
+                                     discount and minimum
+    `total`
+  After all invoices print `customers: N, grand total: $X.XX`.
+
+  Bad usage rows are skipped with a message on stderr, the rest is still
+  invoiced, and the exit status is 1 (otherwise 0):
+    `line N: expected CUSTOMER,ITEM,QUANTITY`  (not exactly three fields)
+    `line N: unknown item NAME`
+    `line N: bad quantity`
+  N is the physical line number of USAGE. Unreadable files: `cannot read FILE`
+  on stderr, exit 2. Wrong arguments:
+  `usage: solution.sh PRICES USAGE [DISCOUNTS]` on stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "graduated pricing tiers"
+  - "money as integers: ten-thousandths, then cents"
+  - "round half up, always the same way"
+  - "aggregating CSV rows with associative arrays"
+required_patterns:
+  - pattern: 'declare\s+-A'
+    message: "Aggregate usage per customer and item in associative arrays."
+forbidden_patterns:
+  - pattern: '\bbc\b'
+    message: "bc is not available everywhere; do the money maths with integers."
+test_cases:
+  - name: full invoices with discount, minimum and tax
+    args: [fixtures/prices.txt, fixtures/usage.csv, fixtures/discounts.txt]
+    env:
+      TAX_PCT: "8"
+      MIN_CHARGE: "500"
+    expected_stdout: |-
+      == gull-and-anchor ==
+      bandwidth      50 GB         $0.00
+      subtotal                     $0.00
+      minimum charge               $5.00
+      tax 8%                       $0.40
+      total                        $5.40
+      == harbour-bakery ==
+      storage       300 GB        $18.00
+      bandwidth      40 GB         $0.00
+      vm-hours      720 hour       $9.00
+      subtotal                    $27.00
+      tax 8%                       $2.16
+      total                       $29.16
+      == north-pier-dental ==
+      vm-hours      100 hour       $1.25
+      subtotal                     $1.25
+      minimum charge               $3.75
+      tax 8%                       $0.40
+      total                        $5.40
+      == tidewater-books ==
+      storage      1500 GB        $68.00
+      bandwidth     175 GB        $11.25
+      subtotal                    $79.25
+      discount 10%                -$7.93
+      tax 8%                       $5.71
+      total                       $77.03
+      customers: 4, grand total: $116.99
+  - name: plain invoices without extras
+    args: [fixtures/prices.txt, fixtures/usage.csv]
+    expected_stdout: |-
+      == gull-and-anchor ==
+      bandwidth      50 GB         $0.00
+      subtotal                     $0.00
+      total                        $0.00
+      == harbour-bakery ==
+      storage       300 GB        $18.00
+      bandwidth      40 GB         $0.00
+      vm-hours      720 hour       $9.00
+      subtotal                    $27.00
+      total                       $27.00
+      == north-pier-dental ==
+      vm-hours      100 hour       $1.25
+      subtotal                     $1.25
+      total                        $1.25
+      == tidewater-books ==
+      storage      1500 GB        $68.00
+      bandwidth     175 GB        $11.25
+      subtotal                    $79.25
+      total                       $79.25
+      customers: 4, grand total: $107.50
+  - name: half a cent rounds up
+    args: [prices.txt, usage.csv]
+    files:
+      prices.txt: |
+        vm-hours hour *:0.0125
+      usage.csv: |
+        eel-diner,vm-hours,2
+        kelp-cafe,vm-hours,1
+        kelp-cafe,vm-hours,1
+    expected_stdout: |-
+      == eel-diner ==
+      vm-hours        2 hour       $0.03
+      subtotal                     $0.03
+      total                        $0.03
+      == kelp-cafe ==
+      vm-hours        2 hour       $0.03
+      subtotal                     $0.03
+      total                        $0.03
+      customers: 2, grand total: $0.06
+  - name: a tier boundary is charged exactly
+    args: [prices.txt, usage.csv]
+    files:
+      prices.txt: |
+        storage GB 100:0.08 1000:0.05 *:0.03
+      usage.csv: |
+        a,storage,100
+        b,storage,101
+        c,storage,1000
+        d,storage,1001
+    expected_stdout: |-
+      == a ==
+      storage       100 GB         $8.00
+      subtotal                     $8.00
+      total                        $8.00
+      == b ==
+      storage       101 GB         $8.05
+      subtotal                     $8.05
+      total                        $8.05
+      == c ==
+      storage      1000 GB        $53.00
+      subtotal                    $53.00
+      total                       $53.00
+      == d ==
+      storage      1001 GB        $53.03
+      subtotal                    $53.03
+      total                       $53.03
+      customers: 4, grand total: $122.08
+  - name: bad rows are skipped but reported
+    args: [fixtures/prices.txt, usage.csv]
+    files:
+      usage.csv: |
+        customer,item,quantity
+        eel-diner,storage,10
+        eel-diner,teleport,5
+        eel-diner,storage,lots
+        eel-diner,storage
+        eel-diner,bandwidth,-3
+        ghost-ship,teleport,1
+    expected_stdout: |-
+      == eel-diner ==
+      storage        10 GB         $0.80
+      subtotal                     $0.80
+      total                        $0.80
+      customers: 1, grand total: $0.80
+    expected_stderr: |-
+      line 3: unknown item teleport
+      line 4: bad quantity
+      line 5: expected CUSTOMER,ITEM,QUANTITY
+      line 6: bad quantity
+      line 7: unknown item teleport
+    expected_exit: 1
+  - name: price tiers must increase
+    args: [prices.txt, fixtures/usage.csv]
+    files:
+      prices.txt: |
+        storage GB 100:0.08 50:0.05 *:0.03
+    expected_stderr: "bad price line 1"
+    expected_exit: 2
+  - name: last tier must be open ended
+    args: [prices.txt, fixtures/usage.csv]
+    files:
+      prices.txt: |
+        # comment
+        storage GB 100:0.08 1000:0.05
+    expected_stderr: "bad price line 2"
+    expected_exit: 2
+  - name: invalid tax setting
+    args: [fixtures/prices.txt, fixtures/usage.csv]
+    env:
+      TAX_PCT: eight
+    expected_stderr: "invalid TAX_PCT"
+    expected_exit: 2
+  - name: bad discount line
+    args: [fixtures/prices.txt, fixtures/usage.csv, disc.txt]
+    files:
+      disc.txt: |
+        harbour-bakery 150
+    expected_stderr: "bad discount line 1"
+    expected_exit: 2
+  - name: nothing to invoice
+    args: [fixtures/prices.txt, usage.csv]
+    files:
+      usage.csv: "customer,item,quantity\n"
+    expected_stdout: "customers: 0, grand total: $0.00"
+  - name: missing usage file
+    args: [fixtures/prices.txt, nope.csv]
+    expected_stderr: "cannot read nope.csv"
+    expected_exit: 2

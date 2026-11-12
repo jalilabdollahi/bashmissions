@@ -1,0 +1,10 @@
+`source FILE` runs FILE inside your current shell, so functions it defines stay available afterwards. A name can be taken apart with parameter expansion:
+
+  for f in some/dir/*.sh; do
+    base=${f##*/}        # remove everything up to the last /
+    base=${base%.sh}     # remove the .sh suffix
+    source "$f"
+    "tool_$base"         # call the function whose name you built
+  done
+
+If the glob matches nothing, the loop runs once with the pattern text. `shopt -s nullglob` makes it match nothing instead.

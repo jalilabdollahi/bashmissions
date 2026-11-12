@@ -1,0 +1,86 @@
+id: 196
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Redirect a Whole Block
+difficulty: expert
+xp: 200
+story: |
+  Gus gets a daily capacity report by email, and the script that makes it
+  has grown to a header, a loop over hosts and a footer. Each piece has its own
+  `>> report.txt`, one forgotten `>>` wiped the middle last Friday, and the
+  warnings are mixed into the numbers Gus pastes into spreadsheets. Mara
+  has one last trick for this module: group the commands in braces and
+  redirect the group once.
+objective: |
+  Write solution.sh that takes a DAY ($1, e.g. 2026-11-11) followed by one or
+  more HOST names.
+
+  Produce two files, report-<DAY>.txt and report-<DAY>.err, by running a
+  single brace group `{ ...; }` whose stdout is redirected to the report and
+  whose stderr is redirected to the .err file (both redirections on the
+  closing brace). Inside the group, in this order:
+
+    1. print `== Capacity report for <DAY> ==`
+    2. for each HOST, run `disk-usage HOST` (it prints one line to stdout and
+       sometimes a warning to stderr)
+    3. print `== end ==`
+
+  Nothing from the group may reach the screen. After the group, print
+  `wrote report-<DAY>.txt` to stdout.
+  If fewer than two arguments are given, print
+  `usage: solution.sh DAY HOST...` to stderr and exit 2.
+concepts:
+  - "{ commands; } > file redirects a group once"
+  - "both stdout and stderr redirections on one block"
+required_patterns:
+  - pattern: '\}\s*>\s*"?report-'
+    message: "Redirect the whole brace group once, on its closing brace: } > file."
+  - pattern: '\}[^\n]*2>\s*"?report-'
+    message: "Send the group's stderr to the .err file with 2> on the same closing brace."
+forbidden_patterns:
+  - pattern: '>>'
+    message: "One redirection on the closing brace; no >> per command."
+test_cases:
+  - name: two healthy hosts
+    args: ["2026-11-11", anchovy, dory]
+    expected_stdout: "wrote report-2026-11-11.txt"
+    expected_stderr: ""
+    expected_files:
+      report-2026-11-11.txt: |-
+        == Capacity report for 2026-11-11 ==
+        anchovy /data 59%
+        dory /data 38%
+        == end ==
+      report-2026-11-11.err: ""
+  - name: a full disk produces a warning in the err file
+    args: ["2026-11-12", grouper-full, eel]
+    expected_stdout: "wrote report-2026-11-12.txt"
+    expected_stderr: ""
+    expected_files:
+      report-2026-11-12.txt: |-
+        == Capacity report for 2026-11-12 ==
+        grouper-full /data 97%
+        eel /data 31%
+        == end ==
+      report-2026-11-12.err: "warning: grouper-full: /data above 90%"
+  - name: a single host and old files are replaced
+    args: ["2026-12-01", cuttlefish]
+    files:
+      report-2026-12-01.txt: |
+        old report
+      report-2026-12-01.err: |
+        old warning
+    expected_stdout: "wrote report-2026-12-01.txt"
+    expected_files:
+      report-2026-12-01.txt: |-
+        == Capacity report for 2026-12-01 ==
+        cuttlefish /data 20%
+        == end ==
+      report-2026-12-01.err: ""
+  - name: no hosts is a usage error
+    args: ["2026-11-11"]
+    expected_stderr: "usage: solution.sh DAY HOST..."
+    expected_exit: 2
+    expected_files:
+      report-2026-11-11.txt: null

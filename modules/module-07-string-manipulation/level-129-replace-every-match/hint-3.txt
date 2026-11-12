@@ -1,0 +1,6 @@
+  name=$1
+  name=${name// /_}
+  name=${name//\//-}
+  echo "$name"
+
+The first line replaces spaces; the second one replaces slashes (note the backslash before the slash you are searching for).

@@ -1,0 +1,7 @@
+A glob in a for loop gives one whole name per round, spaces included:
+
+  for f in "$dir"/*.txt; do
+    printf 'found %s\n' "$f"
+  done
+
+Quote the variable and leave the star bare. If nothing matches, Bash passes the pattern itself as text, unless you first run `shopt -s nullglob`. Test each item with [[ -f $f ]] to skip folders. ${f##*/} removes everything up to the last slash.

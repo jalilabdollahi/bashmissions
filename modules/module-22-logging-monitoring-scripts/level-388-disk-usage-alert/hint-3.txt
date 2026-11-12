@@ -1,0 +1,13 @@
+Skeleton:
+
+  table=$(df -P) || { echo "df failed" >&2; exit 3; }   # use "if ! table=$(...)" if you prefer
+  alerts=0
+  {
+    read -r _header
+    while read -r device _blocks _used _avail pct mount; do
+      # skip devices that do not start with /dev/
+      # strip the % from pct, compare with $limit
+      # print "ALERT $mount at $pct%" and count it
+    done
+  } <<< "$table"
+  # exit 1 if alerts, otherwise print the all-clear line

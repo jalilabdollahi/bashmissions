@@ -1,0 +1,4 @@
+`$(<path)` is a command substitution whose only content is a redirection: it expands to the file's text, minus trailing newlines. Then `${#var}` is the length and `${var:0:4}` the first four characters:
+
+  motd=$(<"$dir/motd.txt")
+  echo "${#motd} chars, starts with ${motd:0:3}"

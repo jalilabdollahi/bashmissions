@@ -1,0 +1,66 @@
+id: 220
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Capture One Group
+difficulty: intermediate
+xp: 140
+story: |
+  Priya now knows that somebody is hammering the bastion. What she wants next
+  is a list of the accounts they are trying, so she can check whether any of
+  them really exist. Finding the failed-login lines is not enough: she needs the
+  username out of each one, on a line of its own, ready to paste into the
+  account audit.
+objective: |
+  Write solution.sh that reads auth-log lines from standard input. A line counts
+  only when it contains "Failed password for ", then ONE word (the username),
+  then " from ". For example:
+    Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+  For every counting line print just the username, one per line, in input order.
+  Print nothing for the other lines. (A line such as "Failed password for
+  invalid user admin from ..." has more than one word before " from " and does
+  not count.)
+  Capture the username with ( ) in a [[ =~ ]] test and read it from
+  ${BASH_REMATCH[1]}. No grep, sed, awk or cut.
+concepts:
+  - "( ) captures the text it matched"
+  - "${BASH_REMATCH[1]} holds the first group"
+  - "read BASH_REMATCH only after a successful match"
+required_patterns:
+  - pattern: '=~'
+    message: "Match with [[ $line =~ regex ]]."
+  - pattern: 'BASH_REMATCH\[1\]'
+    message: "Read the captured username from ${BASH_REMATCH[1]}."
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|cut)\b'
+    message: "Capture with parentheses and BASH_REMATCH instead of an external tool."
+test_cases:
+  - name: usernames in order
+    stdin: |
+      Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+      Nov  7 09:30:19 anchovy sshd[2212]: Failed password for deploy from 203.0.113.9 port 4023 ssh2
+      Nov  7 09:30:25 anchovy sshd[2213]: Failed password for mara from 198.51.100.4 port 52114 ssh2
+    expected_stdout: |-
+      root
+      deploy
+      mara
+  - name: other lines are ignored
+    stdin: |
+      Nov  7 09:31:02 anchovy sshd[2214]: Accepted publickey for mara from 198.51.100.4 port 52114 ssh2
+      Nov  7 09:31:40 anchovy sshd[2220]: Failed password for ollie from 192.0.2.8 port 4031 ssh2
+      Nov  7 09:32:00 anchovy sshd[2221]: Connection closed by 192.0.2.8
+    expected_stdout: "ollie"
+  - name: invalid-user lines do not count
+    stdin: |
+      Nov  7 09:33:11 anchovy sshd[2230]: Failed password for invalid user admin from 203.0.113.9 port 4040 ssh2
+      Nov  7 09:33:14 anchovy sshd[2231]: Failed password for www-data from 203.0.113.9 port 4041 ssh2
+    expected_stdout: "www-data"
+  - name: a failed match must not reuse the previous username
+    stdin: |
+      Nov  7 09:34:00 anchovy sshd[2240]: Failed password for tom from 192.0.2.8 port 5000 ssh2
+      Nov  7 09:34:01 anchovy sshd[2241]: session opened for user tom
+      Nov  7 09:34:02 anchovy sshd[2242]: Failed password for  from 192.0.2.8 port 5001 ssh2
+    expected_stdout: "tom"
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

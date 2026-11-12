@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fake yamllint for the config files check. Accepts: yamllint -q FILE...
+# Exit status comes from FAKE_RC_YAMLLINT (default 0). Every call is logged.
+if [[ ${1:-} != -q ]]; then
+  echo "yamllint: unsupported option '${1:-}' (only -q is implemented)" >&2
+  exit 2
+fi
+shift
+if (( $# == 0 )); then
+  echo "yamllint: no files given" >&2
+  exit 2
+fi
+echo "yamllint -q $*" >> .calls.log
+exit "${FAKE_RC_YAMLLINT:-0}"

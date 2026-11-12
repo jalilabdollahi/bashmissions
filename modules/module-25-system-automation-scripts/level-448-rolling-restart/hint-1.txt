@@ -1,0 +1,1 @@
+Safety comes from three decisions: hosts are handled strictly one at a time, the next host starts only after the previous one proves healthy, and the first failure stops everything. To report how many hosts were left alone you need the full list in memory before you begin.

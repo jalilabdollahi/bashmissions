@@ -1,0 +1,1 @@
+The loop does count correctly, but inside its own little world. When a command is on the right-hand side of a pipe, Bash runs it in a separate copy of the shell, and that copy is thrown away at the end, along with its variables. How else can a loop get its input?

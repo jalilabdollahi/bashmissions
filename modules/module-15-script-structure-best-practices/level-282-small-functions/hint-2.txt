@@ -1,0 +1,6 @@
+Two kinds of function, two ways to hand back an answer:
+
+  clean() { printf '%s\n' "${1,,}"; }        # produces text: call as  x=$(clean "$y")
+  is_small() { (( $1 < 100 )); }             # answers yes/no by status: use as  if is_small "$n"
+
+The status of a function is the status of its last command, so an arithmetic test or `[[ ]]` can be the last line. Remember `10#$n` to read a number with leading zeros as decimal.

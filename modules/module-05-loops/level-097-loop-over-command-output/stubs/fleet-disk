@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake fleet disk report: prints one "<host> <percent-used>" line per server.
+# The data comes from disk.txt in the current directory (the test supplies it).
+if [[ $# -ne 0 ]]; then
+  echo "fleet-disk: takes no arguments" >&2
+  exit 2
+fi
+if [[ ! -f disk.txt ]]; then
+  echo "fleet-disk: cannot reach the fleet" >&2
+  exit 1
+fi
+cat disk.txt

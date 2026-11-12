@@ -1,1 +1,17 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  while IFS='|' read -r group name type target arg; do lineno++; skip blanks/comments
+    any empty field -> "error: $config line $lineno: need GROUP|NAME|TYPE|TARGET|ARG", exit 3
+    case $type in http|tcp|file|disk) ;; *) "unknown type '$type'" exit 3 ;; esac
+    g_of+=("$group") n_of+=("$name") t_of+=("$type") r_of+=("$target") a_of+=("$arg")
+  done < "$config"
+
+  check_http() { code=$(curl ... "$1" 2>/dev/null) || code=000; compare with $2 ...; echo "STATE|detail"; }
+  check_tcp()  { nc -z -w 2 "${1%:*}" "${1##*:}" ... }
+  check_file() { [[ -e $1 ]] ...; [[ -n $(find "$1" -mmin "-$2") ]] ...; }
+  check_disk() { pct=$(df -P "$1" | awk 'NR == 2 { gsub("%", "", $5); print $5 }'); ... }
+
+  work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+  for i in "${!n_of[@]}"; do ( case ${t_of[i]} in ...) ;; esac > "$work/$i" ) & done; wait
+  read the results into states[] / details[]; ordered unique groups; print headers with [up/total up]
+  count states, overall, exit

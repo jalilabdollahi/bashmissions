@@ -1,0 +1,1 @@
+The file system answers three different questions: "is there anything at all?", "is it an ordinary file?" and "is it a folder?". The first is a superset of the other two, so think about which question to ask first when you build the ladder.

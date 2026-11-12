@@ -1,0 +1,1 @@
+One echo with double quotes, and two variables inside the text: echo "You are $USER, your home folder is $HOME". Check the comma and the spacing against the objective.

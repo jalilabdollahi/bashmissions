@@ -1,0 +1,90 @@
+id: 312
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: cd Without Consequences
+difficulty: advanced
+xp: 210
+story: |
+  Theo's `build-all.sh` walks through the customer sites and runs the site
+  builder in each one. It works for the first site and then mysteriously
+  builds the second one inside the first one's folder, because nobody went back
+  after the `cd`. Priya's comment in the review is one word: "Isolate." The
+  fix is to let each site have its own little shell.
+objective: |
+  Write solution.sh. Every argument is a folder that holds one customer
+  site; with no arguments print `usage: solution.sh SITE_DIR...` to stderr and
+  exit with status 2.
+
+  Remember the starting folder at the top (`start=$PWD`). Then for each
+  SITE_DIR, in order:
+    - run `sitebuild` inside that folder, using a subshell so that your own
+      working directory never changes: `( cd "$dir" && sitebuild )`;
+    - if that succeeded print `built SITE_DIR`, otherwise print
+      `failed SITE_DIR` (a missing folder counts as a failure) and carry on
+      with the next one.
+  After the last one print `built A of N sites`, where A is the number that
+  succeeded and N the number of arguments. Then print
+  `still in the starting folder` if `$PWD` equals `start`, or
+  `moved away from the starting folder` if not.
+
+  Exit with status 1 if any site failed, otherwise 0. `sitebuild` needs a
+  `site.conf` in the folder it runs in, and it writes its result to
+  `build.log` there.
+concepts:
+  - "( cd dir && cmd ) keeps the parent's working directory"
+  - "a failing subshell as an if condition"
+required_patterns:
+  - pattern: '\(\s*cd\b'
+    message: "Run the cd and the build inside a subshell: ( cd \"$dir\" && sitebuild )."
+forbidden_patterns:
+  - pattern: '\b(pushd|popd)\b'
+    message: "Use a subshell instead of pushd/popd."
+test_cases:
+  - name: all sites build
+    args: [sites/blog, sites/shop]
+    files:
+      sites/blog/site.conf: "title=Blog"
+      sites/shop/site.conf: "title=Shop"
+    expected_stdout: |-
+      built sites/blog
+      built sites/shop
+      built 2 of 2 sites
+      still in the starting folder
+    expected_files:
+      sites/blog/build.log: "built blog"
+      sites/shop/build.log: "built shop"
+  - name: a missing folder and a broken site
+    args: [sites/blog, sites/ghost, sites/bakery, sites/shop]
+    files:
+      sites/blog/site.conf: "title=Blog"
+      sites/bakery/index.html: "no config here"
+      sites/shop/site.conf: "title=Shop"
+    expected_stdout: |-
+      built sites/blog
+      failed sites/ghost
+      failed sites/bakery
+      built sites/shop
+      built 2 of 4 sites
+      still in the starting folder
+    expected_exit: 1
+    expected_files:
+      sites/shop/build.log: "built shop"
+      sites/bakery/build.log: null
+  - name: folder with spaces and a nested path
+    args: ["sites/Tidewater Books", sites/a/b/deep]
+    files:
+      "sites/Tidewater Books/site.conf": "title=Books"
+      sites/a/b/deep/site.conf: "title=Deep"
+    expected_stdout: |-
+      built sites/Tidewater Books
+      built sites/a/b/deep
+      built 2 of 2 sites
+      still in the starting folder
+    expected_files:
+      "sites/Tidewater Books/build.log": "built Tidewater Books"
+      sites/a/b/deep/build.log: "built deep"
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh SITE_DIR..."
+    expected_exit: 2

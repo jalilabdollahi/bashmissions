@@ -1,0 +1,1 @@
+The format '=%.0s' prints "=" and then zero characters of its value, so the value itself is hidden. Feed it thirty throwaway values with brace expansion: printf '=%.0s' {1..30}. Finish the line with printf '\n'. Padding for the middle row: %-26s.

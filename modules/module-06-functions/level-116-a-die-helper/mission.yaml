@@ -1,0 +1,58 @@
+id: 116
+module: 6
+module_name: functions
+module_display: Functions
+title: A die() Helper
+difficulty: intermediate
+xp: 140
+story: |
+  Theo's scripts fail in forty different ways and with forty different messages:
+  "oops", "ERROR!!", a bare exit 1, once even a joke about Mondays. Priya wants
+  one convention. Every fatal problem goes through a single helper that prints an
+  "error:" line on stderr and ends the script with a meaningful status. Perl
+  programmers call it die; Bash programmers copy the name.
+objective: |
+  Write solution.sh. It takes one argument: a file name. Define a function named
+  die that takes an exit CODE followed by a MESSAGE (which may be several
+  words). It prints  error: <message>  to stderr and then exits the whole script
+  with CODE.
+  Use die for every failure in the script:
+    no argument given:      error: usage: solution.sh FILE      (exit 2)
+    file does not exist:    error: no such file: <FILE>          (exit 3)
+    file exists but empty:  error: file is empty: <FILE>         (exit 4)
+  Otherwise print  <FILE>: <N> lines  (N = number of lines in the file).
+  Use set -euo pipefail at the top.
+concepts:
+  - "die() { echo \"error: $*\" >&2; exit \"$code\"; }"
+  - "exit inside a function ends the whole script"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?die\s*(\(\s*\))?\s*\{'
+    message: "Define a function called die."
+  - pattern: '\bexit\b[\s\S]*\bdie\s+[0-9]'
+    message: "die should call exit, and the main script should call it like: die 3 \"message\"."
+  - pattern: '>&2'
+    message: "Send the error message to stderr with >&2."
+test_cases:
+  - name: counts the lines
+    args: [tides.txt]
+    files:
+      tides.txt: "low\nhigh\nlow\nhigh\n"
+    expected_stdout: "tides.txt: 4 lines"
+  - name: single line without newline
+    args: [one.txt]
+    files:
+      one.txt: "just one"
+    expected_stdout: "one.txt: 1 lines"
+  - name: no argument
+    expected_stderr: "error: usage: solution.sh FILE"
+    expected_exit: 2
+  - name: missing file
+    args: [ghost.log]
+    expected_stderr: "error: no such file: ghost.log"
+    expected_exit: 3
+  - name: empty file
+    args: [blank.log]
+    files:
+      blank.log: ""
+    expected_stderr: "error: file is empty: blank.log"
+    expected_exit: 4

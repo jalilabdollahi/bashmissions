@@ -1,0 +1,1 @@
+This time the lines do not live in a file; they are the output of a command. You still want mapfile to fill the array, and you still want it to run in your own shell. There is a way to make a command's output look like a file for a redirect.

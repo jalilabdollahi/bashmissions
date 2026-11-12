@@ -1,1 +1,0 @@
-Print only the `sum=` line.

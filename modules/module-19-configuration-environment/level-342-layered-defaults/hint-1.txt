@@ -1,0 +1,1 @@
+Work in layers, from the weakest to the strongest. Start with variables holding the built-in defaults, let the file overwrite what it mentions, and finally let the environment overwrite what it mentions. The last writer wins, so the order of your code is the order of precedence.

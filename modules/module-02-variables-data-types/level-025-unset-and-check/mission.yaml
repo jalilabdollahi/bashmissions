@@ -1,0 +1,50 @@
+id: 25
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Unset and Check
+difficulty: beginner
+xp: 65
+story: |
+  Priya found an API token sitting in a variable long after the script had
+  finished using it. "If it is not needed, it should not exist," she says,
+  and asks for a small audit routine: say whether the token is present
+  before, wipe it, and prove that it is gone afterwards. Ollie asks what
+  happens if the token was set to nothing at all. Good question - your
+  report should tell the difference.
+objective: |
+  The vault tooling may or may not pass a setting called TOKEN (it can also
+  pass it empty). Write solution.sh that prints exactly two lines:
+
+    before=[X]
+    after=[Y]
+
+  where X is the word set if TOKEN exists (even when its value is empty)
+  and nothing at all if TOKEN does not exist, and Y is computed the same way
+  after you remove TOKEN with unset.
+
+  Use the ${TOKEN+set} expansion to test existence: it gives the word set
+  when the variable exists and an empty string when it does not.
+concepts:
+  - "unset removes a variable"
+  - "${var+word} tests whether a variable exists"
+required_patterns:
+  - pattern: '\$\{TOKEN\+'
+    message: "Test existence with ${TOKEN+set}."
+  - pattern: '\bunset\s+TOKEN\b'
+    message: "Remove the variable with unset TOKEN."
+test_cases:
+  - name: token with a value
+    env: {TOKEN: s3cr3t-abc}
+    expected_stdout: |-
+      before=[set]
+      after=[]
+  - name: token set to empty
+    env: {TOKEN: ""}
+    expected_stdout: |-
+      before=[set]
+      after=[]
+  - name: no token at all
+    expected_stdout: |-
+      before=[]
+      after=[]

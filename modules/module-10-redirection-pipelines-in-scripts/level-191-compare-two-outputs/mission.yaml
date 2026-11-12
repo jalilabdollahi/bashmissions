@@ -1,0 +1,83 @@
+id: 191
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Compare Two Outputs
+difficulty: advanced
+xp: 160
+story: |
+  After a failed deploy, Theo swears the staging box and the production box
+  have "exactly the same packages". Mara does not. `pkg-list` prints the
+  installed packages of a host, but in whatever order the host feels like, and
+  `diff` wants two files. Creating temp files for a ten-second check feels
+  wrong. There is a way to hand `diff` two command outputs as if they were files.
+objective: |
+  Write solution.sh that takes two host names: HOST_A ($1) and HOST_B ($2).
+
+  Compare the packages of the two hosts. `pkg-list HOST` prints one package
+  per line, unsorted. Sort each list first, then run `diff` on the two sorted
+  lists and let its normal output appear on stdout. If the sorted lists are
+  identical, print `hosts match` instead.
+
+  Do not create temporary files; use process substitution (`<( ... )`) for
+  both sides of the diff. The script exits 0 either way.
+concepts:
+  - "<(command) gives a command's output a file name"
+  - "diff <(a) <(b)"
+required_patterns:
+  - pattern: 'diff\s+<\(.*\)\s+<\('
+    message: "Compare with diff <(...) <(...) so no temp files are needed."
+forbidden_patterns:
+  - pattern: '\bmktemp\b|>\s*/?tmp|>\s*[A-Za-z0-9_.-]+\.(txt|list|pkgs)'
+    message: "No temporary files: process substitution replaces them."
+test_cases:
+  - name: staging misses a package
+    args: [anchovy, barracuda]
+    files:
+      hosts/anchovy.pkgs: |
+        openssl 3.0.13
+        nginx 1.24.0
+        curl 8.5.0
+      hosts/barracuda.pkgs: |
+        curl 8.5.0
+        redis 7.2.4
+        openssl 3.0.13
+        nginx 1.24.0
+    expected_stdout: |-
+      3a4
+      > redis 7.2.4
+  - name: same packages in a different order
+    args: [dory, eel]
+    files:
+      hosts/dory.pkgs: |
+        zlib 1.3
+        bash 5.2
+        grep 3.11
+      hosts/eel.pkgs: |
+        grep 3.11
+        zlib 1.3
+        bash 5.2
+    expected_stdout: "hosts match"
+  - name: version drift
+    args: [flounder, grouper]
+    files:
+      hosts/flounder.pkgs: |
+        openssl 3.0.13
+        tar 1.35
+      hosts/grouper.pkgs: |
+        tar 1.34
+        openssl 3.0.13
+    expected_stdout: |-
+      2c2
+      < tar 1.35
+      ---
+      > tar 1.34
+  - name: a host with nothing installed
+    args: [halibut, marlin]
+    files:
+      hosts/halibut.pkgs: ""
+      hosts/marlin.pkgs: |
+        bash 5.2
+    expected_stdout: |-
+      0a1
+      > bash 5.2

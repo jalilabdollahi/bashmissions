@@ -1,0 +1,6 @@
+  email=$1
+  plan=$2
+  reply=$(curl -s -d "email=...&plan=..." https://billing.lanternfish.example/signup)
+  printf 'reply: %s\n' "$reply"
+
+Fill in the two fields. Check that exactly two arguments were given before you build the request.

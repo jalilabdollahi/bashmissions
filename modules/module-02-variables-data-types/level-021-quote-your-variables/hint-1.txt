@@ -1,0 +1,1 @@
+Look at which lines use CUSTOMER without any quotes around it. Unquoted, Bash chops the value at spaces and then tries to match stars against file names before the command ever runs.

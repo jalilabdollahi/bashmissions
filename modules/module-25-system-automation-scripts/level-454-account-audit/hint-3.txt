@@ -1,0 +1,9 @@
+  declare -A hash=();  while IFS=: read -r name pw _; do ...skip blanks/comments...; hash[$name]=$pw; done < "$shadow"
+  while IFS= read -r line || [[ -n $line ]]; do
+    ...count lines, skip blanks and # lines...
+    colons=${line//[^:]/}; (( ${#colons} == 6 )) || { malformed+=("MALFORMED line $lineno"); continue; }
+    IFS=: read -r name _ uid _ _ _ shell <<< "$line"
+    ...uid 0 and not root; UID -> names table; uid 1..999 with shell basename in sh|bash|dash|zsh|ksh...
+    ...hash lookup: missing key -> NO-SHADOW, empty value -> EMPTY-PASSWORD...
+  done < "$passwd"
+Then loop over the lists in order (malformed, extra root, dups, service, empty, no shadow) printing each entry.

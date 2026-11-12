@@ -1,1 +1,18 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  post()   { curl -sS --fail --max-time 5 -X POST -H 'Content-Type: application/json' -d "$1" "$webhook" >/dev/null 2>&1; }
+  notify() { body=$(printf '{"service":"%s","from":"%s","to":"%s"}' "$1" "$2" "$3")
+             if post "$body"; then delivery=sent; else printf '%s\n' "$body" >> state/outbox; delivery=queued; fi; }
+
+  flush_outbox   # at the very start: loop over state/outbox, post each, keep failures in outbox.new, mv, print "outbox: sent S, K still queued"
+
+  while IFS='|' read -r name url; do
+    reading=$(fetch_status "$url")
+    confirmed=unknown cand=- count=0; [[ -f state/$name.state ]] && read -r confirmed cand count < state/$name.state
+    if   [[ $confirmed == unknown ]];   then ...first reading, alert only when not ok...
+    elif [[ $reading == "$confirmed" ]]; then ...unchanged, reset candidate...
+    else  same candidate? count+1 : new candidate with 1
+          (( count >= confirm )) -> notify, confirmed=$reading, reset  |  else print "pending"
+    fi
+    echo "$confirmed $cand $count" > "state/$name.state"
+  done < "$endpoints"

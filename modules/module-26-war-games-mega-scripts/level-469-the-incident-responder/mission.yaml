@@ -1,22 +1,397 @@
 id: 469
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Incident Responder
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Incident Responder` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Incident Responder
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 410
+story: |
+  Last night the tide-sync server hit a load of 40 for six minutes, then calmed down on
+  its own. By morning nobody could say what had been running, because the one person who
+  looked had already restarted things. Theo's verdict: "It fixed itself." Priya's verdict:
+  "That is the scariest sentence in operations." From now on the machine must keep its own
+  evidence. When a metric crosses a line, a script freezes a snapshot of the processes, disks,
+  connections and recent logs, but without flooding the disk when the alarm keeps ringing.
+objective: |
+  Write solution.sh: `solution.sh [--cooldown SECONDS] [--keep N] RULES SAMPLE`, run
+  every minute by cron. `--cooldown` (whole number, default 300) and `--keep` (positive
+  whole number, default 5). Errors on stderr: exit 2 for `usage: solution.sh [--cooldown SECONDS] [--keep N] RULES SAMPLE`,
+  `error: --cooldown needs a whole number`, `error: --keep needs a positive whole number`,
+  `error: cannot read FILE`; exit 3 for a bad rules file (below).
+
+  SAMPLE has `key=value` lines (the current metrics; values may be missing or non-numeric).
+  RULES lines (blank and `#` lines ignored): `NAME|KEY|OP|THRESHOLD|COLLECTORS`
+  - OP is one of `>`, `>=`, `<`, `<=`, `==` (numeric comparison, decimals allowed; use awk);
+  - COLLECTORS is a comma-separated list of: `procs` (`ps aux`), `disk` (`df -P`),
+    `net` (`ss -tn`), `logs:PATH:N` (`tail -n N PATH`; PATH contains no colon).
+  A rule with fewer than 5 fields, a bad OP or a non-numeric THRESHOLD gives
+  `error: RULES line N: need NAME|KEY|OP|THRESHOLD|COLLECTORS` or `error: RULES line N: bad operator 'X'` or
+  `error: RULES line N: bad threshold 'X'`; an unknown collector gives
+  `error: RULES line N: unknown collector 'X'`. Everything is validated before anything is evaluated.
+
+  Time: `NOW` is the current epoch second: `date +%s`, unless the environment variable NOW is
+  set, in which case that value is used.
+
+  For each rule, in order:
+  - the KEY is missing from SAMPLE or its value is not a number: print `rule NAME: no data for KEY`;
+  - the comparison `VALUE OP THRESHOLD` is false: `rule NAME: ok (KEY=VALUE)`;
+  - true (a breach) and `incidents/.last/NAME` exists with a number L and NOW - L < cooldown:
+    `rule NAME: BREACH KEY=VALUE (OP THRESHOLD) - cooling down (R s left)` where R = cooldown - (NOW - L);
+  - otherwise take a snapshot and print
+    `rule NAME: BREACH KEY=VALUE (OP THRESHOLD) - snapshot INC-SEQ-NAME (C collectors)`.
+  Snapshot: SEQ is the contents of `incidents/.seq` plus one (0 when missing), written back and shown
+  with `%04d`. Build the snapshot in a temporary directory inside `incidents/` (removed by a trap if
+  anything goes wrong) and `mv` it to `incidents/INC-SEQ-NAME` when complete. It holds
+  `trigger.txt` (lines `rule=NAME`, `key=KEY`, `value=VALUE`, `op=OP`, `threshold=THRESHOLD`, `at=NOW`)
+  and one file per collector: `procs.txt`, `disk.txt`, `net.txt`, `log-BASENAME.txt` with the command's
+  output. A collector whose command fails does not stop the snapshot: its file contains the single line
+  `collector failed` and an indented line `  ! collector COLLECTORNAME failed` is printed after the
+  rule line. Then write NOW into `incidents/.last/NAME`, append `INC-SEQ-NAME|NOW|VALUE` to
+  `incidents/INDEX`, and prune: keep only the N newest `incidents/INC-*` directories (names sort
+  by SEQ), deleting older ones.
+  Finally print `breaches: B, snapshots: S, pruned: P` (a cooling breach counts as a breach, not a
+  snapshot). Exit 0 if there were no breaches, else 1.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "evidence collection triggered by a threshold rule"
+  - "cooldown state so a flapping alarm does not flood the disk"
+  - "build in a temp directory then mv: atomic publication"
+  - "numeric comparison with an operator held in a variable"
+  - "retention: prune the oldest beyond N"
+required_patterns:
+  - pattern: 'mktemp -d'
+    message: "Build the snapshot in a temporary directory (mktemp -d) and move it into place."
+  - pattern: '\btrap\b'
+    message: "Remove the half-built snapshot with a trap."
+test_cases:
+  - name: one rule breaches and takes a snapshot
+    args:
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: |-
+      rule high-load: BREACH load=7.2 (>= 5) - snapshot INC-0001-high-load (3 collectors)
+      rule disk-full: ok (disk_pct=71)
+      rule error-burst: no data for errors_per_min
+      breaches: 1, snapshots: 1, pruned: 0
+    expected_exit: 1
+    expected_files:
+      incidents/INC-0001-high-load/trigger.txt: |-
+        rule=high-load
+        key=load
+        value=7.2
+        op=>=
+        threshold=5
+        at=1000000
+      incidents/INC-0001-high-load/procs.txt: |-
+        USER   PID %CPU COMMAND
+        root     1  0.0 init
+        www    311 91.5 tide-sync
+        www    312 12.0 nginx
+      incidents/INC-0001-high-load/log-app.log.txt: |-
+        line two
+        line three
+      incidents/INDEX: INC-0001-high-load|1000000|7.2
+      incidents/.seq: '1'
+      incidents/.last/high-load: '1000000'
+  - name: the alarm keeps ringing but the cooldown holds
+    args:
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+      incidents/.last/high-load: |
+        999900
+      incidents/.seq: |
+        3
+    expected_stdout: |-
+      rule high-load: BREACH load=7.2 (>= 5) - cooling down (200 s left)
+      rule disk-full: ok (disk_pct=71)
+      rule error-burst: no data for errors_per_min
+      breaches: 1, snapshots: 0, pruned: 0
+    expected_exit: 1
+    expected_files:
+      incidents/.seq: '3'
+      incidents/INC-0004-high-load/trigger.txt: null
+  - name: after the cooldown a new snapshot continues the sequence
+    args:
+    - --cooldown
+    - '60'
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+      incidents/.last/high-load: |
+        999900
+      incidents/.seq: |
+        7
+    expected_stdout: |-
+      rule high-load: BREACH load=7.2 (>= 5) - snapshot INC-0008-high-load (3 collectors)
+      rule disk-full: ok (disk_pct=71)
+      rule error-burst: no data for errors_per_min
+      breaches: 1, snapshots: 1, pruned: 0
+    expected_exit: 1
+    expected_files:
+      incidents/.seq: '8'
+      incidents/INDEX: INC-0008-high-load|1000000|7.2
+      incidents/.last/high-load: '1000000'
+      incidents/INC-0008-high-load/trigger.txt: |-
+        rule=high-load
+        key=load
+        value=7.2
+        op=>=
+        threshold=5
+        at=1000000
+  - name: old snapshots are pruned
+    args:
+    - --keep
+    - '3'
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+      incidents/.seq: |
+        5
+      incidents/INC-0003-disk-full/trigger.txt: |
+        old
+      incidents/INC-0004-disk-full/trigger.txt: |
+        old
+      incidents/INC-0005-disk-full/trigger.txt: |
+        old
+      incidents/INC-0002-disk-full/trigger.txt: |
+        old
+      incidents/INC-0001-disk-full/trigger.txt: |
+        old
+    expected_stdout: |-
+      rule high-load: BREACH load=7.2 (>= 5) - snapshot INC-0006-high-load (3 collectors)
+      rule disk-full: ok (disk_pct=71)
+      rule error-burst: no data for errors_per_min
+      breaches: 1, snapshots: 1, pruned: 3
+    expected_exit: 1
+    expected_files:
+      incidents/INC-0001-disk-full/trigger.txt: null
+      incidents/INC-0002-disk-full/trigger.txt: null
+      incidents/INC-0003-disk-full/trigger.txt: null
+      incidents/INC-0004-disk-full/trigger.txt: old
+      incidents/INC-0005-disk-full/trigger.txt: old
+      incidents/INC-0006-high-load/trigger.txt: |-
+        rule=high-load
+        key=load
+        value=7.2
+        op=>=
+        threshold=5
+        at=1000000
+  - name: a failing collector does not lose the snapshot
+    args:
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+      FAKE_FAIL_COLLECTOR: ss
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=1
+        errors_per_min=250
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: |-
+      rule high-load: ok (load=1)
+      rule disk-full: no data for disk_pct
+      rule error-burst: BREACH errors_per_min=250 (> 100) - snapshot INC-0001-error-burst (1 collectors)
+        ! collector net failed
+      breaches: 1, snapshots: 1, pruned: 0
+    expected_exit: 1
+    expected_files:
+      incidents/INC-0001-error-burst/net.txt: collector failed
+  - name: calm system
+    args:
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=0.4
+        disk_pct=50
+        errors_per_min=3
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: |-
+      rule high-load: ok (load=0.4)
+      rule disk-full: ok (disk_pct=50)
+      rule error-burst: ok (errors_per_min=3)
+      breaches: 0, snapshots: 0, pruned: 0
+    expected_files:
+      incidents/INDEX: null
+  - name: non-numeric samples count as no data
+    args:
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=high
+        disk_pct=
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: |-
+      rule high-load: no data for load
+      rule disk-full: no data for disk_pct
+      rule error-burst: no data for errors_per_min
+      breaches: 0, snapshots: 0, pruned: 0
+  - name: unknown collector stops everything
+    args:
+    - rules.conf
+    - sample.conf
+    env:
+      NOW: '1000000'
+    files:
+      rules.conf: |
+        a|load|>|1|procs
+        b|load|>|1|crystal-ball
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: ''
+    expected_stderr: 'error: rules.conf line 2: unknown collector ''crystal-ball'''
+    expected_exit: 3
+    expected_files:
+      incidents/.seq: null
+  - name: bad operator
+    args:
+    - rules.conf
+    - sample.conf
+    files:
+      rules.conf: |
+        # note
+        a|load|=>|1|procs
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: ''
+    expected_stderr: 'error: rules.conf line 2: bad operator ''=>'''
+    expected_exit: 3
+  - name: bad cooldown
+    args:
+    - --cooldown
+    - soon
+    - rules.conf
+    - sample.conf
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: ''
+    expected_stderr: 'error: --cooldown needs a whole number'
+    expected_exit: 2
+  - name: unreadable sample
+    args:
+    - rules.conf
+    - nope.conf
+    files:
+      rules.conf: |
+        # name|key|op|threshold|collectors
+        high-load|load|>=|5|procs,disk,logs:logs/app.log:2
+        disk-full|disk_pct|>|90|disk
+        error-burst|errors_per_min|>|100|net
+      sample.conf: |
+        load=7.2
+        disk_pct=71
+      logs/app.log: |
+        line one
+        line two
+        line three
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read nope.conf'
+    expected_exit: 2

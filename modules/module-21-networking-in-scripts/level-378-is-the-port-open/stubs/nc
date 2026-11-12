@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# netcat stand-in: only the port-scan form  nc [-v] -z [-w SECONDS] HOST PORT
+# Open ports are listed as "host port" lines in fixtures/open-ports.txt.
+# The host "blackhole.lanternfish.example" silently drops packets: without -w a
+# real nc would wait for ages, with -w it gives up after that many seconds.
+zero=0 verbose=0 timeout= host= port=
+while (( $# )); do
+  case $1 in
+    -z) zero=1 ;;
+    -v) verbose=1 ;;
+    -zv|-vz) zero=1; verbose=1 ;;
+    -w) timeout=$2; shift ;;
+    -w*) timeout=${1#-w} ;;
+    -*) echo "nc: invalid option -- ${1#-}" >&2
+        echo "usage: nc [-v] [-z] [-w timeout] host port" >&2
+        exit 2 ;;
+    *) if [[ -z $host ]]; then host=$1; else port=$1; fi ;;
+  esac
+  shift
+done
+if [[ -z $host || -z $port ]]; then
+  echo "usage: nc [-v] [-z] [-w timeout] host port" >&2
+  exit 2
+fi
+if (( ! zero )); then
+  echo "nc: this stand-in only supports port scanning; add -z" >&2
+  exit 2
+fi
+echo "nc $host $port timeout=${timeout:-none}" >> .calls.log
+if [[ $host == blackhole.lanternfish.example ]]; then
+  if [[ -z $timeout ]]; then
+    echo "nc: no -w given, the real nc would hang here until you press Ctrl-C" >&2
+    exit 99
+  fi
+  exit 1
+fi
+if grep -qx "$host $port" fixtures/open-ports.txt; then
+  (( verbose )) && echo "Connection to $host port $port [tcp/*] succeeded!" >&2
+  exit 0
+fi
+(( verbose )) && echo "nc: connect to $host port $port (tcp) failed: Connection refused" >&2
+exit 1

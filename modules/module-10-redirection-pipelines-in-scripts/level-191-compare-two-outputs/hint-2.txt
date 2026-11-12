@@ -1,0 +1,5 @@
+`<( command )` is replaced by a file name that, when read, yields the command's output. It can appear wherever a file name could:
+
+  diff <(sort first.txt) <(sort second.txt)
+
+`diff` exits 0 when both sides are identical and 1 when they differ, so you can put the whole command in an `if`. It still prints the differences itself.

@@ -1,0 +1,44 @@
+id: 143
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Add Two Numbers
+difficulty: beginner
+xp: 100
+story: |
+  It is capacity planning day, and Gus has cleared his whole calendar for it.
+  He is standing at your desk with a coffee and a single question: "How much
+  bandwidth did anchovy and barracuda use between them this month?" Both
+  servers report a plain number of gigabytes. Time to let Bash do the sums.
+objective: |
+  Write solution.sh that takes two whole numbers as arguments: the gigabytes
+  used by anchovy ($1) and by barracuda ($2). Print one line:
+
+    combined: <sum> GB
+
+  The numbers may be zero, negative (a refund adjustment) or very large.
+  Use arithmetic expansion, $(( ... )), to add them. Do not use expr or bc.
+concepts:
+  - "$(( a + b )) arithmetic expansion"
+required_patterns:
+  - pattern: '\$\(\('
+    message: "Do the addition inside $(( ... )) arithmetic expansion."
+forbidden_patterns:
+  - pattern: '\b(expr|bc|dc)\b'
+    message: "Leave expr and bc alone: Bash can add on its own with $(( ... ))."
+test_cases:
+  - name: two ordinary months
+    args: ["120", "80"]
+    expected_stdout: "combined: 200 GB"
+  - name: both idle
+    args: ["0", "0"]
+    expected_stdout: "combined: 0 GB"
+  - name: refund adjustment makes one side negative
+    args: ["-15", "40"]
+    expected_stdout: "combined: 25 GB"
+  - name: totals that overflow 32 bits
+    args: ["3000000000", "4000000000"]
+    expected_stdout: "combined: 7000000000 GB"
+  - name: digits are added, not glued together
+    args: ["7", "5"]
+    expected_stdout: "combined: 12 GB"

@@ -1,0 +1,20 @@
+  awk -F, -v name="$2" '
+    { sub(/\r$/, "") }
+    NR == 1 { find col; if not found: message to /dev/stderr, exit 1; next }
+    $0 == "" { next }
+    {
+      v = $col
+      if (v ~ /^-?[0-9]+(\.[0-9]+)?$/) {
+        v += 0; n++; sum += v
+        if (n == 1 || v < min) min = v
+        if (n == 1 || v > max) max = v
+      } else skipped++
+    }
+    END {
+      # remember: the header error already exited, do not print again
+      printf "count=%d\nskipped=%d\n", n, skipped
+      if (n > 0) printf "sum=%.2f\n..." 
+    }
+  ' "$1"
+
+%d prints an unset variable as 0, which is what the "no numbers" case needs.

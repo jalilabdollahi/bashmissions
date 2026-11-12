@@ -1,1 +1,0 @@
-Without `export`, the variable is only visible to the current shell — child processes (`bash -c ...`, `python script.py`, etc.) won't see it.

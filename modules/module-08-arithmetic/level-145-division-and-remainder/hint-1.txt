@@ -1,0 +1,1 @@
+Think of how you read a clock. The days are "how many full 1440s fit in", and what does not fit in is the rest, which you break down again into hours and minutes. Two questions keep coming back: "how many whole times?" and "what is left?".

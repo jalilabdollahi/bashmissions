@@ -1,1 +1,5 @@
-Print only the first argument. Do not include `$2`, labels, or extra text.
+Your whole script is one line, an echo with the argument inside the double quotes:
+
+  echo "Ahoy, $1! Your Lanternfish account is ready."
+
+Check that the punctuation matches the objective exactly: comma, exclamation mark, full stop.

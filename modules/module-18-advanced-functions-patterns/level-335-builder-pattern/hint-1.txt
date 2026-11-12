@@ -1,1 +1,1 @@
-Use this curriculum concept: chained config calls.
+Instead of one function with a long argument list, keep the machine's description in one place and write a small function per option. Each one checks only its own value and stores it. A last function looks at the whole thing, and only it prints anything.

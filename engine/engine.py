@@ -17,6 +17,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 try:
+    from engine.bashfind import find_bash
     from engine.certificate import render_certificate, save_certificate
     from engine.player import PlayerProgress
     from engine.runner import prepare_level, run_level, level_workspace, set_active_workspace
@@ -40,6 +41,7 @@ try:
     )
     from engine.validator import validate_all
 except ModuleNotFoundError:
+    from bashfind import find_bash
     from certificate import render_certificate, save_certificate
     from player import PlayerProgress
     from runner import prepare_level, run_level, level_workspace, set_active_workspace
@@ -239,10 +241,43 @@ def watch_mode(level_data: dict, workspace: Path) -> bool:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Level completion
+# ─────────────────────────────────────────────────────────────────────────────
+
+def finish_level(levels: list[dict], progress: PlayerProgress, lv_data: dict, started: float) -> bool:
+    """Award XP, show the debrief and move on. Returns False when the campaign is over."""
+    elapsed = time.time() - started
+    already_done = lv_data["id"] in set(progress.data.get("completed_levels", []))
+    xp = 0 if already_done else lv_data.get("xp", 0)
+    progress.add_xp(xp)
+    progress.complete_level(lv_data["id"], elapsed)
+    maybe_award_module(levels, progress, lv_data["module"])
+    show_level_complete(lv_data, xp, elapsed)
+    show_post_level_debrief(level_dir(lv_data), elapsed)
+    if not advance_level(levels, progress, lv_data):
+        progress.save()
+        console.print(f"[bold bright_green]All {len(levels)} missions complete. You are a Bash master.[/bold bright_green]")
+        return False
+    progress.save()
+    return True
+
+
+def module_count(levels: list[dict]) -> int:
+    return len({lv["module"] for lv in levels})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main game loop
 # ─────────────────────────────────────────────────────────────────────────────
 
 def game_loop() -> int:
+    if not find_bash():
+        console.print(
+            "[bold bright_red]BashMissions needs Bash 4 or newer.[/bold bright_red]\n"
+            "macOS ships Bash 3.2. Install a modern Bash with: [bold]brew install bash[/bold]\n"
+            "(You can also point BASHMISSIONS_BASH at a bash binary.)"
+        )
+        return 1
     levels   = load_levels()
     progress = PlayerProgress(PROGRESS_PATH)
 
@@ -262,7 +297,7 @@ def game_loop() -> int:
         levels   = load_levels()
         lv_data  = current_level(levels, progress)
         if not lv_data:
-            console.print("[bold bright_green]All 500 levels complete. You are a bash master.[/bold bright_green]")
+            console.print(f"[bold bright_green]All {len(levels)} missions complete. You are a Bash master.[/bold bright_green]")
             return 0
 
         workspace = level_workspace(lv_data)
@@ -278,6 +313,7 @@ def game_loop() -> int:
             workspace,
             show_workspace=False,
             script_exists=current_script_path(lv_data, workspace).exists(),
+            total_modules=module_count(levels),
         )
         started = time.time()
 
@@ -304,33 +340,16 @@ def game_loop() -> int:
                 show_run_result(report)
                 if not report["passed"]:
                     continue
-                elapsed = time.time() - started
-                progress.add_xp(lv_data.get("xp", 0))
-                progress.complete_level(lv_data["id"], elapsed)
-                maybe_award_module(levels, progress, lv_data["module"])
-                show_level_complete(lv_data, lv_data.get("xp", 0), elapsed)
-                show_post_level_debrief(level_dir(lv_data), elapsed)
-                if not advance_level(levels, progress, lv_data):
-                    progress.save()
-                    console.print("[bold bright_green]Campaign complete.[/bold bright_green]")
+                if not finish_level(levels, progress, lv_data, started):
                     return 0
-                progress.save()
                 break  # go to next level
 
             # ── watch ────────────────────────────────────────────────────────
             if command_name == "watch":
                 passed = watch_mode(lv_data, workspace)
                 if passed:
-                    elapsed = time.time() - started
-                    progress.add_xp(lv_data.get("xp", 0))
-                    progress.complete_level(lv_data["id"], elapsed)
-                    maybe_award_module(levels, progress, lv_data["module"])
-                    show_level_complete(lv_data, lv_data.get("xp", 0), elapsed)
-                    show_post_level_debrief(level_dir(lv_data), elapsed)
-                    if not advance_level(levels, progress, lv_data):
-                        progress.save()
+                    if not finish_level(levels, progress, lv_data, started):
                         return 0
-                    progress.save()
                     break
                 continue
 
@@ -358,6 +377,7 @@ def game_loop() -> int:
                     workspace,
                     show_workspace=True,
                     script_exists=current_script_path(lv_data, workspace).exists(),
+                    total_modules=module_count(levels),
                 )
                 continue
 
@@ -400,6 +420,7 @@ def game_loop() -> int:
                     len(levels),
                     workspace,
                     script_exists=current_script_path(lv_data, workspace).exists(),
+                    total_modules=module_count(levels),
                 )
                 continue
 
@@ -414,6 +435,7 @@ def game_loop() -> int:
                     len(levels),
                     workspace,
                     script_exists=current_script_path(lv_data, workspace).exists(),
+                    total_modules=module_count(levels),
                 )
                 continue
 

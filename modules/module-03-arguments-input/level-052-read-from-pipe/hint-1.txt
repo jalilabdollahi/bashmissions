@@ -1,1 +1,0 @@
-[ -p /dev/stdin ] is true when stdin is connected to a pipe.

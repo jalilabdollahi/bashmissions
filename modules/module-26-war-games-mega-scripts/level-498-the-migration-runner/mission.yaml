@@ -1,22 +1,314 @@
 id: 498
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Migration Runner
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Migration Runner` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Migration Runner
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 480
+story: |
+  The storm-week schema change was applied by hand on three of the four
+  database servers, in a different order on each, and one of them ran the
+  `add-email` step twice. Theo swears he only edited the file "a little" after
+  it was deployed. Mara's rule from now on: schema changes are numbered files,
+  applied in order, recorded in a ledger with a fingerprint, never applied
+  twice, never silently edited afterwards, and always paired with a way back.
+  She needs the tool that enforces all of it.
+objective: |
+  Write solution.sh, a migration runner.
+
+    solution.sh DIR LEDGER status
+    solution.sh DIR LEDGER up [--dry-run] [--allow-out-of-order] [TARGET]
+    solution.sh DIR LEDGER down [N]
+    solution.sh DIR LEDGER verify
+
+  DIR holds migration files named `NNN-NAME.up` and `NNN-NAME.down`: NNN is
+  exactly three digits (the id), NAME matches `[a-z0-9-]+`. Other files are
+  ignored. Two `.up` files with the same id print
+  `duplicate migration id NNN` to stderr and exit 2. A `.down` file is
+  optional.
+
+  LEDGER records what has been applied, one line per migration: `ID SUM NAME`,
+  where SUM is the first number printed by `cksum` for the `.up` file (read as
+  `cksum < FILE`). A missing ledger means nothing is applied. Migrations are
+  executed with the command `dbexec FILE` (a stub): exit status 0 is success.
+
+  Definitions: a migration is APPLIED when its id is in the ledger and its
+  `.up` file still has the recorded SUM; MODIFIED when the id is in the ledger
+  but the SUM differs; MISSING when the ledger has the id and DIR has no `.up`
+  file for it; PENDING when only the file exists.
+
+  status: one line per id found in DIR or in the ledger, in ascending id order:
+    printf '%s %-14s %s\n' ID NAME STATE
+  with STATE one of `applied`, `MODIFIED`, `MISSING`, `pending` (for a MISSING
+  migration the NAME comes from the ledger). Exit 0.
+
+  up: first check the history, and refuse with exit 3 before running anything:
+    `refusing to migrate: ID was modified after it was applied`
+    `refusing to migrate: ID is missing from DIR`
+    `refusing to migrate: ID is older than the newest applied migration (NEWEST)`
+      (a pending id lower than the highest id in the ledger; the check is
+       skipped with --allow-out-of-order)
+  Report the first problem found, checking ledger entries in id order first,
+  then the pending ones in id order. Then run the pending migrations in
+  ascending id order, up to and including TARGET (a three-digit id that must
+  exist in DIR as a `.up` file, otherwise `unknown migration TARGET`, exit 2):
+    run `dbexec DIR/NNN-NAME.up`; on success append `ID SUM NAME` to the ledger
+    at once and print `applied ID NAME`; on failure print
+    `FAILED ID NAME (exit E)` to stderr and stop with exit 1: what already
+    succeeded stays recorded and nothing after it runs.
+  Finish with `up complete: N applied`, or `nothing to do` when nothing was
+  pending (up to TARGET). With --dry-run run nothing, write nothing, print
+  `would apply ID NAME` for each pending migration and finish with
+  `up complete: N pending (dry run)` (or `nothing to do`).
+
+  down [N] (N defaults to 1, positive integer) reverts the N most recently
+  applied migrations, highest id first. For each: the `.down` file must exist
+  (else `no down migration for ID` to stderr and stop with exit 1); run
+  `dbexec DIR/NNN-NAME.down`; on success remove its line from the ledger
+  (rewrite the ledger through a temporary file and `mv`) and print
+  `reverted ID NAME`; on failure print `FAILED ID NAME (exit E)` to stderr, stop,
+  exit 1. If fewer than N are applied revert all of them; with nothing applied
+  print `nothing to revert`.
+
+  verify: print one line `MODIFIED ID NAME` or `MISSING ID NAME` per problem
+  in ascending id order and exit 3, or `OK: N migrations verified` (N = ledger
+  entries) and exit 0.
+
+  Wrong arguments: `usage: solution.sh DIR LEDGER status | up [--dry-run] [--allow-out-of-order] [TARGET] | down [N] | verify`
+  on stderr, exit 2. A DIR that is not a directory: `not a directory: DIR`, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "numbered migrations applied in order, once"
+  - "a ledger with fingerprints: detect edited history"
+  - "record each success immediately; stop at the first failure"
+  - "up and down, dry run, and refusing unsafe states"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Fingerprint each .up file with cksum and compare with the ledger."
+  - pattern: '\bdbexec\b'
+    message: "Run migrations through dbexec."
+test_cases:
+  - name: status of a fresh database
+    args: [migrations, schema.ledger, status]
+    files: &mig
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/001-create-users.down: "DROP TABLE users;\n"
+      migrations/002-add-index.up: "CREATE INDEX idx_users ON users;\n"
+      migrations/002-add-index.down: "DROP INDEX idx_users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email;\n"
+      migrations/003-add-email.down: "ALTER TABLE users DROP email;\n"
+      migrations/004-seed-plans.up: "INSERT INTO plans VALUES (1);\n"
+      migrations/004-seed-plans.down: "DELETE FROM plans;\n"
+      migrations/README.txt: "not a migration\n"
+    expected_stdout: |-
+      001 create-users   pending
+      002 add-index      pending
+      003 add-email      pending
+      004 seed-plans     pending
+  - name: up applies everything in order
+    args: [migrations, schema.ledger, up]
+    files: *mig
+    expected_stdout: |-
+      applied 001 create-users
+      applied 002 add-index
+      applied 003 add-email
+      applied 004 seed-plans
+      up complete: 4 applied
+    expected_files:
+      schema.ledger: |-
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+        004 1741131315 seed-plans
+      .calls.log: |-
+        dbexec migrations/001-create-users.up
+        dbexec migrations/002-add-index.up
+        dbexec migrations/003-add-email.up
+        dbexec migrations/004-seed-plans.up
+  - name: running up again does nothing
+    args: [migrations, schema.ledger, up]
+    files: &applied
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/001-create-users.down: "DROP TABLE users;\n"
+      migrations/002-add-index.up: "CREATE INDEX idx_users ON users;\n"
+      migrations/002-add-index.down: "DROP INDEX idx_users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email;\n"
+      migrations/003-add-email.down: "ALTER TABLE users DROP email;\n"
+      migrations/004-seed-plans.up: "INSERT INTO plans VALUES (1);\n"
+      migrations/004-seed-plans.down: "DELETE FROM plans;\n"
+      schema.ledger: |
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+        004 1741131315 seed-plans
+    expected_stdout: "nothing to do"
+    expected_files:
+      .calls.log: null
+  - name: up with a target stops there
+    args: [migrations, schema.ledger, up, "002"]
+    files: *mig
+    expected_stdout: |-
+      applied 001 create-users
+      applied 002 add-index
+      up complete: 2 applied
+    expected_files:
+      schema.ledger: |-
+        001 720353737 create-users
+        002 219609534 add-index
+  - name: up continues after a partial history
+    args: [migrations, schema.ledger, up]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/002-add-index.up: "CREATE INDEX idx_users ON users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email;\n"
+      schema.ledger: |
+        001 720353737 create-users
+        002 219609534 add-index
+    expected_stdout: |-
+      applied 003 add-email
+      up complete: 1 applied
+    expected_files:
+      schema.ledger: |-
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+  - name: a failure keeps what worked and runs nothing after it
+    args: [migrations, schema.ledger, up]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/002-bad-change.up: "ALTER TABLE ghosts;\nFAIL\n"
+      migrations/003-after.up: "SELECT 1;\n"
+      schema.ledger: ""
+    expected_stdout: "applied 001 create-users"
+    expected_stderr: "FAILED 002 bad-change (exit 3)"
+    expected_exit: 1
+    expected_files:
+      schema.ledger: "001 720353737 create-users"
+      .calls.log: |-
+        dbexec migrations/001-create-users.up
+        dbexec migrations/002-bad-change.up
+  - name: an edited migration blocks everything
+    args: [migrations, schema.ledger, up]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email; -- edited\n"
+      migrations/004-seed-plans.up: "INSERT INTO plans VALUES (1);\n"
+      schema.ledger: |
+        001 720353737 create-users
+        003 2621198134 add-email
+    expected_stderr: "refusing to migrate: 003 was modified after it was applied"
+    expected_exit: 3
+    expected_files:
+      .calls.log: null
+  - name: status shows modified and missing migrations
+    args: [migrations, schema.ledger, status]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email; -- edited\n"
+      migrations/004-seed-plans.up: "INSERT INTO plans VALUES (1);\n"
+      schema.ledger: |
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+    expected_stdout: |-
+      001 create-users   applied
+      002 add-index      MISSING
+      003 add-email      MODIFIED
+      004 seed-plans     pending
+  - name: an older pending migration is refused
+    args: [migrations, schema.ledger, up]
+    files: &gap
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/002-add-index.up: "CREATE INDEX idx_users ON users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email;\n"
+      schema.ledger: |
+        001 720353737 create-users
+        003 2621198134 add-email
+    expected_stderr: "refusing to migrate: 002 is older than the newest applied migration (003)"
+    expected_exit: 3
+  - name: out of order can be allowed explicitly
+    args: [migrations, schema.ledger, up, --allow-out-of-order]
+    files: *gap
+    expected_stdout: |-
+      applied 002 add-index
+      up complete: 1 applied
+    expected_files:
+      schema.ledger: |-
+        001 720353737 create-users
+        003 2621198134 add-email
+        002 219609534 add-index
+  - name: dry run writes and runs nothing
+    args: [migrations, schema.ledger, up, --dry-run]
+    files: *mig
+    expected_stdout: |-
+      would apply 001 create-users
+      would apply 002 add-index
+      would apply 003 add-email
+      would apply 004 seed-plans
+      up complete: 4 pending (dry run)
+    expected_files:
+      schema.ledger: null
+      .calls.log: null
+  - name: down reverts the newest migration
+    args: [migrations, schema.ledger, down]
+    files: *applied
+    expected_stdout: "reverted 004 seed-plans"
+    expected_files:
+      schema.ledger: |-
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+      .calls.log: "dbexec migrations/004-seed-plans.down"
+  - name: down with a count
+    args: [migrations, schema.ledger, down, "2"]
+    files: *applied
+    expected_stdout: |-
+      reverted 004 seed-plans
+      reverted 003 add-email
+    expected_files:
+      schema.ledger: |-
+        001 720353737 create-users
+        002 219609534 add-index
+  - name: down stops when there is no down file
+    args: [migrations, schema.ledger, down, "3"]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/002-add-index.up: "CREATE INDEX idx_users ON users;\n"
+      migrations/002-add-index.down: "DROP INDEX idx_users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email;\n"
+      schema.ledger: |
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+    expected_stderr: "no down migration for 003"
+    expected_exit: 1
+    expected_files:
+      .calls.log: null
+  - name: verify a healthy history
+    args: [migrations, schema.ledger, verify]
+    files: *applied
+    expected_stdout: "OK: 4 migrations verified"
+  - name: verify reports every problem
+    args: [migrations, schema.ledger, verify]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/003-add-email.up: "ALTER TABLE users ADD email; -- edited\n"
+      schema.ledger: |
+        001 720353737 create-users
+        002 219609534 add-index
+        003 2621198134 add-email
+    expected_stdout: |-
+      MISSING 002 add-index
+      MODIFIED 003 add-email
+    expected_exit: 3
+  - name: duplicate ids
+    args: [migrations, schema.ledger, status]
+    files:
+      migrations/001-create-users.up: "CREATE TABLE users;\n"
+      migrations/001-create-people.up: "CREATE TABLE people;\n"
+    expected_stderr: "duplicate migration id 001"
+    expected_exit: 2
+  - name: unknown target
+    args: [migrations, schema.ledger, up, "099"]
+    files: *mig
+    expected_stderr: "unknown migration 099"
+    expected_exit: 2

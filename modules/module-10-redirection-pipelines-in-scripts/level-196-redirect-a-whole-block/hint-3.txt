@@ -1,0 +1,7 @@
+  {
+    echo "== Capacity report for $day =="
+    for host in "$@"; do
+      disk-usage "$host"
+    done
+    echo "== end =="
+  } > "report-$day.txt" 2> "report-$day.err"

@@ -1,1 +1,15 @@
-Print only the transformed records or report lines expected by the tests.
+  awk -F, -v OFS=, '
+    { sub(/\r$/, "") }
+    $0 == "" { next }
+    FNR == NR {
+      # first file (customers): if this is not the header and id is new, remember the name
+      next
+    }
+    FNR == 1 { print "invoice,name,amount"; next }
+    {
+      who = ($2 in name) ? name[$2] : "UNKNOWN"
+      print $1, who, $3
+    }
+  ' "$2" "$1"
+
+The arguments are swapped on purpose: customers ($2) first, invoices ($1) second.

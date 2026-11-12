@@ -1,0 +1,9 @@
+case $name in
+  ""|/*|..|../*|*/../*|*/..)
+    ...print "denied: $name" to stderr, exit 1...
+    ;;
+esac
+if [[ ! -f public/$name ]]; then
+  ...print "not found: $name" to stderr, exit 1...
+fi
+cat -- "public/$name"

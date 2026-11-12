@@ -1,0 +1,5 @@
+`-d` takes the body as one string of `name=value` pairs joined by `&`:
+
+  curl -s -d "color=blue&size=9" https://shop.example/order
+
+You may also repeat -d; curl joins the pieces with `&`. Put the string in double quotes so your variables expand inside it.

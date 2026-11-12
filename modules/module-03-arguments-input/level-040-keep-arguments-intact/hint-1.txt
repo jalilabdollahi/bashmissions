@@ -1,0 +1,1 @@
+The wrapper's job is only to pass a parcel along without opening it. Bash has a variable that stands for all the arguments at once, and it comes in a careless form and a careful form. One of them re-cuts the arguments at every space.

@@ -1,0 +1,49 @@
+id: 41
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Join Arguments
+difficulty: beginner
+xp: 70
+story: |
+  Ollie is writing the maintenance banner for the status page and needs the
+  affected servers in a single comma-separated line: "eel,flounder,grouper". He
+  tried a loop with a trailing comma problem, and a comma at the very end of the
+  banner ended up in front of customers. There is a built-in way to join words
+  that never leaves a stray separator.
+objective: |
+  Write solution.sh that takes any number of server names as arguments and prints
+  one line:
+    affected: <names joined with commas, no spaces>
+  Example: ./solution.sh eel flounder grouper prints
+    affected: eel,flounder,grouper
+  With one argument there is no comma. A name with spaces inside stays intact.
+  Do not use a loop, tr, sed or paste.
+concepts:
+  - '"$*" joins all arguments into one string'
+  - 'the first character of IFS is the glue'
+required_patterns:
+  - pattern: '\$\*'
+    message: 'Join the arguments with "$*".'
+  - pattern: 'IFS='
+    message: 'Set IFS to the character that should glue the words together.'
+forbidden_patterns:
+  - pattern: '\b(tr|sed|paste)\b'
+    message: 'Let "$*" and IFS do the joining, no extra tools.'
+test_cases:
+  - name: three servers
+    args: [eel, flounder, grouper]
+    expected_stdout: |-
+      affected: eel,flounder,grouper
+  - name: a single server has no comma
+    args: [halibut]
+    expected_stdout: |-
+      affected: halibut
+  - name: spaces inside a name are kept
+    args: ["blue whale", marlin]
+    expected_stdout: |-
+      affected: blue whale,marlin
+  - name: five servers
+    args: [a, b, c, d, e]
+    expected_stdout: |-
+      affected: a,b,c,d,e

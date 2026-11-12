@@ -1,0 +1,10 @@
+Capture the four octets, then loop over them and test with (( )):
+
+  re='^([0-9]{1,3})\.([0-9]{1,3})...$'
+  if [[ $addr =~ $re ]]; then
+    for octet in "${BASH_REMATCH[@]:1:4}"; do   # elements 1 to 4, skipping element 0
+      (( 10#$octet > 255 )) && ok=no
+    done
+  fi
+
+Without 10#, a leading zero makes Bash read octal: (( 08 > 255 )) is an error, and 010 means 8.

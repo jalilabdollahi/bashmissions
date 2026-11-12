@@ -1,0 +1,63 @@
+id: 370
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: HTTP Status Codes
+difficulty: intermediate
+xp: 160
+story: |
+  Noor has a pile of "your website is down" tickets and no idea which ones
+  are real. A page can answer with a lot of text and still be an error, so
+  the body is the wrong thing to look at. Mara points at the three digits
+  every web server sends back first: the status code.
+objective: |
+  Write solution.sh. Every argument is a URL. For each one, in order, ask
+  curl for its HTTP status code only (throw the body away) and print
+    <code> <url>
+  for example `200 https://www.gullandanchor.example/`.
+
+  A URL counts as a problem if the code is 400 or higher, or if curl could not
+  connect at all (curl then reports the code `000`). After the last line print
+    problems: N
+  and exit with status 1 if N is above zero, otherwise 0.
+  With no arguments, print `usage: solution.sh URL...` to stderr and exit 2.
+
+  Use `-o /dev/null` to discard the body and `-w '%{http_code}'` to print the
+  code. Remember that a failed connection makes curl exit non-zero.
+concepts:
+  - "-w '%{http_code}' prints the status code after the transfer"
+  - "-o /dev/null throws the body away"
+  - "3xx redirects and 000 (no connection) need their own thought"
+required_patterns:
+  - pattern: '%\{http_code\}'
+    message: "Ask curl for the status code with -w '%{http_code}'."
+  - pattern: '-o\s+/dev/null'
+    message: "Discard the body with -o /dev/null, or it ends up mixed into your output."
+test_cases:
+  - name: two healthy URLs, one is a redirect
+    args: ["https://www.gullandanchor.example/", "https://shop.harbourbakery.example/menu"]
+    expected_stdout: |-
+      200 https://www.gullandanchor.example/
+      301 https://shop.harbourbakery.example/menu
+      problems: 0
+  - name: two server-side errors among the good
+    args: ["https://billing.lanternfish.example/health", "https://docs.lanternfish.example/ping", "https://old.tidewater.example/books"]
+    expected_stdout: |-
+      503 https://billing.lanternfish.example/health
+      200 https://docs.lanternfish.example/ping
+      404 https://old.tidewater.example/books
+      problems: 2
+    expected_exit: 1
+  - name: a host that cannot be reached
+    args: ["https://docs.lanternfish.example/ping", "https://www.gullandanchor.example/"]
+    env:
+      FAKE_DOWN: www.gullandanchor.example
+    expected_stdout: |-
+      200 https://docs.lanternfish.example/ping
+      000 https://www.gullandanchor.example/
+      problems: 1
+    expected_exit: 1
+  - name: no urls given
+    args: []
+    expected_stderr: "usage: solution.sh URL..."
+    expected_exit: 2

@@ -1,0 +1,1 @@
+Two passes, one engine. The first pass only reads the policy and checks that every rule makes sense; if one is broken, stop before deleting anything. The second pass turns each rule into a find command and handles the files it returns.

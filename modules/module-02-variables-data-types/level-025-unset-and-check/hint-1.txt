@@ -1,0 +1,1 @@
+There are two jobs: removing a variable, and asking whether a variable exists. Notice that "exists" is a different question from "has some text in it" - an empty variable still exists.

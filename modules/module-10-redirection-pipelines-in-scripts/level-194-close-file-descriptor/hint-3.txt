@@ -1,1 +1,0 @@
-Print only the final expected lines; redirect any teaching/demo noise into files or /dev/null.

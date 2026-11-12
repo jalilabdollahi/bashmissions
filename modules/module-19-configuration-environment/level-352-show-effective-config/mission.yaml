@@ -1,0 +1,85 @@
+id: 352
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Show Effective Config
+difficulty: expert
+xp: 280
+story: |
+  "It works on my machine" has a configuration cousin: "it says port 8080 in the
+  file". The support desk spends hours finding out which layer actually decided a
+  value, and Gus has started asking why that costs money. Ollie's request is the
+  one every configurable tool eventually gets: a `config show` command that prints
+  what the program will really use, and where each value came from.
+objective: |
+  Write solution.sh, called as `solution.sh [CONFIG_FILE]`. It prints the
+  effective configuration, one line per setting, sorted by name:
+    <name> = <value> [<source>]
+  The names are padded with spaces on the right to the width of the longest
+  name, so that the `=` signs line up. <source> is `env`, `file` or `default`.
+  Where values come from, strongest first:
+    env      every environment variable called `LF_<NAME>` (NAME made of capital
+             letters, digits and underscores, at least one character) defines
+             the setting `<name>`: the part after `LF_`, in lowercase. Other
+             variables are ignored. Variables that are set but empty are ignored.
+    file     `name=value` lines in CONFIG_FILE, if one is given. Ignore blank
+             lines, `#` comments and blanks around names and values; a name must
+             be lowercase letters, digits and underscores, starting with a letter
+             or underscore, anything else is ignored. A value may contain `=`.
+             Empty values are ignored; for a repeated name the last line counts.
+    default  bind=127.0.0.1, log=info, port=8080, workers=2
+  A setting that is not a default can still appear: it comes from the file or the
+  environment. Sort with `sort` in the C locale (the tests run that way). An
+  unreadable CONFIG_FILE prints `cannot read CONFIG_FILE` to stderr, exit 1.
+concepts:
+  - "the final merged configuration with provenance"
+  - "compgen -v LF_ lists variable names by prefix"
+  - "printf '%-*s' pads to a computed width"
+test_cases:
+  - name: defaults only
+    expected_stdout: |-
+      bind    = 127.0.0.1 [default]
+      log     = info [default]
+      port    = 8080 [default]
+      workers = 2 [default]
+  - name: file and environment, new names, noise ignored
+    args: [lf.conf]
+    env:
+      LF_PORT: "9100"
+      LF_NEW_THING: "on"
+      LF_WORKERS: ""
+      LFX_PORT: "1"
+      LF_: "x"
+      LF_lower: "ignored"
+    files:
+      lf.conf: |
+        # tidewater books
+        port = 9000
+        tls_cert=/etc/ssl/tw.pem?v=1
+        Colour=red
+        log=
+        workers=4
+    expected_stdout: |-
+      bind      = 127.0.0.1 [default]
+      log       = info [default]
+      new_thing = on [env]
+      port      = 9100 [env]
+      tls_cert  = /etc/ssl/tw.pem?v=1 [file]
+      workers   = 4 [file]
+  - name: the last line in the file counts, values keep spaces
+    args: [lf.conf]
+    files:
+      lf.conf: |
+        bind=0.0.0.0
+        bind = 10.0.0.5
+        motd = Welcome aboard, captain
+    expected_stdout: |-
+      bind    = 10.0.0.5 [file]
+      log     = info [default]
+      motd    = Welcome aboard, captain [file]
+      port    = 8080 [default]
+      workers = 2 [default]
+  - name: unreadable config
+    args: [none.conf]
+    expected_stderr: "cannot read none.conf"
+    expected_exit: 1

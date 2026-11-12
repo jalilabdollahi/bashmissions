@@ -1,0 +1,1 @@
+Write cat <<EOF, then the lines of text, then EOF alone on its own line. Example: cat <<EOF  /  Hello $USER  /  EOF  prints Hello and the user name. Blank lines and leading spaces are kept; variables are expanded.

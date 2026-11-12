@@ -1,0 +1,1 @@
+You do not need to calculate any ages. The stamp file already stands for "the oldest acceptable moment", so the whole job is to ask, for each heartbeat, whether it is older than that file. The shell has built-in tests that compare the modification times of two files.

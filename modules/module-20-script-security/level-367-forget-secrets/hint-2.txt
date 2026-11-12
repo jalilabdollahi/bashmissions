@@ -1,0 +1,8 @@
+unset removes a variable completely, including its exported copy:
+
+  export SECRET=abc
+  use_it "$SECRET"
+  unset SECRET
+  env | grep SECRET     # prints nothing
+
+If you copied the secret into another variable (tok=$SECRET), unset that one as well. Place the unset directly after the line that last needs the value, and before the next external command.

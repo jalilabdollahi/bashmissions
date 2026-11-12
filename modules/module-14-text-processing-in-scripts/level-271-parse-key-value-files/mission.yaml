@@ -1,0 +1,88 @@
+id: 271
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Parse key=value Files
+difficulty: advanced
+xp: 190
+story: |
+  Every Lanternfish service keeps its settings in a plain `key=value` file, and
+  half the deploy scripts grep for them with patterns that break the moment a
+  value contains an equals sign. Theo's database URL did exactly that last
+  week. Mara wants one small, correct lookup tool that the other scripts can
+  call instead of reinventing it.
+objective: |
+  Write solution.sh that takes two arguments: a settings FILE and a KEY. Each
+  line of the file is `key=value`; the value is everything after the FIRST
+  equals sign and may itself contain equals signs (`url=https://x.example/?a=1`)
+  or be empty (`debug=`). Lines such as `# port=1234` are comments: their key
+  is `# port`, which never equals a real key. Blank lines are ignored.
+  If KEY appears several times, the last assignment wins. Print the value
+  (just the value) and exit 0. If KEY is not in the file, print
+    key not found: KEY
+  to standard error and exit with status 1.
+  The last line of the file may have no trailing newline: still read it.
+  Parse with a Bash while loop and IFS='=' read -r, not with grep, sed, awk
+  or cut.
+concepts:
+  - "IFS='=' read -r key value splits a line at the first ="
+  - "the last variable of read keeps the rest of the line, = signs included"
+  - "while read ... done < file, and the last line without a newline"
+required_patterns:
+  - pattern: "IFS=['\"]?=['\"]?\\s+read\\s+-r"
+    message: "Split each line with IFS='=' read -r key value."
+  - pattern: '\bwhile\b'
+    message: "Loop over the file with while ... done < \"$1\"."
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|cut)\b'
+    message: "Use read with IFS for this one; no external tools."
+test_cases:
+  - name: simple lookup
+    args: [app.conf, port]
+    files:
+      app.conf: |
+        # service settings
+        name=harbour-web
+        port=8080
+
+        workers=4
+    expected_stdout: |-
+      8080
+  - name: value containing equals signs
+    args: [db.conf, url]
+    files:
+      db.conf: |
+        host=anchovy
+        url=postgres://app@anchovy/shop?sslmode=require&timeout=5
+    expected_stdout: |-
+      postgres://app@anchovy/shop?sslmode=require&timeout=5
+  - name: last assignment wins, comments ignored
+    args: [dup.conf, port]
+    files:
+      dup.conf: |
+        port=8080
+        # port=1234
+        port=9090
+        name=x
+    expected_stdout: |-
+      9090
+  - name: key on the last line without newline
+    args: [tail.conf, mode]
+    files:
+      tail.conf: "name=x\nmode=fast"
+    expected_stdout: |-
+      fast
+  - name: empty value is still a value
+    args: [empty.conf, debug]
+    files:
+      empty.conf: |
+        debug=
+        level=3
+    expected_stdout: ""
+  - name: missing key
+    args: [m.conf, colour]
+    files:
+      m.conf: |
+        shape=round
+    expected_stderr: "key not found: colour"
+    expected_exit: 1

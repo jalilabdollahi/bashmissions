@@ -1,8 +1,0 @@
-A compact solution can be shaped like this:
-
-value="${1:-}"
-if [[ -z $value ]]; then
-  exit 1
-fi
-
-echo "value: $value"

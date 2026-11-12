@@ -1,0 +1,7 @@
+file="$1"
+if [[ ! -s $file ]]; then
+  echo "empty or missing: $file" >&2
+  exit 1
+fi
+lines=$(( $(wc -l < "$file") ))
+echo "ok: ..."   # use $file and $lines in the format from the objective

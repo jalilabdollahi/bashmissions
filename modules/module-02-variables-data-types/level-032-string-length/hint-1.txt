@@ -1,1 +1,0 @@
-`${#name}` expands to the number of characters in the value of `name`. No subprocess; pure built-in.

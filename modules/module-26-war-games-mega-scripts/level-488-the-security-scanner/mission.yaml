@@ -1,22 +1,199 @@
 id: 488
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Security Scanner
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Security Scanner` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Security Scanner
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 400
+story: |
+  Priya found an SSH key readable by every user on `halibut`, which was
+  Theo's, which has been there since spring, and which nobody noticed because
+  nobody looks. In storm season the team is working from kitchens and train
+  stations and the usual shortcuts multiply. She wants a scanner she can run
+  against any server's file tree every night: it should find the classic
+  mistakes, rank them by how fast an attacker would use them, and fail the
+  nightly job when something truly dangerous is lying around.
+objective: |
+  Write solution.sh, a configuration and permission scanner.
+
+    solution.sh [--fail-on LEVEL] ROOT [ALLOWLIST]
+
+  ROOT is the directory tree to scan (all paths are reported relative to it,
+  without a leading `./` or `/`). ALLOWLIST is an optional file listing, one
+  per line, the setuid/setgid files that are expected (paths relative to ROOT;
+  blank lines and `#` comments ignored). LEVEL is `critical`, `high` or
+  `medium` (default `high`).
+
+  Checks (use `find` for the permission checks):
+    1. `world-writable file`  HIGH. Any regular file where "others" have the
+       write bit. Symlinks are not followed or reported.
+    2. `private key accessible by group or others`  CRITICAL. Regular files
+       named `*.key`, `id_rsa`, `id_ed25519` or `id_ecdsa` where group or
+       others have ANY permission bit (read, write or execute). Public keys
+       (`.pub`) are fine. Beware: `find -perm -MODE` means "all of these bits",
+       so test the six bits separately.
+    3. `setuid/setgid binary not on allowlist`  HIGH. Regular files with the
+       setuid or setgid bit whose relative path is not in ALLOWLIST.
+    4. If ROOT/etc/ssh/sshd_config exists, read it like sshd does: `#` starts a
+       comment, keys are case-insensitive, and the FIRST occurrence of a key
+       wins. Report, using the first value (compared case-insensitively):
+         PermitEmptyPasswords yes   CRITICAL `ssh accepts empty passwords`
+         PermitRootLogin yes        HIGH     `ssh root login enabled`
+         PasswordAuthentication yes MEDIUM   `ssh password login enabled`
+    5. `plaintext credential on line N`  MEDIUM. In files named `*.conf`,
+       `*.env`, `*.ini` or `*.yml`: a line (not a comment) of the form
+       `KEY = VALUE` or `KEY: VALUE` where KEY (case-insensitive) contains
+       `password`, `passwd`, `secret`, `token` or `api_key`, and VALUE is not
+       empty, not quoted-empty (`""` or `''`), and does not start with `$` or
+       `<` (placeholders). Never print the value itself.
+
+  Print one line per finding, `SEVERITY path: message` (path relative to
+  ROOT), ordered CRITICAL first, then HIGH, then MEDIUM, and inside a severity
+  alphabetically by the rest of the line (use `LC_ALL=C sort`). Then print
+    `scan complete: C critical, H high, M medium`
+  Exit 1 if there is at least one finding at LEVEL or above (critical > high >
+  medium), otherwise 0.
+
+  A ROOT that is not a directory: `not a directory: ROOT` to stderr, exit 2.
+  An unreadable ALLOWLIST: `cannot read ALLOWLIST`, exit 2. A bad LEVEL or other
+  wrong arguments: `usage: solution.sh [--fail-on LEVEL] ROOT [ALLOWLIST]` on
+  stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "find -perm: all-bits vs any-bit tests"
+  - "first-match-wins config parsing (sshd style)"
+  - "severity ranking and a configurable exit threshold"
+  - "reporting a secret's location, never its value"
+required_patterns:
+  - pattern: '\bfind\b'
+    message: "Use find to walk ROOT and test permission bits."
+  - pattern: '-perm'
+    message: "Test permission bits with find -perm."
+test_cases:
+  - name: a badly kept server
+    args: [srv, allow.txt]
+    files: &badtree
+      allow.txt: |
+        # expected setuid programs
+        usr/bin/passwd
+      srv/etc/ssh/sshd_config: |
+        # hardening
+        PermitRootLogin no
+        permitrootlogin yes
+        PasswordAuthentication yes
+        PasswordAuthentication no
+        PermitEmptyPasswords YES
+      srv/home/theo/.ssh/id_ed25519:
+        content: "key material\n"
+        mode: "0644"
+      srv/home/theo/.ssh/id_ed25519.pub:
+        content: "public\n"
+        mode: "0644"
+      srv/home/mara/.ssh/id_rsa:
+        content: "key material\n"
+        mode: "0600"
+      srv/var/www/upload.php:
+        content: "<?php\n"
+        mode: "0666"
+      srv/var/www/index.php:
+        content: "<?php\n"
+        mode: "0644"
+      srv/usr/bin/rescue:
+        content: "#!/bin/sh\n"
+        mode: "4755"
+      srv/usr/bin/passwd:
+        content: "#!/bin/sh\n"
+        mode: "4755"
+      srv/app/db.conf:
+        content: |
+          [main]
+          password = hunter2
+          api_key = ${API_KEY}
+          # password = old-secret
+          token =
+        mode: "0644"
+    expected_stdout: |-
+      CRITICAL etc/ssh/sshd_config: ssh accepts empty passwords
+      CRITICAL home/theo/.ssh/id_ed25519: private key accessible by group or others
+      HIGH usr/bin/rescue: setuid/setgid binary not on allowlist
+      HIGH var/www/upload.php: world-writable file
+      MEDIUM app/db.conf: plaintext credential on line 2
+      MEDIUM etc/ssh/sshd_config: ssh password login enabled
+      scan complete: 2 critical, 2 high, 2 medium
+    expected_exit: 1
+  - name: group-readable key and a setuid file
+    args: [srv]
+    files:
+      srv/deploy/site.key:
+        content: "k\n"
+        mode: "0640"
+      srv/deploy/other.key:
+        content: "k\n"
+        mode: "0600"
+      srv/bin/mail-queue:
+        content: "x\n"
+        mode: "4750"
+    expected_stdout: |-
+      CRITICAL deploy/site.key: private key accessible by group or others
+      HIGH bin/mail-queue: setuid/setgid binary not on allowlist
+      scan complete: 1 critical, 1 high, 0 medium
+    expected_exit: 1
+  - name: medium findings do not fail by default
+    args: [srv]
+    files:
+      srv/app/settings.yml:
+        content: |
+          database:
+            db_password: "s3cret"
+          cache:
+            secret_key: <set me>
+        mode: "0644"
+    expected_stdout: |-
+      MEDIUM app/settings.yml: plaintext credential on line 2
+      scan complete: 0 critical, 0 high, 1 medium
+  - name: fail-on medium turns medium findings into a failure
+    args: [--fail-on, medium, srv]
+    files:
+      srv/app/settings.yml:
+        content: |
+          database:
+            db_password: "s3cret"
+        mode: "0644"
+    expected_stdout: |-
+      MEDIUM app/settings.yml: plaintext credential on line 2
+      scan complete: 0 critical, 0 high, 1 medium
+    expected_exit: 1
+  - name: fail-on critical ignores high findings
+    args: [--fail-on, critical, srv]
+    files:
+      srv/var/www/upload.php:
+        content: "<?php\n"
+        mode: "0666"
+    expected_stdout: |-
+      HIGH var/www/upload.php: world-writable file
+      scan complete: 0 critical, 1 high, 0 medium
+  - name: a clean tree
+    args: [srv]
+    files:
+      srv/etc/ssh/sshd_config: |
+        PermitRootLogin no
+        PasswordAuthentication no
+      srv/var/www/index.html:
+        content: "<h1>hi</h1>\n"
+        mode: "0644"
+    expected_stdout: "scan complete: 0 critical, 0 high, 0 medium"
+  - name: ROOT is not a directory
+    args: [nowhere]
+    expected_stderr: "not a directory: nowhere"
+    expected_exit: 2
+  - name: unknown level
+    args: [--fail-on, severe, srv]
+    files:
+      "srv/": ""
+    expected_stderr: "usage: solution.sh [--fail-on LEVEL] ROOT [ALLOWLIST]"
+    expected_exit: 2
+  - name: unreadable allowlist
+    args: [srv, nope.txt]
+    files:
+      "srv/": ""
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 2

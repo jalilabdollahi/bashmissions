@@ -1,0 +1,115 @@
+id: 432
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Markdown Report
+difficulty: expert
+xp: 370
+story: |
+  Every Friday the chandlery next door, Salt & Sail, needs to know which of the
+  items Lanternfish keeps for them on the shelf are running low, and Noor pastes
+  the answer into the support wiki, which speaks Markdown. Until now she
+  rebuilt the table by hand. Item names sometimes contain a vertical bar
+  ("Rope | 10m"), which in Markdown is the very character that separates the
+  columns.
+objective: |
+  Write solution.sh that takes one argument, a stock CSV with a header:
+    sku,name,stock,reorder_at
+  stock and reorder_at are whole numbers. An item needs reordering when
+  stock <= reorder_at. Print this report to standard output:
+    # Low stock report
+    <empty line>
+    | SKU | Item | Stock | Reorder at |
+    |---|---|---:|---:|
+    | <sku> | <name> | <stock> | <reorder_at> |
+    ... one row per low item, ordered by SKU (character order) ...
+    <empty line>
+    <N> of <M> item(s) need reordering.
+  where M is the number of valid items. Inside item names, every `|` must be
+  written `\|` so it does not split the table. If no item is low, print
+  `_Nothing to reorder._` in place of the table (header row, separator and
+  rows), keeping the surrounding empty lines. A row whose stock or reorder_at
+  is not a whole number is not valid: print `skipped line <N>` to stderr and
+  leave it out. Skip blank lines; ignore `\r`. Names contain no commas.
+concepts:
+  - "generating a table with a header, an alignment row and body rows"
+  - "escaping the delimiter that Markdown uses"
+  - "conditional sections of a report"
+  - "building the whole document in one awk program"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Generate the report from awk."
+  - pattern: '\|---\|---\|---:\|---:\|'
+    message: "Print the Markdown separator row |---|---|---:|---:| (right-aligned number columns)."
+test_cases:
+  - name: two low items
+    args: [stock.csv]
+    files:
+      stock.csv: |
+        sku,name,stock,reorder_at
+        R-20,Rope | 10m,3,10
+        A-05,Anchor shackle,40,15
+        N-77,Fishing net,10,10
+        B-01,Buoy,12,5
+    expected_stdout: |-
+      # Low stock report
+
+      | SKU | Item | Stock | Reorder at |
+      |---|---|---:|---:|
+      | N-77 | Fishing net | 10 | 10 |
+      | R-20 | Rope \| 10m | 3 | 10 |
+
+      2 of 4 item(s) need reordering.
+  - name: nothing is low
+    args: [fine.csv]
+    files:
+      fine.csv: |
+        sku,name,stock,reorder_at
+        A-1,Tarpaulin,50,10
+        A-2,Lantern,9,8
+    expected_stdout: |-
+      # Low stock report
+
+      _Nothing to reorder._
+
+      0 of 2 item(s) need reordering.
+  - name: invalid rows and windows endings
+    args: [win.csv]
+    files:
+      win.csv: "sku,name,stock,reorder_at\r\nZ-9,Flare,0,2\r\nZ-8,Lifejacket,many,5\r\n\r\nZ-7,Oar,4,4\r\n"
+    expected_stdout: |-
+      # Low stock report
+
+      | SKU | Item | Stock | Reorder at |
+      |---|---|---:|---:|
+      | Z-7 | Oar | 4 | 4 |
+      | Z-9 | Flare | 0 | 2 |
+
+      2 of 2 item(s) need reordering.
+    expected_stderr: "skipped line 3"
+  - name: header only
+    args: [hdr.csv]
+    files:
+      hdr.csv: |
+        sku,name,stock,reorder_at
+    expected_stdout: |-
+      # Low stock report
+
+      _Nothing to reorder._
+
+      0 of 0 item(s) need reordering.
+  - name: numbers compare as numbers
+    args: [num.csv]
+    files:
+      num.csv: |
+        sku,name,stock,reorder_at
+        K-1,Hook,9,10
+        K-2,Line,100,20
+    expected_stdout: |-
+      # Low stock report
+
+      | SKU | Item | Stock | Reorder at |
+      |---|---|---:|---:|
+      | K-1 | Hook | 9 | 10 |
+
+      1 of 2 item(s) need reordering.

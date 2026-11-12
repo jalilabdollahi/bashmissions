@@ -1,0 +1,9 @@
+  if ! pg_dump --no-owner "$db" | gzip > "$partial"; then
+    rm -f "$partial"; echo "dump failed for $db" >&2; exit 1
+  fi
+  gzip -t "$partial"; mv "$partial" "$final"; echo "dumped $final"
+  shopt -s nullglob
+  dumps=("$outdir/$db"-[0-9]*.sql.gz)
+  excess=$(( ${#dumps[@]} - keep ))
+  for (( i = 0; i < excess; i++ )); do rm -f -- "${dumps[i]}"; echo "pruned ${dumps[i]##*/}"; done
+The final line needs min(keep, number of dumps) for K.

@@ -1,0 +1,5 @@
+let "name = expression" assigns the result of the expression to name; quote it so spaces do not split it up. (( name = expression )) does the same without quotes. Both return exit status 0 when the value is non-zero, and 1 when the value is zero. Generic example:
+
+  let "gap = high - low"
+  echo "status was $?"
+  (( half = gap / 2 ))

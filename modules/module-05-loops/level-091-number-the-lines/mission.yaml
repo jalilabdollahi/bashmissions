@@ -1,0 +1,59 @@
+id: 91
+module: 5
+module_name: loops
+module_display: Loops
+title: Number the Lines
+difficulty: intermediate
+xp: 120
+story: |
+  Ollie volunteered to build the on-call rota, and the first draft is a
+  disaster: he assigned the same person to every day because "the script
+  only knew the first name". The rota should hand out the days of the week to
+  the people in order, and when the people outnumber the week, start again from
+  Monday. Mara suggests you keep a position number while you walk the list.
+objective: |
+  Write solution.sh that receives the on-call people as arguments, in order.
+  The first person gets Monday, the second Tuesday, and so on through the
+  week (Mon Tue Wed Thu Fri Sat Sun). After Sunday the days start again with
+  Monday. Print one line per person:
+    <Day>: <name>
+  for example "Wed: Priya". Names may contain spaces. With no arguments print
+  nothing.
+  Keep the day names in an array and use a numeric index into it
+  (${days[i]}), working out the day from the person's position with %.
+concepts:
+  - "a loop with a numeric index"
+  - "array element by index: ${days[i]}"
+  - "wrap around with the modulo operator %"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*\[[^]@*]+\]\}'
+    message: "Pick the day with an indexed array element such as ${days[$day_index]}."
+  - pattern: '%\s*(7|\$\{#[A-Za-z_]+\[@\]\})'
+    message: "Use % to wrap around after seven days (position % 7)."
+test_cases:
+  - name: three people
+    args: [Mara, Theo, Priya]
+    expected_stdout: |-
+      Mon: Mara
+      Tue: Theo
+      Wed: Priya
+  - name: more people than days wraps around
+    args: [Anna, Ben, Cleo, Dev, Eli, Fay, Gus, Hana, Ivo]
+    expected_stdout: |-
+      Mon: Anna
+      Tue: Ben
+      Wed: Cleo
+      Thu: Dev
+      Fri: Eli
+      Sat: Fay
+      Sun: Gus
+      Mon: Hana
+      Tue: Ivo
+  - name: names with spaces
+    args: ["Ollie Park", "Noor Haddad"]
+    expected_stdout: |-
+      Mon: Ollie Park
+      Tue: Noor Haddad
+  - name: nobody on call
+    args: []
+    expected_stdout: ""

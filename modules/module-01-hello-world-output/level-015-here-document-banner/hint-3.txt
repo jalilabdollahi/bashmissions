@@ -1,0 +1,1 @@
+Skeleton: cat <<EOF, then "Dear $CUSTOMER," followed by a blank line, the "We will be doing..." line, four spaces plus $WINDOW, the "Your sites..." line, another blank line, "-- Lanternfish Hosting", and finally a line with only EOF.

@@ -1,0 +1,1 @@
+Think of the script as a book: first the chapters (functions), and only at the very end the line that says "begin". Move everything that currently runs at the top level into one function, and leave a single call at the bottom.

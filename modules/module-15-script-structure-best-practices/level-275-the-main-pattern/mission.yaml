@@ -1,0 +1,64 @@
+id: 275
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: The main() Pattern
+difficulty: advanced
+xp: 160
+story: |
+  Gus asked for a quick tally of how many lines each uploaded invoice file has, and
+  Theo delivered: forty lines of loose commands, with a helper function squeezed in
+  halfway down. It works, but nobody can tell where the program starts, and last
+  week someone appended a line after the final command and broke the exit status.
+  Mara asks you to give the script a spine.
+objective: |
+  Restructure solution.sh so that all the logic lives in functions and the only
+  top-level command after the function definitions is the last line:
+    main "$@"
+  Behaviour (must not change):
+    - arguments are files. For each readable file print  <file>: <N> lines
+    - for an unreadable (missing) file print  skip: <file>  on stderr, keep
+      going, and remember it
+    - after the loop print  total: <sum of the lines of the readable files>
+    - exit 0 if every file was readable, exit 1 if any were skipped
+    - with no arguments print  usage: solution.sh FILE...  to stderr, exit 2
+  Define a function called main and put the usage check inside it.
+concepts:
+  - "main() function"
+  - "main \"$@\" as the last line"
+  - "helpers defined before they are called"
+required_patterns:
+  - pattern: '(^|\s)main\s*\(\)'
+    message: "Define a function named main: main() { ... }"
+  - pattern: '(?m)^main\s+"\$@"\s*$'
+    message: "The last line of the script should be exactly: main \"$@\""
+test_cases:
+  - name: two files
+    args: [jan.txt, feb.txt]
+    files:
+      jan.txt: "a\nb\nc\n"
+      feb.txt: "x\ny\n"
+    expected_stdout: |-
+      jan.txt: 3 lines
+      feb.txt: 2 lines
+      total: 5
+  - name: file name with spaces
+    args: [Harbour Bakery.txt]
+    files:
+      "Harbour Bakery.txt": "one\n"
+    expected_stdout: |-
+      Harbour Bakery.txt: 1 lines
+      total: 1
+  - name: one file missing
+    args: [ok.txt, gone.txt]
+    files:
+      ok.txt: "1\n2\n"
+    expected_stdout: |-
+      ok.txt: 2 lines
+      total: 2
+    expected_stderr: "skip: gone.txt"
+    expected_exit: 1
+  - name: no arguments
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh FILE..."
+    expected_exit: 2

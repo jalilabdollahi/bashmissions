@@ -1,0 +1,102 @@
+id: 250
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Directory Summary
+difficulty: expert
+xp: 180
+story: |
+  Gus finally gets to ask the question he has been saving: "What is
+  actually *on* the shared drive?" Not sizes this time, but kinds. How many
+  spreadsheets, how many photos, how many things with no type at all. The
+  cleanup of the file server is nearly done, and the last job is a report
+  that tells the story of what is left, built from everything you have
+  learned this module.
+objective: |
+  Write solution.sh that takes one argument, a FOLDER, and counts the regular
+  files below it, at any depth, grouped by file extension. Use `find` to
+  list the files.
+
+  The extension of a file is the text after the last dot of its **name**
+  (not of its path), in lowercase, provided the dot is not the first
+  character of the name and something follows it:
+
+    photo.JPG -> jpg      backup.tar.gz -> gz      .gitignore -> (none)
+    Makefile  -> (none)   notes.         -> (none)
+
+  Print one line per extension: `EXT: COUNT`, with the biggest counts first;
+  extensions with the same count are in alphabetical order (plain byte
+  order, so `(none)` comes before letters). Finish with `total: N files`
+  (always the word `files`, even for 1).
+
+  If FOLDER is not a directory print `no such folder: FOLDER` to stderr and
+  exit 1. With any other number of arguments than one print
+  `usage: solution.sh FOLDER` to stderr and exit 2.
+concepts:
+  - "counting with an associative array"
+  - "extension from the file name, not the path"
+required_patterns:
+  - pattern: '\bfind\b[^\n]*-type\s+f'
+    message: "List the regular files with find FOLDER -type f."
+  - pattern: 'declare\s+-A'
+    message: "Count per extension in an associative array: declare -A count."
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*##\*[/.]\}'
+    message: "Cut names apart with ${var##*/} (file name) and ${var##*.} (extension)."
+test_cases:
+  - name: a mixed website folder
+    args: [site]
+    files:
+      site/index.html: "i"
+      site/about.html: "a"
+      site/css/main.css: "c"
+      site/img/a.jpg: "1"
+      site/img/B.JPG: "2"
+      site/img/c.jpeg: "3"
+      site/Makefile: "m"
+      site/.gitignore: "g"
+      site/dist/app.tar.gz: "z"
+    expected_stdout: |-
+      (none): 2
+      html: 2
+      jpg: 2
+      css: 1
+      gz: 1
+      jpeg: 1
+      total: 9 files
+  - name: dots in folder names and spaces in file names
+    args: ["Shared Drive"]
+    files:
+      "Shared Drive/v1.2/readme": "r"
+      "Shared Drive/v1.2/Q4 report.final.PDF": "p"
+      "Shared Drive/archive.2023/old report.pdf": "p2"
+      "Shared Drive/archive.2023/notes.": "n"
+      "Shared Drive/budget 2024.xlsx": "b"
+    expected_stdout: |-
+      (none): 2
+      pdf: 2
+      xlsx: 1
+      total: 5 files
+  - name: one kind only
+    args: [logs]
+    files:
+      logs/a.log: "1"
+      logs/b.log: "2"
+      logs/old/c.log: "3"
+    expected_stdout: |-
+      log: 3
+      total: 3 files
+  - name: a lone hidden file
+    args: [void]
+    files:
+      void/sub/.keep: ""
+    expected_stdout: |-
+      (none): 1
+      total: 1 files
+  - name: folder missing
+    args: [ghost]
+    expected_stderr: "no such folder: ghost"
+    expected_exit: 1
+  - name: wrong argument count
+    args: []
+    expected_stderr: "usage: solution.sh FOLDER"
+    expected_exit: 2

@@ -1,0 +1,77 @@
+id: 254
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Collapse Repeats
+difficulty: intermediate
+xp: 140
+story: |
+  The uptime monitor on barracuda writes one word per minute: OK, SLOW or DOWN.
+  After last night's wobble Priya has to put a timeline in the incident review,
+  and a thousand identical OK lines will not impress anyone. She wants only the
+  moments when the state changed, in the order they happened.
+objective: |
+  Write solution.sh that takes one argument, a file with one status word per
+  line (OK, SLOW or DOWN). Print the statuses with every run of identical
+  consecutive lines collapsed into a single line, keeping the original order:
+    OK OK OK SLOW SLOW DOWN OK   ->   OK, SLOW, DOWN, OK (one per line)
+  A state that comes back later is printed again; only neighbours are merged.
+  Use uniq. Do not sort the file first: that would destroy the timeline.
+concepts:
+  - "uniq merges adjacent identical lines"
+  - "uniq does not need or want sorting when order matters"
+required_patterns:
+  - pattern: '\buniq\b'
+    message: "Use uniq to merge repeated neighbouring lines."
+forbidden_patterns:
+  - pattern: '\bsort\b'
+    message: "Do not sort: the order of events is the whole point of the timeline."
+test_cases:
+  - name: outage and recovery
+    args: [heartbeat.txt]
+    files:
+      heartbeat.txt: |
+        OK
+        OK
+        OK
+        SLOW
+        SLOW
+        DOWN
+        OK
+        OK
+    expected_stdout: |-
+      OK
+      SLOW
+      DOWN
+      OK
+  - name: all quiet
+    args: [quiet.txt]
+    files:
+      quiet.txt: |
+        OK
+        OK
+        OK
+        OK
+    expected_stdout: |-
+      OK
+  - name: flapping keeps every change
+    args: [flap.txt]
+    files:
+      flap.txt: |
+        OK
+        DOWN
+        OK
+        DOWN
+        DOWN
+        OK
+    expected_stdout: |-
+      OK
+      DOWN
+      OK
+      DOWN
+      OK
+  - name: no data
+    args: [none.txt]
+    files:
+      none.txt: ""
+    expected_stdout: ""

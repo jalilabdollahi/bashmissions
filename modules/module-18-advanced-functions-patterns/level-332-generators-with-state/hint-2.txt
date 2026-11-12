@@ -1,0 +1,11 @@
+An associative array can hold one counter per name, and `printf -v VAR` formats into a variable instead of printing:
+
+  declare -A seen=([apples]=0 [pears]=0)
+  next() {
+    seen[$1]=$(( seen[$1] + 1 ))
+    printf -v REPLY 'fruit-%02d' "${seen[$1]}"
+  }
+  next pears
+  echo "$REPLY"          # fruit-01
+
+`$(next pears)` would run next in a subshell: it would print the right text once, but the increment would be thrown away.

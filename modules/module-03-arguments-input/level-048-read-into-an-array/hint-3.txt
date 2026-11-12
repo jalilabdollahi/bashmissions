@@ -1,0 +1,6 @@
+Read into an array called `tags`, then print three things about it:
+
+  IFS=, read -ra tags
+  echo "count=${#tags[@]} first=${tags[0]} last=..."
+
+For the last element use a negative index that counts from the end.

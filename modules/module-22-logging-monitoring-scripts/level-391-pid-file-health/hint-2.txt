@@ -1,0 +1,6 @@
+`ps -p PID -o comm=` prints just the command name of one process, or nothing and a non-zero status when there is none. Under `set -e` a failing command substitution would end the script, so make the failure harmless:
+
+  name=$(ps -p "$pid" -o comm= || true)
+  [[ -z $name ]] && echo "nobody home"
+
+Read a one-line file into a variable with pid=$(< file). [[ $pid =~ ^[0-9]+$ ]] tests for digits only.

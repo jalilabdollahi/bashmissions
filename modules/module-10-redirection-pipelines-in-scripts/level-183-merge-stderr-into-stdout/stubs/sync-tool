@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fake sync-tool for BashMissions.
+# stdout: progress. stderr: one error line. SYNC_RC (default 0) is the exit code.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: sync-tool TARGET" >&2
+  exit 2
+fi
+echo "syncing to $1"
+echo "error: $1: permission denied on /srv/uploads" >&2
+echo "synced ${#1} items"
+exit "${SYNC_RC:-0}"

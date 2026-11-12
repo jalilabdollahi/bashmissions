@@ -1,22 +1,100 @@
 id: 424
 module: 24
 module_name: data-processing-scripts
-module_display: Data Processing Scripts
+module_display: Data Wrangling
 title: Join Two CSVs
-difficulty: advanced
-xp: 200
-objective: Join two CSV files by their first column key.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    alice=admin
-    bob=user
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- users.csv
-- roles.csv
+difficulty: expert
+xp: 290
+story: |
+  The billing system knows invoices by customer id. Gus, who has to phone people
+  about overdue ones, knows customers by name. Ollie suggests joining the two
+  exports with the `join` command, then spends ten minutes finding out that
+  `join` wants both files sorted and quietly drops the rows it cannot match.
+  Gus wants every invoice on the list, in the original order, matched or not.
+objective: |
+  Write solution.sh that takes two arguments: an invoices file and a customers
+  file, both CSV with a header.
+    invoices:   invoice,customer_id,amount
+    customers:  customer_id,name,city
+  Print a CSV with the header `invoice,name,amount` followed by one line per
+  invoice, in the order of the invoices file, with the customer's name
+  looked up by customer_id. If the id is not in the customers file, use the
+  name `UNKNOWN`. If an id appears more than once in the customers file, the
+  first one wins. Neither input needs to be sorted. Blank lines are skipped
+  and `\r\n` line endings must not leak into the output. Names contain spaces
+  but never commas.
 concepts:
-- join on key
-scaffold: true
+  - "FNR == NR is true only while reading the first file"
+  - "load one file into an array, then stream the second against it"
+  - "lookup with (key in array) and a fallback value"
+  - "join without sorting"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Load the customers into an awk array, then look invoices up in it."
+  - pattern: 'FNR\s*==\s*NR|NR\s*==\s*FNR'
+    message: "Use FNR == NR to tell the first file from the second."
+forbidden_patterns:
+  - pattern: '\bjoin\b'
+    message: "Do it with awk: join needs sorted input and drops unmatched rows."
+test_cases:
+  - name: matched and unmatched
+    args: [invoices.csv, customers.csv]
+    files:
+      invoices.csv: |
+        invoice,customer_id,amount
+        INV-1,c20,120.00
+        INV-2,c10,45.50
+        INV-3,c99,300.00
+        INV-4,c20,15.00
+      customers.csv: |
+        customer_id,name,city
+        c10,Harbour Bakery,Port Alder
+        c20,Tidewater Books,Saltmarsh
+    expected_stdout: |-
+      invoice,name,amount
+      INV-1,Tidewater Books,120.00
+      INV-2,Harbour Bakery,45.50
+      INV-3,UNKNOWN,300.00
+      INV-4,Tidewater Books,15.00
+  - name: duplicate customer ids, first wins
+    args: [i.csv, c.csv]
+    files:
+      i.csv: |
+        invoice,customer_id,amount
+        INV-7,k1,9.99
+      c.csv: |
+        customer_id,name,city
+        k1,Red Buoy Cafe,Port Alder
+        k1,Red Buoy Cafe (old),Saltmarsh
+    expected_stdout: |-
+      invoice,name,amount
+      INV-7,Red Buoy Cafe,9.99
+  - name: windows endings and blank lines
+    args: [wi.csv, wc.csv]
+    files:
+      wi.csv: "invoice,customer_id,amount\r\nINV-8,z5,70.00\r\n\r\nINV-9,z6,5.00\r\n"
+      wc.csv: "customer_id,name,city\r\nz5,Gull & Anchor Pub,Port Alder\r\n\r\nz6,North Pier Dental,Saltmarsh\r\n"
+    expected_stdout: |-
+      invoice,name,amount
+      INV-8,Gull & Anchor Pub,70.00
+      INV-9,North Pier Dental,5.00
+  - name: no invoices
+    args: [ei.csv, ec.csv]
+    files:
+      ei.csv: |
+        invoice,customer_id,amount
+      ec.csv: |
+        customer_id,name,city
+        a1,Pearl Dive Shop,Port Alder
+    expected_stdout: "invoice,name,amount"
+  - name: no customers at all
+    args: [ni.csv, nc.csv]
+    files:
+      ni.csv: |
+        invoice,customer_id,amount
+        INV-10,q1,1.00
+      nc.csv: |
+        customer_id,name,city
+    expected_stdout: |-
+      invoice,name,amount
+      INV-10,UNKNOWN,1.00

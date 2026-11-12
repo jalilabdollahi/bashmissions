@@ -1,0 +1,1 @@
+Read the loop and underline every distinct rule it enforces: cleaning the host, deciding whether a port is acceptable, shaping the output. Each of those is a sentence you can say on its own, and each deserves a name. The loop body should end up reading like a recipe.

@@ -1,0 +1,104 @@
+id: 411
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Build and Tag an Image
+difficulty: expert
+xp: 360
+story: |
+  Lanternfish moves its apps into containers, and the first thing Ollie learns
+  is that `latest` is a trap: Theo pushed a release candidate as `latest` on
+  Friday and half the staging fleet pulled it. Mara's rule is that every image
+  carries its exact version, stable releases also move the short `MAJOR.MINOR`
+  tag and `latest`, and pre-releases never touch either.
+objective: |
+  Write solution.sh, called as `solution.sh IMAGE VERSION [CONTEXT]`.
+  IMAGE is a repository such as `registry.lanternfish.example/shop`, VERSION is
+  `MAJOR.MINOR.PATCH` with an optional pre-release suffix (`2.0.0-rc1`), and
+  CONTEXT is the build directory (default `.`). A malformed VERSION or a
+  missing IMAGE prints `usage: solution.sh IMAGE VERSION [CONTEXT]` to stderr
+  and exits 2 before docker is called.
+  Run, in this order:
+    docker build --build-arg VERSION=<version> -t IMAGE:<version> CONTEXT
+    docker tag IMAGE:<version> IMAGE:<major>.<minor>     (stable versions only)
+    docker tag IMAGE:<version> IMAGE:latest              (stable versions only)
+    docker push IMAGE:<tag>                              (once per tag, in the
+                                                          order created)
+  A version is stable when it has no `-suffix`. After each successful push print
+  `pushed IMAGE:<tag>`.
+  If the build fails print `build failed` to stderr, exit 1 and do not tag or
+  push anything. If a push fails print `push failed: IMAGE:<tag>` to stderr
+  and exit 1; later pushes do not happen.
+concepts:
+  - "docker build -t NAME:TAG, docker tag, docker push"
+  - "build once, then tag and push the same image"
+  - "tag policy: exact version always, moving tags only for stable releases"
+required_patterns:
+  - pattern: 'docker\s+build\b'
+    message: "Build the image with docker build."
+  - pattern: 'docker\s+tag\b'
+    message: "Build once, then add extra tags with docker tag instead of building again."
+test_cases:
+  - name: stable release moves the short and latest tags
+    args: [registry.lanternfish.example/shop, 1.4.2]
+    files:
+      Dockerfile: "FROM scratch\n"
+    expected_stdout: |-
+      pushed registry.lanternfish.example/shop:1.4.2
+      pushed registry.lanternfish.example/shop:1.4
+      pushed registry.lanternfish.example/shop:latest
+    expected_files:
+      .calls.log: |
+        docker build --build-arg VERSION=1.4.2 -t registry.lanternfish.example/shop:1.4.2 .
+        docker tag registry.lanternfish.example/shop:1.4.2 registry.lanternfish.example/shop:1.4
+        docker tag registry.lanternfish.example/shop:1.4.2 registry.lanternfish.example/shop:latest
+        docker push registry.lanternfish.example/shop:1.4.2
+        docker push registry.lanternfish.example/shop:1.4
+        docker push registry.lanternfish.example/shop:latest
+  - name: release candidate gets only its exact tag
+    args: [registry.lanternfish.example/shop, 2.0.0-rc1, app]
+    files:
+      app/Dockerfile: "FROM scratch\n"
+    expected_stdout: "pushed registry.lanternfish.example/shop:2.0.0-rc1"
+    expected_files:
+      .calls.log: |
+        docker build --build-arg VERSION=2.0.0-rc1 -t registry.lanternfish.example/shop:2.0.0-rc1 app
+        docker push registry.lanternfish.example/shop:2.0.0-rc1
+  - name: a failing build pushes nothing
+    args: [dory/api, 3.1.0]
+    env: {FAKE_DOCKER_FAIL: build}
+    files:
+      Dockerfile: "FROM scratch\n"
+    expected_stderr: "build failed"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      .calls.log: "docker build --build-arg VERSION=3.1.0 -t dory/api:3.1.0 ."
+      .pushed: null
+  - name: build directory without a Dockerfile
+    args: [dory/api, 3.1.1, missing-dir]
+    expected_stderr: "build failed"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      .images: null
+  - name: the registry refuses the push
+    args: [dory/api, 3.2.0]
+    env: {FAKE_DOCKER_FAIL: push}
+    files:
+      Dockerfile: "FROM scratch\n"
+    expected_stderr: "push failed: dory/api:3.2.0"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        docker build --build-arg VERSION=3.2.0 -t dory/api:3.2.0 .
+        docker tag dory/api:3.2.0 dory/api:3.2
+        docker tag dory/api:3.2.0 dory/api:latest
+        docker push dory/api:3.2.0
+  - name: not a version
+    args: [dory/api, v3.2]
+    expected_stderr: "usage: solution.sh IMAGE VERSION [CONTEXT]"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null

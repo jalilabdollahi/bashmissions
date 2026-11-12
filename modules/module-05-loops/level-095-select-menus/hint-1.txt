@@ -1,0 +1,1 @@
+You do not need to print a menu or parse numbers yourself. Bash has a loop whose whole job is to show numbered choices and run your code with the chosen item. It also stops by itself when the input runs out. Decide what each kind of choice should do.

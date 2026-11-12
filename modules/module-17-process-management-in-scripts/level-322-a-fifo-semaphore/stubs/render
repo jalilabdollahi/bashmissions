@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake renderer for BashMissions: render SCENE takes 0.4 s, prints nothing,
+# fails (status 1) for scene names ending in "-bad". Start and end go to
+# .calls.log so the checker can see how many ran together.
+if [[ $# -ne 1 ]]; then
+  echo "usage: render SCENE" >&2
+  exit 2
+fi
+echo "start $1" >> .calls.log
+sleep 0.4
+echo "end $1" >> .calls.log
+case $1 in
+  *-bad) exit 1 ;;
+esac
+exit 0

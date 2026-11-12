@@ -1,0 +1,97 @@
+id: 344
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Required Keys
+difficulty: advanced
+xp: 240
+story: |
+  Last Tuesday a deploy for Harbour Bakery went out without `DB_HOST`. The app
+  started, failed to connect, and Theo fixed it, redeployed, and discovered
+  that `API_TOKEN` was missing too. Two deploys, two apologies. Priya adds a
+  gate to the pipeline: before anything is deployed, check the config and tell
+  the engineer everything that is wrong, all at once.
+objective: |
+  Write solution.sh, called as `solution.sh CONFIG_FILE KEY [KEY...]`. The
+  KEY arguments are the required keys. CONFIG_FILE holds `NAME=VALUE` lines;
+  ignore blank lines and lines starting with `#`, and ignore blanks around the
+  name and around the value. A value may contain `=`. If a name appears more
+  than once, the last line counts.
+  A required key is missing when it does not appear, or when its value is
+  empty.
+    - If nothing is missing, print `config ok: N required keys present` to
+      stdout (N = number of KEY arguments) and exit 0.
+    - Otherwise print one line `missing: KEY` to stderr for every missing key,
+      in the order the KEYs were given on the command line, followed by
+      `config invalid: M of N required keys missing`. Exit with status 1.
+      Do not stop at the first missing key.
+  With fewer than two arguments print `usage: solution.sh CONFIG_FILE KEY...`
+  to stderr and exit 2. An unreadable CONFIG_FILE prints `cannot read FILE`
+  to stderr and exits 2.
+concepts:
+  - "collect problems, report them all, then fail once"
+  - "declare -A to remember which keys have a value"
+  - "counting failures instead of exiting on the first"
+test_cases:
+  - name: everything present
+    args: [deploy.env, DB_HOST, DB_USER, API_TOKEN]
+    files:
+      deploy.env: |
+        # Harbour Bakery
+        DB_HOST = db.harbour.example
+        DB_USER=bakery
+        API_TOKEN=abc=def==
+        UNUSED=1
+    expected_stdout: "config ok: 3 required keys present"
+  - name: one absent, one empty, one commented out
+    args: [deploy.env, DB_HOST, DB_USER, DB_NAME, API_TOKEN]
+    files:
+      deploy.env: |
+        DB_HOST=
+        # DB_USER=bakery
+        API_TOKEN=secret
+    expected_stdout: ""
+    expected_stderr: |-
+      missing: DB_HOST
+      missing: DB_USER
+      missing: DB_NAME
+      config invalid: 3 of 4 required keys missing
+    expected_exit: 1
+  - name: the last assignment counts
+    args: [deploy.env, REGION, TIER]
+    files:
+      deploy.env: |
+        REGION=eu-north
+        TIER=gold
+        TIER=
+    expected_stderr: |-
+      missing: TIER
+      config invalid: 1 of 2 required keys missing
+    expected_exit: 1
+  - name: a key set only to blanks is empty
+    args: [deploy.env, SMTP_USER]
+    files:
+      deploy.env: "SMTP_USER =    \n"
+    expected_stderr: |-
+      missing: SMTP_USER
+      config invalid: 1 of 1 required keys missing
+    expected_exit: 1
+  - name: an empty file is missing everything
+    args: [empty.env, A_KEY, B_KEY]
+    files:
+      empty.env: ""
+    expected_stderr: |-
+      missing: A_KEY
+      missing: B_KEY
+      config invalid: 2 of 2 required keys missing
+    expected_exit: 1
+  - name: not enough arguments
+    args: [deploy.env]
+    files:
+      deploy.env: "A=1\n"
+    expected_stderr: "usage: solution.sh CONFIG_FILE KEY..."
+    expected_exit: 2
+  - name: unreadable file
+    args: [gone.env, DB_HOST]
+    expected_stderr: "cannot read gone.env"
+    expected_exit: 2

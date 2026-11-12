@@ -1,1 +1,6 @@
-`^` and `$` anchor the match to the whole string.
+Use =~ with an unquoted regex (a variable is the tidy way). Useful pieces: ^ start, $ end, [0-9] a digit, + one or more, ? zero or one, \. a real dot.
+
+  re='^ID-[0-9]+$'
+  if [[ $value =~ $re ]]; then echo "looks like an id"; fi
+
+Without ^ and $ the regex may match a small part in the middle of a longer string.

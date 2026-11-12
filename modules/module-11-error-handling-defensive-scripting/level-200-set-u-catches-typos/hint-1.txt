@@ -1,0 +1,1 @@
+Run the starter as it is: the typo produces a path starting with "/releases", which is exactly how real scripts end up aiming at the wrong place. You need Bash to complain about a name that was never set, and a way to say "this one may be missing, use a stand-in".

@@ -1,0 +1,15 @@
+  add_unique() {
+    local -n list=$1
+    local value=$2 item
+    for item in "${list[@]}"; do
+      ... if it equals "$value", return 0 ...
+    done
+    list+=("$value")
+  }
+
+  seen=()
+  while read -r line; do
+    ...skip blanks, call add_unique with the NAME seen...
+  done
+  echo "unique: ${#seen[@]}"
+  ...print each element as "- element"...

@@ -1,0 +1,6 @@
+`compgen -v PREFIX` lists the names of all variables that start with PREFIX (add `|| true` under `set -e`, it fails when there is none). `${!name}` reads a variable by name and `${name,,}` lowercases. Associative arrays remember nothing about order, so sort their keys:
+
+  declare -A seen=([b]=2 [a]=1)
+  printf '%s\n' "${!seen[@]}" | sort
+
+`printf '%-*s' "$width" "$text"` pads `text` on the right to `width` characters.

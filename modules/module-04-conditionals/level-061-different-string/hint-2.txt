@@ -1,0 +1,6 @@
+[[ a != b ]] is true when the two strings differ. Error messages go to stderr with >&2, and exit 1 ends the script with a failure status. Generic example:
+
+  if [[ $user != admin ]]; then
+    echo "admins only" >&2
+    exit 1
+  fi

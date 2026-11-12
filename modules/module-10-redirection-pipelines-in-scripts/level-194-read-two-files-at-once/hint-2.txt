@@ -1,0 +1,10 @@
+`exec 3< file` opens `file` for reading as descriptor 3. `read -r -u 3 var` reads the next line from descriptor 3 into `var`, and fails (non-zero status) at end of file. Generic example:
+
+  exec 3< prices.txt
+  while read -r item; do
+    read -r -u 3 price
+    echo "$item costs $price"
+  done < items.txt
+  exec 3<&-
+
+Use `||` after the read to supply a default when the file has ended.

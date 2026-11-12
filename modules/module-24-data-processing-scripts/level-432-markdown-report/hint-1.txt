@@ -1,0 +1,3 @@
+Markdown tables are plain text with a strict skeleton: a header row, a separator row that also sets the alignment, then body rows, all using the vertical bar as the column divider. Generating one is just printing those lines in the right order.
+
+Two things need thought: the table is only worth printing if there is something in it, and a bar character inside a name would be read as a column divider.

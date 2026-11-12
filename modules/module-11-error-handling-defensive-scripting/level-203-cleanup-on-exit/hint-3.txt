@@ -1,0 +1,13 @@
+Skeleton:
+
+  set -e
+  release_lock() {
+    rm -f deploy.lock
+    echo "lock released"
+  }
+  touch deploy.lock
+  trap release_lock EXIT
+  lanternbuild
+  echo "deploy finished"
+
+The exit status of the script stays the build's status, the trap does not change it.

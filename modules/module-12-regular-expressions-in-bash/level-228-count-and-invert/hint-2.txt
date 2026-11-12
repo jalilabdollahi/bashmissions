@@ -1,0 +1,5 @@
+  grep -c PATTERN file       prints the number of matching lines
+  grep -v PATTERN file       prints the lines that do NOT match
+  grep -v -E '^(a|b)' file   inverted extended regex: lines not starting with a or b
+
+Pipe one grep into another to combine rules. grep -c prints 0 AND exits 1 when nothing matches, which set -e treats as a failure, so wrap the substitution: n=$(... | grep -c x || true)

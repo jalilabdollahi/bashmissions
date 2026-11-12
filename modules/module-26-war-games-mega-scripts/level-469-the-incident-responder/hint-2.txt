@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Numeric comparison with a runtime operator: `awk -v v="$value" -v op="$op" -v t="$thr" 'BEGIN { if (op == ">") r = (v + 0 > t + 0); ...; exit !r }'`, then `if breached ...`. Bash's `(( ))` cannot compare decimals.
+- Atomic snapshots: `tmp=$(mktemp -d incidents/.tmp-XXXXXX)` and `trap '[[ -z $tmp ]] || rm -rf "$tmp"' EXIT`; finish with `mv "$tmp" "incidents/$id"` and set `tmp=` so the trap leaves the finished directory alone.
+- Zero-padded sequence: `printf 'INC-%04d-%s' "$seq" "$name"`; padded names sort correctly, which makes pruning simple.
+- Cooldown: read the stored epoch, `(( now - last < cooldown ))`, and print the remaining seconds.
+- Splitting lists: `IFS=',' read -ra specs <<< "$collectors"`; `logs:PATH:N` is taken apart with `${spec#logs:}`, `${path##*:}` and `${path%:*}`.
+- Pruning: `mapfile -t snaps < <(cd incidents && ls -d INC-* | sort)` then remove the first `count - keep` entries.

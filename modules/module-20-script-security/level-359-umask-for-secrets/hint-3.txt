@@ -1,0 +1,9 @@
+(
+  umask 077
+  mkdir -p secrets
+  printf '%s\n' "$key" > "secrets/$name.key"
+)
+printf '%s\n' "$name" >> index.txt
+printf 'stored: secrets/%s.key\n' "$name"
+
+Only the folder and the key file are created inside the parentheses.

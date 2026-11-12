@@ -1,0 +1,1 @@
+The length is only known when the script runs, so a fixed list or a brace range will not do. You need a loop that keeps its own counter: where it starts, when it stops, and how it moves after each round.

@@ -1,0 +1,8 @@
+  while IFS=, read -r user fullname group shell; do
+    lineno=$((lineno + 1)); (( lineno == 1 )) && continue
+    shell=${shell%$'\r'}; [[ -n $user ]] || continue
+    if [[ ! $user =~ ^[a-z][a-z0-9_-]{2,15}$ ]]; then ...stderr, failed++, continue; fi
+    if grep -q "^$user:" fixtures/etc/passwd; then ...skipped++, continue; fi
+    if useradd -m -c "$fullname" -g "$group" -s "$shell" "$user"; then ...created++; else ...failed++; fi
+  done < "$csv"
+Print the summary, then end with a command that is false when failed > 0.

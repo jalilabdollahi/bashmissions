@@ -1,1 +1,0 @@
-Check (( $# == 0 )) before touching "$1" when set -u is enabled.

@@ -1,0 +1,1 @@
+The draft leaves at the first absent tool, so it can only ever report one. Keep looping instead, remember every tool that was missing, and decide what to print and which status to use only after the loop is over.

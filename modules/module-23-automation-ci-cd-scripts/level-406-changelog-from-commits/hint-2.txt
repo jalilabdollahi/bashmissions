@@ -1,0 +1,6 @@
+Optional parts of a pattern still take a slot in BASH_REMATCH (empty when absent):
+
+  re='^([a-z]+)(\(([^)]+)\))?(!)?: (.+)$'
+  # 1=type 2=(scope) 3=scope 4=! 5=text
+
+`list+=("item")` appends to an array. `${#list[@]}` is its length. `printf '%s\n' "${list[@]}"` prints one element per line. Under `set -u`, expanding an empty array can fail in older Bash, so write `${list[@]+"${list[@]}"}`.

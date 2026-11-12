@@ -1,0 +1,8 @@
+user="$1"
+group="$2"
+mfa="$3"
+if [[ $group == staff && $mfa == yes ]]; then
+  echo "granted: $user"
+else
+  echo "..."   # denied line
+fi

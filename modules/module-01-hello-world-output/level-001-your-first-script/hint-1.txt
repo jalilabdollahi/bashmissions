@@ -1,1 +1,1 @@
-Start with a bash shebang and read the mission carefully. This level focuses on printing one exact line using `echo`.
+A script is just a text file full of commands, run from top to bottom. You need one command whose whole job is to show some text on the screen.

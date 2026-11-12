@@ -1,0 +1,113 @@
+id: 404
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Coverage Gate
+difficulty: advanced
+xp: 280
+story: |
+  North Pier Dental's booking widget went live with a test suite that covered
+  almost nothing, and a Saturday bug cost them forty appointments. Priya
+  proposes a rule: a build may not ship below an agreed coverage percentage.
+  The coverage tool already writes a plain report; someone must read it and say
+  yes or no. Bash has no decimals, so the trick is to avoid needing them.
+objective: |
+  Write solution.sh, called as `solution.sh THRESHOLD REPORT`. THRESHOLD is a
+  whole number from 0 to 100. REPORT has one line per source file:
+    <path> <covered lines> <total lines>
+  Blank lines and lines starting with `#` are ignored. Use integer arithmetic
+  only (no awk, bc or floating point).
+  Output, in this order:
+    coverage=<overall>% (threshold <THRESHOLD>%)
+    low: <path> <percent>%          one line per file below the threshold
+    gate: PASS    or    gate: FAIL
+  Overall coverage is total covered / total lines over all files, shown with
+  one decimal, rounded half up (82.5, 100.0, 0.5). A file percentage is shown
+  the same way; a file is "low" when its exact ratio is below THRESHOLD
+  (files with 0 total lines are skipped). The gate decides on the EXACT
+  overall ratio, not the rounded text: PASS when covered*100 >= THRESHOLD*total.
+  Exit 0 on PASS, 1 on FAIL.
+  Errors go to stderr with exit 2: a THRESHOLD that is not a whole number 0-100
+  or a missing argument prints `usage: solution.sh THRESHOLD REPORT`; an
+  unreadable REPORT prints `cannot read REPORT`; a line that is not
+  `<path> <number> <number>` or has covered > total prints `bad report line N`
+  (N counts every line, including comments); a report with no files prints
+  `no measurable lines`.
+concepts:
+  - "integer arithmetic for percentages (scale by 10 or 100)"
+  - "compare exact ratios by cross-multiplying"
+  - "validate numeric input with a regex before $(( ))"
+required_patterns:
+  - pattern: '\$\(\(|\(\('
+    message: "Do the percentage math with Bash arithmetic: $(( ... ))."
+forbidden_patterns:
+  - pattern: '\b(awk|bc|dc)\b'
+    message: "Keep it in Bash: scale the numbers instead of using floating point."
+test_cases:
+  - name: passes with one weak file
+    args: ["80", report.txt]
+    files:
+      report.txt: |
+        # coverage run 2291
+        core/api.py 90 100
+        core/db.py 45 50
+
+        ui/menu.py 30 50
+    expected_stdout: |-
+      coverage=82.5% (threshold 80%)
+      low: ui/menu.py 60.0%
+      gate: PASS
+  - name: fails a stricter threshold
+    args: ["90", report.txt]
+    files:
+      report.txt: |
+        core/api.py 90 100
+        core/db.py 45 50
+        ui/menu.py 30 50
+    expected_stdout: |-
+      coverage=82.5% (threshold 90%)
+      low: ui/menu.py 60.0%
+      gate: FAIL
+    expected_exit: 1
+  - name: rounds up in the display but the exact ratio fails
+    args: ["80", report.txt]
+    files:
+      report.txt: "booking/widget.js 1999 2500"
+    expected_stdout: |-
+      coverage=80.0% (threshold 80%)
+      low: booking/widget.js 80.0%
+      gate: FAIL
+    expected_exit: 1
+  - name: full coverage and a file with no lines
+    args: ["100", report.txt]
+    files:
+      report.txt: |
+        empty/__init__.py 0 0
+        a.py 7 7
+    expected_stdout: |-
+      coverage=100.0% (threshold 100%)
+      gate: PASS
+  - name: report with a broken line
+    args: ["70", report.txt]
+    files:
+      report.txt: |
+        # header
+        a.py 12 10
+    expected_stderr: "bad report line 2"
+    expected_exit: 2
+  - name: nothing to measure
+    args: ["70", report.txt]
+    files:
+      report.txt: "# nothing here\n"
+    expected_stderr: "no measurable lines"
+    expected_exit: 2
+  - name: threshold is not a number
+    args: ["high", report.txt]
+    files:
+      report.txt: "a.py 1 1"
+    expected_stderr: "usage: solution.sh THRESHOLD REPORT"
+    expected_exit: 2
+  - name: report is missing
+    args: ["50", gone.txt]
+    expected_stderr: "cannot read gone.txt"
+    expected_exit: 2

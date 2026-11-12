@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake run-job for BashMissions: pretends to do the named job.
+# JOB_RC (default 0) is its exit status.
+if [[ $# -ne 1 ]]; then
+  echo "usage: run-job NAME" >&2
+  exit 2
+fi
+echo "working on $1"
+exit "${JOB_RC:-0}"

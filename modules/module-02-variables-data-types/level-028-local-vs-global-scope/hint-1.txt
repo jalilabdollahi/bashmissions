@@ -1,1 +1,0 @@
-Inside a function, `local name=value` creates a variable scoped to that function. It shadows any global of the same name.

@@ -1,1 +1,0 @@
-Only strings beginning with `user:` should match.

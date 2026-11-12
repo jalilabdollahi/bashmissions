@@ -1,1 +1,0 @@
-An empty file and a missing file should both fall through to `empty` here.

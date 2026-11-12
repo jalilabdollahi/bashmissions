@@ -1,0 +1,11 @@
+Set IFS to a colon and a space so one read splits both, and keep results in an associative array:
+
+  declare -A info
+  while IFS=': ' read -r key value unit; do
+    info[$key]=$value
+  done < somefile
+  echo "${info[Name]}"
+  echo "${info[Missing]:-0}"      # default when absent
+  [[ -n ${info[Maybe]:-} ]]       # true when the key exists and is not empty
+
+Integer maths: $(( used * 100 / total )) multiplies first, so you do not lose everything to rounding.

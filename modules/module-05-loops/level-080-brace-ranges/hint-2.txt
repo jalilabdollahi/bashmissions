@@ -1,0 +1,1 @@
+A brace range is written {START..END}, for example for i in {1..4}; do echo "$i"; done prints 1 2 3 4. If the start has a leading zero, as in {001..003}, every number is padded to the same width: 001 002 003.

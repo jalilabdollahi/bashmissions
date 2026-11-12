@@ -1,0 +1,7 @@
+Put a star on both sides of the text. Keep the variable in double quotes but the stars outside them:
+
+  if [[ $text == *"$needle"* ]]; then
+    echo "found it"
+  fi
+
+Quoted parts of a pattern are literal. Unquoted stars are wildcards. Count lines with  n=$((n + 1))  inside a  while IFS= read -r line  loop.

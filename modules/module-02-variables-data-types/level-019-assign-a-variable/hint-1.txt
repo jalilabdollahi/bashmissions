@@ -1,1 +1,0 @@
-Bash assigns variables with `name=value`. There must be **no spaces** around the `=`.

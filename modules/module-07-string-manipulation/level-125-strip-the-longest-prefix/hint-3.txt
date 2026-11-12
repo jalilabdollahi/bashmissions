@@ -1,0 +1,6 @@
+  for path in "$@"; do
+    file=${path##*/}
+    echo "$path -> $file"
+  done
+
+The "*/" means "anything, then a slash". With two hashes, "anything" stretches to cover all the earlier directories.

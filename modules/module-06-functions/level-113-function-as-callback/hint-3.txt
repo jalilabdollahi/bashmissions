@@ -1,1 +1,0 @@
-Use a small transform function as the callback.

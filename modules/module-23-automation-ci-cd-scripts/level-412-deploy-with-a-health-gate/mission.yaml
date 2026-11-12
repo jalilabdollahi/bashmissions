@@ -1,0 +1,104 @@
+id: 412
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Deploy with a Health Gate
+difficulty: expert
+xp: 380
+story: |
+  Theo's deploy script prints "Done!" the moment the files are copied. The new
+  version of the booking service then spends forty seconds starting, serves 503s
+  to Harbour Bakery's customers, and the script is long gone. Mara wants a gate:
+  a deploy is finished only when the service answers its health endpoint, and
+  if it never does, the pipeline must fail loudly instead of waiting forever.
+objective: |
+  Write solution.sh, called as `solution.sh VERSION URL [MAX_ATTEMPTS]`.
+  MAX_ATTEMPTS defaults to 5 and must be a whole number of at least 1;
+  otherwise print `usage: solution.sh VERSION URL [MAX_ATTEMPTS]` to stderr and
+  exit 2 before doing anything.
+  1. Run `deployctl push VERSION`. If it fails print `deploy failed` to stderr
+     and exit 1, without polling.
+  2. Poll the health endpoint with exactly
+       curl -fs --max-time 2 URL
+     (its output is not wanted; send stdout and stderr to /dev/null). The
+     endpoint is healthy when curl exits 0.
+     For each attempt N that is not healthy print `attempt N/MAX: not healthy`.
+     Between two attempts run `sleep 2`; never sleep after the last attempt
+     and never after a success.
+  3. On the first healthy answer print `healthy after N attempt(s)` and exit 0.
+  4. If all attempts fail print `gave up after MAX attempts` to stderr and
+     exit 1.
+concepts:
+  - "retry loop with a maximum number of attempts"
+  - "using a command's exit status as the loop test"
+  - "no sleep after the final attempt; fail loudly on timeout"
+required_patterns:
+  - pattern: '\bsleep\s+2\b'
+    message: "Wait with `sleep 2` between attempts."
+test_cases:
+  - name: healthy on the third attempt
+    args: ["2.7.0", "http://barracuda.internal/health"]
+    env: {FAKE_HEALTHY_AFTER: "3"}
+    expected_stdout: |-
+      attempt 1/5: not healthy
+      attempt 2/5: not healthy
+      healthy after 3 attempt(s)
+    expected_files:
+      .calls.log: |
+        deployctl push 2.7.0
+        curl -fs --max-time 2 http://barracuda.internal/health
+        sleep 2
+        curl -fs --max-time 2 http://barracuda.internal/health
+        sleep 2
+        curl -fs --max-time 2 http://barracuda.internal/health
+  - name: healthy at once, no sleeping
+    args: ["2.7.1", "http://barracuda.internal/health"]
+    env: {FAKE_HEALTHY_AFTER: "1"}
+    expected_stdout: "healthy after 1 attempt(s)"
+    expected_files:
+      .calls.log: |
+        deployctl push 2.7.1
+        curl -fs --max-time 2 http://barracuda.internal/health
+  - name: never becomes healthy
+    args: ["2.8.0", "http://dory.internal/up", "3"]
+    env: {FAKE_HEALTHY_AFTER: "never"}
+    expected_stdout: |-
+      attempt 1/3: not healthy
+      attempt 2/3: not healthy
+      attempt 3/3: not healthy
+    expected_stderr: "gave up after 3 attempts"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        deployctl push 2.8.0
+        curl -fs --max-time 2 http://dory.internal/up
+        sleep 2
+        curl -fs --max-time 2 http://dory.internal/up
+        sleep 2
+        curl -fs --max-time 2 http://dory.internal/up
+  - name: healthy on exactly the last attempt
+    args: ["2.8.1", "http://dory.internal/up", "4"]
+    env: {FAKE_HEALTHY_AFTER: "4"}
+    expected_stdout: |-
+      attempt 1/4: not healthy
+      attempt 2/4: not healthy
+      attempt 3/4: not healthy
+      healthy after 4 attempt(s)
+  - name: deploy itself fails
+    args: ["2.9.0", "http://dory.internal/up"]
+    env: {FAKE_DEPLOY_FAIL: "1"}
+    expected_stderr: "deploy failed"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      .calls.log: "deployctl push 2.9.0"
+  - name: attempts must be a positive number
+    args: ["2.9.1", "http://dory.internal/up", "0"]
+    expected_stderr: "usage: solution.sh VERSION URL [MAX_ATTEMPTS]"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: attempts is not a number
+    args: ["2.9.1", "http://dory.internal/up", "many"]
+    expected_stderr: "usage: solution.sh VERSION URL [MAX_ATTEMPTS]"
+    expected_exit: 2

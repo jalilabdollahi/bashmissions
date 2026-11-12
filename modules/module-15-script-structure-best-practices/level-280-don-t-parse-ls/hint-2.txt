@@ -1,0 +1,7 @@
+A glob in a for loop yields one correct word per entry, even for names with spaces:
+
+  for f in "$dir"/*; do
+    [ -f "$f" ] && echo "regular file: ${f##*/}"
+  done
+
+`${f##*/}` deletes the longest prefix ending in a slash, leaving the bare name. `[ -f x ]` is true only for regular files, which also screens out the unmatched-pattern case.

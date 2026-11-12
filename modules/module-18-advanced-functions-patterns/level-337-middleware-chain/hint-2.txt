@@ -1,1 +1,9 @@
-Keep the example deterministic and clean up any processes or temporary resources you create.
+Keep the step names in an array, loop over it, and let the variable carry the text from step to step:
+
+  chain=("$@")
+  value=$line
+  for step in "${chain[@]}"; do
+    value=$("mw_$step" "$value")
+  done
+
+`IFS= read -r line` reads a line untouched. Handy expansions: `${s,,}` lowercase, `${s//[0-9]/#}` replace every digit, `${s:0:12}` first 12 characters, `${s#"${s%%[![:space:]]*}"}` strips leading whitespace (and the mirror image strips trailing).

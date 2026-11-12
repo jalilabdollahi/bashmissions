@@ -1,0 +1,71 @@
+id: 138
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Contains a Substring
+difficulty: intermediate
+xp: 130
+story: |
+  Something is timing out on the shared cluster and Mara wants to see which log
+  lines mention it. She could use grep, but the on-call helper script is pure Bash
+  and has to run on the minimal rescue image where nothing else is installed. The
+  search word comes from whoever is on call, and tonight it might be something
+  odd like "[WARN]" with brackets in it.
+objective: |
+  Write solution.sh. Its first argument is a search WORD; the log lines come
+  from standard input. For every line that contains WORD anywhere inside it
+  (case-sensitive, WORD taken literally, not as a pattern), print
+
+    line <N>: <the line>
+
+  where N is the line number counted from 1 across ALL input lines. After the
+  last line print  matches=<count>  (also when the count is 0). Test each line
+  with [[ $line == *"$word"* ]]. No grep, sed or awk.
+concepts:
+  - "[[ $s == *sub* ]] contains"
+  - "quote the variable inside the pattern to keep it literal"
+required_patterns:
+  - pattern: '\*"\$\{?[A-Za-z_][A-Za-z0-9_]*\}?"\*'
+    message: 'Wrap the search word in stars and quotes: [[ $line == *"$word"* ]].'
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk)\b'
+    message: "Test for the substring with [[ $line == *\"$word\"* ]], not with grep, sed or awk."
+test_cases:
+  - name: finds timeouts
+    args: [timeout]
+    stdin: "09:01 web-03 request ok\n09:02 web-03 timeout talking to db-01\n09:03 db-01 slow query\n09:04 web-07 timeout after 30s\n"
+    expected_stdout: |-
+      line 2: 09:02 web-03 timeout talking to db-01
+      line 4: 09:04 web-07 timeout after 30s
+      matches=2
+  - name: no match at all
+    args: [panic]
+    stdin: "boot ok\nservices started\n"
+    expected_stdout: |-
+      matches=0
+  - name: case matters
+    args: [ERROR]
+    stdin: "error: disk\nERROR: disk\nNo ERRORS here\n"
+    expected_stdout: |-
+      line 2: ERROR: disk
+      line 3: No ERRORS here
+      matches=2
+  - name: brackets are literal text
+    args: ["[WARN]"]
+    stdin: "[WARN] cert expires\nW cert\nN note\n[INFO] fine\n"
+    expected_stdout: |-
+      line 1: [WARN] cert expires
+      matches=1
+  - name: star is literal text too
+    args: ["a*b"]
+    stdin: "axxb\na*b=3\nab\n"
+    expected_stdout: |-
+      line 2: a*b=3
+      matches=1
+  - name: word with spaces, last line without newline
+    args: ["disk full"]
+    stdin: "disk ok\nwarning: disk full on eel\nhalibut disk full"
+    expected_stdout: |-
+      line 2: warning: disk full on eel
+      line 3: halibut disk full
+      matches=2

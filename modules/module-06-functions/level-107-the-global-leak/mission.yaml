@@ -1,0 +1,56 @@
+id: 107
+module: 6
+module_name: functions
+module_display: Functions
+title: The Global Leak
+difficulty: intermediate
+xp: 140
+story: |
+  Theo's "site census" script lists every hosted website with a running number and
+  a little bar showing how long its name is. Since he added the bar, the numbering
+  is stuck: every site is number 1. Theo swears the counter code did not change.
+  He is right. The bug is somewhere he did not look, and you get to play detective.
+objective: |
+  solution.sh already contains Theo's script. It takes site names as arguments and
+  should print one line per site, then a total:
+    <n>. <site> <bar>
+    total: <number of sites>
+  where <n> counts 1, 2, 3... and <bar> is one # for each character of the site name.
+  Example for  dory eel:
+    1. dory ####
+    2. eel ###
+    total: 2
+  Right now the numbers are wrong. Find the one function that damages a variable
+  of the main script and fix it so the main loop keeps its own count.
+  Keep the function make_bar, keep its job of storing the bar in the variable bar
+  (that part is intentional), and do not change the main loop. Fix the bug inside
+  the function.
+concepts:
+  - "a function that assigns without local overwrites the caller's variable"
+  - "diagnose: which variable name is shared?"
+required_patterns:
+  - pattern: '\blocal\s+'
+    message: "The fix is to make the helper's scratch variable local."
+  - pattern: '(^|\n)\s*(function\s+)?make_bar\s*(\(\s*\))?\s*\{'
+    message: "Keep the function make_bar."
+test_cases:
+  - name: three sites
+    args: [dory, eel, marlin]
+    expected_stdout: |-
+      1. dory ####
+      2. eel ###
+      3. marlin ######
+      total: 3
+  - name: one site
+    args: [flounder]
+    expected_stdout: |-
+      1. flounder ########
+      total: 1
+  - name: no sites
+    expected_stdout: "total: 0"
+  - name: long name
+    args: [halibut-east, ok]
+    expected_stdout: |-
+      1. halibut-east ############
+      2. ok ##
+      total: 2

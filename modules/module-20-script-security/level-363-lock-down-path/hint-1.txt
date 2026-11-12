@@ -1,0 +1,1 @@
+When a script types `ls`, the shell walks the list of folders in PATH, left to right, and runs the first program with that name. Whoever can influence the list or write into an early folder decides what runs. Take the decision back by choosing the list yourself, at the very start.

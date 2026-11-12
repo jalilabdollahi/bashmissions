@@ -1,0 +1,7 @@
+In Bash a function name can be defined again at any time, and the newest definition wins. Order is the whole trick:
+
+  source lib.sh          # defines greet() { echo hello; }
+  greet() { echo "ahoy"; }
+  greet                  # prints ahoy
+
+If you defined greet before sourcing, the library's version would replace yours.

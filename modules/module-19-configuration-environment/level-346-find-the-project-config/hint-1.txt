@@ -1,0 +1,1 @@
+Think of a person looking for a light switch: check this room, then step out into the corridor and check there, until you reach the front door. You need a "current folder" variable, a test for the file, a rule for when to give up (the root), and a way to get the parent of a folder.

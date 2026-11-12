@@ -1,0 +1,1 @@
+A version is three whole numbers, not a string. Check the shape strictly first, pull the three numbers out as numbers, add 1 to the right one and reset the ones to its right. Remember 9 + 1 is 10, which is why splitting on dots and doing arithmetic beats fiddling with characters.

@@ -1,0 +1,66 @@
+id: 185
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Input from a File
+difficulty: intermediate
+xp: 120
+story: |
+  Noor drafts customer notices in plain text files. The in-house mailer,
+  `lantern-mail`, was written by Theo on a Friday: it takes the recipient
+  as an argument and then waits for the message body to be typed on its
+  standard input. Nobody wants to type a notice twice. The file is already
+  right there.
+objective: |
+  Write solution.sh that takes two arguments: a RECIPIENT ($1) and a path to
+  a message FILE ($2).
+
+  If FILE does not exist or is not readable, print
+  `message file not found: <FILE>` to stderr and exit with status 1.
+
+  Otherwise run `lantern-mail RECIPIENT` and feed it the contents of FILE as
+  its standard input. Let the tool's own output appear on stdout.
+  Feed the file with the `<` redirection (not cat, not a pipe).
+concepts:
+  - "< connects a file to stdin (fd 0)"
+required_patterns:
+  - pattern: '<\s*"?\$'
+    message: "Connect the file to the command's stdin with <."
+forbidden_patterns:
+  - pattern: '\bcat\b'
+    message: "No cat: let the shell open the file with <."
+  - pattern: '\|'
+    message: "No pipe needed: redirect the file into the command."
+test_cases:
+  - name: three line notice
+    args: [noor@harbourbakery.example, notice.txt]
+    files:
+      notice.txt: |
+        Planned maintenance on Sunday.
+        Expect a short outage.
+        - Lanternfish
+    expected_stdout: |-
+      to: noor@harbourbakery.example
+      body: 3 lines, 68 bytes
+      first line: Planned maintenance on Sunday.
+  - name: one line notice
+    args: [books@tidewater.example, short.txt]
+    files:
+      short.txt: |
+        Invoice 2231 is ready.
+    expected_stdout: |-
+      to: books@tidewater.example
+      body: 1 lines, 23 bytes
+      first line: Invoice 2231 is ready.
+  - name: empty file gives an empty body
+    args: [pub@gull.example, blank.txt]
+    files:
+      blank.txt: ""
+    expected_stdout: |-
+      to: pub@gull.example
+      body: 0 lines, 0 bytes
+      first line: <empty>
+  - name: missing file
+    args: [pub@gull.example, nothere.txt]
+    expected_stderr: "message file not found: nothere.txt"
+    expected_exit: 1

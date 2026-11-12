@@ -1,0 +1,14 @@
+  declare -A counters=([invoice]=0 [ticket]=0)
+  kind_ok() { [[ -n ${counters[$1]+x} ]] || { echo "gen_next: unknown kind '$1'" >&2; exit 2; }; }
+  gen_next() {
+    local kind=$1
+    kind_ok "$kind"
+    counters[$kind]=$(( counters[$kind] + 1 ))
+    case $kind in
+      invoice) printf -v REPLY 'INV-%04d' "${counters[invoice]}" ;;
+      ticket)  # TCK-%03d
+    esac
+  }
+  while read -r word arg; do
+    # blank: continue; "reset": kind_ok, zero the counter; otherwise gen_next + echo "$REPLY"
+  done

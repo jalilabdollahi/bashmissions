@@ -1,0 +1,1 @@
+Three printf lines in this shape: printf '\033[32mOK\033[0m %s responds in time\n' "$SERVICE". For the other two change the colour number (33 for WARN, 31 for FAIL) and the words of the sentence.

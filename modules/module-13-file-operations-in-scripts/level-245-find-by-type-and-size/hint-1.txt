@@ -1,0 +1,1 @@
+`find` can test what *kind* of thing an entry is (file, folder, ...) and how big it is. Without a type test, folders sneak into a "big files" list, because a folder's own size is not the size of what is inside it. Also consider that the folder you start from is itself a folder.

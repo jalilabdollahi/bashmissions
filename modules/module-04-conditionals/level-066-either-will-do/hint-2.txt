@@ -1,0 +1,5 @@
+Inside [[ ]], || means "or". You can chain several: the whole test is true when any part is true. Each part needs its own full comparison. Generic example:
+
+  if [[ $drink == tea || $drink == coffee || $hour -lt 6 ]]; then
+    echo "caffeinated"
+  fi

@@ -1,0 +1,4 @@
+  set -o pipefail
+  deploy-tool "$site" 2>&1 | tee -a deploy.log
+
+With pipefail on, the script's last status is deploy-tool's, so it also becomes the script's exit status.

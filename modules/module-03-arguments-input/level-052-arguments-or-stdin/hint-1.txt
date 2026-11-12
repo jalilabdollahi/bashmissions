@@ -1,0 +1,1 @@
+Two sources, one preference order: the argument first, stdin only as a fallback. Start by finding out whether the first argument exists without crashing when it does not. Then read from stdin only if you still have nothing. Finally check once more that you ended up with something.

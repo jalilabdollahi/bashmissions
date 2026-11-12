@@ -1,0 +1,15 @@
+Skeleton:
+
+  total=$#; n=0
+  for step in "$@"; do
+    n=$(( n + 1 ))
+    echo "step $n/$total: $step"
+    rc=0
+    bash "$step" || rc=$?
+    if (( rc != 0 )); then
+      # message on stderr, then leave with the same code
+    fi
+  done
+  # final success line
+
+Do not forget the usage check before the loop.

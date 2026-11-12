@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+if [ "$#" -eq 0 ]; then ...usage...; exit 2; fi
+count=0
+for path in "$@"; do
+  lower=$(printf '%s' "$path" | tr '[:upper:]' '[:lower:]')
+  if [ ! -e "$path" ]; then kind=missing
+  elif [ -d "$path" ]; then kind=directory
+  else
+    case "$lower" in
+      *.png|*.jpg|*.jpeg|*.gif) kind=image ;;
+      # archive, log, and the default branch *)
+    esac
+  fi
+  printf '%s: %s\n' "$path" "$kind"
+  count=$((count + 1))
+done

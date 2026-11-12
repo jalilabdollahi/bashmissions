@@ -1,0 +1,6 @@
+port=$(( 16#$port_hex ))
+mode=$(( ...#$mode_oct ))        # the octal base
+echo "port=$port"
+echo "mode=$mode"
+printf 'port_octal=%o\n' "..."
+printf 'mode_hex=%x\n' "..."

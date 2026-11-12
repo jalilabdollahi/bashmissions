@@ -1,0 +1,1 @@
+Three promises: never two copies at once, always leave a log, always report the job's own result. For the first you need a lock that can be taken by only one caller. Be careful about who is allowed to remove it: only the run that created it.

@@ -1,1 +1,12 @@
-Keep the script safe and deterministic inside the mission workspace.
+A stable pseudo-random number from text: cksum prints "CRC size", so
+
+  read -r sum _ < <(printf '%s' "$flag:$user" | cksum)
+  bucket=$(( sum % 100 ))
+
+(printf '%s' avoids a trailing newline that would change the CRC.)
+
+For membership tests keep each list wrapped in commas, then use a glob match:
+  allow=",ollie,noor,"      [[ $allow == *",$user,"* ]]
+For the parse, split at the first = with  name=${line%%=*}  and  rest=${line#*=}, then loop over the words of rest with  for opt in $rest  and split each with  ${opt%%=*} / ${opt#*=}.
+Associative arrays: declare -A fstate frollout; remember file order in a normal array: order+=("$name").
+Beware: a number with a leading zero is octal inside (( )); use 10#$val.

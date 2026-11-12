@@ -1,0 +1,81 @@
+id: 390
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Memory from meminfo
+difficulty: advanced
+xp: 170
+story: |
+  A customer's PHP shop on dory keeps getting its processes killed at random.
+  Noor suspects memory, and Ollie runs `free`, but Mara wants the script to read
+  the kernel's own ledger: `/proc/meminfo`, a plain-text file of `Name: number kB`
+  lines. Your workspace has copies from three machines, so you can practise
+  safely.
+objective: |
+  Write solution.sh: `solution.sh MEMINFO LIMIT`. MEMINFO is a file in
+  `/proc/meminfo` format (all values in kB), LIMIT a whole percentage.
+
+  Print these lines:
+
+      memory: 2048 MiB used of 8192 MiB (25%)
+      swap: 0 MiB used of 2048 MiB
+
+  - used = MemTotal minus MemAvailable. If the file has no MemAvailable
+    line (old kernels), use MemFree + Buffers + Cached as the available amount.
+  - MiB values are kB divided by 1024, the percentage is used * 100 / MemTotal;
+    both use integer division (rounded down).
+  - Swap used = SwapTotal - SwapFree. If SwapTotal is 0, print `swap: none`.
+  - If the memory percentage is at or above LIMIT, add a third line
+    `WARN: memory at 95% (limit 90%)` and exit 1.
+
+  Errors: unreadable file -> `cannot read MEMINFO` on stderr, exit 1; no
+  MemTotal line -> `no MemTotal in MEMINFO`, exit 3; missing or non-numeric
+  arguments -> `usage: solution.sh MEMINFO LIMIT`, exit 2.
+concepts:
+  - "/proc/meminfo is Name: value kB, one per line"
+  - "IFS=': ' read splits key and value"
+  - "fall back when a field is missing"
+required_patterns:
+  - pattern: 'IFS='
+    message: "Split each Name: value line with read and IFS=': '."
+test_cases:
+  - name: roomy machine
+    args: [fixtures/meminfo-ok, "90"]
+    expected_stdout: |-
+      memory: 2048 MiB used of 8192 MiB (25%)
+      swap: 0 MiB used of 2048 MiB
+  - name: nearly out of memory
+    args: [fixtures/meminfo-tight, "90"]
+    expected_stdout: |-
+      memory: 3891 MiB used of 4096 MiB (95%)
+      swap: 768 MiB used of 1024 MiB
+      WARN: memory at 95% (limit 90%)
+    expected_exit: 1
+  - name: old kernel without MemAvailable, no swap
+    args: [fixtures/meminfo-old, "80"]
+    expected_stdout: |-
+      memory: 1152 MiB used of 2048 MiB (56%)
+      swap: none
+  - name: exactly at the limit warns
+    args: [fixtures/meminfo-old, "56"]
+    expected_stdout: |-
+      memory: 1152 MiB used of 2048 MiB (56%)
+      swap: none
+      WARN: memory at 56% (limit 56%)
+    expected_exit: 1
+  - name: file without MemTotal
+    args: [odd-meminfo, "80"]
+    files:
+      odd-meminfo: |
+        MemFree:         1000 kB
+        SwapTotal:          0 kB
+    expected_stderr: "no MemTotal in odd-meminfo"
+    expected_exit: 3
+  - name: file missing
+    args: [fixtures/nope, "80"]
+    expected_stderr: "cannot read fixtures/nope"
+    expected_exit: 1
+  - name: usage
+    args: [fixtures/meminfo-ok]
+    expected_stderr: "usage: solution.sh MEMINFO LIMIT"
+    expected_exit: 2

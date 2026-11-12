@@ -1,0 +1,1 @@
+Two situations need the same text but different treatment: someone who asks for help is happy, so the text is normal output; someone who runs the script wrongly has made a mistake, so the text goes to the error stream and the exit status says so. Put the text in one function and call it from both places.

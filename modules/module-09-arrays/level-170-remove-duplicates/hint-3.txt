@@ -1,0 +1,8 @@
+for name in "$@"; do
+  seen=0
+  for kept in "${unique[@]}"; do
+    # if $kept equals "$name": seen=1 and break
+  done
+  # if seen is still 0: unique+=("$name")
+done
+echo "removed: $(( $# - ${#unique[@]} ))"

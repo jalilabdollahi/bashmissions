@@ -1,0 +1,3 @@
+Spaces are a bad separator for this format because the request and the agent contain spaces. But the fields that contain spaces are exactly the ones wrapped in double quotes, so the quote character is a better separator: cut the line at the quotes, and every piece is either a quoted field or a short run of plain space-separated words.
+
+Check that the line has the shape you expect before you read fields by position.

@@ -1,0 +1,12 @@
+For 20241107T093015 the layout is:  YYYY MM DD T hh mm ss  at offsets 0, 4, 6, (8 is the T), 9, 11, 13.
+
+  stamp=$1
+  year=${stamp:0:4}
+  month=${stamp:4:2}
+  day=...
+  hour=${stamp:9:2}
+  ...
+  echo "date=$year-$month-$day"
+  echo "time=$hour:$minute:$second"
+
+Fill in the day, minute and second.

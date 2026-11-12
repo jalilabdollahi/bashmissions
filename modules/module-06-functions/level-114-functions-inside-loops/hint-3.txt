@@ -1,0 +1,13 @@
+  print_row() {
+    local host=$1 pct=$2 label=OK
+    if (( pct >= 90 )); then label=CRIT
+    elif ... ; then ...
+    fi
+    printf '%-10s %3d%%  %s\n' "$host" "$pct" "$label"
+  }
+
+  rows=0
+  while read -r host pct; do
+    ...skip blanks, call print_row, rows=$(( rows + 1 ))...
+  done
+  echo "rows: $rows"

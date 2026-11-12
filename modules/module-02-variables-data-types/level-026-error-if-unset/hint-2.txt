@@ -1,1 +1,0 @@
-It works on positional parameters: `${1:?missing argument}` is a one-liner argument check.

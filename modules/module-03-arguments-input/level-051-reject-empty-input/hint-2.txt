@@ -1,0 +1,5 @@
+`[[ -z $value ]]` is true when `$value` has no characters. Make `read` forgiving with `|| true` (run `true` if read fails) and give the variable a starting value so it always exists:
+
+  name=""
+  read -r name || true
+  [[ -z $name ]] && { echo "no name" >&2; exit 1; }

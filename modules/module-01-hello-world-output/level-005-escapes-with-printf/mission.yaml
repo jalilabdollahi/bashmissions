@@ -1,0 +1,36 @@
+id: 5
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Escapes with printf
+difficulty: beginner
+xp: 70
+story: |
+  Gus wants a quick table of which servers are up so he can paste it straight
+  into his spreadsheet. Spreadsheets split columns on tab characters, and a
+  row of spaces will not do. Mara introduces you to printf, the careful
+  cousin of echo, which understands \t for a tab and \n for a new line.
+objective: |
+  Write solution.sh so that a single printf command prints this table. The
+  gaps are real tab characters and each row ends with a newline:
+    SERVER<TAB>STATUS
+    anchovy<TAB>up
+    barracuda<TAB>down
+  Use \t and \n inside the printf text; do not type literal tabs.
+concepts:
+  - "printf does not add a newline on its own"
+  - "\\n is a new line, \\t is a tab"
+single_case: true
+required_patterns:
+  - pattern: '\bprintf\b'
+    message: "Use printf for this one."
+  - pattern: '\\t'
+    message: "Use \\t for the tab characters."
+  - pattern: '\\n'
+    message: "Use \\n to end each row."
+forbidden_patterns:
+  - pattern: '\becho\b'
+    message: "This level is about printf; leave echo out."
+test_cases:
+  - name: tab separated table
+    expected_stdout: "SERVER\tSTATUS\nanchovy\tup\nbarracuda\tdown"

@@ -1,0 +1,6 @@
+One read, one echo:
+
+  read -r host address role
+  echo "role=$role host=$host address=$address"
+
+Note that the echo prints the variables in a different order from the order you read them.

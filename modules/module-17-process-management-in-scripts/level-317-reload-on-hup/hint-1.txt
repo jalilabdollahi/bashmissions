@@ -1,0 +1,1 @@
+HUP is how you tell a running program "re-read your configuration" without restarting it. Your script needs a small routine that loads the setting, a handler that runs the routine again when HUP arrives, and a flag so the main flow can see that it happened. Order matters: the handler must exist before anybody can send the signal.

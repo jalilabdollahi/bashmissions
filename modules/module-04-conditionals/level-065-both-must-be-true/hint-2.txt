@@ -1,0 +1,5 @@
+Inside [[ ]] you can join two tests with && ("and"). The whole thing is true only if both sides are true. Generic example:
+
+  if [[ $fish == trout && $size == large ]]; then
+    echo "keeper"
+  fi

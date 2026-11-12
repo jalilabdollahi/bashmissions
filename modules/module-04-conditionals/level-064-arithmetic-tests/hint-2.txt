@@ -1,0 +1,5 @@
+(( expression )) is true when the expression is non-zero, so (( a > b )) is a test, and inside it you write variable names without a dollar sign. To use a calculated value in text, write $(( a - b )). Generic example:
+
+  if (( cups >= 3 )); then
+    echo "that is $(( cups - 3 )) over the limit"
+  fi

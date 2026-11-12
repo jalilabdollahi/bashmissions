@@ -1,0 +1,45 @@
+id: 157
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Create an Array
+difficulty: beginner
+xp: 100
+story: |
+  Lanternfish keeps a night-watch rota: three servers that get a human looking
+  at them while the harbour sleeps. Until now Mara kept it in a sticky note
+  on her monitor. She wants it in a script, as one variable that holds the
+  whole list, so later tools can loop over it, count it and slice it.
+objective: |
+  Write solution.sh that takes exactly three arguments: the three servers on
+  tonight's rota. Put them into one Bash array named `rota`, then print the
+  array with `declare -p rota` (that shows every element and its index).
+  For example, `./solution.sh anchovy barracuda cuttlefish` prints:
+    declare -a rota=([0]="anchovy" [1]="barracuda" [2]="cuttlefish")
+  A server name may contain spaces and arrives as one argument; it must stay
+  one element. If the number of arguments is not exactly 3, print
+  "usage: solution.sh SERVER1 SERVER2 SERVER3" to stderr and exit with status 2.
+concepts:
+  - "arr=(a b c) creates an array"
+  - "each element has a numbered index starting at 0"
+  - "declare -p shows what a variable really holds"
+required_patterns:
+  - pattern: '\brota=\('
+    message: "Create the array with rota=( ... ) - round brackets make an array."
+test_cases:
+  - name: three plain names
+    args: [anchovy, barracuda, cuttlefish]
+    expected_stdout: |-
+      declare -a rota=([0]="anchovy" [1]="barracuda" [2]="cuttlefish")
+  - name: different servers
+    args: [marlin, octopus, dory]
+    expected_stdout: |-
+      declare -a rota=([0]="marlin" [1]="octopus" [2]="dory")
+  - name: a name with spaces stays one element
+    args: ["Gull & Anchor", eel, "old flounder"]
+    expected_stdout: |-
+      declare -a rota=([0]="Gull & Anchor" [1]="eel" [2]="old flounder")
+  - name: too few arguments
+    args: [anchovy, eel]
+    expected_stderr: "usage: solution.sh SERVER1 SERVER2 SERVER3"
+    expected_exit: 2

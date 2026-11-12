@@ -1,0 +1,8 @@
+hit=""
+for file in "$@"; do
+  if grep -q -E '^PermitRootLogin[[:space:]]+yes' "$file" 2>/dev/null; then
+    hit=$file
+    break
+  fi
+done
+After done: if [[ -n $hit ]] print "first insecure config: $hit"; else print "no insecure config found" and exit 1. Do the usage check on $# first.

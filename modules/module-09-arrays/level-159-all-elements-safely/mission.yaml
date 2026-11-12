@@ -1,0 +1,57 @@
+id: 159
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: All Elements Safely
+difficulty: beginner
+xp: 110
+story: |
+  Gus is preparing the monthly invoices and has a list of customers who need
+  one. Some of them are called things like "Tidewater Books" and "Gull &
+  Anchor Pub". The old script he borrowed turned every invoice into three
+  half-invoices, because it split names at every space. He would like it to
+  stop doing that, and he would also like it not to invoice a customer called
+  "*" for the whole directory.
+objective: |
+  Write solution.sh. Its arguments are customer names. Store them in an array,
+  then print one line per customer, in the given order:
+    invoice: <customer name>
+  A name with spaces is one customer and must stay on one line, exactly as
+  given (including repeated spaces and a lone "*"). With no arguments print
+  nothing at all.
+  Expand the whole array with "${name[@]}" in double quotes.
+concepts:
+  - "\"${arr[@]}\" expands to every element, one word each"
+  - "unquoted expansion splits on spaces and globs"
+required_patterns:
+  - pattern: '"\$\{\w+\[@\]\}"'
+    message: 'Expand the array with "${customers[@]}" - the quotes are what keep each name whole.'
+forbidden_patterns:
+  - pattern: '\[\*\]'
+    message: "Use [@], not [*]. In quotes, [*] glues all elements into a single string."
+test_cases:
+  - name: plain names
+    args: [bakery, dentist, pub]
+    expected_stdout: |-
+      invoice: bakery
+      invoice: dentist
+      invoice: pub
+  - name: names with spaces
+    args: ["Tidewater Books", "Gull & Anchor Pub", "North Pier Dental"]
+    expected_stdout: |-
+      invoice: Tidewater Books
+      invoice: Gull & Anchor Pub
+      invoice: North Pier Dental
+  - name: repeated spaces and a star survive
+    args: ["Reef   Cafe", "*", "Pier 9 *"]
+    expected_stdout: |-
+      invoice: Reef   Cafe
+      invoice: *
+      invoice: Pier 9 *
+  - name: one customer
+    args: ["Harbour Bakery"]
+    expected_stdout: |-
+      invoice: Harbour Bakery
+  - name: nobody to invoice
+    args: []
+    expected_stdout: ""

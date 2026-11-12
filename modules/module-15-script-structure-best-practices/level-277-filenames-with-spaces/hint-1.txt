@@ -1,0 +1,1 @@
+An unquoted variable is chopped into words at every space, and each word that looks like a pattern is matched against the files in the current folder. Anywhere the script mentions `$1`, `$f` or `$name`, ask yourself whether it should stay one word.

@@ -1,0 +1,1 @@
+Instead of one `echo` per line, bash lets you write a block of text directly in the script and feed it to a command as its input. Inside such a block, the shell replaces variables with their values, just like in double quotes.

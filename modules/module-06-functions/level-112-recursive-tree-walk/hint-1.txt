@@ -1,1 +1,0 @@
-Recursive directory walking calls the same function for subdirectories.

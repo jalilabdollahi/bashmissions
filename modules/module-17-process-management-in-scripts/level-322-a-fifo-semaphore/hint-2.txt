@@ -1,0 +1,8 @@
+`mkfifo name` makes the pipe. `exec 3<> name` opens it on file descriptor 3 for reading and writing at once (so it does not block waiting for a partner), after which `rm name` is safe. Then:
+
+  echo >&3            # put a token in (write one newline to fd 3)
+  read -r -u 3        # take a token out; blocks while the pipe is empty
+
+A job in the background group must return its token even when the command failed, so put `echo >&3` after the command without relying on its status:
+
+  { mycmd || echo "$name" >> failed.log; echo >&3; } &

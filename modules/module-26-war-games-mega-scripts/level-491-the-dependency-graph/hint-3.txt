@@ -1,1 +1,19 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A deps defline dependents; names=(); problems=0
+  parse: for each line: skip blank/#; no ":" -> problem; name = text before ":" (trim, regex ^[a-z0-9-]+$);
+         duplicate -> problem; deps[$name] = unique words after ":"; defline[$name]=$n; names+=("$name")
+  then for every name and dependency not in defline: problem "$line" "unknown dependency '$d' of '$name'"
+  (( problems == 0 )) || exit 2
+
+  declare -A inplay unmet placed
+  targets: stack walk, or all names when no target given ("unknown service" for a bad one)
+  for name in "${!inplay[@]}"; do unmet[$name]=count of deps; dependents[$d]+="$name "; done
+
+  while (( remaining > 0 )); do
+    ready=( names in play, unplaced, unmet == 0 ); (( ${#ready[@]} )) || break
+    layer=$(printf '%s\n' "${ready[@]}" | LC_ALL=C sort | tr '\n' ' '); layers+=("${layer% }")
+    for name in "${ready[@]}"; do placed[$name]=1; remaining--; for w in ${dependents[$name]:-}; do unmet[$w]--; done; done
+  done
+  remaining > 0: walk the leftover graph, print "cycle detected: a -> b -> a", exit 1
+  levels: "N: names"; order: one per line; stop: same reversed; check: summary

@@ -1,0 +1,86 @@
+id: 384
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Log Levels and Filtering
+difficulty: intermediate
+xp: 140
+story: |
+  Theo's new billing worker is chatty: it writes hundreds of DEBUG lines per
+  minute, and last night the one ERROR that mattered scrolled past unseen.
+  Mara asks for a small log filter the whole team can reuse, with a dial
+  in the environment: production runs it quiet, Theo's laptop runs it loud.
+objective: |
+  Write solution.sh that reads log lines from stdin. Each line starts with a
+  level word (DEBUG, INFO, WARN or ERROR) followed by a message, for example
+  `WARN card gateway slow`.
+
+  The environment variable LOG_LEVEL is the threshold (default INFO). The
+  order from quiet to loud is ERROR, WARN, INFO, DEBUG. Print only the lines
+  whose level is at least as important as the threshold, unchanged, to stdout.
+  So LOG_LEVEL=WARN keeps WARN and ERROR, and LOG_LEVEL=DEBUG keeps everything.
+
+  - A line whose first word is not one of the four levels is skipped, and
+    one line `skipped: <the line>` goes to stderr.
+  - If LOG_LEVEL is not one of the four words, print
+    `unknown LOG_LEVEL: <value>` to stderr, read nothing, exit 2.
+concepts:
+  - "an associative array maps level names to numbers"
+  - "a threshold compares numbers, not words"
+  - "${VAR:-default}"
+required_patterns:
+  - pattern: 'declare\s+-A'
+    message: "Map level names to numbers with an associative array (declare -A)."
+test_cases:
+  - name: default threshold is INFO
+    stdin: |
+      DEBUG cache warmed
+      INFO order 8841 accepted
+      WARN card gateway slow
+      ERROR order 8842 failed
+    expected_stdout: |-
+      INFO order 8841 accepted
+      WARN card gateway slow
+      ERROR order 8842 failed
+  - name: WARN keeps only the important lines
+    env: {LOG_LEVEL: WARN}
+    stdin: |
+      INFO order 1 accepted
+      WARN disk at 81%
+      DEBUG tick
+      ERROR worker crashed
+    expected_stdout: |-
+      WARN disk at 81%
+      ERROR worker crashed
+  - name: DEBUG keeps everything
+    env: {LOG_LEVEL: DEBUG}
+    stdin: |
+      DEBUG a
+      INFO b
+    expected_stdout: |-
+      DEBUG a
+      INFO b
+  - name: ERROR is the quietest setting
+    env: {LOG_LEVEL: ERROR}
+    stdin: |
+      WARN not shown
+      ERROR shown
+    expected_stdout: "ERROR shown"
+  - name: lines without a level are skipped with a note
+    stdin: |
+      INFO fine
+      TRACE too detailed
+      just text
+      ERROR bad
+    expected_stdout: |-
+      INFO fine
+      ERROR bad
+    expected_stderr: |-
+      skipped: TRACE too detailed
+      skipped: just text
+  - name: unknown threshold
+    env: {LOG_LEVEL: LOUD}
+    stdin: |
+      INFO hello
+    expected_stderr: "unknown LOG_LEVEL: LOUD"
+    expected_exit: 2

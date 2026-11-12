@@ -1,0 +1,1 @@
+`wc` does the counting, but it formats its answer differently depending on how you call it: with a file name it prints the name too, and on some systems it pads the number with spaces. Find the way to call it so that only a clean number comes out, then add the numbers up as you go.

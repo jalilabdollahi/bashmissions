@@ -1,0 +1,6 @@
+Right under the shebang:
+
+  set -e
+  trap 'echo "error: line $LINENO: $BASH_COMMAND" >&2' ERR
+
+Then keep the three commands and the final echo unchanged. If your line number looks wrong, check that the trap is in single quotes and the handler is not a separate function (inside a function $LINENO points into the function).

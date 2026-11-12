@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Windows line endings: `tr -d '\r' < "$f" > "$work/in.csv"`, then work on the clean copy but compute `cksum < "$f"` on the original, because that is what the sender re-sends.
+- Re-delivery: `awk -v c="$crc" -v s="$size" '$1 == c && $2 == s { print $3; exit }' processed.list`.
+- Validation order matters, so use one `reject("reason"); next` per rule, in the order of the objective. Trim fields with `sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s)`.
+- Preload the known ids inside `BEGIN` with `while ((getline line < ids) > 0) { split(line, a, "|"); known[a[1]] = 1 }`.
+- Write rows from awk with `printf ... >> out` and counters from `END` into a counts file; read them back with `read -r a b c d e < counts`.
+- `printf "%.2f"` gives the two-decimal total; `toupper()` normalises the SKU.
+- Reason ranking: `sort -t'|' -k1,1nr -k2,2` (count descending, then name).

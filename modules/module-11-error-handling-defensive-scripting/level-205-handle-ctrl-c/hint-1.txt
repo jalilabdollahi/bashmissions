@@ -1,0 +1,1 @@
+Ctrl-C is not an error code; it is a signal that Bash receives while the script runs. By default the signal kills the script on the spot. You can instead tell Bash "when this signal arrives, run my code", and decide for yourself how to leave.

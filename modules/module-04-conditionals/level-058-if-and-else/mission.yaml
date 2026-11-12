@@ -1,0 +1,55 @@
+id: 58
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: if and else
+difficulty: beginner
+xp: 70
+story: |
+  Every morning Noor opens the Harbour Bakery ordering-site log and scans it for
+  the word ERROR. "Most days it is clean," she sighs, "and I still read three
+  hundred lines to be sure." Let the script do the reading, and have it answer
+  either way so Noor never wonders whether it ran.
+objective: |
+  Write solution.sh that takes one argument: the path of a log file.
+  If the file contains the word `ERROR` (capitals, exactly), print:
+    needs attention: ERROR found in <file>
+  Otherwise print:
+    clean: no ERROR in <file>
+  where <file> is the path exactly as given. Always print exactly one of the two lines.
+  Hint for the condition: `grep -q` searches silently and succeeds when it finds a match,
+  and `if` can test any command, not only `[[ ]]`.
+concepts:
+  - "if ... else ... fi"
+  - "if testing a command's exit status"
+required_patterns:
+  - pattern: '\belse\b'
+    message: "This level needs both branches: add an else."
+test_cases:
+  - name: log with an error
+    args: [shop.log]
+    files:
+      shop.log: |
+        2024-05-02 08:00:01 INFO order 4411 accepted
+        2024-05-02 08:00:09 ERROR payment gateway timeout
+        2024-05-02 08:01:15 INFO order 4412 accepted
+    expected_stdout: "needs attention: ERROR found in shop.log"
+  - name: quiet log
+    args: [shop.log]
+    files:
+      shop.log: |
+        2024-05-02 08:00:01 INFO order 4411 accepted
+        2024-05-02 08:01:15 INFO order 4412 accepted
+    expected_stdout: "clean: no ERROR in shop.log"
+  - name: lowercase error does not count
+    args: [bakery-web.log]
+    files:
+      bakery-web.log: |
+        retrying after error in cache layer
+        error handled, continuing
+    expected_stdout: "clean: no ERROR in bakery-web.log"
+  - name: empty log is clean
+    args: [empty.log]
+    files:
+      empty.log: ""
+    expected_stdout: "clean: no ERROR in empty.log"

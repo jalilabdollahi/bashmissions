@@ -1,22 +1,173 @@
 id: 486
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The SLA Monitor
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The SLA Monitor` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The SLA Monitor
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 380
+story: |
+  Gus has read the hosting contracts again, and this time he found the clause
+  about "99.9% monthly availability". Storm season is chewing through that
+  number, and he wants to know, per service, how much downtime is left before
+  Lanternfish owes customers money. The probe robot already writes one line a
+  minute per service; nobody has ever turned that pile into a verdict. Mara
+  asks for a tool that is blunt about the budget, and honest about the minutes
+  when the probe robot itself was blind.
+objective: |
+  Write solution.sh, an uptime and error-budget calculator.
+
+    solution.sh [--strict] SLO PROBES
+
+  SLO lists the promise per service, one per line: `SERVICE TARGET`, where
+  TARGET is a percentage with at most 3 decimals (`99.9`, `99.95`, `99`,
+  `100`), between 0 and 100. Blank lines and `#` comments are ignored. A
+  malformed line prints `bad SLO line N` to stderr and exits 2.
+
+  PROBES holds one probe per line: `EPOCH SERVICE STATE`, STATE being `up`,
+  `degraded` or `down`. EPOCH is in seconds; the MINUTE of a probe is
+  EPOCH / 60 (integer division). The robot probes every minute. For each
+  service the window runs from its first probe's minute to its last probe's
+  minute, inclusive, so
+    TOTAL = last_minute - first_minute + 1
+  Every minute of the window without a probe is a blind minute and counts as
+  DOWN. `down` probes are down; `degraded` probes count as up, unless
+  `--strict` is given, then they count as down too.
+    BAD = down minutes (probed or blind),  UP = TOTAL - BAD
+
+  Per service compute:
+    UPTIME  = UP * 100 / TOTAL as a percentage with 3 decimals, rounded DOWN
+              (use integer maths on thousandths of a percent: UP*100000/TOTAL
+              and print it as `99.500`)
+    ALLOWED = TOTAL * (100 - TARGET) / 100 minutes, integer part only. Do the
+              maths in thousandths of a percent: TOTAL * (100000 - T1000) / 100000
+              where T1000 is the target in thousandths (99.9 -> 99900)
+    OUTAGES = number of runs of consecutive bad minutes; LONGEST = the length
+              of the longest run, in minutes
+  The service MEETS its target when BAD * 100000 <= TOTAL * (100000 - T1000)
+  (compare exactly; do not use the rounded ALLOWED for this).
+
+  Print one line per service, in SLO file order:
+    `NAME: uptime U% (target T%) used BAD of ALLOWED min, outages=O longest=L min -> STATUS`
+  with T printed with 3 decimals like U, and STATUS one of
+    `BREACHED`  does not meet the target
+    `AT RISK`   meets it, BAD > 0, and BAD * 100 >= ALLOWED * 80
+    `OK`        otherwise
+  A service in SLO without any probe prints `NAME: no data -> NO DATA`.
+
+  Probe lines that are damaged are skipped with a message on stderr and do not
+  stop the run: `line N: bad probe` (wrong field count, EPOCH not an integer,
+  unknown STATE), `line N: no SLO for NAME`, `line N: out of order` (the
+  minute is not greater than the previous accepted minute of that service).
+  N is the physical line number in PROBES. A skipped probe is simply a
+  missing probe, so its minute becomes a blind minute (if it lies between two
+  accepted probes).
+
+  Exit 1 if any service is BREACHED, otherwise 0. Unreadable files:
+  `cannot read FILE` on stderr, exit 2. Wrong arguments:
+  `usage: solution.sh [--strict] SLO PROBES` on stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "uptime from probes, and blind minutes as downtime"
+  - "error budget: how much failure the promise allows"
+  - "decimal percentages with integer arithmetic"
+  - "run-length counting of outages"
+required_patterns:
+  - pattern: '100000'
+    message: "Use integer thousandths of a percent (UP*100000/TOTAL); Bash has no floating point."
+test_cases:
+  - name: three services, one breached
+    args: [fixtures/slo.txt, fixtures/probes.log]
+    expected_stdout: |-
+      shop: uptime 99.500% (target 99.500%) used 5 of 5 min, outages=2 longest=3 min -> AT RISK
+      mail: uptime 98.800% (target 99.900%) used 6 of 0 min, outages=2 longest=5 min -> BREACHED
+      blog: uptime 100.000% (target 99.000%) used 0 of 3 min, outages=0 longest=0 min -> OK
+    expected_exit: 1
+  - name: strict mode counts degraded as down
+    args: [--strict, fixtures/slo.txt, fixtures/probes.log]
+    expected_stdout: |-
+      shop: uptime 99.400% (target 99.500%) used 6 of 5 min, outages=3 longest=3 min -> BREACHED
+      mail: uptime 98.800% (target 99.900%) used 6 of 0 min, outages=2 longest=5 min -> BREACHED
+      blog: uptime 100.000% (target 99.000%) used 0 of 3 min, outages=0 longest=0 min -> OK
+    expected_exit: 1
+  - name: everything healthy
+    args: [slo.txt, probes.log]
+    files:
+      slo.txt: |
+        eel 99.95
+      probes.log: |
+        1700000040 eel up
+        1700000100 eel up
+        1700000160 eel degraded
+        1700000220 eel up
+    expected_stdout: "eel: uptime 100.000% (target 99.950%) used 0 of 0 min, outages=0 longest=0 min -> OK"
+  - name: a trailing outage and rounding down
+    args: [slo.txt, probes.log]
+    files:
+      slo.txt: |
+        eel 90
+      probes.log: |
+        1700000040 eel up
+        1700000100 eel up
+        1700000160 eel up
+        1700000220 eel down
+        1700000280 eel down
+        1700000340 eel down
+    expected_stdout: "eel: uptime 50.000% (target 90.000%) used 3 of 0 min, outages=1 longest=3 min -> BREACHED"
+    expected_exit: 1
+  - name: one third rounds down
+    args: [slo.txt, probes.log]
+    files:
+      slo.txt: |
+        eel 50
+      probes.log: |
+        1700000040 eel up
+        1700000100 eel down
+        1700000160 eel down
+    expected_stdout: "eel: uptime 33.333% (target 50.000%) used 2 of 1 min, outages=1 longest=2 min -> BREACHED"
+    expected_exit: 1
+  - name: service without probes
+    args: [slo.txt, probes.log]
+    files:
+      slo.txt: |
+        eel 99.9
+        flounder 99
+      probes.log: |
+        1700000040 eel up
+    expected_stdout: |-
+      eel: uptime 100.000% (target 99.900%) used 0 of 0 min, outages=0 longest=0 min -> OK
+      flounder: no data -> NO DATA
+  - name: damaged probe lines are skipped
+    args: [slo.txt, probes.log]
+    files:
+      slo.txt: |
+        eel 99
+      probes.log: |
+        1700000040 eel up
+        garbage
+        1700000100 eel sideways
+        1700000160 ghost up
+        1700000220 eel up
+        1700000100 eel up
+        abc eel up
+        1700000280 eel up
+    expected_stdout: "eel: uptime 60.000% (target 99.000%) used 2 of 0 min, outages=1 longest=2 min -> BREACHED"
+    expected_exit: 1
+    expected_stderr: |-
+      line 2: bad probe
+      line 3: bad probe
+      line 4: no SLO for ghost
+      line 6: out of order
+      line 7: bad probe
+  - name: bad SLO target
+    args: [slo.txt, probes.log]
+    files:
+      slo.txt: |
+        eel 99.9
+        flounder fast
+      probes.log: |
+        1700000040 eel up
+    expected_stderr: "bad SLO line 2"
+    expected_exit: 2
+  - name: missing probe file
+    args: [fixtures/slo.txt, nope.log]
+    expected_stderr: "cannot read nope.log"
+    expected_exit: 2

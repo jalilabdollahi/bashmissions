@@ -1,0 +1,4 @@
+  file=$1
+  echo "${file%.*}"
+
+That is the whole script. If you are unsure, try it on "archive.tar.gz" and "README" in your terminal first: s=archive.tar.gz; echo "${s%.*}".

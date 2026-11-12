@@ -1,0 +1,4 @@
+Two lines do all the work:
+
+  quota_var=LIMIT_$CUSTOMER
+  echo "quota for $CUSTOMER: ${!quota_var:-...}"    # fallback word: unlimited

@@ -1,22 +1,210 @@
 id: 489
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Forensics Collector
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Forensics Collector` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Forensics Collector
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 420
+story: |
+  At 22:15 on the worst night of the storm, someone logged into `halibut` as
+  Theo and read the shadow file. Theo was asleep, and a power cut had just
+  rebooted half the fleet. Priya has one rule for nights like this: before you
+  look at anything, preserve it. Copy the evidence somewhere safe, fingerprint
+  it, lock it, and write down who touched it and when, so that a week from now
+  nobody, including a lawyer, can say it was altered. Mara hands you the
+  keyboard: build the collector and the verifier.
+objective: |
+  Write solution.sh, an evidence collector with a chain of custody.
+
+    solution.sh collect CASE ANALYST NOW SRC...
+    solution.sh verify  CASE ANALYST NOW
+
+  NOW is the time as epoch seconds (a non-negative integer; no real clock).
+
+  collect:
+    - If CASE already exists (as anything) print `case CASE already exists` to
+      stderr and exit 1; never overwrite evidence.
+    - Sources that are not regular files (missing, folders, symlinks) print
+      `skipped SRC: not a regular file` to stderr and are left out. If no
+      source is left print `nothing to collect` to stderr, exit 1, and do not
+      create CASE at all.
+    - Otherwise create CASE/ and CASE/evidence/. Copy the valid sources in the
+      order given with `cp -p`, to the names `NNN-BASENAME` (NNN counts from
+      001 over the copied files only). Compute `cksum` of the source and of the
+      copy; if they differ print `copy of SRC does not match the source` and
+      exit 3. Make each copy read-only (mode 0444); the originals are never
+      modified or moved.
+    - Write CASE/manifest.txt, one line per file in order:
+      `NAME SUM SIZE SRC` (SUM and SIZE are the two numbers `cksum` prints,
+      SRC exactly as given on the command line, and it may contain spaces).
+    - Write CASE/manifest.seal: the first number of `cksum` over the whole
+      manifest.txt, on one line.
+    - Append `NOW ANALYST collect N items` to CASE/custody.log.
+    - Print `collected N items into CASE (seal SEAL)`.
+
+  verify:
+    - A missing CASE: `no such case: CASE`; missing manifest.txt:
+      `no manifest in CASE`; both to stderr, exit 2.
+    - Print `seal OK`, or `SEAL MISMATCH` if manifest.seal is missing or does
+      not equal the cksum of manifest.txt.
+    - For each manifest line, in order, print exactly one of (first match):
+        `MISSING NAME`   the evidence file is gone
+        `MODIFIED NAME`  its `cksum` output differs from `SUM SIZE`
+        `WRITABLE NAME`  intact but anyone has write permission (the owner
+                         write bit, mode bit 0200, is set; test with find -perm)
+        `OK NAME`
+    - Then, sorted with `LC_ALL=C sort`, every regular file in CASE/evidence
+      that is not in the manifest: `EXTRA NAME`.
+    - Print `verify: N ok, M problems` (a SEAL MISMATCH counts as one problem,
+      as does each MISSING, MODIFIED, WRITABLE and EXTRA line).
+    - Append `NOW ANALYST verify OK` or `NOW ANALYST verify FAILED` to
+      CASE/custody.log, and exit 1 if there were problems, else 0.
+
+  Wrong arguments: `usage: solution.sh collect CASE ANALYST NOW SRC... | verify CASE ANALYST NOW`
+  on stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "preserve before you analyse: copy, hash, lock"
+  - "cksum fingerprints and a sealed manifest"
+  - "read-only evidence and an append-only custody log"
+  - "verifying: missing, modified, extra and writable files"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Fingerprint every file with cksum."
+  - pattern: 'cp\s+-[a-z]*p'
+    message: "Copy with cp -p so the evidence keeps the original timestamps."
+  - pattern: '\bchmod\b'
+    message: "Lock the evidence copies with chmod 0444."
+test_cases:
+  - name: collect two files, skip a folder
+    args: [collect, case, mara, "1700000000", incident/auth.log, incident/archive, incident/syslog]
+    files:
+      incident/auth.log: |
+        Nov 11 22:14 sshd: Accepted publickey for theo from 203.0.113.9
+        Nov 11 22:15 sudo: theo : COMMAND=/bin/cat /etc/shadow
+      incident/syslog: |
+        Nov 11 22:13 kernel: link down on eth0
+      "incident/archive/": ""
+    expected_stdout: "collected 2 items into case (seal 3782153397)"
+    expected_stderr: "skipped incident/archive: not a regular file"
+    expected_files:
+      case/evidence/001-auth.log: |
+        Nov 11 22:14 sshd: Accepted publickey for theo from 203.0.113.9
+        Nov 11 22:15 sudo: theo : COMMAND=/bin/cat /etc/shadow
+      case/evidence/002-syslog: |
+        Nov 11 22:13 kernel: link down on eth0
+      case/manifest.txt: |
+        001-auth.log 1031743211 119 incident/auth.log
+        002-syslog 155093663 39 incident/syslog
+      case/manifest.seal: "3782153397"
+      case/custody.log: "1700000000 mara collect 2 items"
+  - name: a source with a space in its path
+    args: [collect, case, priya, "1700000100", "incident/notes today.txt"]
+    files:
+      "incident/notes today.txt": |
+        meeting notes: storm
+    expected_stdout: "collected 1 items into case (seal 538557469)"
+    expected_files:
+      case/manifest.txt: "001-notes today.txt 2678105713 21 incident/notes today.txt"
+  - name: an existing case is never overwritten
+    args: [collect, case, mara, "1700000000", incident/syslog]
+    files:
+      case/manifest.txt: "old\n"
+      incident/syslog: "x\n"
+    expected_stderr: "case case already exists"
+    expected_exit: 1
+    expected_files:
+      case/manifest.txt: "old"
+  - name: no valid source creates nothing
+    args: [collect, case, mara, "1700000000", nowhere.txt]
+    expected_stderr: |-
+      skipped nowhere.txt: not a regular file
+      nothing to collect
+    expected_exit: 1
+    expected_files:
+      case: null
+  - name: an untouched case verifies
+    args: [verify, case, priya, "1700000500"]
+    files: &goodcase
+      case/manifest.txt: |
+        001-auth.log 1031743211 119 incident/auth.log
+        002-syslog 155093663 39 incident/syslog
+      case/manifest.seal: "3782153397"
+      case/custody.log: |
+        1700000000 mara collect 2 items
+      case/evidence/001-auth.log:
+        content: |
+          Nov 11 22:14 sshd: Accepted publickey for theo from 203.0.113.9
+          Nov 11 22:15 sudo: theo : COMMAND=/bin/cat /etc/shadow
+        mode: "0444"
+      case/evidence/002-syslog:
+        content: |
+          Nov 11 22:13 kernel: link down on eth0
+        mode: "0444"
+    expected_stdout: |-
+      seal OK
+      OK 001-auth.log
+      OK 002-syslog
+      verify: 2 ok, 0 problems
+    expected_files:
+      case/custody.log: |-
+        1700000000 mara collect 2 items
+        1700000500 priya verify OK
+  - name: tampering is found
+    args: [verify, case, priya, "1700000600"]
+    files:
+      case/manifest.txt: |
+        001-auth.log 1031743211 119 incident/auth.log
+        002-syslog 155093663 39 incident/syslog
+      case/manifest.seal: "3782153397"
+      case/custody.log: |
+        1700000000 mara collect 2 items
+      case/evidence/001-auth.log:
+        content: |
+          Nov 11 22:14 sshd: Accepted publickey for theo from 203.0.113.9
+          Nov 11 22:15 sudo: theo : COMMAND=/bin/cat /etc/shadow
+        mode: "0644"
+      case/evidence/002-syslog:
+        content: |
+          Nov 11 22:13 kernel: link down on eth0 (edited)
+        mode: "0444"
+      case/evidence/003-planted:
+        content: |
+          planted
+        mode: "0444"
+    expected_stdout: |-
+      seal OK
+      WRITABLE 001-auth.log
+      MODIFIED 002-syslog
+      EXTRA 003-planted
+      verify: 0 ok, 3 problems
+    expected_exit: 1
+    expected_files:
+      case/custody.log: |-
+        1700000000 mara collect 2 items
+        1700000600 priya verify FAILED
+  - name: a doctored manifest and a missing file
+    args: [verify, case, theo, "1700000700"]
+    files:
+      case/manifest.txt: |
+        001-auth.log 1031743211 119 incident/auth.log
+        002-syslog 155093663 39 incident/syslog
+      case/manifest.seal: "12345"
+      case/evidence/001-auth.log:
+        content: |
+          Nov 11 22:14 sshd: Accepted publickey for theo from 203.0.113.9
+          Nov 11 22:15 sudo: theo : COMMAND=/bin/cat /etc/shadow
+        mode: "0444"
+    expected_stdout: |-
+      SEAL MISMATCH
+      OK 001-auth.log
+      MISSING 002-syslog
+      verify: 1 ok, 2 problems
+    expected_exit: 1
+  - name: verify an unknown case
+    args: [verify, nocase, theo, "1700000700"]
+    expected_stderr: "no such case: nocase"
+    expected_exit: 2
+  - name: bad time value
+    args: [verify, case, theo, yesterday]
+    expected_stderr: "usage: solution.sh collect CASE ANALYST NOW SRC... | verify CASE ANALYST NOW"
+    expected_exit: 2

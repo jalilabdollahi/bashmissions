@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fake deploy-tool for BashMissions: progress on stdout, one warning on stderr.
+# DEPLOY_RC (default 0) is the exit status.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: deploy-tool SITE" >&2
+  exit 2
+fi
+echo "deploy $1: uploading build"
+echo "deploy $1: warning: cache not warm" >&2
+echo "deploy $1: switching symlink"
+exit "${DEPLOY_RC:-0}"

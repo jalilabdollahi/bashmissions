@@ -1,0 +1,18 @@
+  traced() {
+    local fn=$1 rc=0
+    shift
+    echo ">> $fn $*"
+    "orig_$fn" "$@" || rc=$?
+    echo "<< $fn rc=$rc"
+    return "$rc"
+  }
+  decorate() {
+    local fn=$1 def
+    if ! def=$(declare -f "$fn"); then
+      # message on stderr, return 1
+    fi
+    eval "orig_$def"
+    eval "$fn() { traced $fn \"\$@\"; }"
+  }
+  decorate "$1"
+  "$1" "$2"

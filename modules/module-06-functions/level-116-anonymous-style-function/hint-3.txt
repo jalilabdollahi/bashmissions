@@ -1,1 +1,0 @@
-Define and call the helper in the same small block.

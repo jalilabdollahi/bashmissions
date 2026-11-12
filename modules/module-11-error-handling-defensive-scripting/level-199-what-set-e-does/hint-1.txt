@@ -1,0 +1,1 @@
+Two jobs: make the script stop when something breaks, and keep it alive when grep merely finds nothing. Bash has a switch for the first. For the second, think about places where a failing command is being asked a question rather than being run for its effect.

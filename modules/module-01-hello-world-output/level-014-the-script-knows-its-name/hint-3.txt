@@ -1,0 +1,1 @@
+Two echo lines, each with a substitution: "This script is called $(basename "$0")" and "Report file: $(basename "$REPORT_PATH")". Type them in place of the starter's two lines.

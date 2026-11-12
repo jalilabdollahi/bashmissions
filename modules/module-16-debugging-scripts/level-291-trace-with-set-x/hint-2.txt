@@ -1,0 +1,7 @@
+`set -x` (xtrace) turns tracing on. Each traced line starts with `+ ` and shows the command after variables were expanded:
+
+  set -x
+  name=eel
+  echo "hi $name"      # traced as: + echo 'hi eel'
+
+Nothing else is needed: no redirection, no extra echo.

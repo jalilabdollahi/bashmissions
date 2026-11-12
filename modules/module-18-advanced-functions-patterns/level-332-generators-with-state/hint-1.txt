@@ -1,0 +1,1 @@
+A generator is a function that remembers where it was. In Bash, "remembering" means a variable that outlives the call. Keep one counter per series, add one each time, then format. Then think about how the function hands the result back without losing the counter.

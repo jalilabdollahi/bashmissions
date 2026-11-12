@@ -1,0 +1,6 @@
+`-type f` means regular files, `-type d` folders. `-size +100c` means "more than 100 bytes"; `-size 0` means empty. Tests combine with an implicit AND:
+
+  find "$dir" -type f -size +"$limit"c
+  find "$dir" -type d | wc -l
+
+Remember `wc -l` may pad with spaces on macOS: wrap in `$(( ))`. To prefix each result, loop with `while IFS= read -r line`.

@@ -1,0 +1,42 @@
+id: 47
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Read Several Fields
+difficulty: beginner
+xp: 90
+story: |
+  The asset inventory is a text file where each line says "hostname address role",
+  separated by spaces. Gus wants a tidier card for each one on his report, with the
+  role first because that is how he thinks about the fleet. Some roles are two
+  words, like "web frontend", and the card must not lose the second word.
+objective: |
+  Write solution.sh that reads ONE line from stdin with a single read command into
+  three variables: host, address and role. Print:
+    role=<role> host=<host> address=<address>
+  The first word is the host, the second is the address, and everything left on
+  the line (even several words) is the role. If the line has only two words, the
+  role is empty and the output ends with  role= host=...  as usual.
+concepts:
+  - "read -r a b c splits a line into fields"
+  - "the last variable collects the rest of the line"
+required_patterns:
+  - pattern: '\bread\s+(-[A-Za-z]+\s+)*[A-Za-z_][A-Za-z0-9_]*\s+[A-Za-z_][A-Za-z0-9_]*\s+[A-Za-z_][A-Za-z0-9_]*'
+    message: "Give read three variable names: read -r host address role."
+test_cases:
+  - name: three words
+    stdin: "anchovy 10.0.0.5 database\n"
+    expected_stdout: |-
+      role=database host=anchovy address=10.0.0.5
+  - name: role with two words
+    stdin: "barracuda 10.0.0.9 web frontend\n"
+    expected_stdout: |-
+      role=web frontend host=barracuda address=10.0.0.9
+  - name: extra spaces between fields
+    stdin: "cuttlefish    10.0.1.2     cache\n"
+    expected_stdout: |-
+      role=cache host=cuttlefish address=10.0.1.2
+  - name: role missing
+    stdin: "dory 10.0.2.2\n"
+    expected_stdout: |-
+      role= host=dory address=10.0.2.2

@@ -1,0 +1,1 @@
+Build the pattern left to right, exactly as the objective lists it: local part, @, domain, dot, extension. Each part is a "kind of character" with a count. Anchor both ends, or a valid-looking piece inside junk will pass. Two characters need special care: the dot (it means "anything" unless you say otherwise) and the dash inside a character class.

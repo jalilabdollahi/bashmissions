@@ -1,0 +1,1 @@
+Three jobs: find the functions whose names start with `test_`, run each one in a way that cannot hurt the harness, and keep score. Bash can list its own functions, and a subshell gives each test a private copy of everything.

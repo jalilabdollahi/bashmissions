@@ -4,21 +4,63 @@ module_name: loops
 module_display: Loops
 title: Loop over Command Output
 difficulty: intermediate
-xp: 145
-objective: Use process substitution to loop over command output from `printf`. Print
-  each generated word as `cmd=<word>`.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: 'cmd=build
-
-    cmd=test
-
-    cmd=deploy'
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 140
+story: |
+  Fifty servers, and Mara wants to know which disk will fill up first. The
+  company already has a command for that, fleet-disk, which prints one line
+  per server: its name and the percentage of disk used. Reading it by eye is
+  how people miss things at 3 a.m. She wants a script that loops over those
+  lines, remembers the fullest server, and counts how many are in the danger
+  zone. And, after the lesson of the last few levels, it must not lose its
+  variables.
+objective: |
+  Write solution.sh that runs `fleet-disk` (no arguments). Every line of its
+  output looks like "<host> <percent>", with the percent as a whole number
+  without a % sign. Using a loop over that output, find the server with the
+  highest percentage (if two are equal, the first one wins) and count the
+  servers with MORE than 80 percent. Print two lines:
+    fullest: <host> (<percent>%)
+    over 80%: <count>
+  If fleet-disk prints nothing, print "fullest: none" and "over 80%: 0".
+  Feed the loop with process substitution: while read -r host pct; do ... done < <(fleet-disk)
 concepts:
-- '`while IFS= read -r line < <(cmd)`'
-scaffold: true
+  - "while read ... done < <(command)"
+  - "process substitution keeps the loop in the current shell"
+  - "tracking a maximum"
+required_patterns:
+  - pattern: '<\s*<\(\s*fleet-disk'
+    message: "Feed the loop from the command with process substitution: done < <(fleet-disk)"
+forbidden_patterns:
+  - pattern: '\|\s*while\b'
+    message: "Do not pipe into the loop; the variables would be lost. Use < <(fleet-disk)."
+test_cases:
+  - name: busy fleet
+    files:
+      "disk.txt": "anchovy 45\ndory 91\neel 83\nmarlin 12\n"
+    expected_stdout: |-
+      fullest: dory (91%)
+      over 80%: 2
+  - name: exactly 80 is not over 80
+    files:
+      "disk.txt": "octopus 80\n"
+    expected_stdout: |-
+      fullest: octopus (80%)
+      over 80%: 0
+  - name: tie goes to the first
+    files:
+      "disk.txt": "grouper 70\nhalibut 70\nflounder 69\n"
+    expected_stdout: |-
+      fullest: grouper (70%)
+      over 80%: 0
+  - name: everything critical
+    files:
+      "disk.txt": "a 81\nb 99\nc 100\nd 95\n"
+    expected_stdout: |-
+      fullest: c (100%)
+      over 80%: 4
+  - name: no servers reported
+    files:
+      "disk.txt": ""
+    expected_stdout: |-
+      fullest: none
+      over 80%: 0

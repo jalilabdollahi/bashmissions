@@ -1,0 +1,44 @@
+id: 48
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Read into an Array
+difficulty: beginner
+xp: 90
+story: |
+  Customers can tag their servers with labels, and the tags arrive as one
+  comma-separated line, for example "web,eu-west,critical". They can have any
+  number of tags. Noor's dashboard wants a summary: how many tags, the first one
+  and the last one, because those are the ones that decide who gets woken up.
+objective: |
+  Write solution.sh that reads one line from stdin containing tags separated by
+  commas (no spaces around the commas) and stores them in an ARRAY with a single
+  read command. Print exactly:
+    count=<number of tags> first=<first tag> last=<last tag>
+  Example: input  web,eu-west,critical  gives
+    count=3 first=web last=critical
+  The input always has at least one tag.
+concepts:
+  - "read -ra stores the fields in an array"
+  - "IFS=, as a one-command prefix"
+  - "${#arr[@]} count, ${arr[0]} first, ${arr[-1]} last"
+required_patterns:
+  - pattern: '\bread\s+(-[A-Za-z]+\s+)*-[A-Za-z]*a[A-Za-z]*'
+    message: "Read the line into an array with read -ra NAME."
+test_cases:
+  - name: three tags
+    stdin: "web,eu-west,critical\n"
+    expected_stdout: |-
+      count=3 first=web last=critical
+  - name: a single tag
+    stdin: "database\n"
+    expected_stdout: |-
+      count=1 first=database last=database
+  - name: many tags
+    stdin: "a1,b2,c3,d4,e5,f6,g7\n"
+    expected_stdout: |-
+      count=7 first=a1 last=g7
+  - name: tags with a dash and digits
+    stdin: "pci-dss,tier-2\n"
+    expected_stdout: |-
+      count=2 first=pci-dss last=tier-2

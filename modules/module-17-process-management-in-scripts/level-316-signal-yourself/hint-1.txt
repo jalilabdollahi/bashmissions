@@ -1,0 +1,1 @@
+A signal is a message the operating system delivers to a process. A script can ask the system to deliver one to itself, if it knows its own process ID, and it can register a function to run when that signal arrives. The handler then changes the same variables the rest of the script uses.

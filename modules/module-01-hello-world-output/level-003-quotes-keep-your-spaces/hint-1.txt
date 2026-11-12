@@ -1,0 +1,1 @@
+Bash splits a command line into words at spaces and throws the extra spaces away. To keep the gaps, you have to tell Bash that the whole sign belongs together as one piece.

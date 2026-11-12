@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Pretend sleep: records the request instead of waiting.
+if [[ $# -ne 1 || ! $1 =~ ^[0-9]+$ ]]; then
+  echo "sleep: usage: sleep SECONDS" >&2
+  exit 2
+fi
+echo "sleep $1" >> .calls.log

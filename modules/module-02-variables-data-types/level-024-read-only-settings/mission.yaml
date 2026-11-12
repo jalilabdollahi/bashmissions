@@ -1,0 +1,55 @@
+id: 24
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Read-Only Settings
+difficulty: beginner
+xp: 65
+story: |
+  Last month a log-cleanup script quietly changed its own retention setting
+  halfway through and deleted three weeks of Tidewater Books' backups. Priya
+  does not shout, which is worse. She asks for a setting that, once chosen,
+  cannot be changed by any line further down the file - and for Bash to
+  complain loudly the moment somebody tries.
+objective: |
+  The config tooling passes two settings: KEEP_DAYS (the retention to apply)
+  and NEW_DAYS (a "careless" later value that must NOT win).
+
+  Write solution.sh that does these things in this order:
+    1. Make RETENTION_DAYS a read-only variable holding the value of KEEP_DAYS.
+    2. Print:  retention: <RETENTION_DAYS> days
+    3. Try to change it with the plain assignment RETENTION_DAYS=$NEW_DAYS.
+    4. Print:  retention now: <RETENTION_DAYS> days
+
+  Because the variable is read-only, Bash refuses step 3 and prints an error
+  mentioning "readonly variable" on stderr. The script carries on, and the
+  value is still the original one, so both lines on stdout show the
+  KEEP_DAYS value. That is the expected result.
+concepts:
+  - "readonly makes a variable constant"
+  - "assignment to a read-only variable is an error"
+required_patterns:
+  - pattern: '\breadonly\b'
+    message: "Lock the variable with readonly RETENTION_DAYS=..."
+test_cases:
+  - name: keep 30, someone tries 1
+    env: {KEEP_DAYS: "30", NEW_DAYS: "1"}
+    expected_stdout: |-
+      retention: 30 days
+      retention now: 30 days
+    expected_stderr: "RETENTION_DAYS: readonly variable"
+    stderr_comparison: contains
+  - name: keep 90, someone tries 7
+    env: {KEEP_DAYS: "90", NEW_DAYS: "7"}
+    expected_stdout: |-
+      retention: 90 days
+      retention now: 90 days
+    expected_stderr: "RETENTION_DAYS: readonly variable"
+    stderr_comparison: contains
+  - name: the new value is the same as the old one
+    env: {KEEP_DAYS: "14", NEW_DAYS: "14"}
+    expected_stdout: |-
+      retention: 14 days
+      retention now: 14 days
+    expected_stderr: "RETENTION_DAYS: readonly variable"
+    stderr_comparison: contains

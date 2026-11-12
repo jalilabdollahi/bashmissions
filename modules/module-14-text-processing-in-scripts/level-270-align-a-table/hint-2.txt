@@ -1,0 +1,9 @@
+printf takes a format and then values:
+
+  printf "%s|%s\n", "a", "b"      # a|b
+  printf "%-8s|\n", "abc"         # "abc     |"  - means left-align, 8 wide
+  printf "%8s|\n", "abc"          # "     abc|"  right-align (the default)
+
+In awk, BEGIN { ... } runs once before the first line, a good place for a header:
+
+  awk 'BEGIN { print "title" } { ... }' file

@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Decimal percentages without floating point: turn the text into thousandths first.
+
+  [[ $tgt =~ ^([0-9]{1,3})(\.([0-9]{1,3}))?$ ]]       # BASH_REMATCH[1] whole, [3] fraction
+  frac=${BASH_REMATCH[3]:-}; while (( ${#frac} < 3 )); do frac+=0; done
+  milli=$(( 10#${BASH_REMATCH[1]} * 1000 + 10#$frac ))      # 99.9 -> 99900
+
+Multiply before dividing:  uptime=$(( up * 100000 / total ))  and print it with  printf '%d.%03d' $((x / 1000)) $((x % 1000)).
+
+Blind minutes: when the next probe is at minute m and the previous at p, the minutes p+1 .. m-1 are missing: gap=$((m - p - 1)); add them to both the bad count and the current run.
+
+A run ends when a good probe arrives (outages+1, update the longest, reset the run), and again when the data ends, so close it once more in the report.

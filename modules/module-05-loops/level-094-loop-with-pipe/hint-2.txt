@@ -1,1 +1,0 @@
-The runner needs a custom check for real piped stdin.

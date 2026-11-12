@@ -1,0 +1,6 @@
+`shift` removes `$1`. What was `$2` becomes `$1`, `$#` decreases by one, and `"$@"` / `"$*"` now hold only the remaining words:
+
+  # called as: ./x.sh red green blue
+  first=$1       # red
+  shift
+  echo "$#: $*"  # 2: green blue

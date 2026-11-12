@@ -1,0 +1,1 @@
+Two printf lines. Header: printf '[%-10s] [%5s]\n' "HOST" "USERS". Data row: the same shape, but the second placeholder is %5d and the values are "$HOST" and "$USERS".

@@ -1,0 +1,45 @@
+id: 85
+module: 5
+module_name: loops
+module_display: Loops
+title: Skip with continue
+difficulty: beginner
+xp: 100
+story: |
+  Noor keeps a handful of fake accounts in the billing system so the support
+  desk can practise on them. Their codes all start with TEST-. Last quarter
+  one of them got a real invoice, and the "customer" was a very confused
+  rubber duck. Gus wants the billing run to ignore the test accounts without
+  stopping for them.
+objective: |
+  Write solution.sh that receives customer codes as arguments. For every code
+  print:
+    billing <code>
+  except codes that start with TEST-: those are skipped silently, and the loop
+  goes on with the next code. With no arguments nothing is printed.
+  Use `continue` to skip a test account, and match the prefix with a glob
+  pattern in [[ ]].
+concepts:
+  - "continue jumps to the next round"
+  - "[[ $code == TEST-* ]] glob match"
+required_patterns:
+  - pattern: '\bcontinue\b'
+    message: "Skip test accounts with continue."
+test_cases:
+  - name: mixed codes
+    args: [HB-017, TEST-001, TWB-204, TEST-DUCK, GA-9]
+    expected_stdout: |-
+      billing HB-017
+      billing TWB-204
+      billing GA-9
+  - name: only test accounts
+    args: [TEST-1, TEST-2]
+    expected_stdout: ""
+  - name: test is not a prefix here
+    args: [NORTH-TEST-5, TESTING, TEST-]
+    expected_stdout: |-
+      billing NORTH-TEST-5
+      billing TESTING
+  - name: no arguments
+    args: []
+    expected_stdout: ""

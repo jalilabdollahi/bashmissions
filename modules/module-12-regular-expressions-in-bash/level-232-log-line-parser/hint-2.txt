@@ -1,0 +1,7 @@
+An optional group such as (invalid user )? keeps its place in the numbering even when it did not take part: it is simply empty. So in
+
+  re='...Failed password for (invalid user )?([^ ]+) from ([0-9.]+) ...'
+
+the user is the NEXT group, not the one that vanished. Counting opening parentheses from the left always tells you the number.
+
+Per-address state: declare -A failures; failures[$addr]=$(( ${failures[$addr]:-0} + 1 )). To print sorted: printf '%s\n' "${offenders[@]}" | sort.

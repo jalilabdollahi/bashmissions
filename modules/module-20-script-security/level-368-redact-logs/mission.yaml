@@ -1,0 +1,76 @@
+id: 368
+module: 20
+module_name: script-security
+module_display: Security
+title: Redact Logs
+difficulty: expert
+xp: 230
+story: |
+  Priya's security review ends where most leaks begin: in the logs. A customer
+  sent Noor a "please look at this log" attachment, and in it were a password in
+  a query string, a bearer token in a header and a git password inside a URL.
+  Before any log leaves the building, it must go through a filter. Theo wrote
+  the filter's name on the whiteboard; you write its contents.
+objective: |
+  Write solution.sh, a filter. It reads a log from stdin and writes it to
+  stdout, line for line, with secrets replaced by `[REDACTED]`:
+
+  1. `password=VALUE` and `token=VALUE` become `password=[REDACTED]` and
+     `token=[REDACTED]`. VALUE is everything up to the next whitespace or `&`.
+     This also applies inside longer names such as `api_token=...`.
+     A key with an empty value (`password=`) is left alone.
+  2. `Bearer VALUE` becomes `Bearer [REDACTED]` (VALUE runs to the next
+     whitespace).
+  3. A URL with a password, `scheme://USER:PASSWORD@host`, becomes
+     `scheme://USER:[REDACTED]@host`. The user name stays.
+  4. Every other character of every line is unchanged, and a line may contain
+     several secrets. Key names are lowercase.
+
+  Use sed with -E. Do not touch the lines that contain no secret.
+concepts:
+  - "sed -E 's/(key)=[^[:space:]&]+/\\1=[REDACTED]/g'"
+  - "capture groups keep the safe part, replace the secret part"
+  - "scrub before a log leaves the building, and test the scrubber with real shapes"
+required_patterns:
+  - pattern: '\bsed\b[^\n]*-[A-Za-z]*E'
+    message: "Use sed -E so groups and + work without backslashes."
+test_cases:
+  - name: password and token in text and query strings
+    stdin: |
+      login ok user=ana password=hunter2 from 10.0.0.4
+      GET /api/orders?token=abc123&page=2 200
+      deploy finished in 12s
+    expected_stdout: |-
+      login ok user=ana password=[REDACTED] from 10.0.0.4
+      GET /api/orders?token=[REDACTED]&page=2 200
+      deploy finished in 12s
+  - name: bearer header
+    stdin: |
+      sent header Authorization: Bearer eyJhbGciOi.payload.sig ok
+      retry
+    expected_stdout: |-
+      sent header Authorization: Bearer [REDACTED] ok
+      retry
+  - name: password inside a URL keeps the user
+    stdin: |
+      clone https://deploy:s3cr3t@git.lanternfish.example/shop.git done
+      clone https://git.lanternfish.example/public.git done
+    expected_stdout: |-
+      clone https://deploy:[REDACTED]@git.lanternfish.example/shop.git done
+      clone https://git.lanternfish.example/public.git done
+  - name: several secrets on one line and a longer key name
+    stdin: |
+      cfg api_token=zz-9 password=a/b+c=d user=ops Bearer q1w2
+    expected_stdout: "cfg api_token=[REDACTED] password=[REDACTED] user=ops Bearer [REDACTED]"
+  - name: empty value and look-alikes are left alone
+    stdin: |
+      password= left blank
+      the word token is not a secret, nor is passwords=list
+      Bearer
+    expected_stdout: |-
+      password= left blank
+      the word token is not a secret, nor is passwords=list
+      Bearer
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

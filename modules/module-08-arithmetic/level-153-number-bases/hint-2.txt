@@ -1,0 +1,4 @@
+Inside $(( )), base#digits reads digits in any base from 2 to 64: 2#101 is 5, 8#17 is 15, 16#ff is 255. A variable can follow the #. To print a number in another base use printf with %o (octal) or %x (hex). Generic example:
+
+  v=$(( 16#$1 ))
+  printf 'octal=%o hex=%x\n' "$v" "$v"

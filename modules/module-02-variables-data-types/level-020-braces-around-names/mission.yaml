@@ -1,0 +1,49 @@
+id: 20
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Braces Around Names
+difficulty: beginner
+xp: 55
+story: |
+  Theo's nightly backup produced a folder full of files called just
+  ".tar.gz". Nobody knows which server they came from. He swears the script
+  said "$NODE_backup.tar.gz" and that Bash must be broken. Mara raises one
+  eyebrow and tells you to write the naming helper properly.
+objective: |
+  The backup tooling passes the server name in the environment setting NODE.
+  Write solution.sh that prints exactly three lines:
+
+    archive: <NODE>_backup.tar.gz
+    replica: <NODE>2
+    host: <NODE>.lanternfish.example
+
+  For example, with NODE=dory the second line is "replica: dory2".
+  Use ${NODE} with braces wherever text is glued directly onto the name.
+concepts:
+  - "${var} braces mark where a name ends"
+  - "text glued to a variable"
+required_patterns:
+  - pattern: '\$\{NODE\}_backup'
+    message: "Write ${NODE}_backup.tar.gz - without braces Bash looks for a variable called NODE_backup."
+  - pattern: '\$\{NODE\}2'
+    message: "Write ${NODE}2 so the 2 is not read as part of the name."
+test_cases:
+  - name: dory
+    env: {NODE: dory}
+    expected_stdout: |-
+      archive: dory_backup.tar.gz
+      replica: dory2
+      host: dory.lanternfish.example
+  - name: eel
+    env: {NODE: eel}
+    expected_stdout: |-
+      archive: eel_backup.tar.gz
+      replica: eel2
+      host: eel.lanternfish.example
+  - name: name already ends in a digit
+    env: {NODE: grouper9}
+    expected_stdout: |-
+      archive: grouper9_backup.tar.gz
+      replica: grouper92
+      host: grouper9.lanternfish.example

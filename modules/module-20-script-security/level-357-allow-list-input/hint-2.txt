@@ -1,0 +1,7 @@
+grep can answer yes/no through its exit status:
+
+  grep -q  pattern file   # quiet: no output, exit 0 if found
+  grep -F  ...            # treat the pattern as plain text, not a regex
+  grep -x  ...            # the pattern must match the entire line
+
+Put them together as -Fxq. Add `--` before the value so a value that starts with a dash is not read as a flag. Use `if ! grep ...; then` to take the denied branch.

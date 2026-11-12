@@ -1,0 +1,71 @@
+id: 288
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Version Guard
+difficulty: expert
+xp: 220
+story: |
+  The new deploy helper uses associative arrays, which arrived in bash 4. Last week
+  it landed on an old appliance whose bash is 3.2, and instead of a clear message it
+  failed with a cryptic syntax error in the middle of a deployment. Mara wants a
+  guard at the very top: if the running bash is older than the script needs, say so
+  in plain words and stop before anything is touched.
+objective: |
+  solution.sh takes one argument, the minimum bash version the script needs,
+  written MAJOR or MAJOR.MINOR (for example 4.4, or just 5, which means 5.0).
+  Compare it with the bash that is running this script using the BASH_VERSINFO
+  array, and compare the parts as numbers, not as text (10.0 is newer than 9.0).
+    - if the running bash is at least that version, print  ok: bash >= <argument>
+      exactly as given, exit 0
+    - otherwise print  solution.sh: requires bash <argument> or newer (running <A>.<B>)
+      to stderr, where A and B are the running bash's major and minor numbers,
+      and exit 1
+    - if the argument is missing or is not MAJOR or MAJOR.MINOR with digits only,
+      print  usage: solution.sh MINVERSION  to stderr and exit 2
+  Do not parse the text in $BASH_VERSION.
+concepts:
+  - "BASH_VERSINFO[0] and BASH_VERSINFO[1]"
+  - "compare versions numerically"
+  - "fail early with a clear message"
+required_patterns:
+  - pattern: 'BASH_VERSINFO\[0\]'
+    message: "Read the running major version from ${BASH_VERSINFO[0]}."
+  - pattern: 'BASH_VERSINFO\[1\]'
+    message: "Read the running minor version from ${BASH_VERSINFO[1]}."
+forbidden_patterns:
+  - pattern: '\$\{?BASH_VERSION\b'
+    message: "Use the numeric BASH_VERSINFO array rather than the BASH_VERSION string."
+test_cases:
+  - name: old requirement is met
+    args: ["3.2"]
+    expected_stdout: "ok: bash >= 3.2"
+  - name: bash 4.1 is enough
+    args: ["4.1"]
+    expected_stdout: "ok: bash >= 4.1"
+  - name: major only
+    args: ["5"]
+    expected_stdout: "ok: bash >= 5"
+  - name: far future major is refused
+    args: ["10.0"]
+    expected_stdout: ""
+    expected_stderr: 'solution\.sh: requires bash 10\.0 or newer \(running [0-9]+\.[0-9]+\)'
+    stderr_comparison: regex
+    expected_exit: 1
+  - name: same major, impossible minor
+    args: ["5.99"]
+    expected_stdout: ""
+    expected_stderr: 'solution\.sh: requires bash 5\.99 or newer \(running [0-9]+\.[0-9]+\)'
+    stderr_comparison: regex
+    expected_exit: 1
+  - name: text is not a version
+    args: [five]
+    expected_stderr: "usage: solution.sh MINVERSION"
+    expected_exit: 2
+  - name: three part versions are not accepted
+    args: ["4.4.1"]
+    expected_stderr: "usage: solution.sh MINVERSION"
+    expected_exit: 2
+  - name: missing argument
+    expected_stderr: "usage: solution.sh MINVERSION"
+    expected_exit: 2

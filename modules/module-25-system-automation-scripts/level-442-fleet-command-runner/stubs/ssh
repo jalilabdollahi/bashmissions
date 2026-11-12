@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# ssh stand-in. Usage: ssh [-n] [-o BatchMode=yes] [-o ConnectTimeout=N] HOST COMMAND...
+# Answers come from fixtures/hosts/HOST/cmd/<command with spaces as _>.out and an
+# optional .rc file next to it (exit status). A file fixtures/hosts/HOST/unreachable
+# makes the host time out (exit 255, like real ssh).
+# Like real ssh, without -n it reads all of stdin and throws it away.
+nostdin=0 host=
+while (( $# )); do
+  case $1 in
+    -n) nostdin=1 ;;
+    -o) case $2 in
+          BatchMode=*|ConnectTimeout=*) ;;
+          *) echo "ssh: stub does not know option $2" >&2; exit 2 ;;
+        esac
+        shift ;;
+    -*) echo "ssh: stub does not know flag $1" >&2; exit 2 ;;
+    *)  host=$1; shift; break ;;
+  esac
+  shift
+done
+[[ -n $host ]] || { echo "usage: ssh [-n] [-o opt] host command" >&2; exit 2; }
+(( nostdin )) || cat > /dev/null
+cmd="$*"
+echo "ssh $host $cmd" >> .calls.log
+dir=fixtures/hosts/$host
+if [[ ! -d $dir ]]; then
+  echo "ssh: Could not resolve hostname $host: Name or service not known" >&2; exit 255
+fi
+if [[ -e $dir/unreachable ]]; then
+  echo "ssh: connect to host $host port 22: Connection timed out" >&2; exit 255
+fi
+key=${cmd// /_}
+if [[ ! -f $dir/cmd/$key.out ]]; then
+  echo "bash: ${cmd%% *}: command not found" >&2; exit 127
+fi
+cat "$dir/cmd/$key.out"
+rc=0
+[[ -f $dir/cmd/$key.rc ]] && rc=$(tr -d '[:space:]' < "$dir/cmd/$key.rc")
+exit "$rc"

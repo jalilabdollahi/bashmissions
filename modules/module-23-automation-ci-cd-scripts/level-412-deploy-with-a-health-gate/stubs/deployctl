@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fake deploy tool: deployctl push VERSION. FAKE_DEPLOY_FAIL=1 makes it fail.
+echo "deployctl $*" >> .calls.log
+if [[ ${1:-} != push || $# -ne 2 ]]; then
+  echo "deployctl: usage is 'deployctl push VERSION'" >&2
+  exit 2
+fi
+if [[ ${FAKE_DEPLOY_FAIL:-0} == 1 ]]; then
+  echo "deployctl: target barracuda refused version $2" >&2
+  exit 1
+fi

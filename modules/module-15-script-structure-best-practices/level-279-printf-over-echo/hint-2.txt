@@ -1,0 +1,6 @@
+printf takes a format string first, then values to fill it in:
+
+  printf '%s\n' "$value"          # the value is printed as-is, then a newline
+  printf 'count: %d\n' "$n"       # %d for a number
+
+Keep the format string fixed and quoted; pass anything variable as an argument after it. Never write printf "$value".

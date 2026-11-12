@@ -1,0 +1,10 @@
+shopt -s nullglob
+count=0
+for f in "$dir"/*.log; do
+  [[ -f $f ]] || continue
+  first=
+  IFS= read -r first < "$f" || true     # read fails on an empty file
+  printf '%s: %s\n' "${f##*/}" "$first"
+  count=$((count + 1))
+done
+printf 'logs: %d\n' "$count"

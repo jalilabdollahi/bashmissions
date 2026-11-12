@@ -1,0 +1,1 @@
+Waiting one second six times is slow because the probes are independent: none needs another's answer. Start them all first, then wait until they are all done. Since they finish in no particular order, each one needs its own place to leave its answer.

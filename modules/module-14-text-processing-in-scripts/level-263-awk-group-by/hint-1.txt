@@ -1,0 +1,1 @@
+You need a variable per customer, but you do not know the customers in advance. awk has maps for that: a variable you can index with any text, such as the customer name. One map can count the rows, another can add the totals. Printing them is a loop over the keys at the end, and you must not rely on the order that loop uses.

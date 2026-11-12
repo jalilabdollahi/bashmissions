@@ -1,0 +1,10 @@
+awk keeps associative arrays and runs an END block after the last line. Times such as 08:14:03 compare correctly as text:
+
+  awk -v day="2026-03-01" '
+    $1 == day { n[$3]++ ; if (min == "" || $2 < min) min = $2 }
+    END { for (k in n) print k, n[k]; print "EARLIEST", min }
+  ' file1 file2
+
+Add `+ 0` to print 0 instead of an empty string for a counter that never changed. Sort a "name count" list by count (descending) then name:
+
+  sort -k2,2nr -k1,1 | head -n 3

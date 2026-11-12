@@ -1,0 +1,77 @@
+id: 230
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: sed Back-References
+difficulty: advanced
+xp: 170
+story: |
+  Gus gets payment confirmations from the bank's European partner and the
+  dates are written the continental way: day, month, year, with slashes. His
+  accounting import wants ISO dates, year first, with dashes. The lines
+  around the dates are free text ("paid 07/11/2024 by BACS") and must be kept
+  exactly as they are. Retyping 3,000 of them by hand is not how Gus wants to
+  spend Friday.
+objective: |
+  Write solution.sh that copies standard input to standard output, rewriting every
+  date of the form DD/MM/YYYY (two digits, slash, two digits, slash, four digits)
+  into YYYY-MM-DD. Every such date on a line must be converted (a line may hold
+  two). All other text, including things that merely look similar such as
+  "7/11/2024" or "07/11/24", stays exactly as it is.
+  Use sed -E with one substitution that captures the three numbers in ( ) and
+  puts them back in a new order with \1, \2 and \3. Do not validate the numbers;
+  "99/99/2024" is converted like any other.
+concepts:
+  - "( ) in the pattern captures; \\1 \\2 \\3 reuse the captures in the replacement"
+  - "sed -E uses extended regex, like grep -E"
+  - "reordering text with back-references"
+required_patterns:
+  - pattern: 'sed\s+(-[A-Za-z]*E|-r)'
+    message: "Use sed -E so ( ) and {n} work without backslashes."
+  - pattern: '\\3.*\\2.*\\1'
+    message: "Use the back-references in the new order: \\3-\\2-\\1."
+forbidden_patterns:
+  - pattern: '\bawk\b|\bcut\b|\bperl\b|sed\s+-[A-Za-z]*i'
+    message: "A single sed -E substitution with back-references does it."
+test_cases:
+  - name: one date per line
+    stdin: |
+      Gull & Anchor Pub: paid 07/11/2024 by BACS
+      Tidewater Books: paid 30/10/2024 by card
+    expected_stdout: |-
+      Gull & Anchor Pub: paid 2024-11-07 by BACS
+      Tidewater Books: paid 2024-10-30 by card
+  - name: two dates on one line
+    stdin: |
+      invoice 15/09/2024 due 15/10/2024 (net 30)
+    expected_stdout: "invoice 2024-09-15 due 2024-10-15 (net 30)"
+  - name: look-alikes stay untouched
+    stdin: |
+      ref 7/11/2024 short day
+      ref 07/11/24 short year
+      ref 07-11-2024 dashes already
+      ref 2024-11-07 already iso
+    expected_stdout: |-
+      ref 7/11/2024 short day
+      ref 07/11/24 short year
+      ref 07-11-2024 dashes already
+      ref 2024-11-07 already iso
+  - name: lines without dates and ampersands
+    stdin: |
+      North Pier Dental & Co: no payment yet
+      total: 1/2 of 3/4
+    expected_stdout: |-
+      North Pier Dental & Co: no payment yet
+      total: 1/2 of 3/4
+  - name: numbers are not validated
+    stdin: |
+      weird 99/99/2024 entry
+      empty line follows
+
+    expected_stdout: |-
+      weird 2024-99-99 entry
+      empty line follows
+
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

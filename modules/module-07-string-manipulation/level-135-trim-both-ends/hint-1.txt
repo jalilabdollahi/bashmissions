@@ -1,1 +1,0 @@
-Trim leading whitespace first, then trailing whitespace.

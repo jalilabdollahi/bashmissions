@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  rotate_one() {
+    local name=$1 cfg=${cfg_of[$1]} key=${key_of[$1]} user=${user_of[$1]} old new bak
+    reason=
+    [[ -r secrets/$name.secret ]] || { reason="no current secret on disk"; return 1; }
+    old=$(<"secrets/$name.secret")
+    grep -q "^$key=" "$cfg" 2>/dev/null || { reason="config has no $key"; return 1; }
+    new=$(vault-gen "$name")
+    dbctl set-password "$user" "$new" >/dev/null 2>&1 || { reason="database refused the new password"; return 1; }
+    bak=$cfg.rotate-bak; cp -p "$cfg" "$bak"
+    write_config "$cfg" "$key" "$new"
+    if ! dbctl check "$user" "$new" >/dev/null 2>&1; then
+      mv "$bak" "$cfg"; dbctl set-password "$user" "$old" >/dev/null 2>&1 || true
+      reason="verification failed, old secret restored"; return 1
+    fi
+    rm -f "$bak"; (umask 077; printf '%s\n' "$new" > "secrets/$name.secret"); chmod 600 "secrets/$name.secret"
+  }
+
+Main loop: if rotate_one ...; then ok+=("$name") else bad+=("$name"); print "rotated: ${ok[*]:-none}" at the end.

@@ -1,0 +1,1 @@
+The starter prints two lines because each echo ends with a line break. The label has to be printed in a way that leaves the cursor where it is, so the next command continues on the same line.

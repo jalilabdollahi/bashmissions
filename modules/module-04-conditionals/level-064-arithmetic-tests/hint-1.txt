@@ -1,0 +1,1 @@
+Bash can do maths in a special pair of double parentheses, where comparisons look like they do in a calculator: greater than, less than. The same notation can also compute the difference for your sentences.

@@ -1,1 +1,0 @@
-A nested `if` lets one decision happen only inside another branch.

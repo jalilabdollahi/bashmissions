@@ -1,0 +1,7 @@
+Name as many variables as you have fields:
+
+  read -r first second rest
+  # input: "a b c d"  ->  first=a  second=b  rest="c d"
+  # input: "a"        ->  first=a  second=""  rest=""
+
+Repeated spaces between words count as one separator. The last variable always takes the leftover text.

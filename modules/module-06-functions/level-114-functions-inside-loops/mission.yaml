@@ -1,0 +1,58 @@
+id: 114
+module: 6
+module_name: functions
+module_display: Functions
+title: Functions Inside Loops
+difficulty: intermediate
+xp: 140
+story: |
+  Every five minutes the monitoring box dumps one line per server into a file:
+  the server name and its CPU load in percent. Gus wants it as a tidy status board
+  on the lobby screen, with a colour-free OK, WARN or CRIT label at the end of
+  each row. The formatting code is the same for every server, so it should be written
+  once and called from the loop that reads the lines.
+objective: |
+  Write solution.sh. It reads lines from stdin; each line is  HOST PERCENT  (two
+  words, PERCENT a whole number). Define a function named print_row that takes a
+  host and a percentage and prints one row with
+    printf '%-10s %3d%%  %s\n' HOST PERCENT LABEL
+  where LABEL is  CRIT  for 90 and above,  WARN  for 70 to 89, otherwise  OK.
+  Call print_row from inside a while read -r loop, once per input line. Skip
+  blank lines. After the loop print
+    rows: <number of rows printed>
+  Example input line "dory 45" gives:  dory        45%  OK
+concepts:
+  - "call a function once per loop iteration"
+  - "while read -r a b; do fn \"$a\" \"$b\"; done"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?print_row\s*(\(\s*\))?\s*\{'
+    message: "Define a function called print_row."
+  - pattern: 'while\s+(IFS=\S*\s+)?read\s+-r\b'
+    message: "Read the lines with  while read -r host pct; do ... done."
+  - pattern: '%-10s\s+%3d%%'
+    message: "Use the format '%-10s %3d%%  %s\\n' inside print_row."
+test_cases:
+  - name: three servers
+    stdin: "dory 45\nmarlin 72\ngrouper 95\n"
+    expected_stdout: |-
+      dory        45%  OK
+      marlin      72%  WARN
+      grouper     95%  CRIT
+      rows: 3
+  - name: thresholds
+    stdin: "a 69\nb 70\nc 89\nd 90\n"
+    expected_stdout: |-
+      a           69%  OK
+      b           70%  WARN
+      c           89%  WARN
+      d           90%  CRIT
+      rows: 4
+  - name: blank lines are skipped
+    stdin: "eel 5\n\nflounder 100\n\n"
+    expected_stdout: |-
+      eel          5%  OK
+      flounder   100%  CRIT
+      rows: 2
+  - name: empty input
+    stdin: ""
+    expected_stdout: "rows: 0"

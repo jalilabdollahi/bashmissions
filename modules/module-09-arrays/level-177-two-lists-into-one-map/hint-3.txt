@@ -1,0 +1,9 @@
+if (( ${#hosts[@]} != ${#ips[@]} )); then
+  echo "lists differ in length: ${#hosts[@]} hosts, ${#ips[@]} addresses" >&2
+  exit 1
+fi
+declare -A table=()
+for i in "${!hosts[@]}"; do
+  # table[host i] = ip i
+done
+Then sort "${!table[@]}" and print "$h=${table[$h]}" for each key (when the table is not empty).

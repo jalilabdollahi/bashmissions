@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  checksum() { local sum _; read -r sum _ < <(printf '%s' "$1|$2|$3|$4|$5|$6" | cksum); echo "$sum"; }
+
+  walk() {                        # sets entries, seg_count, last_seq, last_sum, bad
+    prev=0 expect=1
+    for f in seg-*.log then current.log; do lineno=0
+      while IFS='|' read -r seq sum ts actor action detail || [[ -n $seq ]]; do
+        lineno++ ; format check -> bad="${f##*/} line $lineno (bad format)"; return 1
+        seq != expect  -> (sequence gap) ;  sum != checksum(...) -> (checksum mismatch)
+        prev=$sum; expect++ ; entries++
+      done < "$f"
+    done
+    last_seq=$((expect - 1)); last_sum=$prev
+  }
+
+  lock() { mkdir "$dir/lock" 2>/dev/null || { ...; exit 4; }; trap 'rmdir "$dir/lock"' EXIT; }
+  append: lock; walk or refuse; ts=${AUDIT_NOW:-$(date +%Y-%m-%dT%H:%M:%S)}; printf the line >> current.log; echo "logged #$seq"
+  verify [--anchor]: walk; then anchor file: missing / a_seq > last_seq (TRUNCATED) / SUM differs (anchor mismatch)
+  checkpoint, rotate, search: as in the objective

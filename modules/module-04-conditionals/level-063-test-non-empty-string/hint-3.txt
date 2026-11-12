@@ -1,1 +1,0 @@
-Whitespace inside a quoted argument still counts as content.

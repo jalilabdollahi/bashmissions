@@ -1,0 +1,1 @@
+You want a tiny helper that speaks only when asked. The "asking" is an environment variable the caller sets on the command line. Think about two traps: the variable may not exist at all, and the helper must not look like a failure when it stays silent.

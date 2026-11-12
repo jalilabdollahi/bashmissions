@@ -1,0 +1,9 @@
+`mktemp -d` creates a new empty folder and prints its name. Number your jobs and use the number as the file name, then redirect both output and errors into it:
+
+  tmp=$(mktemp -d)
+  some_command > "$tmp/1" 2>&1 &
+  wait
+  cat "$tmp/1"
+  rm -rf "$tmp"
+
+`n=$((n + 1))` counts, and `for ((i = 1; i <= n; i++))` visits the files in order.

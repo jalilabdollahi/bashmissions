@@ -1,0 +1,1 @@
+A command normally blocks the script until it finishes. Ask the shell to start it and carry on without waiting, then, before you start anything else, write down which process you just created. The shell keeps that number for you in a special variable.

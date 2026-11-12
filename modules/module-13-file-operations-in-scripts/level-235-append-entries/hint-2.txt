@@ -1,0 +1,4 @@
+`date '+%Y-%m-%d %H:%M:%S'` prints a time in your own layout (each %-code is a piece of the date). `>>` appends to a file. `shift` drops the first argument, and `"$*"` joins all remaining arguments with spaces:
+
+  stamp=$(date '+%H:%M')
+  echo "$stamp $*" >> some.log

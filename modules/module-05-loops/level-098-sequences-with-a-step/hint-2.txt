@@ -1,0 +1,1 @@
+seq FIRST STEP LAST prints the numbers one per line: seq 0 15 45 prints 0 15 30 45. If LAST is below FIRST, nothing is printed. Loop over it with for x in $(seq 0 "$step" "$last"). To turn minutes into HH:MM: hours=$(( m / 60 )), minutes=$(( m % 60 )), printed with %02d.

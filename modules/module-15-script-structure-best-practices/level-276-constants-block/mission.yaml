@@ -1,0 +1,66 @@
+id: 276
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Constants Block
+difficulty: advanced
+xp: 160
+story: |
+  Priya found something in backup-path.sh that made her put her coffee down: the
+  backup root is read from the environment, so anybody who exports BACKUP_ROOT
+  before calling it can point Lanternfish's backups wherever they like. The same
+  numbers (14 days, tar.gz) also appear three times in the file, and Theo changed
+  only two of them last month. Configuration belongs in one block, and constants
+  should be unchangeable.
+objective: |
+  solution.sh takes two arguments, a host name and a date (for example
+  halibut 2026-03-01), and prints two lines:
+    path=<BACKUP_ROOT>/<host>/<date>.<SUFFIX>
+    keep=<KEEP_DAYS> days
+  Put a constants block at the top of the script that declares, with the
+  readonly builtin, exactly these three names:
+    BACKUP_ROOT=/srv/backups
+    KEEP_DAYS=14
+    SUFFIX=tar.gz
+  Use those names in the rest of the script; no literal /srv/backups, 14 or
+  tar.gz outside the block. The environment must not be able to override them:
+  running with BACKUP_ROOT=/tmp/evil in the environment still prints
+  /srv/backups. Fewer than two arguments: print
+  "usage: solution.sh HOST DATE" to stderr, exit 2.
+concepts:
+  - "readonly NAME=value"
+  - "one block of configuration at the top"
+  - "constants ignore the inherited environment"
+required_patterns:
+  - pattern: 'readonly\s+BACKUP_ROOT=/srv/backups'
+    message: "Declare readonly BACKUP_ROOT=/srv/backups in a constants block."
+  - pattern: 'readonly\s+KEEP_DAYS=14'
+    message: "Declare readonly KEEP_DAYS=14."
+  - pattern: 'readonly\s+SUFFIX=tar\.gz'
+    message: "Declare readonly SUFFIX=tar.gz."
+forbidden_patterns:
+  - pattern: '\$\{(BACKUP_ROOT|KEEP_DAYS|SUFFIX):[-=]'
+    message: "A constant must not fall back to the environment. Assign it with readonly and no ${...:-...} default."
+test_cases:
+  - name: ordinary host
+    args: [halibut, 2026-03-01]
+    expected_stdout: |-
+      path=/srv/backups/halibut/2026-03-01.tar.gz
+      keep=14 days
+  - name: another host and date
+    args: [marlin, 2025-12-31]
+    expected_stdout: |-
+      path=/srv/backups/marlin/2025-12-31.tar.gz
+      keep=14 days
+  - name: environment cannot override the root
+    args: [eel, 2026-01-15]
+    env:
+      BACKUP_ROOT: /tmp/evil
+      KEEP_DAYS: "999"
+    expected_stdout: |-
+      path=/srv/backups/eel/2026-01-15.tar.gz
+      keep=14 days
+  - name: missing date
+    args: [eel]
+    expected_stderr: "usage: solution.sh HOST DATE"
+    expected_exit: 2

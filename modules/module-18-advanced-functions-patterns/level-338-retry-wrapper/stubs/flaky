@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# A command that fails its first $FLAKY_FAILS calls (status 7), then works.
+# It counts its calls in .flaky-count in the current directory.
+n=0
+[[ -f .flaky-count ]] && n=$(cat .flaky-count)
+n=$(( n + 1 ))
+echo "$n" > .flaky-count
+if (( n <= ${FLAKY_FAILS:-0} )); then
+  exit 7
+fi
+echo "flaky $*: ok on call $n"

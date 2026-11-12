@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Fake probe for BashMissions: reports the two environment variables it sees.
+echo "probe level=${LOG_LEVEL:-unset} label=${PROBE_LABEL:-none}"

@@ -1,1 +1,0 @@
-Capture tracing output separately from normal stdout when writing testable scripts.

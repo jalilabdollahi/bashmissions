@@ -1,0 +1,4 @@
+Put a value in with name=value, with NO spaces around the equals sign. Read it back by writing a dollar sign before the name. A generic example:
+
+  city=Bergen
+  echo "Hello from $city"

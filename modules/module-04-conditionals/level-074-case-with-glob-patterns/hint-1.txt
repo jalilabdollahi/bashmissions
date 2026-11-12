@@ -1,1 +1,0 @@
-`case` patterns can use globs like `*.sh` and `*.txt`.

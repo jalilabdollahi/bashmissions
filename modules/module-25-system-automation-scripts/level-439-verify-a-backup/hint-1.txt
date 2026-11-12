@@ -1,0 +1,1 @@
+The manifest is a promise written at backup time: "this file had this checksum and this size". Your job is to recompute both today and compare. Do the manifest lines one by one, then separately look for files the manifest never mentioned.

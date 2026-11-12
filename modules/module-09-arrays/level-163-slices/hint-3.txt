@@ -1,0 +1,5 @@
+wave=("${machines[@]:offset:size}")
+if (( ${#wave[@]} > 0 )); then
+  printf '%s\n' "${wave[@]}"
+fi
+Check ./solution.sh -2 2 a b c d by hand: it should print c and d.

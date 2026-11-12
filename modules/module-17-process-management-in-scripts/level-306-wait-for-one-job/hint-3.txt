@@ -1,0 +1,9 @@
+integrity-check "$server" &
+pid=$!
+echo "checking $server"
+status=0
+wait "$pid" || status=$?
+echo "$server: status $status"
+exit "$status"
+
+Put the usage check for a missing SERVER before all of this.

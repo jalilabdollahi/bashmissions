@@ -1,0 +1,4 @@
+In $(( )), / divides and throws the fraction away; % gives the remainder. Remainder first, then divide, goes left to right at the same strength. Generic example with 200 seconds:
+
+  echo $(( 200 / 60 ))       # 3   whole minutes
+  echo $(( 200 % 60 ))       # 20  seconds left over

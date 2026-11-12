@@ -1,0 +1,5 @@
+Print, remove, print again - the same expansion both times:
+
+  echo "before=[${TOKEN+set}]"
+  unset TOKEN
+  echo "after=[...]"            # same ${TOKEN+set} expression

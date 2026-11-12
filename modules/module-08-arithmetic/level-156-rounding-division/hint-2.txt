@@ -1,0 +1,5 @@
+Adding a number k to the amount before dividing by n tips the result up whenever the remainder is at least n - k. For k = n/2, that happens at half or more (round to nearest, half up); for k = n - 1, any remainder at all (round up). Generic example for rounding 17 / 5:
+
+  echo $(( 17 / 5 ))              # 3  down
+  echo $(( (17 + 5 / 2) / 5 ))    # 3  nearest (3.4 stays 3)
+  echo $(( (17 + 5 - 1) / 5 ))    # 4  up

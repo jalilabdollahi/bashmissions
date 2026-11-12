@@ -1,0 +1,3 @@
+# customer  percent
+tidewater-books 10
+harbour-bakery  0

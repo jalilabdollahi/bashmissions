@@ -1,1 +1,0 @@
-After sourcing, call the function by name.

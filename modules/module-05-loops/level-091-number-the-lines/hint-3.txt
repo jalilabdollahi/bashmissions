@@ -1,0 +1,6 @@
+days=(Mon Tue Wed Thu Fri Sat Sun)
+people=("$@")
+for (( i=0; i<${#people[@]}; i++ )); do
+  echo "${days[i % 7]}: ${people[i]}"
+done
+Arithmetic inside an array index needs no $(( )), and quotes around the whole echo string keep names with spaces together.

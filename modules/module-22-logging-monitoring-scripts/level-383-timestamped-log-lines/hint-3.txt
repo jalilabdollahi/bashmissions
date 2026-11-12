@@ -1,0 +1,9 @@
+Skeleton:
+
+  [[ $# -ge 2 ]] || usage
+  when=$1; shift
+  if [[ $when == now ]]; then when=-1
+  elif [[ ! $when =~ ^[0-9]+$ ]]; then usage; fi
+  printf '%(%Y-%m-%dT%H:%M:%SZ)T %s\n' "$when" "$*"
+
+Define usage() so that it prints the message to stderr and runs exit 2.

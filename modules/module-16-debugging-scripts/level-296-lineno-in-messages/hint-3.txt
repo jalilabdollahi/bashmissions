@@ -1,0 +1,5 @@
+Inside the first `if` block:
+
+  echo "error (line $LINENO): file not found: $1" >&2
+
+and inside the second one the same shape with "file is empty". Keep the `exit` lines below them: they decide the status (1 and 2).

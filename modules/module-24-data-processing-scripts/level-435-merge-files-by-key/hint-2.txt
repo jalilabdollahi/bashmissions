@@ -1,1 +1,0 @@
-Read from the fixture file under `fixtures/` and keep the transformation streaming when possible.

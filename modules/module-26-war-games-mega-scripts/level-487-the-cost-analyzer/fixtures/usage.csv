@@ -1,0 +1,9 @@
+customer,item,quantity
+harbour-bakery,storage,250
+harbour-bakery,bandwidth,40
+harbour-bakery,vm-hours,720
+harbour-bakery,storage,50
+tidewater-books,storage,1500
+tidewater-books,bandwidth,175
+north-pier-dental,vm-hours,100
+gull-and-anchor,bandwidth,50

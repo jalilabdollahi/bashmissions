@@ -1,0 +1,5 @@
+Fields: 1 id, 2 priority, 3 age_days, 4 owner, 5 status.
+
+  awk '$2 == "P1" && $3 > 3 && $5 == "open" { print $1, $4, $3 }' "$1"
+
+Check the print order against the output format: id, owner, age.

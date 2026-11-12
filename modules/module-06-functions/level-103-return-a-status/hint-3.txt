@@ -1,0 +1,12 @@
+Inside check_disk compare the number and return in order, biggest threshold first:
+
+  check_disk() {
+    if (( $1 >= 95 )); then return 2; fi
+    ... 80 and up ...
+    return 0
+  }
+
+  check_disk "$1"
+  code=$?
+  echo "disk $1% -> status $code"
+  exit "$code"

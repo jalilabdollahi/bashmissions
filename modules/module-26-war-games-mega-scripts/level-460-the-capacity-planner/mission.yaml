@@ -1,22 +1,212 @@
 id: 460
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Capacity Planner
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Capacity Planner` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Capacity Planner
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 370
+story: |
+  Storm season means webcams, weather feeds and a flood of customers re-uploading
+  boat photos, and the disks are filling faster than anyone expected. Gus does not
+  want a graph, he wants one sentence per disk: "this one is full on the 6th of
+  December". The monitoring export only has weekly samples of used space, so the
+  forecast is yours to build. Mara's one hard rule: no `date -d`, the build machines
+  are a mix of macOS and Linux and the script must give the same answer on both.
+objective: |
+  Write solution.sh: `solution.sh [--warn DAYS] [--crit DAYS] FILE`
+
+  FILE is a CSV of disk samples, one per line: `DATE,HOST,MOUNT,USED_GB,TOTAL_GB`
+  (DATE is `YYYY-MM-DD`; numbers may have decimals; rows are in any order). A first
+  line starting with `date,` is a header and is skipped, blank lines are ignored.
+  Any other line that is not five fields with a valid date and positive numbers
+  is skipped and counted. If there were any, print
+  `warning: skipped N malformed line(s)` to stderr (N is the count).
+
+  Group samples by HOST and MOUNT. For a group with at least 3 samples:
+  - fit a straight line through (day, used GB) by least squares; the slope is the
+    growth in GB per day. Day numbers must come from your own calendar arithmetic
+    (days since 1970-01-01), not from the `date` command.
+  - USED% = last sample's used / total * 100. The last sample is the one with the
+    latest date and also provides USED and TOTAL.
+  - if slope > 0: DAYS_LEFT = whole days (rounded down) until the disk is full,
+    counted from the last sample, = (total - used) / slope (0 if already full), and
+    FULL_ON is the last sample's date plus DAYS_LEFT days as `YYYY-MM-DD`
+    (leap years count). Otherwise DAYS_LEFT and FULL_ON are `-`.
+  - STATUS: `CRIT` if DAYS_LEFT <= crit (default 14), `WARN` if DAYS_LEFT <= warn
+    (default 45), else `OK`; any disk at 95.0% or more is `CRIT` regardless of growth.
+  A group with fewer than 3 samples gets `-` in every numeric column and STATUS `NODATA`.
+
+  Print a header and one row per group using
+    printf '%-8s %-8s %6s %8s %9s  %-10s  %s\n'
+  with the columns HOST MOUNT USED% GB/DAY DAYS_LEFT FULL_ON STATUS (USED% with one
+  decimal, GB/DAY with two). Row order: CRIT disks that are not growing first, then
+  growing disks by fewest days left, then non-growing ones, then NODATA; ties by
+  host then mount. After the table print
+    summary: C crit, W warn, O ok, N nodata
+  Exit status (like a monitoring plugin): 0 if nothing is WARN or CRIT, 1 if the
+  worst is WARN, 2 if any CRIT. Usage errors exit 3:
+  `usage: solution.sh [--warn DAYS] [--crit DAYS] FILE`; a threshold that is not a whole
+  number `error: --warn needs a whole number of days` (same for --crit);
+  `error: --crit must not exceed --warn`; `error: cannot read FILE`; and a file
+  with no usable samples `error: no usable samples in FILE`.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "least-squares regression in awk"
+  - "calendar arithmetic without date(1): days since the epoch and back"
+  - "grouping with composite awk keys"
+  - "plugin-style exit codes 0/1/2/3"
+  - "sorting by a computed key, then dropping it"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk for the regression and the calendar maths."
+forbidden_patterns:
+  - pattern: '\bdate\b\s'
+    message: "No date command here: compute day numbers yourself so macOS and Linux agree."
+test_cases:
+  - name: five disks, one critical
+    args:
+    - samples.csv
+    files:
+      samples.csv: |
+        date,host,mount,used_gb,total_gb
+        2026-10-01,marlin,/data,100,200
+        2026-10-11,marlin,/data,115,200
+        2026-10-21,marlin,/data,130,200
+        2026-10-31,marlin,/data,145,200
+        2026-10-01,barracuda,/var,50,300
+        2026-10-11,barracuda,/var,100,300
+        2026-10-21,barracuda,/var,150,300
+        2026-10-01,eel,/srv,200,320
+        2026-10-11,eel,/srv,240,320
+        2026-10-21,eel,/srv,280,320
+        2026-11-01,dory,/home,80,100
+        2026-11-02,dory,/home,79,100
+        2026-11-03,dory,/home,78,100
+        2026-11-01,flounder,/tmp,5,50
+        2026-11-02,flounder,/tmp,6,50
+        this is not a sample
+        2026-11-02,flounder,/tmp,abc,50
+    expected_stdout: |-
+      HOST     MOUNT     USED%   GB/DAY DAYS_LEFT  FULL_ON     STATUS
+      eel      /srv       87.5     4.00        10  2026-10-31  CRIT
+      barracuda /var       50.0     5.00        30  2026-11-20  WARN
+      marlin   /data      72.5     1.50        36  2026-12-06  WARN
+      dory     /home      78.0    -1.00         -  -           OK
+      flounder /tmp          -        -         -  -           NODATA
+      summary: 1 crit, 2 warn, 1 ok, 1 nodata
+    expected_stderr: 'warning: skipped 2 malformed line(s)'
+    expected_exit: 2
+  - name: noisy samples use the regression slope
+    args:
+    - samples.csv
+    files:
+      samples.csv: |
+        2026-11-01,halibut,/db,100,200
+        2026-11-02,halibut,/db,103,200
+        2026-11-03,halibut,/db,104,200
+        2026-11-04,halibut,/db,109,200
+    expected_stdout: |-
+      HOST     MOUNT     USED%   GB/DAY DAYS_LEFT  FULL_ON     STATUS
+      halibut  /db        54.5     2.80        32  2026-12-06  WARN
+      summary: 0 crit, 1 warn, 0 ok, 0 nodata
+    expected_exit: 1
+  - name: custom thresholds change the verdict
+    args:
+    - --warn
+    - '20'
+    - --crit
+    - '5'
+    - samples.csv
+    files:
+      samples.csv: |
+        2026-10-01,marlin,/data,100,200
+        2026-10-11,marlin,/data,115,200
+        2026-10-21,marlin,/data,130,200
+        2026-10-31,marlin,/data,145,200
+        2026-10-01,eel,/srv,200,320
+        2026-10-11,eel,/srv,240,320
+        2026-10-21,eel,/srv,280,320
+    expected_stdout: |-
+      HOST     MOUNT     USED%   GB/DAY DAYS_LEFT  FULL_ON     STATUS
+      eel      /srv       87.5     4.00        10  2026-10-31  WARN
+      marlin   /data      72.5     1.50        36  2026-12-06  OK
+      summary: 0 crit, 1 warn, 1 ok, 0 nodata
+    expected_exit: 1
+  - name: a nearly full disk is critical even when it stopped growing
+    args:
+    - samples.csv
+    files:
+      samples.csv: |
+        2026-11-01,grouper,/logs,192,200
+        2026-11-02,grouper,/logs,192,200
+        2026-11-03,grouper,/logs,192,200
+        2026-11-01,dory,/home,50,100
+        2026-11-02,dory,/home,50.5,100
+        2026-11-03,dory,/home,51,100
+    expected_stdout: |-
+      HOST     MOUNT     USED%   GB/DAY DAYS_LEFT  FULL_ON     STATUS
+      grouper  /logs      96.0     0.00         -  -           CRIT
+      dory     /home      51.0     0.50        98  2027-02-09  OK
+      summary: 1 crit, 0 warn, 1 ok, 0 nodata
+    expected_exit: 2
+  - name: leap day is counted
+    args:
+    - samples.csv
+    files:
+      samples.csv: |
+        2028-02-18,cuttlefish,/pool,60,100
+        2028-02-19,cuttlefish,/pool,61,100
+        2028-02-20,cuttlefish,/pool,62,100
+    expected_stdout: |-
+      HOST     MOUNT     USED%   GB/DAY DAYS_LEFT  FULL_ON     STATUS
+      cuttlefish /pool      62.0     1.00        38  2028-03-29  WARN
+      summary: 0 crit, 1 warn, 0 ok, 0 nodata
+    expected_exit: 1
+  - name: everything calm
+    args:
+    - samples.csv
+    files:
+      samples.csv: |
+        2026-11-01,dory,/home,50,500
+        2026-11-02,dory,/home,49,500
+        2026-11-03,dory,/home,50,500
+    expected_stdout: |-
+      HOST     MOUNT     USED%   GB/DAY DAYS_LEFT  FULL_ON     STATUS
+      dory     /home      10.0     0.00         -  -           OK
+      summary: 0 crit, 0 warn, 1 ok, 0 nodata
+  - name: threshold must be a number
+    args:
+    - --warn
+    - soon
+    - samples.csv
+    files:
+      samples.csv: ''
+    expected_stdout: ''
+    expected_stderr: 'error: --warn needs a whole number of days'
+    expected_exit: 3
+  - name: crit above warn is nonsense
+    args:
+    - --warn
+    - '10'
+    - --crit
+    - '20'
+    - samples.csv
+    files:
+      samples.csv: ''
+    expected_stdout: ''
+    expected_stderr: 'error: --crit must not exceed --warn'
+    expected_exit: 3
+  - name: file without samples
+    args:
+    - samples.csv
+    files:
+      samples.csv: |
+        date,host,mount,used_gb,total_gb
+    expected_stdout: ''
+    expected_stderr: 'error: no usable samples in samples.csv'
+    expected_exit: 3
+  - name: missing file
+    args:
+    - nope.csv
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read nope.csv'
+    expected_exit: 3

@@ -1,0 +1,5 @@
+`<` with a file name connects that file to the command's standard input (descriptor 0):
+
+  sort-tool < names.txt
+
+Check readability first with `[[ -r "$file" ]]`; if the test fails, write the message to stderr with `>&2` and exit.

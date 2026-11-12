@@ -1,0 +1,89 @@
+id: 289
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: POSIX-Friendly Code
+difficulty: expert
+xp: 230
+story: |
+  The recovery stick that Lanternfish keeps in the office safe boots a tiny Linux
+  whose only shell is dash, and the installer scripts on it start with #!/bin/sh.
+  The file classifier Theo wrote is full of bashisms, so on the stick it dies on
+  line 7. Priya wants a version that runs under any POSIX shell, without giving up
+  what it does.
+objective: |
+  Rewrite solution.sh in portable POSIX shell. Line 1 must be #!/bin/sh.
+  The script takes one or more paths and prints, for each, one line
+    <path>: <kind>
+  where kind is the first of these that applies:
+    missing     the path does not exist
+    directory   it is a directory
+    image       the name ends in .png .jpg .jpeg or .gif, in any letter case
+    archive     the name ends in .tar.gz .tgz or .zip, in any letter case
+    log         the name ends in .log, in any letter case
+    other       anything else
+  After the paths print  items: <number of paths>.  With no arguments print
+  "usage: solution.sh PATH..." to stderr and exit 2.
+  It must also run correctly under plain sh. Use [ ] and case, and avoid
+  bash-only features: no [[ ]], no (( )), no ${var,,}, no ==, no function
+  keyword, no local, no arrays, no here-strings, no source.
+concepts:
+  - "[ ] and case instead of [[ ]]"
+  - "$(( )) arithmetic is POSIX, (( )) is not"
+  - "tr for case conversion, printf instead of echo -e"
+required_patterns:
+  - pattern: '\bcase\b'
+    message: "Classify by file name with a case statement and glob patterns."
+forbidden_patterns:
+  - pattern: '\[\['
+    message: "[[ ]] is a bashism; use [ ] or case."
+  - pattern: '(?<![$(])\(\('
+    message: "(( )) is a bashism; use $(( )) for arithmetic or [ ... -lt ... ]."
+  - pattern: '\$\{[A-Za-z_0-9]+(,,|\^\^)'
+    message: "${var,,} and ${var^^} are bash 4 only; use tr '[:upper:]' '[:lower:]'."
+  - pattern: '=='
+    message: "Use a single = inside [ ]; == is not POSIX."
+  - pattern: '\b(function|local|declare|source|mapfile)\b'
+    message: "Stay with POSIX: no function keyword, local, declare, source or mapfile."
+  - pattern: '<<<|=~|&>'
+    message: "Here-strings, =~ and &> are bash features."
+test_cases:
+  - name: one of each kind
+    args: [Beach.PNG, nightly.LOG, backup.tar.gz, notes.txt, shots]
+    files:
+      Beach.PNG: "x"
+      nightly.LOG: "x"
+      backup.tar.gz: "x"
+      notes.txt: "x"
+      shots/inner.txt: "x"
+    expected_stdout: |-
+      Beach.PNG: image
+      nightly.LOG: log
+      backup.tar.gz: archive
+      notes.txt: other
+      shots: directory
+      items: 5
+  - name: missing path and spaces in names
+    args: [Harbour Photo.JpG, "nope.gif", "Q3 sales.zip"]
+    files:
+      "Harbour Photo.JpG": "x"
+      "Q3 sales.zip": "x"
+    expected_stdout: |-
+      Harbour Photo.JpG: image
+      nope.gif: missing
+      Q3 sales.zip: archive
+      items: 3
+  - name: a directory named like a log is a directory
+    args: [old.log, bundle.TGZ, pic.jpeg]
+    files:
+      old.log/readme: "x"
+      bundle.TGZ: "x"
+      pic.jpeg: "x"
+    expected_stdout: |-
+      old.log: directory
+      bundle.TGZ: archive
+      pic.jpeg: image
+      items: 3
+  - name: no arguments
+    expected_stderr: "usage: solution.sh PATH..."
+    expected_exit: 2

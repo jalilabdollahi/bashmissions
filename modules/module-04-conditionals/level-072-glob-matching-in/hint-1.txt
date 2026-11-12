@@ -1,0 +1,1 @@
+You can match a name against a shape instead of an exact value: "starts with tmp-", "ends with .log", "has exactly one character in the middle". The same wildcards you use at the command line on file names work inside the double-bracket test. Order your checks the way the rules are ordered.

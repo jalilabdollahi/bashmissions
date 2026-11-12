@@ -1,1 +1,0 @@
-`-n` is true when a string has at least one character.

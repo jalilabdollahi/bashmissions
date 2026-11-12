@@ -1,0 +1,1 @@
+If you copy the first value over the second, the second value is gone forever. So before you overwrite anything, put one of the values somewhere safe.

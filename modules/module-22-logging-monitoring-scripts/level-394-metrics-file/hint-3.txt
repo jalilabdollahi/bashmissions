@@ -1,0 +1,15 @@
+Skeleton:
+
+  read -r valid bytes largest bad < <(awk '...valid/bad counting, END prints four numbers...' "$log")
+  codes=$(awk '...count per $4 ...' "$log" | sort -n)
+  tmp="$out.tmp"
+  {
+    echo '# HELP lanternfish_http_requests_total Requests served, by status code.'
+    echo '# TYPE lanternfish_http_requests_total counter'
+    while read -r code count; do
+      # printf the {code="..."} sample line (skip an empty $codes!)
+    done <<< "$codes"
+    # the bytes counter, the largest gauge and the malformed counter, each with HELP + TYPE
+  } > "$tmp"
+  mv "$tmp" "$out"
+  echo "wrote $out ($valid requests)"

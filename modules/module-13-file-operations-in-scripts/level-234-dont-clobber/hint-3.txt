@@ -1,0 +1,10 @@
+  set -o noclobber
+  if [[ $force == --force ]]; then
+    echo "$text" >| "$file"
+  elif ! { echo "$text" > "$file"; } 2>/dev/null; then
+    echo "refusing to overwrite $file" >&2
+    exit 1
+  fi
+  echo "wrote $file"
+
+Add the argument-count check in front, and read the optional third argument with ${3:-}.

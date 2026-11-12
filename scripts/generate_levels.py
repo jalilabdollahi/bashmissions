@@ -38,7 +38,8 @@ def main() -> int:
         level["module_total_levels"] = module_totals[module_id]
         level["module_difficulty_range"] = sorted(module_ranges[module_id])
 
-    OUTPUT_PATH.write_text(json.dumps(levels, indent=2), encoding="utf-8")
+    # default=str: YAML turns unquoted 2026-03-01 into a date; the runner str()s it the same way
+    OUTPUT_PATH.write_text(json.dumps(levels, indent=2, default=str), encoding="utf-8")
     print(f"Wrote {len(levels)} levels to {OUTPUT_PATH}")
     return 0
 

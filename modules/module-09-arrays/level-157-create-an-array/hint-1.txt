@@ -1,0 +1,1 @@
+So far a variable held one value. An array is a variable that holds a numbered list of values, so the whole rota can live under a single name. Look at what shape of brackets turns a plain assignment into a list.

@@ -1,0 +1,10 @@
+Inside a function, `return 3` ends the function right there and sets the status to 3. The caller finds that number in `$?` directly after the call:
+
+  is_even() {
+    if (( $1 % 2 == 0 )); then return 0; fi
+    return 1
+  }
+  is_even 7
+  result=$?
+
+Read `$?` straight away; any later command replaces it.

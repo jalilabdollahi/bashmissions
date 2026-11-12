@@ -1,0 +1,6 @@
+Two lines do the whole job:
+
+  IFS=,
+  echo "affected: $*"
+
+Make sure `$*` is inside the double quotes, and that you set IFS to a comma without a space after it.

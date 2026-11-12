@@ -1,0 +1,1 @@
+Wrap the text in double quotes: everything between the quotes is handed to echo untouched. echo "a    b" keeps four spaces, while echo a    b prints a b with a single space.

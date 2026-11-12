@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fake release rehearsal: try-steps K runs the first K steps of the release
+# plan on a scratch machine. It fails when the broken step is among them.
+# The broken step's position comes from BAD_AT (unset = nothing is broken).
+if [[ $# -ne 1 || ! $1 =~ ^[1-9][0-9]*$ ]]; then
+  echo "try-steps: usage: try-steps COUNT   (COUNT is a positive number)" >&2
+  exit 2
+fi
+echo "try-steps $1" >> .calls.log
+if [[ -n ${BAD_AT:-} ]] && (( $1 >= BAD_AT )); then
+  echo "try-steps: one of the first $1 steps failed" >&2
+  exit 1
+fi
+echo "try-steps: first $1 steps ok"

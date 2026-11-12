@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Fake slow virus scanner. Takes SCAN_SECONDS (default 0.1) to finish, then prints
+# "scan complete" and exits with SCAN_STATUS (default 0).
+# On TERM it stops its own sleep and exits 143, like a well-behaved tool.
+sleep "${SCAN_SECONDS:-0.1}" &
+sleeper=$!
+trap 'kill "$sleeper" 2>/dev/null; exit 143' TERM
+wait "$sleeper"
+echo "scan complete"
+exit "${SCAN_STATUS:-0}"

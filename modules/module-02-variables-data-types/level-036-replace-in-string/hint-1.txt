@@ -1,1 +1,0 @@
-`${var/old/new}` replaces the **first** match of `old` (a glob pattern) with `new`. `${var//old/new}` (double slash) replaces **all** matches.

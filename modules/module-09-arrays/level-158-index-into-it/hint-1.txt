@@ -1,0 +1,1 @@
+Put all the arguments into one array first, then ask the array for single elements by their position. Remember that positions are counted from zero, and that Bash also lets you count from the other end.

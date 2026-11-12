@@ -1,0 +1,1 @@
+Reading a file line by line is a loop around the read builtin. read splits each line into variables using IFS, and you can set IFS just for that one command. If a line is split into only two variables, the second one gets everything that is left, which is exactly what you want when the value itself contains the separator.

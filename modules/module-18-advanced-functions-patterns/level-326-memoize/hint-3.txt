@@ -1,0 +1,12 @@
+  (( $# )) || { echo "usage: solution.sh DOMAIN..." >&2; exit 2; }
+  declare -A cache=()
+  registrar_of() {
+    local domain=$1
+    if [[ -z ${cache[$domain]+x} ]]; then
+      cache[$domain]=$(whois-lookup "$domain")
+    fi
+    registrar=${cache[$domain]}
+  }
+  for domain in "$@"; do
+    # call registrar_of, then print "$domain -> $registrar"
+  done

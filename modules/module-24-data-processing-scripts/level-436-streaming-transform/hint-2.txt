@@ -1,1 +1,5 @@
-Read from the fixture file under `fixtures/` and keep the transformation streaming when possible.
+awk is a streaming tool by design: it reads a line, runs your rules, prints, and forgets the line (unless you store it). With no file argument it reads standard input:
+
+  awk -F, 'NR == 1 { print; next } { total += $2; print $1, total }'
+
+Convert cents to dollars with integer division and remainder: for c = 1205, `int(c / 100)` is 12 and `c % 100` is 5, and `sprintf("%.0f.%02d", ...)` pads the cents to two digits. Handle the sign first: remember a "-" and work with `-c` if c is negative. Test a number with `$2 ~ /^-?[0-9]+$/`. The END block runs when the input ends: print the summary line there, and only if `NR > 0`. Print errors with `printf ... > "/dev/stderr"`.

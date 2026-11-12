@@ -1,0 +1,1 @@
+Put each command on its own line of the script. For instance, echo "first" on one line and echo "second" on the next prints first, then second underneath it. Swap them and the output swaps too.

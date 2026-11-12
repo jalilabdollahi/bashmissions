@@ -1,0 +1,5 @@
+`trap 'commands' ERR` runs `commands` whenever a command fails. Inside, `$BASH_COMMAND` is the failing command's text, `$LINENO` its line, `$?` its status. Use single quotes so they are read at failure time, and take `$?` before running anything else:
+
+  trap 'rc=$?; echo "oops: $BASH_COMMAND (rc=$rc)" >&2' ERR
+
+`set -E` (errtrace) makes functions inherit the trap; combine it with `set -e`: `set -eE`.

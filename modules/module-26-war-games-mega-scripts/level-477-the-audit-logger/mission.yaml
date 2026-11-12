@@ -1,22 +1,421 @@
 id: 477
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Audit Logger
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Audit Logger` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Audit Logger
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 450
+story: |
+  After the storm, the insurer's auditor asks one question: "Can you prove nobody touched
+  the admin log after the incident?" Priya has been waiting for it. The old trick, a chained
+  checksum per line, catches an edited line but not a clever one: delete the *last* entries
+  and the chain still verifies, rewrite the tail with fresh checksums and it still verifies.
+  So the log needs the whole kit: a chain across rotated files, a checkpoint kept somewhere
+  else (the anchor), a lock so two writers cannot fork the chain, and search that refuses to
+  answer from a log it cannot trust.
+objective: |
+  Write solution.sh, an audit-log tool working in the directory `audit/`:
+    `solution.sh append ACTOR ACTION DETAIL...`
+    `solution.sh verify [--anchor]`
+    `solution.sh checkpoint`
+    `solution.sh rotate [--max N]`
+    `solution.sh search [--actor A] [--action X] [--from SEQ] [--to SEQ] [--force]`
+  A wrong command or option, a missing argument, an ACTOR not matching `^[a-z][a-z0-9_-]*$`, an ACTION not
+  matching `^[A-Z_]+$` or an empty DETAIL: `usage: solution.sh append ACTOR ACTION DETAIL... | verify [--anchor] | checkpoint | rotate [--max N] | search [--actor A] [--action X] [--from SEQ] [--to SEQ] [--force]`
+  on stderr, exit 2.
+
+  Storage: finished segments `audit/seg-0001.log`, `audit/seg-0002.log`, ... and the live file `audit/current.log`
+  (read in that order; missing files are fine). One entry per line: `SEQ|SUM|TS|ACTOR|ACTION|DETAIL` (DETAIL is the rest of
+  the line and may contain `|`). SEQ counts 1, 2, 3, ... continuously across all segments. SUM is the first number
+  `cksum` prints for the text `PREV|SEQ|TS|ACTOR|ACTION|DETAIL` (exactly that, no trailing newline), PREV being the
+  previous entry's SUM across segment boundaries, `0` for the very first entry. TS is `AUDIT_NOW` when that environment
+  variable is set, otherwise `date +%Y-%m-%dT%H:%M:%S`; it must look like `2026-11-12T03:14:07`.
+
+  Checking the chain (used by every command except usage errors): walk all segments in order and stop at the first bad
+  line; a line is `bad format` if SEQ or SUM is not a number, TS/ACTOR/ACTION do not match the patterns above, or DETAIL is
+  empty; `sequence gap` if SEQ is not the expected number; `checksum mismatch` otherwise. The failure is described as
+  `FILE line N (REASON)` with FILE the base name (`seg-0001.log`).
+  - `verify` prints `OK: N entries in S segments` (S = number of files read) and exits 0, or `TAMPERED: FILE line N (REASON)`
+    and exits 1. `verify --anchor` additionally compares with `audit/anchor` (one line `SEQ SUM`): when the chain is
+    intact and the anchor matches print the OK line and then `anchor OK (#SEQ)`; with no anchor file print only
+    `NO ANCHOR: run checkpoint first` (exit 1); if the anchored SEQ is beyond the last entry print only
+    `TRUNCATED: anchor expects #A, log ends at #L` (exit 1); if the log's entry with that SEQ has another SUM print only
+    `TAMPERED: anchor mismatch at #A` (exit 1). An anchor older than the log's end is fine.
+  - `append`, `checkpoint` and `rotate` first take a lock by creating the directory `audit/lock` (creating `audit/` if needed); if
+    it exists they print `error: audit log is locked by another process` on stderr and exit 4; a trap removes the lock when
+    they end. `append` checks the chain first: if broken, `refusing to append: log is tampered` on stderr, exit 1, nothing
+    written. Otherwise it appends the next entry to current.log and prints `logged #SEQ`.
+  - `checkpoint` checks the chain (`refusing to checkpoint: log is tampered`, exit 1; an empty log: `error: nothing to anchor`,
+    exit 1), writes `SEQ SUM` of the last entry to `audit/anchor` (written to a temporary file and moved into place) and prints
+    `anchored #SEQ`.
+  - `rotate [--max N]` (N default 1000, positive whole number): after checking the chain (`refusing to rotate: log is tampered`,
+    exit 1), if current.log has fewer than N entries print `no rotation needed (K entries)`; otherwise move it to the next free
+    segment name and print `rotated to seg-NNNN.log (K entries)`.
+  - `search` filters by exact actor, exact action and an inclusive SEQ range. A broken chain prints
+    `refusing to search: log is tampered` (stderr, exit 1) unless `--force`. Output: one line `#SEQ TS ACTOR ACTION DETAIL` per match, then
+    `N matches`.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "a hash chain that continues across rotated files"
+  - "an external anchor detects truncation and consistent rewrites"
+  - "mkdir lock with trap, taken only by writers"
+  - "tail-field parsing: the last field keeps the separator"
+  - "refuse to answer from data you cannot trust, unless forced"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Compute each entry's SUM with cksum."
+  - pattern: '\btrap\b'
+    message: "Release the lock with a trap."
+test_cases:
+  - name: first entry of a new log
+    args:
+    - append
+    - mara
+    - DEPLOY
+    - shrimp-api
+    - 2.4.0
+    - to
+    - prod
+    env:
+      AUDIT_NOW: '2026-11-12T03:10:00'
+    expected_stdout: 'logged #1'
+    expected_files:
+      audit/current.log: 1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+      audit/lock: null
+  - name: append continues the chain across segments
+    args:
+    - append
+    - noor
+    - NOTICE
+    - customer
+    - mail
+    - sent
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    env:
+      AUDIT_NOW: '2026-11-12T05:00:00'
+    expected_stdout: 'logged #6'
+    expected_files:
+      audit/current.log: |-
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+        6|401669892|2026-11-12T05:00:00|noor|NOTICE|customer mail sent
+      audit/seg-0001.log: |-
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/lock: null
+  - name: the timestamp falls back to the clock
+    args:
+    - append
+    - noor
+    - NOTICE
+    - clock
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+    expected_stdout: 'logged #2'
+    expected_files:
+      audit/lock: null
+  - name: verify an intact rotated log
+    args:
+    - verify
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: 'OK: 5 entries in 2 segments'
+  - name: an edited message in an old segment is caught
+    args:
+    - verify
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after reboot
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: 'TAMPERED: seg-0001.log line 2 (checksum mismatch)'
+    expected_exit: 1
+  - name: a deleted line breaks the sequence
+    args:
+    - verify
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: 'TAMPERED: seg-0001.log line 2 (sequence gap)'
+    expected_exit: 1
+  - name: garbage in the live file
+    args:
+    - verify
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+        not an entry
+    expected_stdout: 'TAMPERED: current.log line 3 (bad format)'
+    expected_exit: 1
+  - name: a log with the tail cut off still verifies without an anchor
+    args:
+    - verify
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+    expected_stdout: 'OK: 3 entries in 1 segments'
+  - name: but the anchor notices the truncation
+    args:
+    - verify
+    - --anchor
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/anchor: |
+        5 2696922597
+    expected_stdout: 'TRUNCATED: anchor expects #5, log ends at #3'
+    expected_exit: 1
+  - name: a consistently rewritten tail passes the chain but not the anchor
+    args:
+    - verify
+    - --anchor
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|634337531|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.2 to prod
+      audit/anchor: |
+        5 2696922597
+    expected_stdout: 'TAMPERED: anchor mismatch at #5'
+    expected_exit: 1
+  - name: an intact log with a current anchor
+    args:
+    - verify
+    - --anchor
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+      audit/anchor: |
+        3 538722329
+    expected_stdout: |-
+      OK: 5 entries in 2 segments
+      anchor OK (#3)
+  - name: anchor requested but never written
+    args:
+    - verify
+    - --anchor
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: 'NO ANCHOR: run checkpoint first'
+    expected_exit: 1
+  - name: checkpoint writes the anchor
+    args:
+    - checkpoint
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: 'anchored #5'
+    expected_files:
+      audit/anchor: 5 2696922597
+      audit/anchor.new: null
+      audit/lock: null
+  - name: checkpoint refuses a tampered log
+    args:
+    - checkpoint
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|maria|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+    expected_stdout: ''
+    expected_stderr: 'refusing to checkpoint: log is tampered'
+    expected_exit: 1
+    expected_files:
+      audit/anchor: null
+  - name: rotate when the live file is big enough
+    args:
+    - rotate
+    - --max
+    - '2'
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: rotated to seg-0002.log (2 entries)
+    expected_files:
+      audit/seg-0002.log: |-
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+      audit/current.log: null
+      audit/seg-0001.log: |-
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+  - name: rotate does nothing for a small file
+    args:
+    - rotate
+    - --max
+    - '5'
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+    expected_stdout: no rotation needed (2 entries)
+    expected_files:
+      audit/seg-0001.log: null
+  - name: search by actor and action
+    args:
+    - search
+    - --actor
+    - mara
+    - --action
+    - DEPLOY
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: |-
+      #1 2026-11-12T03:10:00 mara DEPLOY shrimp-api 2.4.0 to prod
+      #5 2026-11-12T04:05:09 mara DEPLOY shrimp-api 2.4.1 to prod
+      2 matches
+  - name: search by sequence range keeps the pipe in the detail
+    args:
+    - search
+    - --from
+    - '3'
+    - --to
+    - '4'
+    files:
+      audit/seg-0001.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oom
+        3|538722329|2026-11-12T03:20:31|priya|GRANT|admin to ollie for storm shift
+      audit/current.log: |
+        4|1230907194|2026-11-12T04:02:00|ollie|LOGIN|console | pipe in detail
+        5|2696922597|2026-11-12T04:05:09|mara|DEPLOY|shrimp-api 2.4.1 to prod
+    expected_stdout: |-
+      #3 2026-11-12T03:20:31 priya GRANT admin to ollie for storm shift
+      #4 2026-11-12T04:02:00 ollie LOGIN console | pipe in detail
+      2 matches
+  - name: search refuses a tampered log
+    args:
+    - search
+    - --actor
+    - mara
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oops
+    expected_stdout: ''
+    expected_stderr: 'refusing to search: log is tampered'
+    expected_exit: 1
+  - name: search --force answers anyway
+    args:
+    - search
+    - --force
+    - --actor
+    - theo
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|theo|RESTART|tide-sync after oops
+    expected_stdout: |-
+      #2 2026-11-12T03:14:07 theo RESTART tide-sync after oops
+      1 matches
+  - name: a writer cannot start while the lock is held
+    args:
+    - append
+    - mara
+    - DEPLOY
+    - x
+    files:
+      audit/lock/.keep: ''
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+    expected_stdout: ''
+    expected_stderr: 'error: audit log is locked by another process'
+    expected_exit: 4
+    expected_files:
+      audit/lock/.keep: ''
+      audit/current.log: 1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+  - name: append refuses a tampered log
+    args:
+    - append
+    - mara
+    - DEPLOY
+    - x
+    files:
+      audit/current.log: |
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|thea|RESTART|tide-sync after oom
+    env:
+      AUDIT_NOW: '2026-11-12T05:00:00'
+    expected_stdout: ''
+    expected_stderr: 'refusing to append: log is tampered'
+    expected_exit: 1
+    expected_files:
+      audit/current.log: |-
+        1|2902170505|2026-11-12T03:10:00|mara|DEPLOY|shrimp-api 2.4.0 to prod
+        2|3703675951|2026-11-12T03:14:07|thea|RESTART|tide-sync after oom
+  - name: bad actor name
+    args:
+    - append
+    - Mara
+    - DEPLOY
+    - x
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh append ACTOR ACTION DETAIL... | verify [--anchor] | checkpoint | rotate [--max N] | search [--actor A] [--action X] [--from SEQ] [--to SEQ] [--force]'
+    expected_exit: 2
+  - name: unknown command
+    args:
+    - erase
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh append ACTOR ACTION DETAIL... | verify [--anchor] | checkpoint | rotate [--max N] | search [--actor A] [--action X] [--from SEQ] [--to SEQ] [--force]'
+    expected_exit: 2

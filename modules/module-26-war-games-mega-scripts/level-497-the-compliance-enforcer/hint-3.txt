@@ -1,1 +1,21 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  parse rules:  read -r id s t p r <<< "$line"   (r keeps the rest of the line)
+                validate severity, type, duplicate id, path (no leading / and no ..), arguments per type;
+                collect all problems, exit 2 afterwards.  Store in associative arrays sev[] type[] path[] rest[].
+
+  evaluate() {   # ID -> 0 ok / 1 with $msg
+    case ${type[$1]} in
+      mode)    exists? cur=$(mode_of ...) want=$(want_mode ...) compare
+      line)    grep -qxF -- "$text" "$file"
+      noline)  count=$(grep -cE -- "$re" "$file" || true)
+      setting) first non-comment line whose first word equals the key (case-insensitive)
+      absent)  [[ -e $f || -L $f ]]
+    esac
+  }
+  can_fix(), fix_text() and apply_fix() are one case statement each: chmod / append / filter / replace-or-append / remove.
+
+  main loop:
+    waiver valid (until >= NOW)?   print WAIVED and continue; expired? note on stderr
+    evaluate ok? PASS.  else check: FAIL.  enforce: can_fix? no -> CANNOT FIX; dry -> WOULD FIX; yes -> backup, apply_fix, evaluate again -> FIXED or STILL FAILING
+  echo summary; exit 1 when failed > 0 (or in dry run when something would be fixed)

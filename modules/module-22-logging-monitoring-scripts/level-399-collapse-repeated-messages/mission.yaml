@@ -1,0 +1,95 @@
+id: 399
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Collapse Repeated Messages
+difficulty: expert
+xp: 200
+story: |
+  When the card gateway went down on Tuesday, Tidewater Books' checkout wrote
+  the same line, `cannot reach gateway`, eleven thousand times in nine
+  minutes. The one line that explained *why* (a certificate had expired) was
+  buried in the middle. Mara wants the log viewer to fold such floods the way
+  syslog does: "last message repeated 11000 times".
+objective: |
+  Write solution.sh: it reads log lines from stdin, each of the form
+  `HH:MM:SS message words...`, and prints them with runs of repeats folded.
+
+  Two lines repeat each other when their messages (everything after the
+  first space, the timestamp excluded) are identical and the lines are next to each other.
+
+  - Print the first line of a run unchanged (with its own timestamp).
+  - If the run had R further copies (R of 1 or more), print directly after it
+    `last message repeated R times` (write `1 time` when R is 1).
+  - The same message appearing again later, after a different one, starts a
+    new run. Messages are never merged across a gap.
+  - A line is *kept as is* and ends the current run even if it has no message
+    at all (only a timestamp).
+  - Empty input prints nothing.
+concepts:
+  - "remember the previous message and a counter"
+  - "flush the pending count when the message changes and at end of input"
+  - "${line#* } drops the first word"
+test_cases:
+  - name: a flood is folded
+    stdin: |
+      10:00:01 cannot reach gateway
+      10:00:02 cannot reach gateway
+      10:00:02 cannot reach gateway
+      10:00:03 cannot reach gateway
+      10:00:09 certificate expired
+    expected_stdout: |-
+      10:00:01 cannot reach gateway
+      last message repeated 3 times
+      10:00:09 certificate expired
+  - name: nothing repeats
+    stdin: |
+      09:00:00 started
+      09:00:01 listening
+      09:00:02 ready
+    expected_stdout: |-
+      09:00:00 started
+      09:00:01 listening
+      09:00:02 ready
+  - name: a single repeat uses the singular
+    stdin: |
+      12:00:00 disk slow
+      12:00:05 disk slow
+      12:00:06 ok
+    expected_stdout: |-
+      12:00:00 disk slow
+      last message repeated 1 time
+      12:00:06 ok
+  - name: the same message later starts a new run
+    stdin: |
+      08:00:00 retry
+      08:00:01 retry
+      08:00:02 connected
+      08:00:03 retry
+      08:00:04 retry
+      08:00:05 retry
+    expected_stdout: |-
+      08:00:00 retry
+      last message repeated 1 time
+      08:00:02 connected
+      08:00:03 retry
+      last message repeated 2 times
+  - name: the last run is flushed at the end of input
+    stdin: |
+      23:59:58 heartbeat missed
+      23:59:59 heartbeat missed
+    expected_stdout: |-
+      23:59:58 heartbeat missed
+      last message repeated 1 time
+  - name: messages differing in one character are different
+    stdin: |
+      11:00:00 worker 1 died
+      11:00:01 worker 2 died
+      11:00:02 worker 2 died
+    expected_stdout: |-
+      11:00:00 worker 1 died
+      11:00:01 worker 2 died
+      last message repeated 1 time
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

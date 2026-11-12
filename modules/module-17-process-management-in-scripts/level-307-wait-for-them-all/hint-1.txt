@@ -1,0 +1,1 @@
+You need a notebook: one entry per job, written down while the jobs are being started, so that later you can ask each job in turn how it went. Start everything first. Only when all are running do you begin waiting, and waiting in the order you started gives you answers in that same order.

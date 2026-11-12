@@ -1,0 +1,31 @@
+id: 4
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Single Quotes Are Literal
+difficulty: beginner
+xp: 60
+story: |
+  Priya is writing the security reminder that pops up when someone logs in to
+  a Lanternfish server. It has to mention the names of shell variables, $HOME
+  and $USER, as plain words, because new hires keep pasting their real values
+  into support tickets. Her first attempt printed a path instead of the word
+  $HOME, which rather defeated the point.
+objective: |
+  Write solution.sh so that it prints exactly these two lines, with the dollar
+  signs as ordinary characters:
+    Never paste $HOME or $USER into a ticket.
+    Late report fee: $5 per day.
+  Use single quotes so Bash leaves every character alone.
+concepts:
+  - "single quotes: no expansion at all"
+  - "double quotes still expand $variables"
+single_case: true
+required_patterns:
+  - pattern: "echo\\s+'[^']*\\$[^']*'"
+    message: "Wrap the text in single quotes, e.g. echo '...$...', so the $ signs stay literal."
+test_cases:
+  - name: dollar signs survive
+    expected_stdout: |-
+      Never paste $HOME or $USER into a ticket.
+      Late report fee: $5 per day.

@@ -1,0 +1,11 @@
+Skeleton in the required order:
+
+  config=${1:-}
+  [[ -n $config ]] || { echo "usage: solution.sh CONFIG" >&2; exit 2; }
+  [[ -r $config ]] || { ... exit 3; }
+  port=$(grep '^port=' "$config" | head -n 1 | cut -d= -f2 || true)
+  [[ $port =~ ^[0-9]+$ ]] || { ... exit 4; }
+  probe "$port" || { ... exit 5; }
+  echo "healthy: port $port"
+
+Fill in the messages. The `|| true` keeps a missing port= line from being a failure of the pipeline itself.

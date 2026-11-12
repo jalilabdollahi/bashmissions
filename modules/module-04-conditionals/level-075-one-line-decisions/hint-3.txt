@@ -1,0 +1,3 @@
+sev="${1:-}"
+[[ $sev == critical ]] && { notify page-oncall || echo "pager failed" >&2; } || echo "logged: ..."
+# "logged: ..." should include the severity; the braces keep the pager failure away from it.

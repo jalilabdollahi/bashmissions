@@ -1,0 +1,4 @@
+for name in anchovy barracuda cuttlefish dory eel; do
+  echo "refreshing banner on $name"
+done
+Then add the final "all banners refreshed" line AFTER the word done, so it runs only once.

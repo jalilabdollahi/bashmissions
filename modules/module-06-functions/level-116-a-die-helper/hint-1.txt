@@ -1,0 +1,1 @@
+Every failure does the same two things: say what went wrong on stderr, then stop with a number that tells the caller why. That pair of actions is what the function wraps, so a failure becomes one short line at the place where you detect it.

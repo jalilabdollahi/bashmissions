@@ -1,1 +1,0 @@
-Early exit means leaving the script or loop as soon as a condition is met.

@@ -1,0 +1,12 @@
+  awk '
+    /^:INPUT / { if ($2 == "ACCEPT") { printf "line %d: INPUT policy is ACCEPT\n", NR; found++ } }
+    /^-A /     { rules++ }
+    /^-A INPUT / {
+      src = ""; iface = ""; proto = ""; mod = 0; ports = ""; target = ""
+      for (i = 2; i <= NF; i++) { ...if ($i == "-s") src = $(i + 1) ... one branch per option... }
+      world = (src == "" || src == "0.0.0.0/0")
+      if (target == "ACCEPT" && world) { ...ports: split, range or sensitive; else accepts-all test... }
+    }
+    END { printf "audited %d rules, %d findings\n", rules, found; exit (found > 0) }
+  ' "$file"
+Check beforehand that the file contains a *filter line.

@@ -1,0 +1,1 @@
+A script's first lines are its front door. Think of three things a stranger needs: which interpreter runs it, what it is for, and what happens when something goes wrong. The old script answers none of them, and the last one is why a missing file looks like success.

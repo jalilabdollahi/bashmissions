@@ -1,0 +1,1 @@
+Think of a taxi meter: one number that exists outside the loop, starts at zero, and gets a little bigger on every round. The line you print each round shows what the meter says right now.

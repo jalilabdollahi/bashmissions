@@ -1,0 +1,67 @@
+id: 219
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Alternation
+difficulty: intermediate
+xp: 140
+story: |
+  The firewall on barracuda writes a line for every packet decision, and the
+  action is spelled three different ways depending on which rule fired. Priya
+  does not need the lines, she needs the totals: how many packets were turned
+  away, how many were let in, and how many lines say something else entirely.
+  She plans to paste the numbers into a slide, so the format matters.
+objective: |
+  Write solution.sh that reads firewall lines from standard input. Each
+  line contains a field "ACTION=<word>", for example
+    barracuda kernel: ACTION=DROP SRC=203.0.113.9 DPT=22
+  Classify every line by its action:
+    blocked   ACTION=DROP, ACTION=REJECT or ACTION=DENY
+    allowed   ACTION=ACCEPT or ACTION=ALLOW
+    other     anything else, including lines without an ACTION field
+  The action word must be complete: "ACTION=DROPPED" is "other". The field is
+  always followed by a space or the end of the line. After reading all input
+  print one line:
+    blocked=<n> allowed=<n> other=<n>
+  Use alternation with | inside a group in [[ =~ ]]. Do not use grep or case.
+concepts:
+  - "a|b matches either alternative"
+  - "( ) limits where the alternation starts and ends"
+  - "bound the alternatives so DROP does not match DROPPED"
+required_patterns:
+  - pattern: '\([A-Z]+\|[A-Z|]+\)'
+    message: "Group the alternatives, e.g. (DROP|REJECT|DENY), so the | only covers the action word."
+forbidden_patterns:
+  - pattern: '\b(grep|awk|sed|case)\b'
+    message: "Use alternation inside =~ for this level."
+test_cases:
+  - name: a mixed batch
+    stdin: |
+      barracuda kernel: ACTION=DROP SRC=203.0.113.9 DPT=22
+      barracuda kernel: ACTION=ACCEPT SRC=198.51.100.4 DPT=443
+      barracuda kernel: ACTION=REJECT SRC=192.0.2.77 DPT=3389
+      barracuda kernel: ACTION=ALLOW SRC=198.51.100.5 DPT=80
+      barracuda kernel: ACTION=DENY SRC=203.0.113.50 DPT=23
+    expected_stdout: "blocked=3 allowed=2 other=0"
+  - name: the action word must be complete
+    stdin: |
+      fw: ACTION=DROPPED SRC=1.2.3.4
+      fw: ACTION=ACCEPTED SRC=1.2.3.4
+      fw: ACTION=ALLOWANCE SRC=1.2.3.4
+      fw: ACTION=DROP SRC=1.2.3.4
+    expected_stdout: "blocked=1 allowed=0 other=3"
+  - name: action at the end of the line and missing action
+    stdin: |
+      fw: SRC=10.0.0.5 ACTION=ACCEPT
+      fw: SRC=10.0.0.6 ACTION=REJECT
+      fw: link state changed
+      fw: ACTION= SRC=10.0.0.7
+    expected_stdout: "blocked=1 allowed=1 other=2"
+  - name: lowercase actions are not recognised
+    stdin: |
+      fw: action=DROP
+      fw: ACTION=drop
+    expected_stdout: "blocked=0 allowed=0 other=2"
+  - name: empty input
+    stdin: ""
+    expected_stdout: "blocked=0 allowed=0 other=0"

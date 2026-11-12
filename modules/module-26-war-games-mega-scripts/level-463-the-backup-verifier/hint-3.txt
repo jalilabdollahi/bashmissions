@@ -1,1 +1,18 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+  index=$( for archive in "$dir"/*.tar.gz; do ...regex...; echo "$set|$date|$base"; done | sort -t'|' -k1,1 -k2,2r )
+
+  verify_one() {      # BASENAME -> 0/1, explanation in $detail
+    [[ -f $sums ]]                          || { detail="no sums file"; return 1; }
+    entries=$(tar -tzf "$archive" 2>/dev/null) || { detail="corrupt archive"; return 1; }
+    bad=$(... grep ... | head -n 1 || true); [[ -z $bad ]] || { detail="unsafe path in archive: $bad"; return 1; }
+    rm -rf "$work/restore"; mkdir "$work/restore"; tar -xzf "$archive" -C "$work/restore" || corrupt
+    while read -r crc size path; do listed[$path]=1; missing / mismatch checks; done < "$sums"
+    unlisted: (cd "$work/restore" && find . -type f | sort) not in listed
+    join the non-empty groups with "; " and return 1, else detail="N files restored, checksums match"
+  }
+
+  while IFS='|' read -r set date base; do   # new set? close_set; count shown < keep; verify_one; print row
+  done <<< "$index"
+  final tally and exit 2 / 1 / 0

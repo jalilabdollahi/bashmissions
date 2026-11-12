@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# systemctl reload nginx (logged; FAKE_RELOAD_FAIL=1 makes it fail)
+[[ ${1:-} == reload && $# -eq 2 ]] || { echo "systemctl: only 'reload UNIT' is supported here" >&2; exit 2; }
+echo "systemctl reload $2" >> .calls.log
+[[ ${FAKE_RELOAD_FAIL:-} != 1 ]]

@@ -1,0 +1,5 @@
+`set -u` makes bash stop with "unbound variable" the moment an unset variable is expanded. For a variable that is allowed to be unset, `${name:-fallback}` expands to the fallback when `name` is unset or empty:
+
+  set -u
+  echo "hello ${GREETING:-world}"     # fine even if GREETING does not exist
+  echo "hello $GREETNG"               # aborts: unbound variable

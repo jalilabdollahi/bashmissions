@@ -1,0 +1,11 @@
+  case ${name^^} in
+    *_KEY|*_TOKEN|*_SECRET|*_PASSWORD)
+      if (( ${#value} >= 12 )); then value="****${value: -4}"
+      elif [[ -n $value ]]; then value="****"
+      fi ;;
+    *)
+      if [[ $value =~ ^(.*://[^:/@]*:)[^@/]*(@.*)$ ]]; then
+        value="${BASH_REMATCH[1]}****${BASH_REMATCH[2]}"
+      fi ;;
+  esac
+  echo "$name=$value"

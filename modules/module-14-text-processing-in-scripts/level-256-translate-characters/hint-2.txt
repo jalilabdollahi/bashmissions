@@ -1,1 +1,7 @@
-Use the requested text-processing tool in the pipeline, then shape the output exactly.
+The filter is tr, and it only works on standard input:
+
+  echo hello | tr 'el' 'ip'        # hippo : e->i, l->p
+  echo hello | tr 'a-z' 'A-Z'      # HELLO : ranges are allowed
+  echo a.b | tr '.' '/'            # a/b
+
+Both sets are matched by position, so they should have the same length. If the second set is shorter, its last character is repeated.

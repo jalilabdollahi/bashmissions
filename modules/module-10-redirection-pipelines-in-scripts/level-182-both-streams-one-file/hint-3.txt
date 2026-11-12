@@ -1,0 +1,5 @@
+  cert-check "$domain" &> cert.log
+  lines=$(( $(wc -l < cert.log) ))
+  echo "saved $lines lines"
+
+(The `<` after wc is a redirection too; a later level is all about it.)

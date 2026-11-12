@@ -1,0 +1,3 @@
+Look carefully at how the timestamps are written: the year comes first, then month, day, hour, minute, second, and every number is padded with zeros to a fixed width. Now imagine sorting those lines alphabetically. What does that do to their chronological order?
+
+If the answer is "nothing", then comparing two timestamps is just comparing two strings, and no date arithmetic is needed.

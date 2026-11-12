@@ -1,0 +1,1 @@
+Bash has no "count the occurrences" operation, but it has two things that combine into one: deleting characters, and measuring length. If you delete everything in a row that is NOT a comma, what is left is a string of commas, and its length is the answer. Think about how to say "any character except a comma" in a pattern.

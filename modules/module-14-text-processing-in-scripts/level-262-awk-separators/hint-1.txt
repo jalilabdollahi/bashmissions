@@ -1,0 +1,1 @@
+awk splits at blanks unless you tell it otherwise, and it also joins what it prints with a single space unless you tell it otherwise. Those are two separate settings: one for reading, one for writing. Set both to what the situation needs, then print the fields you want.

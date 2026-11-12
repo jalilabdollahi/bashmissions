@@ -1,0 +1,59 @@
+id: 310
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: A Worker Limit
+difficulty: advanced
+xp: 200
+story: |
+  Harbour Bakery uploaded four hundred product photos and Theo's shell loop
+  started `resize` on all of them at once. The little server `cuttlefish`
+  swapped itself to a standstill. Starting jobs one by one is too slow and
+  starting everything at once is too much; Mara wants "at most three at a
+  time, and start the next one the moment a slot frees up".
+objective: |
+  Write solution.sh. The first argument is MAX, the largest number of
+  `resize` jobs allowed to run at the same moment; the remaining arguments
+  are the image names. With no arguments at all print
+  `usage: solution.sh MAX NAME...` to stderr and exit with status 2.
+
+  Run `resize NAME` in the background for every NAME. Never have more than
+  MAX running together, and keep MAX of them busy whenever there is work
+  left: as soon as one job ends, start the next. Use `wait -n`, which waits
+  for whichever job finishes first and returns that job's status.
+
+  Count the jobs whose status was 0 and the ones whose status was not.
+  After the last job has ended, print
+    done: A ok, B failed
+  and exit with status 1 if B is above zero, otherwise 0. With no names,
+  print `done: 0 ok, 0 failed`.
+concepts:
+  - "wait -n waits for the next job to finish"
+  - "a running-jobs counter keeps the pool at MAX"
+required_patterns:
+  - pattern: 'wait\s+-n\b'
+    message: "Use wait -n to wait for whichever job ends first."
+  - pattern: '\$!|&\s*$'
+    message: "Start each resize in the background with &."
+test_cases:
+  - name: eight images, three at a time
+    args: [3, a.jpg, b.jpg, c.jpg, d.jpg, e.jpg, f.jpg, g.jpg, corrupt-h.jpg]
+    expected_stdout: "done: 7 ok, 1 failed"
+    expected_exit: 1
+  - name: limit of two
+    args: [2, logo.png, banner.png, menu.png, map.png]
+    expected_stdout: "done: 4 ok, 0 failed"
+  - name: limit larger than the work
+    args: [6, one.jpg, two.jpg]
+    expected_stdout: "done: 2 ok, 0 failed"
+  - name: one at a time
+    args: [1, x.jpg, corrupt-y.jpg, z.jpg]
+    expected_stdout: "done: 2 ok, 1 failed"
+    expected_exit: 1
+  - name: no images
+    args: [4]
+    expected_stdout: "done: 0 ok, 0 failed"
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh MAX NAME..."
+    expected_exit: 2

@@ -1,0 +1,71 @@
+id: 260
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: awk Filters
+difficulty: intermediate
+xp: 160
+story: |
+  Monday morning, and the ticket queue has the look of a sinking ship. Noor
+  exported it as a plain table, and Mara wants the short list: the urgent
+  tickets that are still open and have been left waiting for more than three
+  days. Everything else is somebody else's problem until Wednesday.
+objective: |
+  Write solution.sh that takes one argument, a ticket file. Each line has
+  five whitespace-separated fields:
+    <id> <priority> <age_days> <owner> <status>
+  for example `T-101 P1 5 theo open`. There is no header line. Print a line
+  `<id> <owner> <age_days>` for every ticket that satisfies ALL of these:
+    - priority is exactly P1
+    - age_days is greater than 3 (compare as numbers: 12 is more than 3)
+    - status is exactly open
+  Keep the file's order. If nothing matches, print nothing.
+  Put the test in awk's pattern (the part before the braces), not in an if.
+concepts:
+  - "awk pattern { action } runs the action only for matching lines"
+  - "string equality (==) and numeric comparison (>) on fields"
+  - "combine conditions with &&"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk to filter on the fields."
+  - pattern: "awk\\s+'[^{]*(==|>)[^{]*\\{"
+    message: "Write the condition as an awk pattern in front of the braces: awk 'COND { print ... }'."
+forbidden_patterns:
+  - pattern: '\bif\s*\('
+    message: "Use a pattern before the action instead of an if inside it."
+test_cases:
+  - name: only the urgent old open ones
+    args: [queue.txt]
+    files:
+      queue.txt: |
+        T-101 P1 5 theo open
+        T-102 P3 12 noor open
+        T-103 P1 2 mara open
+        T-104 P1 9 ollie closed
+        T-105 P1 4 priya open
+    expected_stdout: |-
+      T-101 theo 5
+      T-105 priya 4
+  - name: age is a number, not text
+    args: [old.txt]
+    files:
+      old.txt: |
+        T-7 P1 10 gus open
+        T-8 P1 3 gus open
+        T-9 P1 30 mara open
+    expected_stdout: |-
+      T-7 gus 10
+      T-9 mara 30
+  - name: nothing qualifies
+    args: [calm.txt]
+    files:
+      calm.txt: |
+        T-1 P2 40 noor open
+        T-2 P1 1 theo open
+        T-3 p1 8 theo open
+    expected_stdout: ""
+  - name: empty queue
+    args: [none.txt]
+    files:
+      none.txt: ""
+    expected_stdout: ""

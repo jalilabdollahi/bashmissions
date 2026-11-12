@@ -1,0 +1,4 @@
+$RANDOM is a new integer from 0 to 32767 every time it is read. N % size is always between 0 and size-1. Assigning RANDOM=<number> seeds it. Generic example: a die roll from 1 to 6.
+
+  RANDOM=99
+  echo $(( 1 + RANDOM % 6 ))

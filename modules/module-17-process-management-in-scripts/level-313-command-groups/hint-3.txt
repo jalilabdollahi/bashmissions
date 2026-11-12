@@ -1,0 +1,13 @@
+list=$1
+[[ -r $list ]] || { echo "cannot read $list" >&2; exit 1; }
+count=$(( $(awk 'NF' "$list" | sort -u | wc -l) ))
+
+{
+  echo "== fleet report =="
+  awk 'NF' "$list" | sort -u
+  echo "total: $count"
+} > report.txt
+
+echo "wrote report.txt ($count servers)"
+
+The usage check for a missing argument goes at the top.

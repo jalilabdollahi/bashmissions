@@ -1,0 +1,7 @@
+Inside [[ ]], -z is true when a string is empty (zero length) and -n is true when it is not. Use ${1:-} so a missing argument becomes an empty string instead of an error under set -u. Generic example:
+
+  title="${1:-}"
+  if [[ -z $title ]]; then
+    echo "need a title" >&2
+    exit 2
+  fi

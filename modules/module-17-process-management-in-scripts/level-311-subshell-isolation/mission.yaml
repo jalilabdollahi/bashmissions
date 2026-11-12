@@ -1,0 +1,66 @@
+id: 311
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Subshell Isolation
+difficulty: advanced
+xp: 205
+story: |
+  Ollie asks a good question over lunch: "When my script sets `LOG_LEVEL=debug`
+  for one command, why is every later command suddenly chatty?" Mara slides
+  a napkin across the table. It says: "A child process can never change its
+  parent. Use that on purpose." Time to build a wrapper that gives one probe a
+  noisy, labelled environment and leaves the rest of the script untouched.
+objective: |
+  Write solution.sh that takes one argument, LABEL (it may contain spaces).
+  Without it, print `usage: solution.sh LABEL` to stderr and exit 2.
+
+  At the top, set `LOG_LEVEL=info` and export it. Then:
+    1. Open a subshell with `( ... )`. Inside it: set and export
+       `LOG_LEVEL=debug`, export `PROBE_LABEL` with the value of LABEL, run
+       `probe`, and finish with `exit 7`.
+    2. Right after the closing `)`, capture the subshell's status and print
+         subshell exited with N
+       Use `|| status=$?` (set status=0 before it), so a non-zero status does
+       not stop a script that uses `set -e`.
+    3. Run `probe` again, outside the subshell.
+    4. Print `main LOG_LEVEL=` followed by the current value of LOG_LEVEL.
+
+  `probe` prints a line like `probe level=... label=...` from the environment
+  it sees (`label=none` when PROBE_LABEL is not set). Nothing done inside the
+  subshell may leak out.
+concepts:
+  - "( ... ) runs commands in a child shell"
+  - "variable changes and exit inside a subshell stay inside"
+  - "the subshell's exit status arrives in $?"
+required_patterns:
+  - pattern: '^\s*\('
+    message: "Open the subshell with ( at the start of a line and close it with )."
+  - pattern: '\|\|\s*status=\$\?|\)\s*;\s*status=\$\?|\)\s*\|\|'
+    message: "Capture the status right after the ): ( ... ) || status=$?"
+test_cases:
+  - name: simple label
+    args: [nightly]
+    expected_stdout: |-
+      probe level=debug label=nightly
+      subshell exited with 7
+      probe level=info label=none
+      main LOG_LEVEL=info
+  - name: label with spaces
+    args: [night shift]
+    expected_stdout: |-
+      probe level=debug label=night shift
+      subshell exited with 7
+      probe level=info label=none
+      main LOG_LEVEL=info
+  - name: label that looks like an option
+    args: ["-v=1"]
+    expected_stdout: |-
+      probe level=debug label=-v=1
+      subshell exited with 7
+      probe level=info label=none
+      main LOG_LEVEL=info
+  - name: no label
+    args: []
+    expected_stderr: "usage: solution.sh LABEL"
+    expected_exit: 2

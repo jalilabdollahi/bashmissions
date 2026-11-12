@@ -1,0 +1,1 @@
+Shell functions cannot hand back a number the way functions in other languages do; they hand back a status code, the same kind of number every command leaves behind. 0 means success, anything else means something specific you decide.

@@ -1,0 +1,5 @@
+A glob such as "$dir"/* lists a folder's entries in alphabetical order, and  [[ -d $path ]]  tells directories apart. When the folder is empty the glob stays as the literal text "dir/*", so skip entries that do not exist ( [[ -e $entry ]] || continue ). To get just the name, `${entry##*/}` removes everything up to the last slash.
+
+The extra argument carries the indentation:
+
+  walk "$entry" "$indent  "     # two more spaces than before

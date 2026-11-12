@@ -1,0 +1,1 @@
+Two numbers travel through the loop: the delay, which gets bigger by a fixed rule each round, and the total, which collects every delay. The ceiling is just an extra check on the delay before you use it. Nothing here needs a real pause.

@@ -1,0 +1,86 @@
+id: 112
+module: 6
+module_name: functions
+module_display: Functions
+title: "Recursion: Directory Tree"
+difficulty: advanced
+xp: 170
+story: |
+  Priya is auditing a customer's website folder before a migration and wants to
+  see its whole shape at a glance, folders inside folders, the way a file manager
+  shows them. The standard tree tool is not installed on the migration box (and
+  Priya does not install things on a box she is auditing). A folder that contains
+  folders is exactly the kind of data recursion was invented for.
+objective: |
+  Write solution.sh. It takes one argument: a directory. Print the directory's
+  contents as an indented tree. Rules:
+    - first line: the directory as given, followed by /
+    - every entry below it is on its own line, indented by 2 spaces per level
+    - directories get a trailing /, files do not
+    - entries in each folder are listed in alphabetical order (a shell glob
+      like "$dir"/* already gives that order), files and folders mixed
+    - hidden files (names starting with a dot) are ignored
+  Example for a folder  site  that contains index.html and css/main.css:
+    site/
+      css/
+        main.css
+      index.html
+  Define a function named walk that takes a directory and an indent string and
+  calls itself for every sub-directory.
+  If the argument is missing or not a directory, print
+    no such directory: <argument>
+  to stderr and exit 1 (when the argument is missing, print "no such directory: ").
+concepts:
+  - "recursion over nested data"
+  - "the function passes a longer indent to its recursive call"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?walk\s*(\(\s*\))?\s*\{[\s\S]*\bwalk\s+["$]'
+    message: "Define walk and let it call itself for each sub-directory."
+test_cases:
+  - name: small website
+    args: [site]
+    files:
+      site/index.html: "<html></html>"
+      site/css/main.css: "body {}"
+      site/css/theme/dark.css: "x"
+      site/img/logo.png: "png"
+    expected_stdout: |-
+      site/
+        css/
+          main.css
+          theme/
+            dark.css
+        img/
+          logo.png
+        index.html
+  - name: empty folder and hidden file
+    args: [uploads]
+    files:
+      uploads/empty/.keep: ""
+      uploads/.hidden: "secret"
+      uploads/readme.txt: "hi"
+    expected_stdout: |-
+      uploads/
+        empty/
+        readme.txt
+  - name: capitals sort first and spaces survive
+    args: [backups]
+    files:
+      backups/Zed.txt: "z"
+      backups/alpha/a.txt: "a"
+      "backups/tide tables/2025 spring.txt": "t"
+    expected_stdout: |-
+      backups/
+        Zed.txt
+        alpha/
+          a.txt
+        tide tables/
+          2025 spring.txt
+  - name: not a directory
+    args: [nothing-here]
+    expected_stderr: "no such directory: nothing-here"
+    expected_exit: 1
+  - name: missing argument
+    expected_stderr: "no such directory:"
+    stderr_comparison: contains
+    expected_exit: 1

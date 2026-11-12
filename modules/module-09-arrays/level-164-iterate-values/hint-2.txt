@@ -1,0 +1,1 @@
+for item in "${list[@]}"; do ... done runs the body once per element, with $item holding that element. Inside, arithmetic like sum=$(( sum + item )) and a test like if (( item >= 10 )); then count=$(( count + 1 )); fi are all you need. An empty array simply runs the body zero times.

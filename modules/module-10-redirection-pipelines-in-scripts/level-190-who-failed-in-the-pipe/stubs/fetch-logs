@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Fake fetch-logs for BashMissions: emits four log lines, exits with FETCH_RC (default 0).
+printf '%s\n' \
+  "10.1.4.7 login ok user=anna" \
+  "10.1.4.9 login failed user=bob" \
+  "10.2.0.3 export started" \
+  "10.2.0.3 export finished"
+exit "${FETCH_RC:-0}"

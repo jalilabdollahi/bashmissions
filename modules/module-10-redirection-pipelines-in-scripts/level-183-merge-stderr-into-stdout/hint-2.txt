@@ -1,0 +1,6 @@
+`2>&1` means "make descriptor 2 a copy of whatever descriptor 1 points at right now". So the file redirection must come first:
+
+  report-tool > out.log 2>&1     # both in out.log
+  report-tool 2>&1 > out.log     # stderr still on the screen!
+
+To keep the exit status of a command that may fail, use `cmd || status=$?` after setting `status=0`.

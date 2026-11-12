@@ -1,0 +1,1 @@
+ls prints names for people to read, separated by newlines, and nothing marks where one name ends. The shell already knows exactly where each file name ends when it expands a wildcard. Let it do that work and skip the middleman.

@@ -1,0 +1,101 @@
+id: 194
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Read Two Files at Once
+difficulty: advanced
+xp: 180
+story: |
+  Noor has two lists from two systems: customer names in one file, their
+  server addresses in another, in the same order. She needs them side by
+  side for a handover document, and `paste` is not installed on the
+  jump host she must use (a policy thing, don't ask). A `while read` loop reads
+  one file easily. Reading two files in lockstep needs a second open door.
+objective: |
+  Write solution.sh that takes two file names: NAMES ($1) and ADDRESSES ($2).
+
+  If either file cannot be read, print `cannot read: <file>` to stderr (name
+  the first unreadable one, checking NAMES first) and exit 1.
+
+  Otherwise print one line per line of NAMES:
+
+    <name> -> <address>
+
+  where <address> is the line at the same position in ADDRESSES. If
+  ADDRESSES has run out of lines, print `(none)` as the address. Extra lines
+  in ADDRESSES beyond the end of NAMES are ignored.
+  Read NAMES with the loop's own stdin (`done < "$1"`) and ADDRESSES through
+  your own descriptor 3: `exec 3< ...` and `read -u 3`.
+concepts:
+  - "exec 3<file opens a file for reading"
+  - "read -u 3 reads one line from descriptor 3"
+required_patterns:
+  - pattern: 'exec\s+3<'
+    message: "Open the second file for reading with exec 3< file."
+  - pattern: 'read\s+(-[A-Za-z]+\s+)*-u\s*3'
+    message: "Read a line from the second file with read -u 3."
+forbidden_patterns:
+  - pattern: '\b(paste|join)\b'
+    message: "Do it with a read loop and a second descriptor, not paste."
+test_cases:
+  - name: equal length lists
+    args: [names.txt, ips.txt]
+    files:
+      names.txt: |
+        Harbour Bakery
+        Tidewater Books
+        Gull & Anchor Pub
+      ips.txt: |
+        10.0.1.11
+        10.0.1.12
+        10.0.1.13
+    expected_stdout: |-
+      Harbour Bakery -> 10.0.1.11
+      Tidewater Books -> 10.0.1.12
+      Gull & Anchor Pub -> 10.0.1.13
+  - name: addresses run out
+    args: [n.txt, a.txt]
+    files:
+      n.txt: |
+        alpha
+        beta
+        gamma
+      a.txt: |
+        192.0.2.1
+    expected_stdout: |-
+      alpha -> 192.0.2.1
+      beta -> (none)
+      gamma -> (none)
+  - name: extra addresses are ignored
+    args: [n.txt, a.txt]
+    files:
+      n.txt: |
+        solo
+      a.txt: |
+        10.9.9.1
+        10.9.9.2
+        10.9.9.3
+    expected_stdout: "solo -> 10.9.9.1"
+  - name: names with spaces and backslashes survive
+    args: [n.txt, a.txt]
+    files:
+      n.txt: |
+        North Pier  Dental
+        C:\temp
+      a.txt: |
+        dental.example
+        temp.example
+    expected_stdout: |-
+      North Pier  Dental -> dental.example
+      C:\temp -> temp.example
+  - name: addresses file missing
+    args: [n.txt, nothere.txt]
+    files:
+      n.txt: |
+        alpha
+    expected_stderr: "cannot read: nothere.txt"
+    expected_exit: 1
+  - name: names file missing is reported first
+    args: [nothere.txt, nowhere.txt]
+    expected_stderr: "cannot read: nothere.txt"
+    expected_exit: 1

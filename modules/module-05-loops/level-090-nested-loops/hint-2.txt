@@ -1,1 +1,1 @@
-Use rows `A B` and columns `1 2`.
+An inner loop runs completely for every round of the outer loop. Example: for r in 1 2; do for c in 1 2 3; do printf '%d%d ' "$r" "$c"; done; printf '\n'; done prints 11 12 13 on one line and 21 22 23 on the next. printf with no \n keeps the cursor on the same line.

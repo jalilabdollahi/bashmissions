@@ -1,1 +1,0 @@
-You can copy a positional argument into a named variable with `name="$1"`. After that, `$name` is just as good as `$1`, and easier to read.

@@ -1,1 +1,6 @@
-Read each generated line and prefix it with `cmd=`.
+fullest_host=none; fullest_pct=-1; over=0
+while read -r host pct; do
+  if (( pct > fullest_pct )); then fullest_host=$host; fullest_pct=$pct; fi
+  if (( pct > 80 )); then over=$(( over + 1 )); fi
+done < <(fleet-disk)
+After the loop print "over 80%: $over", and for the first line handle fullest_host being "none" separately.

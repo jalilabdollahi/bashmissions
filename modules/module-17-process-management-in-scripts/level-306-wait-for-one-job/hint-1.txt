@@ -1,0 +1,1 @@
+Once a job is running in the background you can ask the shell to pause until that particular job is done, and the answer to "how did it go?" comes back in the same place a normal command's status does. Remember that a failing status is exactly what you want to look at, not something to die from.

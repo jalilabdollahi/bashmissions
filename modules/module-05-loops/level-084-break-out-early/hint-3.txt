@@ -1,0 +1,8 @@
+for server in anchovy barracuda cuttlefish dory eel flounder; do
+  if [[ -e down/$server ]]; then
+    echo "STOP: $server is down"
+    break
+  fi
+  echo "patched $server"
+done
+The "patched" line is only reached when the if did not fire.

@@ -1,0 +1,6 @@
+awk -F, '
+  NR > 1 { rows[$2]++; gb[$2] += $3 }
+  END    { for (c in rows) print c "," rows[c] "," gb[c] }
+' "$1" | sort
+
+Field 2 is the customer, field 3 the gb. Both arrays share the same keys, so one loop over rows is enough.

@@ -1,1 +1,0 @@
-Use echo to print each line. Each call to echo prints a new line. Start with a bash shebang.

@@ -1,0 +1,1 @@
+Think of a folder as "a list of things, and some of those things are folders that are again a list of things". Printing a folder means printing its entries, and when an entry is itself a folder, doing the same job for it, one step further to the right.

@@ -1,0 +1,10 @@
+An array can hold function names, and a loop can call them:
+
+  start_hooks=()
+  start_hooks+=(say_hello)         # append
+  start_hooks+=(say_bye)
+  for h in "${start_hooks[@]}"; do
+    "$h" "an argument"             # call each one
+  done
+
+Register everything from the arguments first, then run. That way a bad argument stops the program before anything has happened.

@@ -1,0 +1,1 @@
+The wrapper needs to know two things: how many tries, and what to run. Take the count off the front of the argument list; whatever is left is the command with its arguments, exactly as the caller typed it. Remember that under `set -e` a failing command ends the script unless you say you expect it to fail.

@@ -1,0 +1,61 @@
+id: 54
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Long Flags by Hand
+difficulty: intermediate
+xp: 130
+story: |
+  Noor's new-customer tool grew from one argument to five, and nobody remembers the
+  order any more: was it name, then plan, then dry-run? Theo proposes named flags,
+  like the big tools use: --customer "Tidewater Books" --plan harbour. They can
+  come in any order, and some are optional. You will parse them by hand, the way
+  scripts did before getopts.
+objective: |
+  Write solution.sh accepting these flags in any order:
+    --customer NAME   (required, takes a value)
+    --plan NAME       (optional, takes a value, default: basic)
+    --dry-run         (optional switch, no value)
+  Print exactly one line:
+    customer=<NAME> plan=<PLAN> dry_run=<yes|no>
+  Errors, all with nothing on stdout and exit status 2:
+    - an unrecognised argument: stderr  error: unknown option: <argument>
+    - no --customer given:       stderr  usage: solution.sh --customer NAME [--plan PLAN] [--dry-run]
+  Loop over the arguments with while and case, and use shift to move forward.
+concepts:
+  - "while [[ $# -gt 0 ]] loop over arguments"
+  - "case $1 in --flag) ... ;; esac"
+  - "shift 2 consumes a flag together with its value"
+required_patterns:
+  - pattern: '\bwhile\b'
+    message: "Walk through the arguments with a while loop."
+  - pattern: '\bcase\b'
+    message: "Dispatch on the current argument with case ... esac."
+  - pattern: '\bshift\b'
+    message: "Use shift to consume each flag (shift 2 when it has a value)."
+forbidden_patterns:
+  - pattern: '\bgetopts\b'
+    message: "getopts is the next-but-one level; parse by hand here."
+test_cases:
+  - name: all flags in one order
+    args: [--customer, Tidewater Books, --plan, harbour, --dry-run]
+    expected_stdout: |-
+      customer=Tidewater Books plan=harbour dry_run=yes
+  - name: defaults apply
+    args: [--customer, Dory]
+    expected_stdout: |-
+      customer=Dory plan=basic dry_run=no
+  - name: order does not matter
+    args: [--dry-run, --plan, deepwater, --customer, Gull & Anchor Pub]
+    expected_stdout: |-
+      customer=Gull & Anchor Pub plan=deepwater dry_run=yes
+  - name: unknown option
+    args: [--customer, Eel, --colour, blue]
+    expected_stdout: ""
+    expected_stderr: "error: unknown option: --colour"
+    expected_exit: 2
+  - name: customer missing
+    args: [--plan, harbour]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh --customer NAME [--plan PLAN] [--dry-run]"
+    expected_exit: 2

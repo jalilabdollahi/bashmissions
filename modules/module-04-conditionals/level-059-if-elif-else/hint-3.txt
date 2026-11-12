@@ -1,1 +1,0 @@
-The final `else` should catch all other input.

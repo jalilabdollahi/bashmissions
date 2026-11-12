@@ -1,22 +1,398 @@
 id: 462
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The API Poller
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The API Poller` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The API Poller
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 380
+story: |
+  The harbour's ferry, webcam and tide services all expose a tiny status API, and the
+  town's emergency channel wants a ping the moment one of them changes state. Last
+  week the old script paged people forty times in one night because a single flaky
+  response flipped `ok` to `down` and back. Noor received every page. She would like
+  the new poller to be calm: confirm a change before shouting about it, never alert
+  for the same thing twice, and never lose an alert just because the webhook was
+  itself down for a minute.
+objective: |
+  Write solution.sh, a poller that is run once per minute by cron:
+    `solution.sh --webhook URL [--confirm N] ENDPOINTS`
+
+  ENDPOINTS has lines `NAME|URL` (blank lines and `#` lines ignored). `--confirm N`
+  (positive whole number, default 2; otherwise `error: --confirm needs a positive
+  whole number`, exit 2). Missing --webhook or wrong argument count:
+  `usage: solution.sh --webhook URL [--confirm N] ENDPOINTS`; unreadable ENDPOINTS:
+  `error: cannot read ENDPOINTS`; all exit 2. State lives in `state/`.
+
+  `curl` is on PATH. Fetch a status with `curl -sS --fail --max-time 5 URL`. The body
+  contains a JSON field such as `"status": "down"` (maybe pretty printed over several
+  lines; extract it with sed, there is no jq). The reading is that value if it is
+  `ok`, `degraded` or `down`; `unreachable` if curl failed; `invalid` for anything else.
+
+  Per endpoint keep `state/NAME.state` with one line `CONFIRMED CANDIDATE COUNT`
+  (`-` for no candidate). Start with CONFIRMED `unknown`.
+  - First reading (confirmed `unknown`): accepted at once. Print
+    `NAME: R (first reading)`; if R is not `ok` also send a webhook (from `unknown`)
+    and print `NAME: R (first reading, webhook sent)` (or `webhook queued`) instead.
+  - Reading equals confirmed: print `NAME: R`, clear the candidate.
+  - Reading differs: if it equals the candidate, COUNT+1, else it becomes the new
+    candidate with COUNT 1. When COUNT reaches N the change is confirmed: send the
+    webhook, print `NAME: OLD -> NEW (webhook sent)` (or `queued`), set the confirmed
+    status and clear the candidate. Otherwise print
+    `NAME: CONFIRMED (saw R, pending COUNT/N)`.
+  The webhook is `curl -sS --fail --max-time 5 -X POST -H 'Content-Type: application/json'
+  -d BODY WEBHOOK_URL` with BODY exactly
+    {"service":"NAME","from":"OLD","to":"NEW"}
+  If the POST fails the body is appended to `state/outbox` (one per line) instead.
+  At the start of every run, before polling, retry every queued body; keep the ones that
+  fail again, and if the outbox was not empty print `outbox: sent S, K still queued`.
+  Exit 1 if any endpoint's confirmed status is not `ok` after this run, otherwise 0.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "state machine per endpoint stored in a file"
+  - "debouncing: confirm a change before reporting it"
+  - "extracting JSON fields with sed when jq is unavailable"
+  - "an outbox for at-least-once webhook delivery"
+  - "read the old state, write it back, every run"
+required_patterns:
+  - pattern: '\bcurl\b'
+    message: "Use curl to poll and to post the webhook."
+  - pattern: '\bsed\b'
+    message: "Pull the status field out of the JSON body with sed."
+test_cases:
+  - name: first run records everything and alerts on the sick service
+    args:
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"down","since":"03:14"}
+    expected_stdout: |-
+      ferry: ok (first reading)
+      webcams: ok (first reading)
+      tides: down (first reading, webhook sent)
+    expected_exit: 1
+    expected_files:
+      state/ferry.state: ok - 0
+      state/tides.state: down - 0
+      .webhooks.log: '{"service":"tides","from":"unknown","to":"down"}'
+      state/outbox: null
+  - name: one bad reading is only pending
+    args:
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"status": "down"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"ok"}
+      state/ferry.state: |
+        ok - 0
+      state/webcams.state: |
+        ok - 0
+      state/tides.state: |
+        ok - 0
+    expected_stdout: |-
+      ferry: ok (saw down, pending 1/2)
+      webcams: ok
+      tides: ok
+    expected_files:
+      state/ferry.state: ok down 1
+      .webhooks.log: null
+  - name: a second bad reading confirms the change
+    args:
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"status": "down"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"ok"}
+      state/ferry.state: |
+        ok down 1
+      state/webcams.state: |
+        ok - 0
+      state/tides.state: |
+        ok - 0
+    expected_stdout: |-
+      ferry: ok -> down (webhook sent)
+      webcams: ok
+      tides: ok
+    expected_exit: 1
+    expected_files:
+      state/ferry.state: down - 0
+      .webhooks.log: '{"service":"ferry","from":"ok","to":"down"}'
+  - name: a flap resets the candidate
+    args:
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"ok"}
+      state/ferry.state: |
+        ok down 1
+      state/webcams.state: |
+        ok - 0
+      state/tides.state: |
+        ok - 0
+    expected_stdout: |-
+      ferry: ok
+      webcams: ok
+      tides: ok
+    expected_files:
+      state/ferry.state: ok - 0
+      .webhooks.log: null
+  - name: webhook outage queues the alert
+    args:
+    - --confirm
+    - '1'
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {"status": "degraded"}
+      responses/tides.json: |
+        {"status":"ok"}
+      state/ferry.state: |
+        ok - 0
+      state/webcams.state: |
+        ok - 0
+      state/tides.state: |
+        ok - 0
+      webhook.fail: ''
+    expected_stdout: |-
+      ferry: ok
+      webcams: ok -> degraded (webhook queued)
+      tides: ok
+    expected_exit: 1
+    expected_files:
+      state/outbox: '{"service":"webcams","from":"ok","to":"degraded"}'
+      state/webcams.state: degraded - 0
+      .webhooks.log: null
+  - name: queued alerts are delivered on the next run
+    args:
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"ok"}
+      state/ferry.state: |
+        ok - 0
+      state/webcams.state: |
+        degraded - 0
+      state/tides.state: |
+        ok - 0
+      state/outbox: |
+        {"service":"webcams","from":"ok","to":"degraded"}
+    expected_stdout: |-
+      outbox: sent 1, 0 still queued
+      ferry: ok
+      webcams: degraded (saw ok, pending 1/2)
+      tides: ok
+    expected_exit: 1
+    expected_files:
+      state/outbox: ''
+      .webhooks.log: '{"service":"webcams","from":"ok","to":"degraded"}'
+  - name: unreachable and invalid replies are readings too
+    args:
+    - --confirm
+    - '1'
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        <html>maintenance</html>
+      responses/tides.json: |
+        {"status":"ok"}
+      responses/ferry.fail: ''
+      state/ferry.state: |
+        ok - 0
+      state/webcams.state: |
+        ok - 0
+      state/tides.state: |
+        down - 0
+    expected_stdout: |-
+      ferry: ok -> unreachable (webhook sent)
+      webcams: ok -> invalid (webhook sent)
+      tides: down -> ok (webhook sent)
+    expected_exit: 1
+    expected_files:
+      .webhooks.log: |-
+        {"service":"ferry","from":"ok","to":"unreachable"}
+        {"service":"webcams","from":"ok","to":"invalid"}
+        {"service":"tides","from":"down","to":"ok"}
+      state/ferry.state: unreachable - 0
+      state/webcams.state: invalid - 0
+  - name: recovery is announced too
+    args:
+    - --confirm
+    - '1'
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"ok"}
+      state/ferry.state: |
+        down - 0
+      state/webcams.state: |
+        ok - 0
+      state/tides.state: |
+        ok - 0
+    expected_stdout: |-
+      ferry: down -> ok (webhook sent)
+      webcams: ok
+      tides: ok
+    expected_files:
+      .webhooks.log: '{"service":"ferry","from":"down","to":"ok"}'
+  - name: confirm must be a positive number
+    args:
+    - --confirm
+    - '0'
+    - --webhook
+    - https://hooks.lanternfish.example/storm
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"down","since":"03:14"}
+    expected_stdout: ''
+    expected_stderr: 'error: --confirm needs a positive whole number'
+    expected_exit: 2
+  - name: webhook is required
+    args:
+    - endpoints.txt
+    files:
+      endpoints.txt: |
+        # name|url
+        ferry|https://status.lanternfish.example/ferry
+        webcams|https://status.lanternfish.example/webcams
+
+        tides|https://status.lanternfish.example/tides
+      responses/ferry.json: |
+        {"service": "ferry", "status": "ok"}
+      responses/webcams.json: |
+        {
+          "service": "webcams",
+          "status": "ok",
+          "viewers": 31
+        }
+      responses/tides.json: |
+        {"status":"down","since":"03:14"}
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh --webhook URL [--confirm N] ENDPOINTS'
+    expected_exit: 2

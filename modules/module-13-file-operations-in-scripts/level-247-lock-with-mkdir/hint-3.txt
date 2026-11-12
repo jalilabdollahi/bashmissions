@@ -1,0 +1,13 @@
+  job=$1
+  lock="run/$job.lock"
+  mkdir -p run
+  if ! mkdir "$lock" 2>/dev/null; then
+    echo "$job is already running (lock: $lock)" >&2
+    exit 1
+  fi
+  trap 'rmdir "$lock"' EXIT
+  echo "$job started" >> run/jobs.log
+  run-job "$job"
+  echo "$job finished" >> run/jobs.log
+
+Put the usage check first; keep `set -e` on so a failing job ends the script (and fires the trap).

@@ -1,0 +1,7 @@
+The list is the array `PIPESTATUS`. Copy it immediately:
+
+  first | second | third
+  codes=("${PIPESTATUS[@]}")
+  echo "${codes[0]} ${codes[1]} ${codes[2]}"
+
+If you echo something else before the copy, you will be looking at the status of the echo, not of the pipeline. A `for` loop over indexes 0..2 plus an `if` can find the first non-zero code.

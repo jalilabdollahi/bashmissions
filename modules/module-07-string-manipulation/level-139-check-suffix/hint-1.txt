@@ -1,1 +1,0 @@
-A leading `*` in the pattern allows any prefix.

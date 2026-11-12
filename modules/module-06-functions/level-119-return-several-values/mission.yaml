@@ -1,0 +1,48 @@
+id: 119
+module: 6
+module_name: functions
+module_display: Functions
+title: Return Several Values
+difficulty: advanced
+xp: 160
+story: |
+  Gus wants a one-line summary of the response times (in milliseconds) from the
+  latest health-check run: fastest, slowest and total. Ollie's first version
+  walked through the numbers three times, once per answer. Mara shows him a neater
+  way: compute everything in one pass and let the function hand back all three
+  answers together, so the caller can unpack them in one go.
+objective: |
+  Write solution.sh. The arguments are whole numbers (they may be negative). Define a
+  function named stats that goes through all its arguments once and prints a single
+  line with three values separated by spaces:   <min> <max> <sum>
+  Use printf for that line. The main script captures the line and splits it into
+  three variables with  read -r min max sum <<< "$(stats "$@")"  and prints:
+    min=<min> max=<max> sum=<sum>
+  With no arguments print "no numbers given" to stderr and exit 1 (before calling
+  stats).
+concepts:
+  - "a function prints several values on one line"
+  - "read -r a b c <<< \"$(fn)\" splits them into variables"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?stats\s*(\(\s*\))?\s*\{'
+    message: "Define a function called stats."
+  - pattern: '\bread\s+-r\s+\w+\s+\w+\s+\w+'
+    message: "Unpack the three values with  read -r min max sum <<< \"$(stats \"$@\")\"."
+  - pattern: '\bprintf\b'
+    message: "Print the three values with printf."
+test_cases:
+  - name: typical run
+    args: ["120", "80", "95", "300"]
+    expected_stdout: "min=80 max=300 sum=595"
+  - name: single value
+    args: ["42"]
+    expected_stdout: "min=42 max=42 sum=42"
+  - name: negative numbers
+    args: ["-5", "10", "-20", "3"]
+    expected_stdout: "min=-20 max=10 sum=-12"
+  - name: all equal
+    args: ["7", "7", "7"]
+    expected_stdout: "min=7 max=7 sum=21"
+  - name: nothing to summarise
+    expected_stderr: "no numbers given"
+    expected_exit: 1

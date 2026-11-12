@@ -1,0 +1,1 @@
+Think of a highlighter: it starts at a line matching one pattern and stops at a line matching another. sed has an address form for a range of lines delimited by two patterns. By default sed prints everything, so you also have to switch that off and ask for only the selected lines to be printed.

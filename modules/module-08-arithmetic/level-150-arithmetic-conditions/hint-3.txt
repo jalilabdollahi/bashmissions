@@ -1,0 +1,8 @@
+name="$1"; used="$2"; total="$3"
+if (( used * 100 >= total * 90 )); then
+  echo "$name: ..."
+elif (( ... >= ... )); then       # the 75% line, same trick
+  echo "$name: ..."
+else
+  echo "$name: ..."
+fi

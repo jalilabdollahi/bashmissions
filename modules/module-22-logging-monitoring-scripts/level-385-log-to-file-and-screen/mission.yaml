@@ -1,0 +1,84 @@
+id: 385
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Log to File and Screen
+difficulty: intermediate
+xp: 140
+story: |
+  When Ollie runs the nightly sync by hand he watches the terminal; when cron
+  runs it, nobody watches anything and the output vanishes. Noor needs proof
+  that Tidewater Books' data was synced, which means a log file that survives
+  the night, and Ollie wants to keep seeing progress live.
+objective: |
+  Write solution.sh as a job wrapper: `solution.sh LOGFILE JOB`.
+  The job's output arrives on stdin, one line per event.
+
+  For every input line, write `JOB: <line>` both to the screen (stdout) and to
+  the end of LOGFILE. After the last line add `JOB: finished, N lines`
+  (N = number of input lines) to both as well.
+
+  LOGFILE may already contain earlier runs; keep them and only add to the end.
+  If the folder that should contain LOGFILE does not exist, print
+  `cannot write to LOGFILE` to stderr and exit 1 without reading stdin.
+  With fewer than two arguments print `usage: solution.sh LOGFILE JOB` to
+  stderr and exit 2.
+concepts:
+  - "tee -a copies a stream to a file and to the screen"
+  - "append (-a) keeps the old content"
+  - "a prefix added in a loop"
+required_patterns:
+  - pattern: 'tee\s+-a'
+    message: "Use tee -a to write to the screen and append to the log in one step."
+test_cases:
+  - name: new log file
+    args: [logs/sync.log, sync-books]
+    stdin: |
+      copied 120 files
+      skipped 3 files
+    expected_stdout: |-
+      sync-books: copied 120 files
+      sync-books: skipped 3 files
+      sync-books: finished, 2 lines
+    expected_files:
+      logs/sync.log: |-
+        sync-books: copied 120 files
+        sync-books: skipped 3 files
+        sync-books: finished, 2 lines
+    files:
+      "logs/": ""
+  - name: earlier runs are kept
+    args: [logs/sync.log, sync-books]
+    stdin: |
+      nothing to do
+    files:
+      logs/sync.log: |
+        sync-books: copied 5 files
+        sync-books: finished, 1 lines
+    expected_stdout: |-
+      sync-books: nothing to do
+      sync-books: finished, 1 lines
+    expected_files:
+      logs/sync.log: |-
+        sync-books: copied 5 files
+        sync-books: finished, 1 lines
+        sync-books: nothing to do
+        sync-books: finished, 1 lines
+  - name: empty job output
+    args: [run.log, quiet-job]
+    stdin: ""
+    expected_stdout: "quiet-job: finished, 0 lines"
+    expected_files:
+      run.log: "quiet-job: finished, 0 lines"
+  - name: log folder missing
+    args: [nowhere/sync.log, sync-books]
+    stdin: |
+      a line
+    expected_stderr: "cannot write to nowhere/sync.log"
+    expected_exit: 1
+    expected_files:
+      nowhere: null
+  - name: usage
+    args: [only-one.log]
+    expected_stderr: "usage: solution.sh LOGFILE JOB"
+    expected_exit: 2

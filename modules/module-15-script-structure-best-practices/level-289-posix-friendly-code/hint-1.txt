@@ -1,0 +1,1 @@
+Go through the script line by line and ask: does this exist in the oldest shell? The double-bracket test, the double-parenthesis arithmetic, the lower-casing expansion and the == operator are all bash extras. Each has a plain, older equivalent that works in every shell.

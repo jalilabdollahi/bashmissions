@@ -1,0 +1,56 @@
+id: 163
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Slices
+difficulty: intermediate
+xp: 120
+story: |
+  Nightly patching at Lanternfish is done in waves so the harbour never loses
+  every server at once. Mara keeps the machine list in a fixed order and wants
+  a tiny tool: give it a starting position and a wave size, and it names the
+  machines in that wave. Next week she wants "the last two" as well, without
+  anyone counting the list by hand.
+objective: |
+  Write solution.sh. The first argument is OFFSET, the second is SIZE, and
+  every argument after them is a machine name (there may be none). Put the
+  machines into an array and print the wave: SIZE machines starting at index
+  OFFSET, one per line. If fewer than SIZE machines are available, print the
+  ones that exist. OFFSET may be negative, which counts from the end of the
+  list (-2 means "the last two start here").
+  Print nothing when the wave is empty. If fewer than 2 arguments are given,
+  print "usage: solution.sh OFFSET SIZE [MACHINE...]" to stderr and exit
+  with status 2. Use an array slice, ${name[@]:offset:size}.
+concepts:
+  - "${arr[@]:offset:length} slices"
+  - "a negative offset counts from the end"
+  - "a slice is a copy; the array is unchanged"
+required_patterns:
+  - pattern: '\[@\]:'
+    message: 'Cut the wave out with a slice: "${machines[@]:$offset:$size}".'
+test_cases:
+  - name: middle of the list
+    args: ["1", "2", anchovy, barracuda, cuttlefish, dory, eel]
+    expected_stdout: |-
+      barracuda
+      cuttlefish
+  - name: size larger than what is left
+    args: ["3", "10", marlin, octopus, pike, quahog, ray]
+    expected_stdout: |-
+      quahog
+      ray
+  - name: negative offset takes the tail
+    args: ["-2", "2", halibut, "ice fish", jack, "king crab"]
+    expected_stdout: |-
+      jack
+      king crab
+  - name: offset past the end is an empty wave
+    args: ["9", "2", anchovy, barracuda]
+    expected_stdout: ""
+  - name: no machines at all
+    args: ["0", "3"]
+    expected_stdout: ""
+  - name: too few arguments
+    args: ["1"]
+    expected_stderr: "usage: solution.sh OFFSET SIZE [MACHINE...]"
+    expected_exit: 2

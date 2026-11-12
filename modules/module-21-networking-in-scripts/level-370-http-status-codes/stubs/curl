@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# curl stand-in: GET with -s, -o FILE and -w FORMAT (only %{http_code} and \n).
+# Reads fixtures/http/<host><path>.status (default 200) and .body.
+silent=0 out= fmt= url=
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -o) out=$2; shift ;;
+    -w) fmt=$2; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+rest=${url#*://}; host=${rest%%/*}; path=/${rest#*/}
+[[ $path == */ ]] && path+=index
+code=000 rc=0
+case " ${FAKE_DOWN:-} " in
+  *" $host "*) (( silent )) || echo "curl: (6) Could not resolve host: $host" >&2; rc=6 ;;
+  *)
+    base=fixtures/http/$host$path
+    code=404
+    [[ -f $base.body || -f $base.status ]] && code=200
+    [[ -f $base.status ]] && code=$(tr -d '[:space:]' < "$base.status")
+    if [[ -n $out ]]; then
+      if [[ -f $base.body ]]; then cat "$base.body" > "$out"; else : > "$out"; fi
+    elif [[ -f $base.body ]]; then
+      cat "$base.body"
+    fi ;;
+esac
+if [[ -n $fmt ]]; then
+  fmt=${fmt//'%{http_code}'/$code}
+  printf '%s' "${fmt//\\n/$'\n'}"
+fi
+exit $rc

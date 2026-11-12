@@ -1,0 +1,77 @@
+id: 187
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Quoted Here-Docs
+difficulty: intermediate
+xp: 140
+story: |
+  Theo wants a "scaffold" command that drops a ready-to-edit cron wrapper into a
+  folder: a little script full of `$BACKUP_DIR` and `$(date +%F)` that will
+  run LATER, on the server, with its own environment. His first attempt wrote
+  the file with the variables already replaced by the values from his laptop,
+  and every wrapper in the fleet backed up to /Users/theo. Priya has opinions.
+objective: |
+  Write solution.sh that takes one argument, a JOB name. If it is missing,
+  print `usage: solution.sh JOB` to stderr and exit 2.
+
+  Create the file `cron-<JOB>.sh` containing exactly these four lines, with
+  every `$` and backtick kept as literal text (nothing in them may be
+  expanded by your script):
+
+    #!/usr/bin/env bash
+    LOG_DIR="$BACKUP_DIR/logs"
+    stamp=$(date +%F)
+    echo "run at $stamp" >> "$LOG_DIR/run-$stamp.log"
+
+  Then print `wrote cron-<JOB>.sh` to stdout.
+  Write the four lines with ONE here-document whose delimiter is quoted.
+concepts:
+  - "<<'EOF' disables all expansion in the body"
+  - "here-document redirected into a file"
+required_patterns:
+  - pattern: "<<-?\\s*(['\"])[A-Za-z_]+\\1"
+    message: "Quote the delimiter: <<'EOF' so nothing in the body is expanded."
+  - pattern: 'cat\s*>\s*"?cron-'
+    message: "Send cat's output into the cron-<JOB>.sh file with >."
+test_cases:
+  - name: backup wrapper
+    args: [backup]
+    env:
+      BACKUP_DIR: /should/not/appear
+    expected_stdout: "wrote cron-backup.sh"
+    expected_files:
+      cron-backup.sh: |-
+        #!/usr/bin/env bash
+        LOG_DIR="$BACKUP_DIR/logs"
+        stamp=$(date +%F)
+        echo "run at $stamp" >> "$LOG_DIR/run-$stamp.log"
+  - name: another job name, stamp variable already set
+    args: [rotate-certs]
+    env:
+      stamp: "1999-12-31"
+      LOG_DIR: /tmp/elsewhere
+    expected_stdout: "wrote cron-rotate-certs.sh"
+    expected_files:
+      cron-rotate-certs.sh: |-
+        #!/usr/bin/env bash
+        LOG_DIR="$BACKUP_DIR/logs"
+        stamp=$(date +%F)
+        echo "run at $stamp" >> "$LOG_DIR/run-$stamp.log"
+  - name: an existing file is replaced
+    args: [report]
+    files:
+      cron-report.sh: |
+        old content
+        that must go away
+    expected_stdout: "wrote cron-report.sh"
+    expected_files:
+      cron-report.sh: |-
+        #!/usr/bin/env bash
+        LOG_DIR="$BACKUP_DIR/logs"
+        stamp=$(date +%F)
+        echo "run at $stamp" >> "$LOG_DIR/run-$stamp.log"
+  - name: missing job name
+    args: []
+    expected_stderr: "usage: solution.sh JOB"
+    expected_exit: 2

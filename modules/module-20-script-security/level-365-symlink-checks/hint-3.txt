@@ -1,0 +1,9 @@
+folder=$(dirname -- "$file")
+if [[ -L $file ]]; then
+  ...print "refusing: $file is a symlink" to stderr, exit 1...
+fi
+if [[ -L $folder ]]; then
+  ...print "refusing: $folder is a symlink" to stderr, exit 1...
+fi
+printf '%s\n' "$text" >> "$file"
+printf 'noted: %s\n' "$file"

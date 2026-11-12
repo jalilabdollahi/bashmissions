@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Pretend date for tests: only `date +%s` is understood. The "current time" is
+# the number in .clock (1700000000 when the file is missing); every call then
+# moves the clock forward by FAKE_TICK seconds (default 0).
+if [[ ${1:-} != "+%s" || $# -ne 1 ]]; then
+  echo "date: this stub only supports +%s" >&2
+  exit 2
+fi
+now=1700000000
+[[ -r .clock ]] && now=$(< .clock)
+echo "$now"
+echo "$((now + ${FAKE_TICK:-0}))" > .clock

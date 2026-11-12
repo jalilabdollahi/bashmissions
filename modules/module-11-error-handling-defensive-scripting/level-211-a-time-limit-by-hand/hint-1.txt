@@ -1,0 +1,1 @@
+You cannot ask the scan to stop itself, so run it somewhere you can still reach it: in the background. The script then waits for the allowed time, looks whether the scan is still there, and ends it if it is.

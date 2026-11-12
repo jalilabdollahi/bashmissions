@@ -1,0 +1,85 @@
+id: 429
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Top Talkers
+difficulty: expert
+xp: 340
+story: |
+  The firewall log of `marlin` is eating the disk, and Theo suspects one
+  customer's backup job is hammering the edge. Rather than guess, the team
+  wants a league table: which clients moved the most data, how many requests
+  it took them, and who is in second place when two clients tie. Ollie asks if
+  the ranking could just be done with `sort | uniq -c`. It cannot, because the
+  ranking is by bytes, not by lines.
+objective: |
+  Write solution.sh that takes a log file and an optional count N (default 3).
+  Each log line has three space-separated fields:
+    <timestamp> <client> <bytes>
+  where bytes is a whole number or `-` (unknown, counted as 0 but the request
+  still counts). Print the N busiest clients, ranked by total bytes, highest
+  first; clients with equal totals are ordered by name (plain character
+  order). Format:
+    <rank>. <client> requests=<count> bytes=<total>
+  with rank starting at 1. If there are fewer than N clients, print them all.
+  Skip blank lines and lines with fewer than three fields; ignore `\r`.
+  If N is not a positive whole number, print `usage: solution.sh LOG [N]` to
+  stderr and exit 2.
+concepts:
+  - "two accumulators per key: requests and bytes"
+  - "sort -k with n and r: numeric, reversed, then a tie-break"
+  - "rank numbers added after sorting"
+  - "validating an optional argument"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Total up requests and bytes per client with awk arrays."
+  - pattern: '\bsort\b.*-k'
+    message: "Rank with sort -k on the byte total (numeric, reversed) plus a tie-break on the name."
+test_cases:
+  - name: top three by default
+    args: [fw.log]
+    files:
+      fw.log: |
+        2026-08-01T00:00:01Z 10.0.0.5 4000
+        2026-08-01T00:00:02Z 10.0.0.9 100
+        2026-08-01T00:00:03Z 10.0.0.5 6000
+        2026-08-01T00:00:04Z backup.gull.example 52000
+        2026-08-01T00:00:05Z 10.0.0.7 -
+        2026-08-01T00:00:06Z 10.0.0.9 150
+        2026-08-01T00:00:07Z 10.0.0.12 1
+    expected_stdout: |-
+      1. backup.gull.example requests=1 bytes=52000
+      2. 10.0.0.5 requests=2 bytes=10000
+      3. 10.0.0.9 requests=2 bytes=250
+  - name: explicit N and ties
+    args: [tie.log, "2"]
+    files:
+      tie.log: |
+        t alpha 500
+        t beta 500
+        t gamma 500
+        t alpha 0
+    expected_stdout: |-
+      1. alpha requests=2 bytes=500
+      2. beta requests=1 bytes=500
+  - name: fewer clients than N, junk lines skipped
+    args: [small.log, "10"]
+    files:
+      small.log: "t solo 5\r\n\r\nbroken line\r\nt solo -\r\n"
+    expected_stdout: "1. solo requests=2 bytes=5"
+  - name: bytes are summed as numbers
+    args: [big.log, "1"]
+    files:
+      big.log: |
+        t a 9
+        t b 10
+        t a 9
+        t c 3
+    expected_stdout: "1. a requests=2 bytes=18"
+  - name: bad N
+    args: [small.log, zero]
+    files:
+      small.log: |
+        t solo 5
+    expected_stderr: "usage: solution.sh LOG [N]"
+    expected_exit: 2

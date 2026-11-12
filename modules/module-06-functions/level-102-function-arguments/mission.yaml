@@ -1,0 +1,44 @@
+id: 102
+module: 6
+module_name: functions
+module_display: Functions
+title: Function Arguments
+difficulty: intermediate
+xp: 110
+story: |
+  Noor keeps a whiteboard of how many websites each server carries, and she
+  asks for a one-sentence summary per server to paste into the support wiki.
+  The sentence is always the same; only the server name and the number change.
+  A function that takes the name and the number is exactly the right tool.
+objective: |
+  Write solution.sh. It receives four arguments: SERVER1 COUNT1 SERVER2 COUNT2.
+  Define a function named describe that takes two arguments (a server name and
+  a site count) and prints one line:
+    <name> hosts <count> sites
+  Call describe once for each pair, so the script prints two lines. Names can
+  contain spaces when quoted, e.g. "dory east".
+  Inside the function, read the values from $1 and $2.
+concepts:
+  - "inside a function $1, $2 are the function's own arguments"
+  - "call with arguments: fn \"$a\" \"$b\""
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?describe\s*(\(\s*\))?\s*\{'
+    message: "Define a function called describe."
+  - pattern: '\$\{?1\}?[\s\S]*\$\{?2\}?'
+    message: "Inside describe, use $1 (the name) and $2 (the count)."
+test_cases:
+  - name: two plain servers
+    args: [dory, "12", marlin, "7"]
+    expected_stdout: |-
+      dory hosts 12 sites
+      marlin hosts 7 sites
+  - name: name with a space
+    args: ["dory east", "3", "eel", "0"]
+    expected_stdout: |-
+      dory east hosts 3 sites
+      eel hosts 0 sites
+  - name: big numbers
+    args: [grouper, "250", anchovy, "1"]
+    expected_stdout: |-
+      grouper hosts 250 sites
+      anchovy hosts 1 sites

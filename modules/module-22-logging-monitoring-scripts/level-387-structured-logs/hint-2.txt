@@ -1,0 +1,10 @@
+Parameter expansions do the cutting and rewriting without any external tool:
+
+  pair="site=Harbour Bakery"
+  key=${pair%%=*}          # site   (remove from the first = to the end)
+  val=${pair#*=}           # Harbour Bakery
+  lower=${LEVEL,,}         # lowercase
+  safe=${text//\"/\\\"}    # every " becomes \"
+  [[ $val == *" "* ]]      # true when the value contains a space
+  printf -v when '%(%H:%M)T' -1     # store printf output in a variable
+  line+=" more"            # append to a string

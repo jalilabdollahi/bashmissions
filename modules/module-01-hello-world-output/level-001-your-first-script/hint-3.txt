@@ -1,1 +1,1 @@
-Match the required output exactly: `Hello, BashMissions!` and exit successfully.
+Leave the shebang line where it is and put this on its own line below it, with your own text swapped in if you changed anything: echo "Hello, Lanternfish!" - mind the comma and the exclamation mark.

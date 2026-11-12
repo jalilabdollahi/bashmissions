@@ -1,0 +1,11 @@
+results=$(mktemp -d)
+i=0
+for host in "$@"; do
+  probe-host "$host" > "$results/$i" &
+  i=$(( i + 1 ))
+done
+wait
+i=0
+for host in "$@"; do echo "$host: $(cat "$results/$i")"; i=$(( i + 1 )); done
+echo "checked $# hosts"; rm -r "$results"
+Do not forget the usage check at the top.

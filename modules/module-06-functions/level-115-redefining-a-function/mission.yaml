@@ -1,0 +1,51 @@
+id: 115
+module: 6
+module_name: functions
+module_display: Functions
+title: Redefining a Function
+difficulty: advanced
+xp: 150
+story: |
+  The platform team ships a shared script called defaults.sh with sensible
+  behaviour for every Lanternfish site: backups are kept for 30 days and
+  notifications are printed plainly. The Eel Street site is special: its
+  customers pay for 90-day retention, and its notices have to carry the ops desk
+  tag so they land in the right inbox. Nobody may edit the shared file. You
+  customise by overriding.
+objective: |
+  The shared library is fixtures/defaults.sh. It defines three functions:
+  notify, retention_days and report. report SITE calls the other two.
+  Write solution.sh that:
+    1. loads the library with source,
+    2. AFTER loading it, redefines  retention_days  so it prints 90, and
+       redefines  notify  so it prints  [ops-desk] <all its arguments>,
+    3. calls  report "$1"  (the library's own function, do not redefine it).
+  Expected output for the argument eel-street:
+    [ops-desk] eel-street keeps backups for 90 days
+  If no argument is given, print "usage: solution.sh SITE" to stderr and exit 2.
+  Do not edit or copy the library; the point is that a later definition replaces
+  an earlier one.
+concepts:
+  - "defining a function again replaces the earlier definition"
+  - "override after sourcing, and report keeps working with the new versions"
+required_patterns:
+  - pattern: '(source|\.)\s+\S*defaults\.sh[\s\S]*\bretention_days\s*(\(\s*\))?\s*\{'
+    message: "Redefine retention_days AFTER sourcing fixtures/defaults.sh."
+  - pattern: '(source|\.)\s+\S*defaults\.sh[\s\S]*\bnotify\s*(\(\s*\))?\s*\{'
+    message: "Redefine notify AFTER sourcing fixtures/defaults.sh."
+forbidden_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?report\s*(\(\s*\))?\s*\{'
+    message: "Leave report alone: it must pick up your new versions of the two helpers."
+test_cases:
+  - name: eel street
+    args: [eel-street]
+    expected_stdout: "[ops-desk] eel-street keeps backups for 90 days"
+  - name: another site
+    args: [harbour-bakery]
+    expected_stdout: "[ops-desk] harbour-bakery keeps backups for 90 days"
+  - name: site name with spaces
+    args: ["north pier"]
+    expected_stdout: "[ops-desk] north pier keeps backups for 90 days"
+  - name: missing site
+    expected_stderr: "usage: solution.sh SITE"
+    expected_exit: 2

@@ -1,0 +1,8 @@
+  if [[ $# -ne 2 || ! $2 =~ ^[1-9][0-9]*$ ]]; then
+    echo "usage: solution.sh ROTA DAY" >&2; exit 2
+  fi
+  rota=$1; day=$2
+  # ... readable file check ...
+  name=$(sed -n "${day}p" "$rota")
+  [[ -n $name ]] || { echo "no one on call for day $day" >&2; exit 1; }
+  echo "day $day: $name"

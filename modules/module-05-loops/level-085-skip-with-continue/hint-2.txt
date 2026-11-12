@@ -1,0 +1,1 @@
+continue skips the rest of the current round and starts the next one. Example: for n in 1 2 3 4; do if [[ $n -eq 2 ]]; then continue; fi; echo "$n"; done prints 1 3 4. A prefix test uses a glob in double brackets: [[ $name == web-* ]].

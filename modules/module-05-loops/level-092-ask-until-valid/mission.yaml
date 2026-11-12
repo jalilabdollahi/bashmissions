@@ -1,0 +1,61 @@
+id: 92
+module: 5
+module_name: loops
+module_display: Loops
+title: Ask Until Valid
+difficulty: intermediate
+xp: 120
+story: |
+  Priya's new firewall helper asks the operator which port to open. Last
+  Thursday somebody typed "eighty" and the helper cheerfully opened nothing,
+  then reported success. She wants it to be stubborn: if the answer is not a
+  real port number, complain and ask again, as many times as it takes.
+objective: |
+  Write solution.sh that asks for a TCP port on standard input. Each time
+  around, print the prompt "port> " to stderr (no newline), then read one
+  line. A valid answer is a whole number from 1 to 65535.
+  - Valid: print "port=<number>" to stdout and stop (exit status 0).
+  - Not valid: print "bad port: <what was typed>" to stderr and ask again.
+  - If the input ends (EOF) before a valid port arrives, print
+    "no valid port given" to stderr and exit with status 1.
+  Use a loop that repeats until a valid answer is read.
+concepts:
+  - "a loop that repeats until input passes a check"
+  - "read returning failure at end of input"
+  - "[[ $x =~ ^[0-9]+$ ]] combined with a range test"
+required_patterns:
+  - pattern: '\b(while|until)\b'
+    message: "Use a while or until loop that keeps asking."
+  - pattern: '\bread\b'
+    message: "Read the answer with read."
+test_cases:
+  - name: valid on the first try
+    stdin: |
+      8080
+    expected_stdout: "port=8080"
+  - name: words and out-of-range numbers are rejected
+    stdin: |
+      eighty
+      0
+      70000
+      443
+    expected_stdout: "port=443"
+  - name: empty answer then valid
+    stdin: |
+
+      22
+    expected_stdout: "port=22"
+  - name: only the first valid port counts
+    stdin: |
+      99999
+      65535
+      80
+    expected_stdout: "port=65535"
+  - name: input ends without a valid port
+    stdin: |
+      abc
+      -5
+    expected_stdout: ""
+    expected_stderr: "no valid port given"
+    stderr_comparison: contains
+    expected_exit: 1

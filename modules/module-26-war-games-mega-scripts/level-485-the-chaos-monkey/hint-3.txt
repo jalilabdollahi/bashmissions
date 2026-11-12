@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  dry=0; [[ ${1:-} == --dry-run ]] && { dry=1; shift; }
+  seed=$1 rounds=$2 fleet=$3          # validate with [[ $x =~ ^[0-9]+$ ]]; CHANCE 0..100
+
+  targets=()   # from the fleet file, skipping "protected"; none -> message, exit 1
+
+  state=$((seed & 2147483647)); rnd=0
+  next() { state=$(( (state * 1103515245 + 12345) & 2147483647 )); rnd=$(( state >> 16 )); }
+
+  for (( n = 1; n <= rounds; n++ )); do
+    next; if (( rnd % 100 >= chance )); then echo "round $n: calm"; continue; fi
+    next; target=${targets[rnd % ${#targets[@]}]}
+    next; kind=$(( rnd % 3 ))
+    next; p=$(( rnd % 9 + 1 ))
+    case $kind in 0) desc="kill $target";; 1) desc="delay $target $((p*100))ms";; 2) desc="drop $target $((p*10))%";; esac
+    dry run: print "would $desc" and continue
+    live: chaosctl kill|delay|drop ..., s1=$(chaosctl status "$target"), chaosctl heal "$target", s2=$(...)
+  done
+  summary line; live runs end with  (( unhealed == 0 ))  so the exit status says whether everything recovered.

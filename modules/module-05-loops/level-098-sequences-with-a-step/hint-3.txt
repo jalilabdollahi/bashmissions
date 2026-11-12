@@ -1,0 +1,7 @@
+n=0
+for offset in $(seq 0 "$step" $(( (count - 1) * step ))); do
+  n=$(( n + 1 ))
+  minutes=$(( 120 + offset ))
+  printf 'host-%d starts at %02d:%02d\n' "$n" $(( minutes / 60 )) $(( minutes % 60 ))
+done
+02:00 is minute 120 of the day. Check for two arguments first, and exit 0 early when count is less than 1 (seq cannot count up to a negative number everywhere).

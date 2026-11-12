@@ -1,0 +1,86 @@
+id: 269
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Set Differences
+difficulty: advanced
+xp: 190
+story: |
+  At the start of every month Noor drops the list of active customers into a
+  file, and at the end of the month she drops another. Gus's only question is
+  who joined and who left, because the first group gets a welcome basket from
+  the harbour deli and the second gets a phone call from him, in that order.
+  The lists are in no order whatsoever and neither is going to be sorted by
+  hand.
+objective: |
+  Write solution.sh that takes two arguments: OLD and NEW, files with one
+  customer name per line (names may contain spaces; no duplicates; any order).
+  Print first the customers who are only in NEW, each prefixed with "+ ", then
+  the customers who are only in OLD, each prefixed with "- ", each group in
+  plain character order:
+    + North Pier Dental
+    - Gull & Anchor Pub
+  Customers in both files are not printed. Identical lists print nothing.
+  Use comm, which needs sorted input, and sed to add the prefixes.
+concepts:
+  - "comm compares two sorted files in three columns"
+  - "comm -13 shows lines only in file 2, -23 only in file 1"
+  - "inputs must be sorted"
+required_patterns:
+  - pattern: '\bcomm\s+-\w+'
+    message: "Use comm with column-suppressing flags such as -13 and -23."
+  - pattern: '\bsort\b'
+    message: "comm needs sorted input: sort both lists first."
+test_cases:
+  - name: one joined, one left
+    args: [old.txt, new.txt]
+    files:
+      old.txt: |
+        Harbour Bakery
+        Tidewater Books
+        Gull & Anchor Pub
+      new.txt: |
+        Harbour Bakery
+        North Pier Dental
+        Tidewater Books
+    expected_stdout: |-
+      + North Pier Dental
+      - Gull & Anchor Pub
+  - name: several changes, capitals first
+    args: [jan.txt, feb.txt]
+    files:
+      jan.txt: |
+        zeta supplies
+        Old Mill Cycles
+        kelp cafe
+      feb.txt: |
+        Old Mill Cycles
+        Anchor Dental
+        Salt & Sail
+        zeta supplies
+        Brine Books
+    expected_stdout: |-
+      + Anchor Dental
+      + Brine Books
+      + Salt & Sail
+      - kelp cafe
+  - name: identical lists
+    args: [a.txt, b.txt]
+    files:
+      a.txt: |
+        Harbour Bakery
+        Tidewater Books
+      b.txt: |
+        Tidewater Books
+        Harbour Bakery
+    expected_stdout: ""
+  - name: everybody is new
+    args: [none.txt, all.txt]
+    files:
+      none.txt: ""
+      all.txt: |
+        Kelp Cafe
+        Brine Books
+    expected_stdout: |-
+      + Brine Books
+      + Kelp Cafe

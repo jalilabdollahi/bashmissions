@@ -1,0 +1,10 @@
+# Lanternfish default image
+Port 22
+PermitRootLogin prohibit-password
+PasswordAuthentication yes
+UsePAM yes
+X11Forwarding yes
+MaxAuthTries 6
+
+Match User backup
+    PasswordAuthentication no

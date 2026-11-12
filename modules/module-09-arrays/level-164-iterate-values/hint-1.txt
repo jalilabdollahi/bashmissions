@@ -1,0 +1,1 @@
+You want to look at every value in the array, once each, and keep two running numbers on the side. The loop variable should take on the values themselves, one after another. You do not need to know where in the array a value sits.

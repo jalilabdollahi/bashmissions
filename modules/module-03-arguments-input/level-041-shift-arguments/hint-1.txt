@@ -1,1 +1,0 @@
-After shift, the old $2 becomes the new $1.

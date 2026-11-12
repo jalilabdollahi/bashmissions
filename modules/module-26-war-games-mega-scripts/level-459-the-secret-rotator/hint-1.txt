@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Treat each rotation as a small transaction. Do the checks that cannot hurt anything first (secret file readable, key present in the config), then change the database, then the config, then prove the new password works. If the proof fails, undo both changes using the copies you took. Read the map once into associative arrays so the rest of the script can look things up by name, and validate all requested names before the first change.

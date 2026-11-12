@@ -1,0 +1,10 @@
+failed=()
+for linter in shellcheck yamllint markdownlint; do
+  rc=0
+  "$linter" -q "$@" || rc=$?
+  # print ok / FAILED (exit $rc) and append to failed when rc is not 0
+done
+# if ${#failed[@]} is above 0: stderr "lint failed: ..." and exit 1
+# otherwise print "all linters passed"
+
+Put the usage check first, before any linter runs.

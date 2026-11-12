@@ -1,0 +1,1 @@
+`diff` compares two files, but your data is the output of two commands. Bash can run a command and hand its result to another program under a file-like name, so no real file has to be created.

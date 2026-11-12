@@ -1,0 +1,1 @@
+A signal handler is just a function that Bash calls when the signal arrives. The valuable part is what the handler does: read the file again, check it, and only replace the live setting if the new one is acceptable. Write the "read and validate the level" logic once, as a function, and call it from both the start-up code and the handler.

@@ -1,0 +1,46 @@
+id: 7
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Padding Columns
+difficulty: beginner
+xp: 80
+story: |
+  Gus prints the daily "who is on which server" sheet and pins it to the
+  kitchen fridge. Last week the numbers wandered left and right like boats at
+  low tide, and he squinted for ten minutes. He asks for tidy columns: names
+  flush left in a fixed-width box, numbers flush right in another. The
+  monitoring tool sets HOST and USERS before it calls you.
+objective: |
+  Write solution.sh so that it prints two lines. The brackets make the padding
+  visible, so keep them:
+    [HOST      ] [USERS]
+    [<HOST padded to 10, left-aligned>] [<USERS padded to 5, right-aligned>]
+  For HOST=dory and USERS=42 the second line is:  [dory      ] [   42]
+  Use printf with %-10s (left, width 10) and %5d (right, width 5) for the data
+  line. The header line uses the same widths: [%-10s] [%5s].
+  Read the values from $HOST and $USERS, in double quotes.
+concepts:
+  - "%-10s left-aligned text in a 10-wide field"
+  - "%5d right-aligned number in a 5-wide field"
+required_patterns:
+  - pattern: '%-10s'
+    message: "Use %-10s to pad the host name to 10 characters, left-aligned."
+  - pattern: '%5d'
+    message: "Use %5d to right-align the user count in 5 characters."
+test_cases:
+  - name: short name small number
+    env: {HOST: "dory", USERS: "42"}
+    expected_stdout: |-
+      [HOST      ] [USERS]
+      [dory      ] [   42]
+  - name: longer name bigger number
+    env: {HOST: "cuttlefish", USERS: "1234"}
+    expected_stdout: |-
+      [HOST      ] [USERS]
+      [cuttlefish] [ 1234]
+  - name: zero users
+    env: {HOST: "eel", USERS: "0"}
+    expected_stdout: |-
+      [HOST      ] [USERS]
+      [eel       ] [    0]

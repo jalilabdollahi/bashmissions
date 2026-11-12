@@ -1,0 +1,13 @@
+version=${1:-} url=${2:-} max=${3:-5}
+# validate: both set, max digits only and at least 1 -> otherwise usage, exit 2
+
+if ! deployctl push "$version"; then ...; fi
+
+for (( attempt = 1; attempt <= max; attempt++ )); do
+  if curl -fs --max-time 2 "$url" >/dev/null 2>&1; then
+    # healthy: print and exit 0
+  fi
+  # print "attempt $attempt/$max: not healthy"
+  # sleep 2 only when attempt < max
+done
+# out of attempts: stderr message, exit 1

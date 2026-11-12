@@ -1,0 +1,1 @@
+Two different clean-ups: one removes a character completely, the other shrinks repeated copies of a character down to one. The same filter you used to translate characters has an option for each. Chain two calls so each one has a single job.

@@ -1,0 +1,105 @@
+id: 321
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: A Job Queue from a File
+difficulty: expert
+xp: 260
+story: |
+  Friday's deploy list is a text file: one customer site per line, with comments
+  and blank lines where people left notes. Each deploy takes a few seconds and
+  they must not all run at once, but one at a time is how last Friday ended at
+  9 pm. Theo draws three boxes on the whiteboard and calls them workers. Each
+  one walks down the list, takes every third entry and deploys it, and when the
+  three are done there is one report for Gus.
+objective: |
+  Write solution.sh that takes two arguments: WORKERS (a positive whole
+  number) and QUEUE (a file). Print `usage: solution.sh WORKERS QUEUE` to
+  stderr and exit 2 if either is missing. If QUEUE is not a readable file print
+  `cannot read QUEUE` to stderr and exit 1.
+
+  Jobs are the lines of QUEUE, except blank lines and lines starting with `#`.
+  Number the jobs 0, 1, 2, ... in file order. Start WORKERS background
+  workers, numbered 0 to WORKERS-1. Worker W goes through the whole file and
+  handles exactly the jobs whose number leaves remainder W when divided by
+  WORKERS (use `%`), one after the other. To handle a job it runs
+  `deploy "JOB"` (the whole line is the job name, spaces included) and prints
+    JOB ok          if deploy exited 0
+    JOB FAILED      otherwise
+
+  Wait for all workers. The workers print in whatever order they are
+  scheduled, so collect everything, sort it, and print the sorted lines.
+  Then print `N jobs, F failed` and exit 1 if F is above zero, else 0. With no
+  jobs, print only the summary line `0 jobs, 0 failed`.
+concepts:
+  - "a worker is a loop run as a background job"
+  - "splitting a queue between workers with a modulo"
+  - "collect and sort the combined output of all workers"
+required_patterns:
+  - pattern: '%'
+    message: "Split the queue with a modulo: job number % WORKERS equals the worker number."
+  - pattern: '\bwait\b'
+    message: "Wait for all workers before reporting."
+  - pattern: '&\s*$|&\s*\n|&\s*;|\)\s*&'
+    message: "Start the workers in the background with &."
+  - pattern: '\bsort\b'
+    message: "Sort the combined output so the report does not depend on timing."
+forbidden_patterns:
+  - pattern: '\bxargs\b|\bwait\s+-n\b'
+    message: "Build this one by hand: a worker function started with &, no xargs and no wait -n."
+test_cases:
+  - name: seven jobs, three workers
+    args: [3, queue.txt]
+    files:
+      queue.txt: "# friday deploys\nharbour-bakery\ntidewater books\n\nnorth-pier-dental\ngull-anchor-bad\nlantern-cafe\n# retired: old-site\nwhale-watch\nmarina-supply\n"
+    expected_stdout: |-
+      gull-anchor-bad FAILED
+      harbour-bakery ok
+      lantern-cafe ok
+      marina-supply ok
+      north-pier-dental ok
+      tidewater books ok
+      whale-watch ok
+      7 jobs, 1 failed
+    expected_exit: 1
+  - name: two workers, all succeed
+    args: [2, queue.txt]
+    files:
+      queue.txt: "alpha\nbeta\ngamma\ndelta\n"
+    expected_stdout: |-
+      alpha ok
+      beta ok
+      delta ok
+      gamma ok
+      4 jobs, 0 failed
+  - name: more workers than jobs
+    args: [5, queue.txt]
+    files:
+      queue.txt: "solo-job\nsecond-job\n"
+    expected_stdout: |-
+      second-job ok
+      solo-job ok
+      2 jobs, 0 failed
+  - name: a single worker does everything in order
+    args: [1, queue.txt]
+    files:
+      queue.txt: "c-site\na-site\nb-site-bad\n"
+    expected_stdout: |-
+      a-site ok
+      b-site-bad FAILED
+      c-site ok
+      3 jobs, 1 failed
+    expected_exit: 1
+  - name: only comments and blanks
+    args: [3, queue.txt]
+    files:
+      queue.txt: "# nothing today\n\n   \n"
+    expected_stdout: "0 jobs, 0 failed"
+  - name: queue file missing
+    args: [2, nothing.txt]
+    expected_stderr: "cannot read nothing.txt"
+    expected_exit: 1
+  - name: missing arguments
+    args: [2]
+    expected_stderr: "usage: solution.sh WORKERS QUEUE"
+    expected_exit: 2

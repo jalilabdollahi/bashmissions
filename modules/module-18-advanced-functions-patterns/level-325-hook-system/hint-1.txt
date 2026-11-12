@@ -1,1 +1,0 @@
-Use this curriculum concept: pre/post hook arrays.

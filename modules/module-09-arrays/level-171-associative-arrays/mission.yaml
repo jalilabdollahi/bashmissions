@@ -1,0 +1,73 @@
+id: 171
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Associative Arrays
+difficulty: advanced
+xp: 140
+story: |
+  Every server at Lanternfish has an owner who gets paged when it misbehaves:
+  Theo owns the web boxes, Priya the vault, the dental practice's IT contact
+  owns their VM. The mapping is in a text file, "server owner" per line, and
+  support keeps asking "who owns dory?". A map from server name to owner is
+  the obvious structure, but plain arrays only know numbers as keys.
+objective: |
+  Write solution.sh. The first argument is a path to an ownership file. Each
+  line is a server name (one word), a space, and then the owner (the rest of
+  the line, which may contain spaces). If a server appears twice, the LAST
+  line wins. The remaining arguments are servers to look up.
+  Load the file into an associative array (`declare -A owners`) keyed by
+  server name, then print one line per looked-up server, in the order given:
+    <server> -> <owner>
+  or, for a server not in the file:
+    <server> -> unassigned
+  With no servers to look up print nothing. If no argument is given at all
+  print "usage: solution.sh OWNERFILE [SERVER...]" to stderr and exit with
+  status 2.
+concepts:
+  - "declare -A creates an associative array"
+  - "map[key]=value and ${map[key]}"
+  - "${map[key]:-default} for a missing key"
+required_patterns:
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Declare the map first: declare -A owners (without -A the keys are treated as numbers)."
+test_cases:
+  - name: look up two servers
+    files:
+      "owners.txt": "anchovy Theo\nbarracuda Theo\ndory Priya\neel North Pier Dental IT\n"
+    args: ["owners.txt", dory, anchovy]
+    expected_stdout: |-
+      dory -> Priya
+      anchovy -> Theo
+  - name: multi-word owner and unknown server
+    files:
+      "o.txt": "eel North Pier Dental IT\nflounder Gus\n"
+    args: ["o.txt", eel, halibut, flounder]
+    expected_stdout: |-
+      eel -> North Pier Dental IT
+      halibut -> unassigned
+      flounder -> Gus
+  - name: last line wins
+    files:
+      "moves.txt": "grouper Theo\nmarlin Mara\ngrouper Ollie\n"
+    args: ["moves.txt", grouper, marlin]
+    expected_stdout: |-
+      grouper -> Ollie
+      marlin -> Mara
+  - name: keys are not numbers
+    files:
+      "pair.txt": "alpha one\nbeta two\n"
+    args: ["pair.txt", beta, alpha, gamma]
+    expected_stdout: |-
+      beta -> two
+      alpha -> one
+      gamma -> unassigned
+  - name: nothing to look up
+    files:
+      "owners.txt": "anchovy Theo\n"
+    args: ["owners.txt"]
+    expected_stdout: ""
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh OWNERFILE [SERVER...]"
+    expected_exit: 2

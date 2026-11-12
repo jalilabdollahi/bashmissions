@@ -1,0 +1,7 @@
+`if command; then` runs the then-part when the command exits with 0. Add `!` to flip it, and `&&` to chain two commands that must both succeed. Hide a command's printed output with `> /dev/null` when only its status matters:
+
+  if ping-tool host > /dev/null; then echo up; else echo down; fi
+  if restart-tool x && check-tool x > /dev/null; then echo fixed; fi
+  bad=0            # set it to 1 when something fails, exit "$bad" at the end
+
+Under set -e, a command inside an if condition may fail without aborting the script.

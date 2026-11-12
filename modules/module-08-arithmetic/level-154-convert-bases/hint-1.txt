@@ -1,1 +1,0 @@
-`printf %x` formats a number as lowercase hexadecimal.

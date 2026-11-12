@@ -1,0 +1,7 @@
+Whole-number tricks:
+
+  tenths=$(( (hit * 1000 + all / 2) / all ))    # rounded, e.g. 825 means 82.5
+  echo "$(( tenths / 10 )).$(( tenths % 10 ))"
+  (( hit * 100 >= limit * all ))               # hit/all >= limit/100, no division
+
+Check input with `[[ $x =~ ^[0-9]+$ ]]` before it goes anywhere near `$(( ))`. Remember the overall number is printed first, so keep the files in arrays and print the "low:" lines afterwards.

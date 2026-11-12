@@ -1,0 +1,6 @@
+Three tools together:
+ - `[[ $# -lt 1 ]]` is true when fewer than one argument was given.
+ - `command && { ...; }` runs the braces only when the test is true.
+ - `echo "text" >&2` sends text to stderr, and `exit 2` ends the script with status 2.
+
+  [[ $# -lt 2 ]] && { echo "usage: tool A B" >&2; exit 2; }

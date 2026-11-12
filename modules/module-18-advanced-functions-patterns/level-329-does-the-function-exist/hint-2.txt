@@ -1,0 +1,9 @@
+`declare -F NAME` succeeds (and prints the name) only when NAME is a defined function; it fails otherwise. Send the printed name away and test the status:
+
+  if declare -F "tool_$word" > /dev/null; then
+    "tool_$word"
+  else
+    echo "no such tool: $word" >&2
+  fi
+
+Other ways of asking ("is a variable set?", "is it on the PATH?") answer a different question.

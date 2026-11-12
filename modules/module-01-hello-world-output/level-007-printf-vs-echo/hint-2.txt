@@ -1,1 +1,0 @@
-Use `printf` with the `%s` format specifier — it passes the argument through literally without interpreting `\n` or other sequences.

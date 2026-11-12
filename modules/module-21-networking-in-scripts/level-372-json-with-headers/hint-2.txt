@@ -1,0 +1,9 @@
+`-H 'Name: value'` adds a header to the request; repeat it for more headers:
+
+  curl -s -H 'Content-Type: application/json' -d '{"ok":true}' https://api.example/ping
+
+To put variables inside JSON, build it in a variable with escaped quotes (or single-quoted pieces):
+
+  json="{\"name\":\"$name\",\"count\":$count}"
+
+Test a number with `[[ $x =~ ^[0-9]+$ ]]`.

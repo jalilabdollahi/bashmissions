@@ -1,0 +1,118 @@
+id: 423
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Column Statistics
+difficulty: expert
+xp: 280
+story: |
+  Gus pulled the month's payment log from the card processor and wants five
+  numbers about it before his nine o'clock call: how many payments, how much
+  money, the smallest, the largest and the average. The log is not clean. Refunds
+  are negative numbers, a few amounts are blank where the card was declined, and
+  one tool wrote "pending" in the amount column.
+objective: |
+  Write solution.sh that takes two arguments: a CSV file with a header, and
+  the name of a column (found in the header, not by number). The header of the
+  sample is `date,customer,amount`, but the script must work for any column
+  name. Blank lines are skipped, lines may end in `\r\n`.
+  A cell is a number if it is digits with an optional leading `-` and an
+  optional decimal part. Print, in this order:
+    count=<numbers found>
+    skipped=<non-blank rows whose cell was not a number>
+    sum=<total>
+    min=<smallest>
+    max=<largest>
+    avg=<sum / count>
+  with sum, min, max and avg formatted with two decimals (`%.2f`). If there
+  were no numbers, print only the count and skipped lines. If the column name
+  is not in the header, print `unknown column: <name>` to stderr and exit 1.
+concepts:
+  - "running sum, min and max in one pass"
+  - "initialise min/max from the first value, not from 0"
+  - "printf %.2f for fixed decimals"
+  - "skipping and counting bad cells instead of trusting them"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Accumulate the statistics in a single awk pass."
+  - pattern: '%\.2f'
+    message: "Format the results with printf and %.2f."
+test_cases:
+  - name: payments with a refund and junk
+    args: [payments.csv, amount]
+    files:
+      payments.csv: |
+        date,customer,amount
+        2026-05-01,harbour-bakery,120.50
+        2026-05-01,tidewater-books,80
+        2026-05-02,gull-anchor,
+        2026-05-03,harbour-bakery,-20.25
+        2026-05-03,north-pier,pending
+        2026-05-04,north-pier,300.75
+    expected_stdout: |-
+      count=4
+      skipped=2
+      sum=481.00
+      min=-20.25
+      max=300.75
+      avg=120.25
+  - name: another column of another file
+    args: [bw.csv, gb]
+    files:
+      bw.csv: |
+        host,gb
+        anchovy,7
+        barracuda,3
+        cuttlefish,5
+    expected_stdout: |-
+      count=3
+      skipped=0
+      sum=15.00
+      min=3.00
+      max=7.00
+      avg=5.00
+  - name: all negative values
+    args: [neg.csv, delta]
+    files:
+      neg.csv: |
+        day,delta
+        mon,-5
+        tue,-2.5
+        wed,-10
+    expected_stdout: |-
+      count=3
+      skipped=0
+      sum=-17.50
+      min=-10.00
+      max=-2.50
+      avg=-5.83
+  - name: no numbers at all
+    args: [none.csv, amount]
+    files:
+      none.csv: |
+        id,amount
+
+        1,n/a
+        2,
+    expected_stdout: |-
+      count=0
+      skipped=2
+  - name: windows endings and column in the middle
+    args: [win.csv, qty]
+    files:
+      win.csv: "sku,qty,price\r\nA1,4,9.99\r\nA2,6,1.50\r\n"
+    expected_stdout: |-
+      count=2
+      skipped=0
+      sum=10.00
+      min=4.00
+      max=6.00
+      avg=5.00
+  - name: unknown column
+    args: [payments.csv, total]
+    files:
+      payments.csv: |
+        date,amount
+        2026-05-01,5
+    expected_stderr: "unknown column: total"
+    expected_exit: 1

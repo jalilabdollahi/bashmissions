@@ -1,0 +1,81 @@
+id: 360
+module: 20
+module_name: script-security
+module_display: Security
+title: Find World-Writable Files
+difficulty: advanced
+xp: 180
+story: |
+  After a customer's site got defaced, Priya wants a weekly sweep of the web
+  roots for files that anybody on the machine can rewrite. Ollie's first attempt
+  parses `ls -l` output and chokes on file names with spaces. Priya hands him a
+  better idea: "Ask the filesystem a question, don't read its handwriting."
+objective: |
+  Write solution.sh that audits one folder, given as the first argument.
+
+  1. With no argument print `usage: solution.sh DIR` to stderr, exit 2.
+  2. If DIR is not a folder print `no such folder: DIR` to stderr, exit 1.
+  3. Otherwise list every regular file anywhere below DIR that other users can
+     write to (the "others write" permission bit is set, whatever the rest of
+     the mode is). Print one path per line, in `sort` order, each starting with
+     DIR exactly as given. Folders and symbolic links are not listed.
+  4. Finish with a line `world-writable: N` where N is how many files were
+     listed (0 is fine).
+
+  Use `find` with a permission test. Do not parse `ls` output.
+concepts:
+  - "find -type f -perm -002"
+  - "-perm -MODE: all of these bits set; -perm MODE: exactly this mode"
+  - "ask the filesystem instead of parsing ls"
+required_patterns:
+  - pattern: '\bfind\b[^\n]*-perm\s+(-0*2\b|-o=w\b|-o\+w\b|-002\b)'
+    message: "Use find with -perm -002 (all of these bits set: others can write)."
+forbidden_patterns:
+  - pattern: '\bls\b'
+    message: "Do not parse ls output; let find test the permission."
+  - pattern: '\bstat\b'
+    message: "Use find -perm; stat has different flags on macOS and Linux."
+test_cases:
+  - name: mixed modes
+    args: [site]
+    files:
+      site/index.html: {content: "home", mode: "0644"}
+      site/upload.php: {content: "x", mode: "0666"}
+      site/css/main.css: {content: "x", mode: "0644"}
+      site/css/theme.css: {content: "x", mode: "0777"}
+      site/cache/page.tmp: {content: "x", mode: "0602"}
+      site/notes.txt: {content: "x", mode: "0664"}
+    expected_stdout: |-
+      site/cache/page.tmp
+      site/css/theme.css
+      site/upload.php
+      world-writable: 3
+  - name: names with spaces
+    args: ["Harbour Bakery"]
+    files:
+      "Harbour Bakery/menu list.txt": {content: "x", mode: "0666"}
+      "Harbour Bakery/price list.txt": {content: "x", mode: "0640"}
+    expected_stdout: |-
+      Harbour Bakery/menu list.txt
+      world-writable: 1
+  - name: folders and links are not files
+    args: [www]
+    files:
+      www/open-dir/: ""
+      www/open-dir/safe.txt: {content: "x", mode: "0600"}
+      www/real.txt: {content: "x", mode: "0600"}
+      www/alias.txt: {symlink: "real.txt"}
+    expected_stdout: "world-writable: 0"
+  - name: a clean folder
+    args: [clean]
+    files:
+      clean/a: {content: "a", mode: "0644"}
+    expected_stdout: "world-writable: 0"
+  - name: missing folder
+    args: [ghost]
+    expected_stderr: "no such folder: ghost"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

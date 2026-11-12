@@ -1,0 +1,100 @@
+id: 248
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Atomic Writes
+difficulty: advanced
+xp: 160
+story: |
+  The web server re-reads `config/app.conf` every few seconds. On Monday
+  Theo's deploy script was halfway through writing a new one when the server
+  looked: it saw a file with half a line in it, tried to start on port
+  "80" instead of "8080", and took Harbour Bakery's shop offline for four
+  minutes. Mara's rule: "A reader must see the old file or the complete new
+  file. Never anything in between."
+objective: |
+  Write solution.sh, which reads a complete new configuration from standard
+  input and installs it as `config/app.conf` in an atomic way:
+
+  1. Create the folder `config` if it does not exist.
+  2. Make a temporary file *inside* `config` with `mktemp` (use the template
+     `config/.app.conf.XXXXXX`, so it is on the same disk as the target) and
+     write all of standard input into it.
+  3. The new configuration is valid only if it contains a line that is
+     exactly `port=` followed by digits (for example `port=8080`). If it is
+     not valid, delete the temporary file, print
+     `invalid config: no port= line, keeping the old file` to stderr and
+     exit 1. The existing `config/app.conf` must not be touched.
+  4. If it is valid: `chmod 644` the temporary file (`mktemp` files start
+     private) and move it over `config/app.conf` with `mv`.
+  5. Print `installed config/app.conf (N lines)` with N the number of lines
+     of the new file.
+
+  Never write to `config/app.conf` directly with `>`. When the script ends
+  there must be no temporary file left in `config`.
+concepts:
+  - "write to a temporary file, then rename it into place"
+  - "mv within one file system is atomic"
+required_patterns:
+  - pattern: '\bmktemp\b'
+    message: "Write into a temporary file made with mktemp, in the same folder as the target."
+  - pattern: '\bmv\b'
+    message: "Finish with mv: renaming within one disk is atomic."
+forbidden_patterns:
+  - pattern: '>\s*"?config/app\.conf'
+    message: "Do not write to the live file directly; write the temp file and mv it into place."
+test_cases:
+  - name: valid config replaces the old one
+    args: []
+    stdin: |
+      port=8080
+      workers=4
+      mode=production
+    files:
+      config/app.conf: "port=80\n"
+    expected_stdout: "installed config/app.conf (3 lines)"
+    expected_files:
+      config/app.conf: |-
+        port=8080
+        workers=4
+        mode=production
+  - name: first install creates the folder
+    args: []
+    stdin: "# fresh box\nport=9000\n"
+    expected_stdout: "installed config/app.conf (2 lines)"
+    expected_files:
+      config/app.conf: |-
+        # fresh box
+        port=9000
+  - name: missing port keeps the old file
+    args: []
+    stdin: |
+      workers=2
+      mode=debug
+    files:
+      config/app.conf: "port=8080\nworkers=4\n"
+    expected_stdout: ""
+    expected_stderr: "invalid config: no port= line, keeping the old file"
+    expected_exit: 1
+    expected_files:
+      config/app.conf: |-
+        port=8080
+        workers=4
+  - name: empty input is invalid too
+    args: []
+    stdin: ""
+    files:
+      config/app.conf: "port=8080\n"
+    expected_stderr: "invalid config: no port= line, keeping the old file"
+    expected_exit: 1
+    expected_files:
+      config/app.conf: "port=8080"
+  - name: port must be a number
+    args: []
+    stdin: "port=eighty\nworkers=1\n"
+    files:
+      config/app.conf: "port=8080\n"
+    expected_stderr: "invalid config: no port= line, keeping the old file"
+    expected_exit: 1
+    expected_files:
+      config/app.conf: "port=8080"

@@ -1,0 +1,5 @@
+Channels have numbers: 0 is input, 1 is normal output, 2 is errors. Put the number directly in front of `>` to choose which one you are redirecting (no space between them):
+
+  disk-scan /data 2> scan-errors.txt
+
+Here only the errors go to the file; the normal output stays on screen.

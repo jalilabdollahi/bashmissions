@@ -1,0 +1,1 @@
+Before calling a name you built from user input, ask Bash whether that name is a function. Bash can answer that with a command, and a command's success or failure is something an `if` can use.

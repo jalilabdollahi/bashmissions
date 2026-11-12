@@ -1,0 +1,6 @@
+The conversion looks like %(strftime-format)T and its argument is an epoch:
+
+  printf 'it is %(%H:%M)T\n' 1700000000
+  printf '%(%Y-%m-%d)T\n' -1        # -1 means now
+
+Inside the parentheses use strftime letters: %Y year, %m month, %d day, %H hour, %M minute, %S second. TZ is already UTC here. "$*" joins all remaining arguments into one string.

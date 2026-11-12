@@ -1,0 +1,1 @@
+You only get to see each number once, so everything you want to know has to be updated as it goes by: a counter, a running total, and a "record so far" for the smallest and for the largest. The tricky bit is what those two records should hold before you have seen anything.

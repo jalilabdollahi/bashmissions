@@ -1,0 +1,1 @@
+You are not running these lines now; you are writing them down for a script that will run later. That means the shell must leave every dollar sign alone. A here-document has a switch for exactly that, and it sits on the opening line.

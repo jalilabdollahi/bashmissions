@@ -1,0 +1,1 @@
+The shell handles redirections strictly from left to right, one at a time. "Make stderr go where stdout goes" only does what you want if stdout has already been pointed at the file by then.

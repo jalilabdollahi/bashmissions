@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Fake git with just enough for a release script. State lives in the current directory:
+#   .git-tags   one tag name per line      .git-dirty  "git status --porcelain" output
+#   .git-pushed tags pushed to origin      (set FAKE_PUSH_FAIL=1 to make push fail)
+echo "git $*" >> .calls.log
+die() { echo "$1" >&2; exit "${2:-128}"; }
+has_tag() { [[ -f .git-tags ]] && grep -qxF -- "$1" .git-tags; }
+
+case ${1:-} in
+  status)
+    [[ ${2:-} == --porcelain && $# -eq 2 ]] || die "git status: only --porcelain is implemented" 2
+    [[ -f .git-dirty ]] && cat .git-dirty
+    exit 0 ;;
+  rev-parse)
+    [[ ${2:-} == -q && ${3:-} == --verify && $# -eq 4 ]] || die "git rev-parse: only 'rev-parse -q --verify REF' is implemented" 2
+    if [[ $4 == refs/tags/* ]] && has_tag "${4#refs/tags/}"; then
+      echo "0123456789abcdef0123456789abcdef01234567"
+      exit 0
+    fi
+    exit 1 ;;
+  tag)
+    [[ ${2:-} == -a && ${4:-} == -m && $# -eq 5 ]] || die "git tag: usage here is 'tag -a NAME -m MESSAGE'" 2
+    has_tag "$3" && die "fatal: tag '$3' already exists"
+    echo "$3" >> .git-tags
+    exit 0 ;;
+  push)
+    [[ ${2:-} == origin && $# -eq 3 ]] || die "git push: usage here is 'push origin TAG'" 2
+    [[ ${FAKE_PUSH_FAIL:-0} == 1 ]] && die "fatal: unable to access 'https://git.lanternfish.example/shop.git/'"
+    has_tag "$3" || die "error: src refspec $3 does not match any"
+    echo "$3" >> .git-pushed
+    exit 0 ;;
+  *) die "git: '${1:-}' is not implemented in this stub" 2 ;;
+esac

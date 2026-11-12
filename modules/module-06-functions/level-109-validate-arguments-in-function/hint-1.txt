@@ -1,1 +1,0 @@
-A guard clause checks invalid input at the top of a function.

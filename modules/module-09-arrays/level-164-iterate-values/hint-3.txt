@@ -1,0 +1,5 @@
+for amount in "${amounts[@]}"; do
+  total=$(( total + amount ))
+  # if this amount is 100 or more, add one to large
+done
+The totals are printed after the loop, which the starter already does.

@@ -1,0 +1,9 @@
+awk reads several files in one run. `FNR == NR` is true only for the first one:
+
+  awk -F, 'FNR == NR { a[$1] = $0; next }
+           { b[$1] = $0 }
+           END { for (k in b) if (!(k in a)) print "new:", k }' first second
+
+The rest of a row after the first comma: `substr($0, length($1) + 2)`. A for-in loop has no useful order, so print `key<TAB>text` lines and let `sort -t "$tab" -k1,1 | cut -f2-` order them (with `tab=$'\t'`). Count the three kinds from the final text with `grep -c '^+ '`. `grep -c` exits with status 1 when the count is 0, which kills a `set -e` script inside `$( )`: add `|| true`.
+
+Check emptiness with `[[ -s file ]]` (true only if the file exists and is not empty) before awk runs.

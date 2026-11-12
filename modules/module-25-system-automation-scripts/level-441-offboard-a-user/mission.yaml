@@ -1,0 +1,106 @@
+id: 441
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Offboard a User
+difficulty: expert
+xp: 320
+story: |
+  Dana from the billing team left on Friday and Priya has one question:
+  "Can she still log in?" Nobody knew. Offboarding done by hand always
+  forgets something, so the order is now fixed: shut the door first, then
+  keep her files for the legal retention period, then write down what you did.
+  The one thing the script must never do is touch a system account.
+objective: |
+  Write solution.sh [-n] USER STAMP. User accounts are listed in
+  `fixtures/etc/passwd` (name:x:UID:GID:comment:home:shell). In this sandbox
+  the home directory of NAME is the folder `fixtures/home/NAME`.
+
+  Checks, in this order:
+  - USER not in the passwd file: `unknown user: USER` on stderr, exit 1.
+  - UID below 1000 (root, service accounts): `refusing to offboard system
+    account USER` on stderr, exit 3.
+
+  Then, in this order:
+  1. Lock the account: `usermod -L -s /usr/sbin/nologin USER`.
+  2. Archive the home directory to `offboarded/USER-STAMP.tar.gz` (create
+     `offboarded/`; inside the archive the paths start with `USER/`). If the
+     home directory does not exist there is nothing to archive.
+  3. Print the report on stdout:
+       offboarded: USER
+       locked: yes
+       archive: offboarded/USER-STAMP.tar.gz      (or `archive: none`)
+       files: N                                   (regular files archived, 0 if none)
+
+  With -n (dry run) change nothing and print instead:
+       would lock USER
+       would archive fixtures/home/USER to offboarded/USER-STAMP.tar.gz
+  (the checks still run). Wrong argument count: `usage: solution.sh [-n] USER STAMP`
+  on stderr, exit 2.
+concepts:
+  - "refuse dangerous targets before doing anything"
+  - "ordered steps: lock, archive, report"
+  - "usermod -L locks a password, -s changes the login shell"
+required_patterns:
+  - pattern: '\busermod\b'
+    message: "Lock the account with usermod."
+  - pattern: '\btar\b'
+    message: "Archive the home directory with tar."
+test_cases:
+  - name: ordinary leaver with a home directory
+    args: [dana, "20260301"]
+    files:
+      fixtures/home/dana/notes.txt: "q4 invoices\n"
+      fixtures/home/dana/reports/march.csv: "a,b\n"
+      fixtures/home/dana/.bashrc: "alias ll='ls -l'\n"
+    expected_stdout: |-
+      offboarded: dana
+      locked: yes
+      archive: offboarded/dana-20260301.tar.gz
+      files: 3
+    expected_files:
+      offboarded/dana-20260301.tar.gz: true
+      .calls.log: |
+        usermod user=dana lock=yes shell=/usr/sbin/nologin
+  - name: no home directory to keep
+    args: [kit, "20260301"]
+    expected_stdout: |-
+      offboarded: kit
+      locked: yes
+      archive: none
+      files: 0
+    expected_files:
+      offboarded/kit-20260301.tar.gz: null
+      .calls.log: |
+        usermod user=kit lock=yes shell=/usr/sbin/nologin
+  - name: dry run changes nothing
+    args: ["-n", dana, "20260301"]
+    files:
+      fixtures/home/dana/notes.txt: "q4 invoices\n"
+    expected_stdout: |-
+      would lock dana
+      would archive fixtures/home/dana to offboarded/dana-20260301.tar.gz
+    expected_files:
+      offboarded/dana-20260301.tar.gz: null
+      .calls.log: null
+  - name: a service account is refused
+    args: [sync, "20260301"]
+    expected_stdout: ""
+    expected_stderr: "refusing to offboard system account sync"
+    expected_exit: 3
+    expected_files:
+      .calls.log: null
+  - name: root is refused too
+    args: [root, "20260301"]
+    expected_stderr: "refusing to offboard system account root"
+    expected_exit: 3
+  - name: a user who does not exist
+    args: [ghost, "20260301"]
+    expected_stderr: "unknown user: ghost"
+    expected_exit: 1
+    expected_files:
+      .calls.log: null
+  - name: missing stamp
+    args: [dana]
+    expected_stderr: "usage: solution.sh [-n] USER STAMP"
+    expected_exit: 2

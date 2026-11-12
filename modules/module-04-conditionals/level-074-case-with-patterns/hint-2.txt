@@ -1,0 +1,14 @@
+In a case branch, patterns can be wildcards like *.zip, and you can list alternatives with | so one branch handles several shapes. Branches are tried top to bottom, so put the more specific shape first. Generic example:
+
+  case "$name" in
+    *.jpg | *.jpeg)
+      echo "photo"
+      ;;
+    *.png)
+      echo "picture"
+      ;;
+    *)
+      echo "unknown" >&2
+      exit 1
+      ;;
+  esac

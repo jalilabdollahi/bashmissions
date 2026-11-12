@@ -1,0 +1,1 @@
+Every program has two output channels: one for results and one for problems. Your terminal shows both, but a script's caller can pick them apart. The warning belongs on the second channel.

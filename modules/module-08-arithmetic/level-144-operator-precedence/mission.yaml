@@ -1,0 +1,62 @@
+id: 144
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Operator Precedence
+difficulty: beginner
+xp: 110
+story: |
+  Gus built the bandwidth invoice in a spreadsheet and the total came out
+  wildly too high. Theo glances over his shoulder: "You added the base fee to
+  the gigabytes before multiplying by the rate, didn't you?" Gus did. Bash has
+  the same rules of precedence as the spreadsheet, so your script had better
+  get them right the first time.
+objective: |
+  Write solution.sh that takes four whole numbers:
+    $1  SERVERS  number of servers on the plan
+    $2  BASE     flat monthly fee per server
+    $3  GB       gigabytes of traffic per server
+    $4  RATE     price per gigabyte
+
+  Print exactly two lines:
+    per_server=<BASE + GB * RATE>
+    total=<(BASE + GB * RATE) * SERVERS>
+
+  Use $(( ... )) and write the expression the way it reads in maths:
+  multiplication happens before addition, and you need parentheses where the
+  addition has to happen first.
+concepts:
+  - "operator precedence (* before +)"
+  - "parentheses in $(( ))"
+required_patterns:
+  - pattern: '\$\(\([^)]*\([^)]*\)'
+    message: "The total needs parentheses inside $(( )): (fee + traffic) * servers."
+forbidden_patterns:
+  - pattern: '\b(expr|bc)\b'
+    message: "Use $(( )) here, not expr or bc."
+test_cases:
+  - name: three small servers
+    args: ["3", "20", "100", "2"]
+    expected_stdout: |-
+      per_server=220
+      total=660
+  - name: single server, no traffic
+    args: ["1", "15", "0", "9"]
+    expected_stdout: |-
+      per_server=15
+      total=15
+  - name: no servers at all
+    args: ["0", "50", "10", "10"]
+    expected_stdout: |-
+      per_server=150
+      total=0
+  - name: heavy traffic on a big fleet
+    args: ["12", "35", "1800", "3"]
+    expected_stdout: |-
+      per_server=5435
+      total=65220
+  - name: rate of one makes addition order obvious
+    args: ["2", "4", "6", "1"]
+    expected_stdout: |-
+      per_server=10
+      total=20

@@ -1,0 +1,109 @@
+id: 224
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Validate a Date
+difficulty: advanced
+xp: 180
+story: |
+  Gus is closing the books for the year and the invoice export has a column of
+  due dates typed by hand. The accounting system reads them as YYYY-MM-DD and
+  falls over on anything else: "2024-02-30", "2024-13-01", "2024-4-5". He
+  would like to know which rows to fix, and why, before he uploads the file.
+objective: |
+  Write solution.sh that reads one date per line from standard input and prints
+
+    <date>: ok            if it is a real calendar date
+    <date>: bad format    if it is not exactly YYYY-MM-DD (4+2+2 digits)
+    <date>: bad month     if the format is right but the month is not 01 to 12
+    <date>: bad day       if the month is right but the day does not exist
+                          in that month (day 00 never exists)
+
+  Days per month: 31 for 01 03 05 07 08 10 12; 30 for 04 06 09 11; February
+  has 28, or 29 in a leap year. A leap year is divisible by 4, except for
+  years divisible by 100, unless they are also divisible by 400 (2000 is a leap
+  year, 1900 is not). Check the format with a three-group regex in [[ =~ ]],
+  then check month and day with arithmetic (use 10# so 08 and 09 stay decimal).
+concepts:
+  - "capture year, month and day with groups"
+  - "regex checks the shape, arithmetic checks the calendar"
+  - "10# prevents octal surprises with 08 and 09"
+required_patterns:
+  - pattern: '=~'
+    message: "Check the format with [[ $date =~ regex ]]."
+  - pattern: 'BASH_REMATCH\[3\]'
+    message: "Capture year, month and day: BASH_REMATCH[1], [2], [3]."
+  - pattern: '10#'
+    message: "Use 10# when you do arithmetic on month and day."
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|cut|date)\b'
+    message: "Do the checks with a regex and arithmetic, not with date or another tool."
+test_cases:
+  - name: valid dates
+    stdin: |
+      2024-11-07
+      2025-01-31
+      2024-04-30
+      2024-12-01
+    expected_stdout: |-
+      2024-11-07: ok
+      2025-01-31: ok
+      2024-04-30: ok
+      2024-12-01: ok
+  - name: leap years
+    stdin: |
+      2024-02-29
+      2023-02-29
+      2000-02-29
+      1900-02-29
+      2100-02-29
+    expected_stdout: |-
+      2024-02-29: ok
+      2023-02-29: bad day
+      2000-02-29: ok
+      1900-02-29: bad day
+      2100-02-29: bad day
+  - name: impossible days
+    stdin: |
+      2024-02-30
+      2024-04-31
+      2024-06-00
+      2024-01-32
+      2024-09-31
+    expected_stdout: |-
+      2024-02-30: bad day
+      2024-04-31: bad day
+      2024-06-00: bad day
+      2024-01-32: bad day
+      2024-09-31: bad day
+  - name: impossible months
+    stdin: |
+      2024-13-01
+      2024-00-10
+      2024-99-99
+    expected_stdout: |-
+      2024-13-01: bad month
+      2024-00-10: bad month
+      2024-99-99: bad month
+  - name: wrong formats
+    stdin: |
+      2024-4-5
+      24-04-05
+      2024/04/05
+      2024-04-05 
+      20240405
+      today
+    expected_stdout: |-
+      2024-4-5: bad format
+      24-04-05: bad format
+      2024/04/05: bad format
+      2024-04-05 : bad format
+      20240405: bad format
+      today: bad format
+  - name: months 08 and 09 are not octal
+    stdin: |
+      2024-08-08
+      2024-09-30
+    expected_stdout: |-
+      2024-08-08: ok
+      2024-09-30: ok

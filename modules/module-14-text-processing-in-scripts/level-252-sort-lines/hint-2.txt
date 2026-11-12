@@ -1,0 +1,6 @@
+The tool is sort. It compares lines character by character, left to right:
+
+  printf 'pear\napple\nfig\n' | sort      # apple, fig, pear
+  sort names.txt                          # same, reading a file
+
+Because comparison is by character, "10" sorts before "2" (the character 1 comes before 2). That is expected here; numeric order is a later level.

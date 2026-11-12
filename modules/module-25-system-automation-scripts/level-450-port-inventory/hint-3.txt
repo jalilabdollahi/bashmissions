@@ -1,0 +1,10 @@
+  declare -A expected=()
+  while read -r host ports; do ...skip blanks/comments...; expected[$host]=" $ports "; done < "$expected_file"
+  for port in 22 25 80 443 3306 5432; do
+    if nc -z -w 1 "$host" "$port" 2>/dev/null; then
+      ...append to open_list...; [[ $want == *" $port "* ]] || ...UNEXPECTED note...
+    else
+      [[ $want == *" $port "* ]] && ...NOT-LISTENING note...
+    fi
+  done
+Print the host line first, then the notes; count notes into the deviation total.

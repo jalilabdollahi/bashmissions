@@ -1,0 +1,7 @@
+  exec 3> report.txt
+  for service in "$@"; do
+    state=$(svc-status "$service") || down=$(( down + 1 ))
+    echo "$service: $state" >&3
+    total=$(( total + 1 ))
+  done
+  exec 3>&-

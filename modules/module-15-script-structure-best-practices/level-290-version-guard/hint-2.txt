@@ -1,1 +1,0 @@
-Prefer clear structure, quoted expansions, and predictable entry points.

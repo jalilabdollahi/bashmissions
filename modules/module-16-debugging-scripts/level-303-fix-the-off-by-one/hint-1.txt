@@ -1,0 +1,1 @@
+Do not guess; reproduce. Feed the script five names with KEEP=3 and count how many "delete:" lines come out. You should expect two. Then work out which indexes the loop visits, on paper, for total=5 and keep=3. The loop is the only place where counting happens.

@@ -1,0 +1,3 @@
+A pivot table is a group-by with two keys instead of one: the pair (region, plan) identifies a cell. While you add up the cells, keep three more running totals: one per row, one per column and one for everything. The cells never occurring together must show 0, so you need to remember which regions and plans exist.
+
+The names also have to come out in a fixed order, and awk gives you no sorted-keys function that works on every system.

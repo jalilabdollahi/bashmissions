@@ -1,0 +1,8 @@
+  src=${1%/}
+  name=$(basename "$src"); parent=$(dirname "$src")
+  archive=$dest/$name-$stamp.tar.gz
+  mkdir -p "$dest"
+  [[ -e $archive ]] && { echo "archive already exists: $archive" >&2; exit 1; }
+  tar -czf "$archive" -C "$parent" "$name"
+  files=$(tar -tzf "$archive" | grep -vc '/$' || true)
+Add the argument and directory checks first, then print the two result lines.

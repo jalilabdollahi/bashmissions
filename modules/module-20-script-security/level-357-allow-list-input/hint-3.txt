@@ -1,0 +1,6 @@
+if ! grep -Fxq -- "$service" fixtures/allowed-services.txt; then
+  ...print "denied: $service" to stderr, exit 1...
+fi
+...append to queue.txt and print "queued: $service"...
+
+The denied branch comes first, so queue.txt is never touched for a bad name.

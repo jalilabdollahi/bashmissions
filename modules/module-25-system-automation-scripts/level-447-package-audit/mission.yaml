@@ -1,0 +1,98 @@
+id: 447
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Package Audit
+difficulty: expert
+xp: 360
+story: |
+  Priya's quarterly audit asks the same three questions about every server:
+  is the software we depend on there, is the software we banned absent, and
+  is the security-critical software new enough? Until now the answer came
+  from someone scrolling through `dpkg -l`. Gus would like it in a form he
+  can attach to a spreadsheet.
+objective: |
+  Write solution.sh POLICY. POLICY has one rule per line (blank lines and
+  `#` comments ignored):
+    require NAME             the package must be installed
+    forbid NAME              the package must not be installed
+    minver NAME VERSION      installed and at least VERSION
+  Get the installed packages by running
+    dpkg-query -W -f='${Package} ${Version}\n'
+  which prints one `name version` pair per line.
+
+  Check the rules in policy order and print one line per problem:
+    MISSING NAME                              (require or minver, not installed)
+    FORBIDDEN NAME (installed VERSION)        (forbid, but installed)
+    OUTDATED NAME INSTALLED < REQUIRED        (minver, too old)
+  For the comparison use only the numeric part of a version: its leading
+  digits and dots (`1.9.5p2-3` becomes `1.9.5`, `3.0.2-0ubuntu1` becomes
+  `3.0.2`). Compare component by component as numbers (3.0.9 is older than
+  3.0.13), treating missing components as 0. OUTDATED shows both versions in
+  their numeric form.
+
+  Finish with `audit: clean` (exit 0) or `audit: N problem(s)` (exit 1).
+  An unknown rule word: `policy line N: unknown rule 'WORD'` on stderr,
+  exit 1 (before printing anything). Unreadable policy: `cannot read POLICY`
+  on stderr, exit 1. No argument: `usage: solution.sh POLICY` on stderr, exit 2.
+concepts:
+  - "dpkg-query -W -f lists installed packages"
+  - "an associative array as a lookup table"
+  - "numeric version comparison component by component"
+required_patterns:
+  - pattern: 'dpkg-query'
+    message: "Read the package list with dpkg-query -W -f=..."
+  - pattern: 'declare\s+-A'
+    message: "Keep the installed packages in an associative array (declare -A) for quick lookups."
+test_cases:
+  - name: one of each kind of problem
+    args: [policy.txt]
+    files:
+      policy.txt: "# baseline\nrequire nginx\nrequire chrony\nforbid telnet\nforbid ftp\nminver openssl 3.0.13\nminver sudo 1.9.5\n"
+      fixtures/installed.txt: "nginx 1.18.0-6ubuntu14\nopenssl 3.0.2-0ubuntu1.12\ntelnet 0.17-44build1\nsudo 1.9.5p2-3\nbash 5.1-6ubuntu1\n"
+    expected_stdout: |-
+      MISSING chrony
+      FORBIDDEN telnet (installed 0.17-44build1)
+      OUTDATED openssl 3.0.2 < 3.0.13
+      audit: 3 problem(s)
+    expected_exit: 1
+  - name: a compliant host
+    args: [policy.txt]
+    files:
+      policy.txt: "# baseline\nrequire nginx\nrequire chrony\nforbid telnet\nforbid ftp\nminver openssl 3.0.13\nminver sudo 1.9.5\n"
+      fixtures/installed.txt: "nginx 1.24.0-2\nchrony 4.2-2\nopenssl 3.0.13-0ubuntu3\nsudo 1.9.15p5-3\n"
+    expected_stdout: "audit: clean"
+  - name: versions compare as numbers
+    args: [policy.txt]
+    files:
+      policy.txt: "minver curl 7.81.0\nminver zlib1g 1.3\nminver git 2.9\n"
+      fixtures/installed.txt: "curl 7.9.0-1\nzlib1g 1.2.13.dfsg-1\ngit 2.10.1-1\n"
+    expected_stdout: |-
+      OUTDATED curl 7.9.0 < 7.81.0
+      OUTDATED zlib1g 1.2.13 < 1.3
+      audit: 2 problem(s)
+    expected_exit: 1
+  - name: minver on a package that is not installed
+    args: [policy.txt]
+    files:
+      policy.txt: "minver openssl 3.0.13\n"
+      fixtures/installed.txt: "bash 5.1-6ubuntu1\n"
+    expected_stdout: |-
+      MISSING openssl
+      audit: 1 problem(s)
+    expected_exit: 1
+  - name: unknown rule word
+    args: [policy.txt]
+    files:
+      policy.txt: "require bash\nprefer vim\n"
+    expected_stdout: ""
+    expected_stderr: "policy line 2: unknown rule 'prefer'"
+    expected_exit: 1
+  - name: policy file missing
+    args: [nope.txt]
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh POLICY"
+    expected_exit: 2

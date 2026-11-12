@@ -1,0 +1,7 @@
+Command substitution `$(...)` runs a command, here your function, and replaces itself with whatever it printed:
+
+  double() { echo $(( $1 * 2 )); }
+  answer=$(double 21)      # answer is now 42
+  echo "got $answer"
+
+For the cleanup: `tr 'abc' 'xyz'` maps characters one-to-one and `tr -cd 'a-z'` deletes everything except the listed ones. Use printf '%s' "$1" to feed the text without a stray newline.

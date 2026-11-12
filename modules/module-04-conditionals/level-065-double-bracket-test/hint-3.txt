@@ -1,1 +1,0 @@
-Inside `[[ ]]`, the right-hand glob pattern should not be quoted when you want pattern matching.

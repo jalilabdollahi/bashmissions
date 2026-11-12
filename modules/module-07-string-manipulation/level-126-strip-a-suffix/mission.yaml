@@ -1,0 +1,52 @@
+id: 126
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Strip a Suffix
+difficulty: intermediate
+xp: 110
+story: |
+  The nightly job leaves compressed dumps with names like db-2024.sql.gz, and
+  Gus wants a restore log that names the file you get after decompressing. That
+  is the same name minus the last extension and nothing more: "archive.tar.gz"
+  must become "archive.tar", because the tar part is still there to unpack.
+objective: |
+  Write solution.sh that takes one argument, a file name, and prints the name
+  with its LAST extension removed (the last "." and everything after it):
+
+    ./solution.sh db-2024.sql.gz      prints  db-2024.sql
+
+  A name with no dot is printed unchanged. Remove the suffix with the
+  remove-shortest-suffix expansion, not with sed, cut, awk or basename.
+concepts:
+  - "${var%pattern} removes the shortest matching suffix"
+  - "${var%.*} drops the last extension"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*%[^%]'
+    message: 'Remove the suffix with ${name%pattern}, for example ${file%.*}.'
+forbidden_patterns:
+  - pattern: '\b(sed|cut|awk|basename)\b'
+    message: "Strip the extension with the % expansion instead of an external command."
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*%%'
+    message: "Use a single %: the double form would eat every extension, not just the last one."
+test_cases:
+  - name: gzipped sql dump
+    args: [db-2024.sql.gz]
+    expected_stdout: |-
+      db-2024.sql
+  - name: tarball keeps its tar
+    args: [archive.tar.gz]
+    expected_stdout: |-
+      archive.tar
+  - name: many dots in the name
+    args: [report.final.v2.pdf]
+    expected_stdout: |-
+      report.final.v2
+  - name: no extension
+    args: [README]
+    expected_stdout: |-
+      README
+  - name: dot inside the name with a space
+    args: ["Q3 summary.v1.xlsx"]
+    expected_stdout: |-
+      Q3 summary.v1

@@ -1,0 +1,100 @@
+id: 375
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Respect Retry-After
+difficulty: advanced
+xp: 220
+story: |
+  The reports API at Lanternfish allows only a few calls per minute. When
+  you go over, it does not break; it answers "429 Too Many Requests" and
+  tells you exactly how long to wait in a header. Theo's cron job ignored
+  the header and retried instantly, 900 times. The API now blocks Theo's
+  server, and Theo is buying everyone coffee.
+objective: |
+  Write solution.sh, which takes no arguments and fetches
+    https://reports.lanternfish.example/api/v1/monthly
+  Make up to 4 attempts in total.
+
+  - HTTP 200: print the body and exit 0.
+  - HTTP 429: read the number of seconds from the response header
+    `Retry-After`, run `sleep N`, and try again. Header names are
+    case-insensitive and the header line ends in a carriage return, which
+    you must strip. If the header is missing or is not a whole number, wait
+    1 second. Do not sleep after the last attempt.
+  - after 4 attempts that all got 429: print
+    `still rate limited after 4 attempts` to stderr and exit 1.
+  - any other HTTP code: print `unexpected HTTP <code>` to stderr, exit 1
+    (no retry).
+
+  Save the response headers with `-D FILE` and the status code with
+  `-w '%{http_code}'`; keep the body with `-o`. Use mktemp files and remove
+  them on exit. (The workspace `sleep` only records the request, so tests
+  are quick.)
+concepts:
+  - "-D saves the response headers"
+  - "headers are case-insensitive and end in \\r\\n"
+  - "Retry-After says how long to wait"
+required_patterns:
+  - pattern: '(-D|--dump-header)\b'
+    message: "Save the response headers with curl -D FILE."
+  - pattern: '\bsleep\b'
+    message: "Wait with sleep before you try again."
+  - pattern: "grep\\s+(-[A-Za-z]*i|--ignore-case)|-i\\b|tolower|IGNORECASE|\\[Rr\\]"
+    message: "Header names are case-insensitive: match Retry-After without caring about case (grep -i)."
+test_cases:
+  - name: no rate limit at all
+    args: []
+    expected_stdout: "report 2026-10: total=1840.20"
+    expected_files:
+      .calls.log: |
+        GET https://reports.lanternfish.example/api/v1/monthly
+  - name: limited twice, waits 3 and then 1 second
+    args: []
+    env:
+      FAKE_429_AFTERS: "3 1"
+    expected_stdout: "report 2026-10: total=1840.20"
+    expected_files:
+      .calls.log: |
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 3
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 1
+        GET https://reports.lanternfish.example/api/v1/monthly
+  - name: lowercase header names
+    args: []
+    env:
+      FAKE_429_AFTERS: "2"
+      FAKE_HDR_CASE: lower
+    expected_stdout: "report 2026-10: total=1840.20"
+    expected_files:
+      .calls.log: |
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 2
+        GET https://reports.lanternfish.example/api/v1/monthly
+  - name: 429 without a Retry-After header waits one second
+    args: []
+    env:
+      FAKE_429_AFTERS: "-"
+    expected_stdout: "report 2026-10: total=1840.20"
+    expected_files:
+      .calls.log: |
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 1
+        GET https://reports.lanternfish.example/api/v1/monthly
+  - name: gives up after four attempts
+    args: []
+    env:
+      FAKE_429_AFTERS: "1 1 1 1 1 1"
+    expected_stdout: ""
+    expected_stderr: "still rate limited after 4 attempts"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 1
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 1
+        GET https://reports.lanternfish.example/api/v1/monthly
+        sleep 1
+        GET https://reports.lanternfish.example/api/v1/monthly

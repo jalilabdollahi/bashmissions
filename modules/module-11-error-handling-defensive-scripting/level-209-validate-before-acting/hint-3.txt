@@ -1,0 +1,11 @@
+Structure:
+
+  usage check (exit 2)
+  bad=0
+  for f in "$@"; do ... missing: $f ... bad=$(( bad + 1 )); done
+  if (( bad > 0 )); then exit 1; fi
+  mkdir -p archive
+  for f in "$@"; do mv -- "$f" "archive/$f.old"; done
+  echo "archived $# files"
+
+`$#` is already the number of files, so no counter is needed in the second loop.

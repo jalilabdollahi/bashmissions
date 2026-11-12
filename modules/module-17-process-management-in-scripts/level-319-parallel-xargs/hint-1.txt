@@ -1,0 +1,1 @@
+You do not have to write the pool yourself: a standard tool takes a list of names on its input and runs a command for them, and it has an option to do that several at a time. Because the answers come back in whatever order the jobs finish, the final step is to put them in a fixed order. And think about how that tool reports that something went wrong.

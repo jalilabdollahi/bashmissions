@@ -1,0 +1,1 @@
+You need every column to have a fixed width, whatever the content: short values get blanks added, long ones get chopped. The printf command that you already know for formatted output can do both in one format, so no manual counting of spaces is needed. Split each line at its comma first.

@@ -1,1 +1,0 @@
-The expansion ${1:-guest} means use $1 unless it is missing or empty.

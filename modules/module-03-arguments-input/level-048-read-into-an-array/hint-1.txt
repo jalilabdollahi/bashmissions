@@ -1,0 +1,1 @@
+When the number of fields is unknown you cannot list a variable name for each one. `read` has a mode that puts all the fields into a single array variable. Also, this time the fields are separated by commas rather than spaces, so you must tell `read` where to cut.

@@ -1,0 +1,1 @@
+A download can be wrong in two ways: damaged on the way, or cut short. The cure is a checksum, a short fingerprint of the file's contents that is published separately. Never give a file its real name before you have checked it, and make sure a failed attempt leaves nothing behind.

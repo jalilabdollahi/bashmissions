@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Associative arrays keyed by the setting name: `value[$k]`, `source[$k]`, `type_of[$k]`, `flags_of[$k]`, plus an ordinary array `keys` for the schema order.
+- Test whether a key exists even if its value is empty: `[[ -n ${type_of[$k]+set} ]]`.
+- Trimming without external tools: `s=${s#"${s%%[![:space:]]*}"}; s=${s%"${s##*[![:space:]]}"}`. Split `key = value` with `${t%%=*}` and `${t#*=}`.
+- Environment by computed name: `name=${prefix}_${k//./_}; name=${name^^}; if [[ -v $name ]]; then value[$k]=${!name}; fi`.
+- Booleans: `case ${v,,} in true|yes|on|1) ... ;; false|no|off|0) ... ;; esac`.
+- Shell quoting of a single quote: `${v//\'/\'\\\'\'}`. JSON escaping: `v=${v//\\/\\\\}; v=${v//\"/\\\"}`.
+- Masking is a function used by `show` and `get`; exports skip secrets unless `--reveal`.

@@ -1,1 +1,1 @@
-Regex matching uses `=~` inside `[[ ]]`.
+Globs cannot say "one or more digits", so this is a job for a regular expression: a small language for describing the shape of text. Bash can test a string against one inside double brackets. Write the shape in words first: optional v, digits, dot, digits, dot, digits, and the line must start and end there.

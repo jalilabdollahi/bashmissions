@@ -1,0 +1,1 @@
+You do not need to read the tool's output at all, only to know whether it succeeded. Unix has a special file that swallows everything written to it, a "black hole" you can redirect to.

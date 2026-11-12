@@ -1,0 +1,1 @@
+Bash has a special variable that gives a different number each time you read it. It is a big number, so you must fit it into a small range: think of dealing out a pile of cards into a fixed number of stacks, then adding an offset so the first stack starts at LOW instead of zero. Seeding is how you make "random" repeatable.

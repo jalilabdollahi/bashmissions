@@ -1,0 +1,42 @@
+id: 46
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Prompt on stderr
+difficulty: beginner
+xp: 80
+story: |
+  Ollie tried the restart helper for the first time and stared at a blinking cursor
+  for a full minute: nothing told him that the script was waiting for a server
+  name. Mara wants a friendly question to appear when a human runs it, but she also
+  uses the helper in pipelines, where the question must never end up mixed into
+  the program's real output.
+objective: |
+  Write solution.sh that asks "Server to restart: " using read's built-in prompt
+  option, reads the answer, and prints exactly one line to stdout:
+    restart queued for <answer>
+  The prompt itself must not appear on stdout. (Bash shows read -p prompts on
+  stderr, and only when input comes from a terminal; in the tests stdin is a pipe,
+  so stderr must stay empty.)
+concepts:
+  - "read -p shows a prompt"
+  - "the prompt goes to stderr, not stdout"
+required_patterns:
+  - pattern: '\bread\s+(-[A-Za-z]+\s+)*-[A-Za-z]*p[A-Za-z]*\b'
+    message: "Use read -p (for example read -rp \"Server to restart: \" name)."
+test_cases:
+  - name: typed answer
+    stdin: "anchovy\n"
+    expected_stdout: |-
+      restart queued for anchovy
+    expected_stderr: ""
+  - name: answer with a space
+    stdin: "blue whale\n"
+    expected_stdout: |-
+      restart queued for blue whale
+    expected_stderr: ""
+  - name: backslash kept
+    stdin: "dory\\1\n"
+    expected_stdout: |-
+      restart queued for dory\1
+    expected_stderr: ""

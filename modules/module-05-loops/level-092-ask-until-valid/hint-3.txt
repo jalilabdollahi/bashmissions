@@ -1,0 +1,9 @@
+while true; do
+  printf 'port> ' >&2
+  if ! read -r port; then echo "no valid port given" >&2; exit 1; fi
+  if [[ $port =~ ^[0-9]+$ ]] && (( port >= 1 && port <= 65535 )); then
+    echo "port=$port"
+    break
+  fi
+  echo "bad port: $port" >&2
+done

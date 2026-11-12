@@ -1,0 +1,8 @@
+  exec 3< "$2"
+  while IFS= read -r name; do
+    IFS= read -r -u 3 address || address="(none)"
+    echo "$name -> $address"
+  done < "$1"
+  exec 3<&-
+
+Add the loop that checks both files above it.

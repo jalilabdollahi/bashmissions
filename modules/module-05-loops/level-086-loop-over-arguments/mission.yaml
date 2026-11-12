@@ -4,29 +4,51 @@ module_name: loops
 module_display: Loops
 title: Loop over Arguments
 difficulty: beginner
-xp: 60
-objective: Loop over all command-line arguments with `for arg in "$@"` and print each
-  as `arg=<value>`.
-expected_script_name: solution.sh
-test_cases:
-- args:
-  - alpha
-  - beta
-  expected_stdout: 'arg=alpha
-
-    arg=beta'
-  expected_exit: 0
-  comparison: exact
-- args:
-  - spaces allowed
-  - '42'
-  expected_stdout: 'arg=spaces allowed
-
-    arg=42'
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 100
+story: |
+  Every month Noor sends the same request: "Can you make an empty report file
+  for each of these customers?" The list changes, the names include spaces
+  ("Gull & Anchor Pub" is a favourite), and she is tired of renaming files that
+  ended up as "Gull", "&" and "Anchor". She will pass the names as arguments.
+objective: |
+  Write solution.sh that takes any number of customer names as arguments.
+  Create the directory reports/ if it does not exist. For every name, create
+  the file reports/<name>.txt containing the single line:
+    report for <name>
+  and print:
+    created reports/<name>.txt
+  Names may contain spaces; each argument is one name.
+  With no arguments print "usage: solution.sh NAME..." to stderr and exit 2.
+  Loop with for name in "$@".
 concepts:
-- '`for arg in "$@"`'
-scaffold: true
+  - 'for arg in "$@"'
+  - "quoting keeps arguments with spaces whole"
+required_patterns:
+  - pattern: 'in\s+"\$@"'
+    message: 'Loop over the arguments with for name in "$@"; the quotes are essential.'
+test_cases:
+  - name: two simple names
+    args: [Tidewater, Lighthouse]
+    expected_stdout: |-
+      created reports/Tidewater.txt
+      created reports/Lighthouse.txt
+    expected_files:
+      "reports/Tidewater.txt": "report for Tidewater"
+      "reports/Lighthouse.txt": "report for Lighthouse"
+  - name: names with spaces
+    args: ["Gull & Anchor Pub", "Harbour Bakery"]
+    expected_stdout: |-
+      created reports/Gull & Anchor Pub.txt
+      created reports/Harbour Bakery.txt
+    expected_files:
+      "reports/Gull & Anchor Pub.txt": "report for Gull & Anchor Pub"
+      "reports/Harbour Bakery.txt": "report for Harbour Bakery"
+  - name: a single customer
+    args: ["North Pier Dental"]
+    expected_stdout: "created reports/North Pier Dental.txt"
+    expected_files:
+      "reports/North Pier Dental.txt": "report for North Pier Dental"
+  - name: no names
+    args: []
+    expected_stderr: "usage: solution.sh NAME..."
+    expected_exit: 2

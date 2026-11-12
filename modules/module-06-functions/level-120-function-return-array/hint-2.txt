@@ -1,1 +1,0 @@
-`mapfile -t array < <(function)` captures those lines into an array.

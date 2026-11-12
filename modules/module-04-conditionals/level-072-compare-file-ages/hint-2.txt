@@ -1,1 +1,0 @@
-Use temporary files so the test is deterministic.

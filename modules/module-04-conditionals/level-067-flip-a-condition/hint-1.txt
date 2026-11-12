@@ -1,0 +1,1 @@
+Priya's question is about absence: "is this address NOT in the list?". Searching the list is easy; you want the BLOCK branch to run when the search finds nothing. Bash has a one-character way to flip a yes into a no. Also be careful that a search for 10.0.0.1 does not match 10.0.0.15.

@@ -1,0 +1,1 @@
+Wrap a command in $( ... ) and Bash replaces that whole piece with what the command prints. Example: echo "Today is $(echo Monday)" prints Today is Monday. head -n 1 FILE gives the first line, tail -n 1 FILE the last.

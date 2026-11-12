@@ -1,0 +1,8 @@
+Functions share the script's variables unless told otherwise. The helper counts down in a variable called count, and the main loop also counts in count, so the helper leaves it at 0 every time. You can fix it by giving the helper its own private variable with `local`:
+
+  helper() {
+    local i=$1
+    ...
+  }
+
+You may rename the variable, or declare `local count`, either works.

@@ -1,0 +1,7 @@
+`#!/usr/bin/env bash` asks the environment to find bash wherever it lives, instead of trusting /bin/bash. Strict mode is one line:
+
+  set -euo pipefail
+
+-e stops at a failing command, -u makes an unset variable an error, -o pipefail makes a pipeline fail when any stage fails. A description is just a comment:
+
+  # Description: archives the nightly logs

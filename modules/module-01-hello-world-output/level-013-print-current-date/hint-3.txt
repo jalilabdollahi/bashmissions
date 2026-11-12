@@ -1,1 +1,0 @@
-Inside a double-quoted string, command substitution still works: `echo "today is $(date +%Y-%m-%d)"`.

@@ -1,0 +1,7 @@
+Three groups give you year, month and day. Turn them into numbers with 10# so that 08 is not octal, and use `continue` to move to the next line as soon as a line is rejected:
+
+  re='^([0-9]{4})-([0-9]{2})-([0-9]{2})$'
+  if ! [[ $d =~ $re ]]; then echo "$d: bad format"; continue; fi
+  month=$(( 10#${BASH_REMATCH[2]} ))
+
+A case on the month can set the maximum day: 4|6|9|11) is 30, 2) depends on the leap-year rule, everything else is 31.

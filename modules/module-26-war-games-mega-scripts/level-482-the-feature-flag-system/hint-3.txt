@@ -1,1 +1,25 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A fstate frollout fallow fdeny fenv; order=(); problems=0
+  problem() { echo "$file:$1: $2" >&2; problems=$((problems + 1)); }
+
+  load_flags() {
+    n=0
+    while IFS= read -r line || [[ -n $line ]]; do
+      n=$((n+1)); line=$(trim "$line"); skip blank and # lines
+      no "=" -> problem; name=$(trim "${line%%=*}"); check the name regex
+      read -r state rest <<< "$(trim "${line#*=}")"; state must be on|off
+      for opt in $rest; do case ${opt%%=*} in rollout) ... allow) ... deny) ... env) ... *) problem ... ;; esac; done
+      duplicate? -> problem, else store in the arrays and order+=("$name")
+    done < "$file"
+  }
+
+  decide() {   # sets decision and reason, in this order:
+    off -> kill switch | deny | env | allow | rollout 100 | cksum bucket
+  }
+
+  case $mode in
+    validate) problems? exit 1 : echo "OK: ${#order[@]} flags" ;;
+    check) problems? exit 3; unknown flag? exit 2; decide; echo "...: $decision ($reason)"; exit status from decision ;;
+    list) problems? exit 3; printf '%-14s %s\n' "$flag" "$decision" ;;
+  esac

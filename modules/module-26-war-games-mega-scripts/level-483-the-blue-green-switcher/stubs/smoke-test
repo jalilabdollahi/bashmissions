@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Pretend smoke test: `smoke-test RELEASE_DIR` checks that a release answers.
+# FAKE_SMOKE=ok (default) | fail. Calls are recorded in .calls.log.
+if [[ $# -ne 1 ]]; then
+  echo "smoke-test: usage: smoke-test RELEASE_DIR" >&2
+  exit 2
+fi
+if [[ ! -d $1 ]]; then
+  echo "smoke-test: no such release: $1" >&2
+  exit 2
+fi
+echo "smoke $1" >> .calls.log
+if [[ ${FAKE_SMOKE:-ok} == fail ]]; then
+  echo "smoke: GET /health -> 502"
+  exit 1
+fi
+echo "smoke: GET /health -> 200"

@@ -1,0 +1,84 @@
+id: 147
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Increment and Decrement
+difficulty: intermediate
+xp: 130
+story: |
+  The VPN gateway logs one line every time someone connects or disconnects.
+  Priya wants to know, from last night's log, how many connections there were
+  in total and how many people were still connected when the log ended. "Please
+  don't read it by eye," she says. "Last time I did, I lost count around
+  line 40."
+objective: |
+  Write solution.sh that reads the VPN log from standard input, one event per
+  line. Each line is either "connect <user>" or "disconnect <user>"; ignore any
+  other line.
+
+  Keep two counters:
+    total   goes up by one for every connect line
+    active  goes up by one for connect, down by one for disconnect
+
+  Afterwards print exactly:
+    total_connects=<total>
+    still_connected=<active>
+
+  (active can be negative when the log starts in the middle of a session.)
+  Use (( x++ )) and (( x-- )) for the counting.
+concepts:
+  - "(( i++ )) increment"
+  - "(( i-- )) decrement"
+required_patterns:
+  - pattern: '\(\(\s*[A-Za-z_][A-Za-z0-9_]*\+\+\s*\)\)|\(\(\s*\+\+[A-Za-z_]'
+    message: "Count up with (( counter++ ))."
+  - pattern: '\(\(\s*[A-Za-z_][A-Za-z0-9_]*--\s*\)\)|\(\(\s*--[A-Za-z_]'
+    message: "Count down with (( counter-- ))."
+forbidden_patterns:
+  - pattern: '[+-]\s*1\b'
+    message: "Use ++ and -- instead of adding or subtracting 1 yourself."
+test_cases:
+  - name: busy evening
+    stdin: |
+      connect ana
+      connect tom
+      disconnect ana
+      connect lee
+      disconnect tom
+    expected_stdout: |-
+      total_connects=3
+      still_connected=1
+  - name: nothing happened
+    stdin: ""
+    expected_stdout: |-
+      total_connects=0
+      still_connected=0
+  - name: log starts mid-session
+    stdin: |
+      disconnect zoe
+      disconnect max
+      connect ivy
+    expected_stdout: |-
+      total_connects=1
+      still_connected=-1
+  - name: other lines are ignored
+    stdin: |
+      gateway restarted
+      connect ana
+      auth failed for bob
+      connect tom
+      keepalive
+    expected_stdout: |-
+      total_connects=2
+      still_connected=2
+  - name: everyone leaves
+    stdin: |
+      connect a
+      disconnect a
+      connect b
+      disconnect b
+      connect c
+      disconnect c
+    expected_stdout: |-
+      total_connects=3
+      still_connected=0

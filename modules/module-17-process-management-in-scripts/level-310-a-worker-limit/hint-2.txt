@@ -1,0 +1,6 @@
+`wait -n` (bash 4.3+) blocks until any one background job finishes and returns that job's exit status. Inside an `if` its failure does not trip `set -e`:
+
+  if wait -n; then ok=$((ok + 1)); else bad=$((bad + 1)); fi
+  running=$((running - 1))
+
+A loop `while (( running >= max )); do ... done` placed before each `&` keeps the pool full but never overfull. After the last job has been started you still have up to MAX jobs running: loop until `running` reaches 0.

@@ -1,1 +1,1 @@
-You do not need command-line arguments in this level; just print the required greeting exactly.
+The command is echo. Whatever you write after it is printed, and wrapping the text in double quotes keeps it tidy. For example, echo "Good morning, harbour" prints Good morning, harbour.

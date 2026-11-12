@@ -1,0 +1,1 @@
+Each echo ends its output with a line break. So to get three lines you do not need anything fancy: you need three commands, written in the order you want to read them.

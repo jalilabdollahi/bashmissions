@@ -1,0 +1,1 @@
+Bash can read a file's entire content into a variable by itself, without starting another program. The result is just a string, so everything you know about string length and slicing applies to it.

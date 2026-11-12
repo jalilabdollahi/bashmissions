@@ -1,0 +1,1 @@
+Instead of spelling out every possible letter and digit, describe the kind of character you accept in each position: "one lowercase letter" here, "one digit" there. Fixed text such as "rack-" stays as it is. Remember that you want the whole line to fit, not just a piece of it.

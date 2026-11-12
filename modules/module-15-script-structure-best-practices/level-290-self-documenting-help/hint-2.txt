@@ -1,0 +1,7 @@
+`$0` is the path the script was started as, so `awk ... "$0"` reads the script. A small awk program can say "skip line 1, print comment lines without their marker, stop at the first non-comment":
+
+  awk 'NR == 1 { next }
+       /^#/    { sub(/^# ?/, ""); print; next }
+               { exit }' "$0"
+
+`sub(/^# ?/, "")` removes "# " or a lone "#". Put it in a function and call it from a `case "${1:-}" in -h|--help) ... ;; esac` branch. For the error path redirect the function: `show_help >&2`.

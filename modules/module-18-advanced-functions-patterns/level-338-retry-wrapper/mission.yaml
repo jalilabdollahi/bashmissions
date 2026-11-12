@@ -1,0 +1,101 @@
+id: 338
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Retry Wrapper
+difficulty: expert
+xp: 250
+story: |
+  The nightly sync to the offsite store fails about once a week because of a
+  network blip, and so do a handful of other nightly commands. Everybody has
+  written their own little retry loop, and each one is slightly wrong: one
+  always exits 1, one retries forever, one drops the arguments with
+  spaces. Mara wants one `retry` that wraps *any* command, and gets it right
+  once.
+objective: |
+  Write solution.sh, called as `solution.sh ATTEMPTS COMMAND [ARG...]`.
+  Define a function `retry ATTEMPTS COMMAND [ARG...]` that runs the command
+  with its arguments, unchanged, up to ATTEMPTS times:
+    - on success it stops at once and returns 0; the command's own output
+      goes to stdout as usual;
+    - after each failed attempt it prints
+        retry: attempt K/N failed (status S)
+      to stderr (K is the attempt number, N is ATTEMPTS, S the command's
+      exit status);
+    - after the last failed attempt it also prints "retry: giving up" to
+      stderr and returns the exit status of the LAST attempt;
+    - between attempts it sleeps for ${RETRY_DELAY:-0} seconds (not after the
+      last one).
+  The script calls `retry "$@"` and its own exit status is retry's.
+  ATTEMPTS must be a whole number of at least 1 and a COMMAND must be given;
+  otherwise print "usage: solution.sh ATTEMPTS COMMAND [ARG...]" to stderr and
+  exit 2. The `flaky` stub fails with status 7 for its first FLAKY_FAILS calls,
+  then succeeds.
+concepts:
+  - "a generic wrapper: shift the count, run \"$@\""
+  - "capturing a failing status without set -e exiting: cmd || rc=$?"
+  - "return the last status, not a generic 1"
+required_patterns:
+  - pattern: 'retry\s*\(\)'
+    message: "Define a function called retry."
+  - pattern: '"\$@"'
+    message: "Run the wrapped command as \"$@\" so its arguments stay intact."
+test_cases:
+  - name: works the first time
+    args: ["3", flaky, push, anchovy]
+    expected_stdout: "flaky push anchovy: ok on call 1"
+    expected_files:
+      ".flaky-count": "1"
+  - name: works on the third attempt, arguments with spaces intact
+    args: ["4", flaky, sync, "tidewater books"]
+    env:
+      FLAKY_FAILS: "2"
+    expected_stdout: "flaky sync tidewater books: ok on call 3"
+    expected_stderr: |-
+      retry: attempt 1/4 failed (status 7)
+      retry: attempt 2/4 failed (status 7)
+    expected_files:
+      ".flaky-count": "3"
+  - name: gives up and returns the command's own status
+    args: ["3", flaky, push]
+    env:
+      FLAKY_FAILS: "99"
+    expected_stderr: |-
+      retry: attempt 1/3 failed (status 7)
+      retry: attempt 2/3 failed (status 7)
+      retry: attempt 3/3 failed (status 7)
+      retry: giving up
+    expected_exit: 7
+    expected_files:
+      ".flaky-count": "3"
+  - name: any command, not only the stub
+    args: ["2", "false"]
+    expected_stderr: |-
+      retry: attempt 1/2 failed (status 1)
+      retry: attempt 2/2 failed (status 1)
+      retry: giving up
+    expected_exit: 1
+  - name: a command that just works
+    args: ["2", echo, hello, world]
+    expected_stdout: "hello world"
+  - name: a delay of zero is fine and one attempt means no retry
+    args: ["1", flaky, once]
+    env:
+      FLAKY_FAILS: "1"
+      RETRY_DELAY: "0"
+    expected_stderr: |-
+      retry: attempt 1/1 failed (status 7)
+      retry: giving up
+    expected_exit: 7
+  - name: attempts must be a positive number
+    args: ["0", flaky, x]
+    expected_stderr: "usage: solution.sh ATTEMPTS COMMAND [ARG...]"
+    expected_exit: 2
+  - name: attempts that are not a number
+    args: [many, flaky, x]
+    expected_stderr: "usage: solution.sh ATTEMPTS COMMAND [ARG...]"
+    expected_exit: 2
+  - name: no command
+    args: ["3"]
+    expected_stderr: "usage: solution.sh ATTEMPTS COMMAND [ARG...]"
+    expected_exit: 2

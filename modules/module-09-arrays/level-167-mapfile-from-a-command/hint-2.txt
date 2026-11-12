@@ -1,0 +1,1 @@
+<(command) is process substitution: Bash runs the command and gives you a file-like handle to its output. So mapfile -t names < <(ls | sort) reads the output as lines. Mind the two separate < characters: the first is the redirect, the second belongs to <( ). A pipe into mapfile would not work, because the array would be filled in a subshell and lost.

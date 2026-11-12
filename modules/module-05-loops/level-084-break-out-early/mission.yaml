@@ -1,0 +1,61 @@
+id: 84
+module: 5
+module_name: loops
+module_display: Loops
+title: Break Out Early
+difficulty: beginner
+xp: 100
+story: |
+  Last month Theo's patch script marched through all fifty servers, including
+  the three that were already down, and left a trail of half-patched machines.
+  This time the rule is simple: patch servers in order, and the moment one of
+  them is down, stop the whole rollout. Nobody wants to explain a second mess
+  to Gus.
+objective: |
+  Write solution.sh that goes through these servers in order:
+  anchovy barracuda cuttlefish dory eel flounder
+  A server is down when a file named down/<server> exists in the current
+  directory. For each server that is up, print:
+    patched <server>
+  When you reach a server that is down, print:
+    STOP: <server> is down
+  and end the loop right there. No later server is touched, even if it is up.
+  If nothing is down, all six lines "patched ..." are printed and no STOP line.
+  Use `break` to leave the loop.
+concepts:
+  - "break leaves the innermost loop immediately"
+  - "[[ -e path ]] as the trigger"
+required_patterns:
+  - pattern: '\bbreak\b'
+    message: "End the loop with break when you find a server that is down."
+test_cases:
+  - name: dory is down
+    files:
+      down/dory: "maintenance"
+    expected_stdout: |-
+      patched anchovy
+      patched barracuda
+      patched cuttlefish
+      STOP: dory is down
+  - name: first server is down
+    files:
+      down/anchovy: "disk replaced"
+    expected_stdout: "STOP: anchovy is down"
+  - name: everything is up
+    expected_stdout: |-
+      patched anchovy
+      patched barracuda
+      patched cuttlefish
+      patched dory
+      patched eel
+      patched flounder
+  - name: two down, only the first counts
+    files:
+      down/eel: "reboot"
+      down/flounder: "reboot"
+    expected_stdout: |-
+      patched anchovy
+      patched barracuda
+      patched cuttlefish
+      patched dory
+      STOP: eel is down

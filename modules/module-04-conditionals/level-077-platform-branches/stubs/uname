@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake uname for BashMissions. Only "uname -s" is understood.
+# The reported system comes from FAKE_UNAME (default: Linux).
+if [[ ${1:-} == -s ]]; then
+  echo "${FAKE_UNAME:-Linux}"
+  exit 0
+fi
+echo "uname: this fake only supports -s" >&2
+exit 2

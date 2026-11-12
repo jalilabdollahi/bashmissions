@@ -1,0 +1,50 @@
+id: 52
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Arguments or stdin
+difficulty: intermediate
+xp: 110
+story: |
+  Ollie asks a good question: "Why can I type ./check.sh anchovy but not pipe
+  the hostname in?" Good Unix tools do both. Theo's health-check script should
+  take the hostname as an argument when one is given, and otherwise read it from
+  standard input, so it works in a terminal, in a pipeline and in cron.
+objective: |
+  Write solution.sh that finds a hostname like this:
+    1. If an argument is given, use the first argument (ignore stdin).
+    2. Otherwise read one line from stdin.
+  Print  checking <hostname>  and exit 0.
+  If there is no argument and stdin gives no usable line (empty line or no input),
+  print  usage: solution.sh [HOSTNAME]  to stderr, nothing to stdout, and exit 2.
+concepts:
+  - "fall back to stdin when no arguments are given"
+  - "${1:-} as a safe way to look at an optional argument"
+required_patterns:
+  - pattern: '\bread\b'
+    message: "When there is no argument, read the hostname from stdin."
+  - pattern: '\$\{1:-'
+    message: 'Use ${1:-} to look at the first argument safely, even when it is missing.'
+test_cases:
+  - name: argument wins
+    args: [anchovy]
+    expected_stdout: |-
+      checking anchovy
+  - name: argument beats stdin
+    args: [barracuda]
+    stdin: "cuttlefish\n"
+    expected_stdout: |-
+      checking barracuda
+  - name: stdin used when no argument
+    stdin: "dory\n"
+    expected_stdout: |-
+      checking dory
+  - name: nothing anywhere
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh [HOSTNAME]"
+    expected_exit: 2
+  - name: blank stdin line is not a hostname
+    stdin: "\n"
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh [HOSTNAME]"
+    expected_exit: 2

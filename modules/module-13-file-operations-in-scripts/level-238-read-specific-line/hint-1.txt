@@ -1,1 +1,0 @@
-Use the curriculum concept for this level: `sed -n '5p'`.

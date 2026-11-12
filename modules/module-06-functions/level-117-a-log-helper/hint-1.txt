@@ -1,0 +1,1 @@
+To decide whether a message is "important enough" you need to compare levels, and words cannot be compared that way. First turn each level name into a number; then the rule is a single comparison between the message's number and the threshold's number.

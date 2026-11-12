@@ -1,0 +1,95 @@
+id: 222
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Validate an Email Address
+difficulty: advanced
+xp: 160
+story: |
+  Noor runs the newsletter sign-up for Lanternfish customers, and the mailing
+  tool bounces every address it cannot parse, which costs real money per
+  bounce. The import file is full of typing slips: a missing domain extension,
+  two @ signs, a space inside. She asks for a gatekeeper that separates the
+  plausible addresses from the obvious junk before the import runs.
+objective: |
+  Write solution.sh that reads one address per line from standard input and
+  prints
+
+    OK <address>      if it looks valid
+    BAD <address>     otherwise
+
+  An address looks valid when the whole line is:
+    - a local part of one or more of: letters, digits, and the characters . _ % + -
+    - one @
+    - a domain of one or more of: letters, digits, dots and dashes
+    - a dot
+    - a final extension (TLD) of at least two letters
+  Use one anchored regex in [[ =~ ]]. Check it with an if, no external tools.
+  You are not asked to catch every rule of the real email standard, only the
+  rules above.
+concepts:
+  - "combining classes, quantifiers and anchors into a real validator"
+  - "escape the dot you mean literally; place - last in a class"
+  - "validate the whole string with ^ and $"
+required_patterns:
+  - pattern: '=~'
+    message: "Validate with [[ $addr =~ regex ]]."
+  - pattern: '@'
+    message: "The regex needs a literal @."
+  - pattern: '\\\.'
+    message: "Escape the dot before the extension: \\. means a real dot."
+  - pattern: '\{2,\}'
+    message: "The extension needs at least two letters: {2,}."
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk)\b'
+    message: "Do the whole check with one regex and =~."
+test_cases:
+  - name: good addresses
+    stdin: |
+      noor@lanternfish.example
+      mara.k+news@harbour-bakery.co.uk
+      OLLIE_99@tidewater.books
+      a-b%c@x1.io
+    expected_stdout: |-
+      OK noor@lanternfish.example
+      OK mara.k+news@harbour-bakery.co.uk
+      OK OLLIE_99@tidewater.books
+      OK a-b%c@x1.io
+  - name: no extension
+    stdin: |
+      noor@lanternfish
+      noor@lanternfish.
+      noor@localhost
+      noor@lanternfish.c
+    expected_stdout: |-
+      BAD noor@lanternfish
+      BAD noor@lanternfish.
+      BAD noor@localhost
+      BAD noor@lanternfish.c
+  - name: wrong number of at signs
+    stdin: |
+      noorlanternfish.example
+      noor@@lanternfish.example
+      noor@gull@pub.example
+      @lanternfish.example
+    expected_stdout: |-
+      BAD noorlanternfish.example
+      BAD noor@@lanternfish.example
+      BAD noor@gull@pub.example
+      BAD @lanternfish.example
+  - name: spaces and stray characters
+    stdin: |
+      noor @lanternfish.example
+      noor@lantern fish.example
+      noor@lanternfish.example 
+      <noor@lanternfish.example>
+      noor@lanternfish.ex4mple
+    expected_stdout: |-
+      BAD noor @lanternfish.example
+      BAD noor@lantern fish.example
+      BAD noor@lanternfish.example 
+      BAD <noor@lanternfish.example>
+      BAD noor@lanternfish.ex4mple
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

@@ -1,0 +1,10 @@
+`mkfifo name` creates a named pipe. Anything written into it can be read out of it, in order. Start the writer with `&`, and let a loop read from the pipe by redirecting the loop's input:
+
+  mkfifo demo.pipe
+  producer demo.pipe &
+  while IFS= read -r line; do
+    echo "got: $line"
+  done < demo.pipe
+  rm demo.pipe
+
+The loop ends by itself when the writer closes the pipe.

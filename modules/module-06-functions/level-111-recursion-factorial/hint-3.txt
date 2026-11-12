@@ -1,0 +1,12 @@
+  factorial() {
+    local n=$1
+    if (( n <= 1 )); then
+      echo 1
+      return
+    fi
+    local smaller
+    smaller=$(factorial $(( n - 1 )))
+    echo ... n times smaller ...
+  }
+
+Before calling it, check with [[ ${1:-} =~ ^[0-9]+$ ]] that the argument is a whole number; otherwise print the usage line to stderr and exit 1.

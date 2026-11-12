@@ -1,0 +1,11 @@
+Loop over the tool names, call each one through a variable, and keep a list in an array:
+
+  bad=()
+  for tool in one two; do
+    rc=0
+    "$tool" --flag "$@" || rc=$?
+    (( rc == 0 )) || bad+=("$tool")
+  done
+  echo "${#bad[@]} failed: ${bad[*]}"
+
+Quoting `"$@"` keeps file names with spaces in one piece.

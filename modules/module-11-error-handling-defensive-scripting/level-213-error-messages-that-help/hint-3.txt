@@ -1,0 +1,7 @@
+For the malformed-line case:
+
+  echo "error: $config:$lineno: not a key=value line: \"$line\"" >&2
+  echo "  fix: write it as name=value, or start the line with # to comment it out" >&2
+  exit 1
+
+The missing-file and missing-key cases follow the same two-line shape; copy the exact wording from the objective, including the two leading spaces before "fix:". Keep the checks and the order of the starter.

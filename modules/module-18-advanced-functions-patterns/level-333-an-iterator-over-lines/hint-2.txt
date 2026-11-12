@@ -1,0 +1,12 @@
+`mapfile -t arr < file` loads the lines into an array. A function can walk it with a marker kept outside the function:
+
+  mapfile -t items < "$f"
+  pos=0
+  next_item() {
+    (( pos < ${#items[@]} )) || return 1   # nothing left
+    ITEM=${items[pos]}
+    pos=$(( pos + 1 ))
+  }
+  while next_item; do first=$ITEM; next_item || break; second=$ITEM; done
+
+Status 1 is how the iterator says "no more".

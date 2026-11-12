@@ -1,0 +1,9 @@
+used="$1"
+if [[ $used -eq 100 ]]; then
+  echo "$used% used: FULL"
+elif [[ $used -ge 90 ]]; then
+  echo "$used% used: CRITICAL"
+elif ...        # 70 or more: WARNING
+else
+  echo "$used% used: OK"
+fi

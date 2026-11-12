@@ -1,0 +1,7 @@
+  if probe-host "$host" > /dev/null 2>&1; then
+    echo "$host is up"
+  else
+    echo "$host is down"
+  fi
+
+Keep the usage check from the starter above it.

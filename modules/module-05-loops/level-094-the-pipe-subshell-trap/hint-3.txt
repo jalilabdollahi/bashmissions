@@ -1,0 +1,6 @@
+Remove "cat "$1" |" from the front and attach the file to the end of the loop:
+while read -r host state; do
+  total=$(( total + 1 ))
+  if [[ $state == down ]]; then down=$(( down + 1 )); fi
+done < "$1"
+echo "down: $down of $total"

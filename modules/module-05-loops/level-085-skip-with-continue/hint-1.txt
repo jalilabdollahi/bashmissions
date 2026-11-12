@@ -1,0 +1,1 @@
+For each code, first decide whether it is one of the fake accounts. If it is, you want to forget about it and move on to the next code, without ending the entire loop. There is a keyword for "next round, please".

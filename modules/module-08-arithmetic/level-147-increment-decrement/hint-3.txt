@@ -1,1 +1,0 @@
-One increment and two decrements produces original minus one.

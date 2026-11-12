@@ -1,0 +1,1 @@
+for i in "${!hosts[@]}"; do table[${hosts[i]}]=${ips[i]}; done uses one index i for both arrays; the host is the key and the address is the value. Compare the lengths with if (( ${#a[@]} != ${#b[@]} )). To print in host order, sort the keys of the map (printf '%s\n' "${!table[@]}" | sort) and read them back with mapfile -t, then look up each value.

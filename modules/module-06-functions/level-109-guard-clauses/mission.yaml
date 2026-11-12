@@ -1,0 +1,64 @@
+id: 109
+module: 6
+module_name: functions
+module_display: Functions
+title: Guard Clauses
+difficulty: intermediate
+xp: 140
+story: |
+  Noor's support desk sets disk quotas by hand and last month someone typed
+  "twenty" instead of 20 and another person set a quota of 9000 gigabytes on a
+  server with 2000. Mara asks for a quota-setting function that refuses bad input
+  immediately, with a clear message, instead of nesting five levels of if.
+objective: |
+  Write solution.sh. Define a function named set_quota that takes NAME and GB and
+  checks its input with guard clauses, one after another, each returning early:
+    1. NAME missing or empty:        print "error: name required" to stderr, return 2
+    2. GB is not a whole number:     print "error: GB must be a number" to stderr, return 3
+    3. GB below 1 or above 100:      print "error: GB must be 1-100" to stderr, return 4
+    4. otherwise print "quota set: <NAME> <GB>GB" to stdout (return 0)
+  The checks happen in this order and the happy path is last, with no nesting.
+  The main script calls  set_quota "${1:-}" "${2:-}"  and exits with the function's
+  status (exit $?). Do not use set -e.
+  Hint for number tests: [[ $gb =~ ^[0-9]+$ ]] is true for whole numbers only.
+concepts:
+  - "validate early, return early"
+  - "keep the happy path unindented"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?set_quota\s*(\(\s*\))?\s*\{'
+    message: "Define a function called set_quota."
+  - pattern: '\breturn\s+2\b[\s\S]*\breturn\s+3\b[\s\S]*\breturn\s+4\b'
+    message: "Use return 2, return 3 and return 4 in that order for the three guards."
+forbidden_patterns:
+  - pattern: 'set\s+-[a-z]*e'
+    message: "Leave set -e out: the guards return non-zero on purpose."
+test_cases:
+  - name: valid quota
+    args: [harbour-bakery, "40"]
+    expected_stdout: "quota set: harbour-bakery 40GB"
+  - name: missing name
+    expected_stderr: "error: name required"
+    expected_exit: 2
+  - name: empty name
+    args: ["", "10"]
+    expected_stderr: "error: name required"
+    expected_exit: 2
+  - name: not a number
+    args: [tidewater-books, twenty]
+    expected_stderr: "error: GB must be a number"
+    expected_exit: 3
+  - name: missing size counts as not a number
+    args: [tidewater-books]
+    expected_stderr: "error: GB must be a number"
+    expected_exit: 3
+  - name: too big
+    args: [gull-anchor, "9000"]
+    expected_stderr: "error: GB must be 1-100"
+    expected_exit: 4
+  - name: zero is too small
+    args: [gull-anchor, "0"]
+    expected_stderr: "error: GB must be 1-100"
+    expected_exit: 4
+  - name: upper limit accepted
+    args: [north-pier, "100"]
+    expected_stdout: "quota set: north-pier 100GB"

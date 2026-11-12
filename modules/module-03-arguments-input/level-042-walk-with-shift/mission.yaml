@@ -1,0 +1,48 @@
+id: 42
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Walk with shift
+difficulty: beginner
+xp: 70
+story: |
+  Mara's rollout tool is called like this: the first word is the environment, and
+  everything after it is a server to roll out to. Her old script kept dragging
+  "$1" into the middle of the server list. She asks you for a version that
+  takes the environment off the front and leaves only the servers behind.
+objective: |
+  Write solution.sh. Its first argument is an environment name, the remaining
+  arguments are servers. Print exactly two lines:
+    environment: <first argument>
+    targets=<N> [<servers separated by single spaces>]
+  where N is the number of servers (arguments after the first). With no servers,
+  the second line is  targets=0 []
+  You may assume at least the environment is given. Use shift to remove the
+  environment from the argument list.
+concepts:
+  - "shift drops $1 and renumbers the rest"
+  - "$# and $* change after shift"
+required_patterns:
+  - pattern: '\bshift\b'
+    message: "Use shift to remove the environment from the front of the list."
+test_cases:
+  - name: staging with three servers
+    args: [staging, anchovy, barracuda, cuttlefish]
+    expected_stdout: |-
+      environment: staging
+      targets=3 [anchovy barracuda cuttlefish]
+  - name: one server
+    args: [production, dory]
+    expected_stdout: |-
+      environment: production
+      targets=1 [dory]
+  - name: environment only
+    args: [canary]
+    expected_stdout: |-
+      environment: canary
+      targets=0 []
+  - name: a server with a space stays one target
+    args: [lab, "blue whale", eel]
+    expected_stdout: |-
+      environment: lab
+      targets=2 [blue whale eel]

@@ -1,0 +1,33 @@
+id: 10
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Comments Are for Humans
+difficulty: beginner
+xp: 80
+story: |
+  Theo left a cache warm-up script for Tidewater Books on the shared drive,
+  with his debugging echo lines still switched on. Mara opens it, sighs
+  gently, and hands it to you: "Quiet the noise, but do not delete anything.
+  Next month someone will want those debug lines back, and that someone might
+  be you. And give the file a proper name tag at the top."
+objective: |
+  Edit solution.sh so that it prints only these two lines:
+    Warming the cache for Tidewater Books
+    Cache warm: 3 pages
+  Silence the two lines that start with echo "DEBUG by turning them into
+  comments (put # in front of each), do not delete them.
+  Then add a header block of comments right under the shebang line with two
+  lines that begin exactly like this:
+    # Purpose: <what the script does>
+    # Author: <your name>
+concepts:
+  - "# starts a comment; Bash ignores the rest of the line"
+  - "commenting out code instead of deleting it"
+  - "a header comment block"
+single_case: true
+test_cases:
+  - name: only the real output remains
+    expected_stdout: |-
+      Warming the cache for Tidewater Books
+      Cache warm: 3 pages

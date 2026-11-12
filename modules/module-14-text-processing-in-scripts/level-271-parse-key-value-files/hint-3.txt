@@ -1,0 +1,14 @@
+Skeleton:
+
+  found=0
+  while IFS='=' read -r key value || [[ -n $key ]]; do
+    if [[ $key == "$2" ]]; then
+      found=1
+      result=$value          # keep reading: the last match wins
+    fi
+  done < "$1"
+
+  # after the loop: if found, print $result; otherwise write the error to stderr
+  # (echo ... >&2) and exit 1
+
+Comment lines like "# port=1234" have the key "# port", which never equals a real key, so they need no special case.

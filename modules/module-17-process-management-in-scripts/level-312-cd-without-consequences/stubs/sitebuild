@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Fake site builder for BashMissions. Works on the current folder:
+# needs ./site.conf, writes ./build.log.
+if [[ ! -f site.conf ]]; then
+  echo "sitebuild: no site.conf in $(basename "$PWD")" >&2
+  exit 4
+fi
+echo "built $(basename "$PWD")" > build.log

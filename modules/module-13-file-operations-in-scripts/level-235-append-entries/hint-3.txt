@@ -1,0 +1,7 @@
+  level=$1
+  shift
+  stamp=$(date '+%Y-%m-%d %H:%M:%S')
+  echo "[$stamp] $level: $*" >> ops.log
+  cat ops.log
+
+Put an argument-count check (at least two) before the shift.

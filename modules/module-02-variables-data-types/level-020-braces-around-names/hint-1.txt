@@ -1,0 +1,1 @@
+Bash reads as many letters, digits and underscores after a $ as it can and treats all of them as the variable's name. You need a way to say "the name ends here" before the text you glue on.

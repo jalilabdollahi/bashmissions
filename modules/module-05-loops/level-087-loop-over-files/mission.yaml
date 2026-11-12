@@ -4,21 +4,51 @@ module_name: loops
 module_display: Loops
 title: Loop over Files
 difficulty: beginner
-xp: 70
-objective: Loop over `fixtures/*.txt` and print each matching basename. Ignore non-text
-  files.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: 'a.txt
-
-    b.txt'
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- a.txt
-- b.txt
-- notes.log
+xp: 110
+story: |
+  The logs/ folder on the web server is a jungle: .log files, .txt notes, and
+  once a file named "final FINAL v2.log". Ollie has been asked how long each
+  log is, and he has been running wc by hand for twenty minutes. Mara looks at
+  the clock, then at you. "Let the shell list the files for you. And please
+  make it behave when the folder is empty."
+objective: |
+  Write solution.sh that goes through every file matching logs/*.log in the
+  current directory, in the order Bash lists them, and prints for each one:
+    <file name without the folder>: <number of lines>
+  for example `web.log: 3`. Files that do not end in .log are ignored. If there
+  is no logs/ folder or it holds no .log files, print nothing and exit 0.
+  Loop with a glob (for f in logs/*.log) and enable `shopt -s nullglob` so
+  that a pattern with no matches expands to nothing instead of itself.
 concepts:
-- '`for f in *.txt`'
-scaffold: true
+  - "for f in logs/*.log"
+  - "shopt -s nullglob"
+required_patterns:
+  - pattern: 'shopt\s+-s\s+nullglob'
+    message: "Turn on nullglob so an unmatched pattern disappears: shopt -s nullglob"
+  - pattern: 'for\s+\w+\s+in\s+[^;]*\*\.log'
+    message: "Loop over the glob logs/*.log."
+forbidden_patterns:
+  - pattern: '\bls\b|\bfind\b'
+    message: "Let the shell glob do the listing; no ls or find needed."
+test_cases:
+  - name: two logs and a note
+    files:
+      "logs/web.log": "GET /\nGET /about\nGET /prices\n"
+      "logs/db.log": "started\nready\n"
+      "logs/notes.txt": "ignore me\nplease\n"
+    expected_stdout: |-
+      db.log: 2
+      web.log: 3
+  - name: name with spaces and an empty log
+    files:
+      "logs/final FINAL v2.log": "one\ntwo\nthree\nfour\n"
+      "logs/empty.log": ""
+    expected_stdout: |-
+      empty.log: 0
+      final FINAL v2.log: 4
+  - name: folder without logs
+    files:
+      "logs/readme.txt": "nothing to see\n"
+    expected_stdout: ""
+  - name: no folder at all
+    expected_stdout: ""

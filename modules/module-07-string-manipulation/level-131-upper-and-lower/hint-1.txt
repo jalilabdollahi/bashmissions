@@ -1,0 +1,1 @@
+Both formats contain the same characters, only the case of the letters differs. Bash can change the case of a whole value while expanding it, in both directions, so the original variable does not even need to be modified. Think of two operators that look like the arrows "up" and "down".

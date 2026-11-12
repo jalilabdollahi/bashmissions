@@ -1,0 +1,12 @@
+  host=localhost; port=25; tls=off
+  if [[ -n ${1:-} && -r ${1:-} ]]; then
+    while IFS='=' read -r key value || [[ -n $key ]]; do
+      # trim key and value, skip an empty value
+      case $key in
+        RELAY_HOST) host=$value ;;
+        ...         # port and tls
+      esac
+    done < "$1"
+  fi
+  host=${RELAY_HOST:-$host}
+  ...                 # port and tls the same way

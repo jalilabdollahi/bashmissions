@@ -1,0 +1,66 @@
+id: 388
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Disk Usage Alert
+difficulty: intermediate
+xp: 160
+story: |
+  At 02:40 last Tuesday the Tidewater Books backup server filled its disk and
+  stopped taking backups for two days before anyone noticed. Gus has asked for
+  "something that shouts before it happens". Mara hands you the first check
+  of your rota: read `df`, compare with a limit, shout.
+objective: |
+  Write solution.sh: `solution.sh LIMIT`, where LIMIT is a whole number from 1
+  to 100 (percent). Anything else: print `usage: solution.sh LIMIT` to stderr,
+  exit 2.
+
+  Run `df -P` (the portable format: one filesystem per line, header first)
+  and look at every filesystem whose device name starts with `/dev/`
+  (ignore tmpfs and friends). The capacity column looks like `92%`.
+
+  - For each one whose capacity is at least LIMIT print
+    `ALERT <mount> at <N>%`, in the order df lists them.
+  - If there was at least one alert, exit with status 1.
+  - If there was none, print `all filesystems below LIMIT%` and exit 0.
+  - If `df` itself fails, print `df failed` to stderr and exit 3.
+concepts:
+  - "df -P gives one line per filesystem in a fixed column order"
+  - "read -r splits a line into named fields"
+  - "${pct%\\%} strips the percent sign"
+required_patterns:
+  - pattern: 'df\s+-P'
+    message: "Run df -P so every filesystem is on exactly one line."
+test_cases:
+  - name: everything healthy
+    args: ["80"]
+    expected_stdout: "all filesystems below 80%"
+  - name: two filesystems over the limit, tmpfs ignored
+    args: ["90"]
+    env: {FAKE_DF: busy}
+    expected_stdout: |-
+      ALERT / at 92%
+      ALERT /srv/backups at 91%
+    expected_exit: 1
+  - name: lower limit catches more
+    args: ["80"]
+    env: {FAKE_DF: busy}
+    expected_stdout: |-
+      ALERT / at 92%
+      ALERT /var at 83%
+      ALERT /srv/backups at 91%
+    expected_exit: 1
+  - name: exactly at the limit counts
+    args: ["43"]
+    expected_stdout: "ALERT /var at 43%"
+    expected_exit: 1
+  - name: df fails
+    args: ["90"]
+    env: {FAKE_DF: fail}
+    stderr_comparison: contains
+    expected_stderr: "df failed"
+    expected_exit: 3
+  - name: limit must be a number
+    args: [lots]
+    expected_stderr: "usage: solution.sh LIMIT"
+    expected_exit: 2

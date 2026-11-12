@@ -1,20 +1,93 @@
 id: 335
 module: 18
 module_name: advanced-functions-patterns
-module_display: Advanced Functions & Patterns
+module_display: Function Patterns
 title: Builder Pattern
 difficulty: advanced
-xp: 195
-objective: Build configuration through small setter functions.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    host=localhost
-    port=8080
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 240
+story: |
+  Customers order virtual machines with a form that has fifteen optional
+  fields, and the provisioning script takes them as fifteen positional
+  arguments. Last week someone swapped RAM and disk, and a dental practice
+  got a 4 GB disk. "Name your arguments," Mara says. "Collect them one
+  option at a time, check each as it arrives, and only build the thing when
+  you have all of it."
+objective: |
+  Write solution.sh, called as `solution.sh NAME [KEY=VALUE ...]`.
+  The spec of a machine lives in an associative array. Write these functions:
+    vm_new NAME      reset the spec to the defaults: cpus=1 ram_gb=2 disk_gb=20 region=eu-north
+    with_cpus N      1 to 16 (whole number)
+    with_ram_gb N    1 to 64
+    with_disk_gb N   10 to 500
+    with_region R    one of eu-north, eu-south, us-east
+    build            check the combination, then print the spec
+  A setter that gets a bad value prints "with_cpus: invalid value 'X'" (with
+  its own name) to stderr and returns 1; otherwise it stores the value.
+  `build` fails with "build: N cpus need at least M GB of RAM" (M = 2 times N)
+  when ram_gb is too small, otherwise it prints exactly five lines:
+    vm=NAME
+    cpus=...
+    ram_gb=...
+    disk_gb=...
+    region=...
+  The script calls vm_new, then one setter per KEY=VALUE argument (keys:
+  cpus, ram_gb, disk_gb, region), then build. Any setter or build failure
+  ends the script with exit 2 and nothing on stdout. An unknown key prints
+  "unknown option: KEY" to stderr and exits 2. With no NAME print
+  "usage: solution.sh NAME [KEY=VALUE ...]" to stderr and exit 2.
 concepts:
-- chained config calls
-scaffold: true
+  - "state in an associative array, one setter function per option"
+  - "validate each value when it is set, validate the combination at build"
+  - "fail before producing output"
+required_patterns:
+  - pattern: 'with_cpus\s*\(\)'
+    message: "Define with_cpus() and the other setters (with_ram_gb, with_disk_gb, with_region)."
+  - pattern: 'build\s*\(\)'
+    message: "Define a build() function that checks and prints the spec."
+  - pattern: 'declare\s+-A\s+\w+'
+    message: "Keep the spec in an associative array."
+test_cases:
+  - name: defaults only
+    args: [anchovy-01]
+    expected_stdout: |-
+      vm=anchovy-01
+      cpus=1
+      ram_gb=2
+      disk_gb=20
+      region=eu-north
+  - name: options in any order
+    args: [barracuda-02, region=us-east, cpus=4, disk_gb=120, ram_gb=16]
+    expected_stdout: |-
+      vm=barracuda-02
+      cpus=4
+      ram_gb=16
+      disk_gb=120
+      region=us-east
+  - name: a bad value is named after its setter
+    args: [cuttlefish-03, cpus=lots]
+    expected_stderr: "with_cpus: invalid value 'lots'"
+    expected_exit: 2
+    expected_stdout: ""
+  - name: out of range
+    args: [dory-04, disk_gb=4]
+    expected_stderr: "with_disk_gb: invalid value '4'"
+    expected_exit: 2
+    expected_stdout: ""
+  - name: an unknown region
+    args: [eel-05, region=mars]
+    expected_stderr: "with_region: invalid value 'mars'"
+    expected_exit: 2
+    expected_stdout: ""
+  - name: the combination is checked at build time
+    args: [flounder-06, cpus=8, ram_gb=8]
+    expected_stderr: "build: 8 cpus need at least 16 GB of RAM"
+    expected_exit: 2
+    expected_stdout: ""
+  - name: unknown option
+    args: [grouper-07, colour=blue]
+    expected_stderr: "unknown option: colour"
+    expected_exit: 2
+    expected_stdout: ""
+  - name: no name
+    expected_stderr: "usage: solution.sh NAME [KEY=VALUE ...]"
+    expected_exit: 2

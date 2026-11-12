@@ -1,0 +1,6 @@
+Bash can test the link itself, without following it:
+
+  [[ -L path ]]    # true for any symlink, even one pointing at nothing
+  [[ -e path ]]    # follows the link; false for a dangling one
+
+dirname prints the folder part of a path: `dirname -- notes/a.txt` gives `notes`. Check the file first, then the folder, and only then write. Put `--` before the path so a name starting with a dash is not read as an option.

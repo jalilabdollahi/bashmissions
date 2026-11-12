@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Pretend curl for the status page. GET only; understands -s / --silent.
+silent=0
+url=
+for arg in "$@"; do
+  case $arg in
+    -s|--silent) silent=1 ;;
+    -*)
+      echo "curl: option $arg: is unknown" >&2
+      echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+      exit 2 ;;
+    *) url=$arg ;;
+  esac
+done
+if [[ -z $url ]]; then
+  echo "curl: no URL specified" >&2
+  exit 2
+fi
+rest=${url#*://}
+host=${rest%%/*}
+path=/${rest#*/}
+# Without -s a real curl draws a progress meter on stderr when stdout is not a terminal.
+if (( ! silent )); then
+  printf '  %% Total    %% Received %% Xferd  Average Speed   Time    Time     Time  Current\n' >&2
+fi
+if [[ ${FAKE_NET:-up} == down ]]; then
+  (( silent )) || echo "curl: (6) Could not resolve host: $host" >&2
+  exit 6
+fi
+file=fixtures/http/$host$path.body
+if [[ -f $file ]]; then
+  cat "$file"
+else
+  echo "no such component"
+fi

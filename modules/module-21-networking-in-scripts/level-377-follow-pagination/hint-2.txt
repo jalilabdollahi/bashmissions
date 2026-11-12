@@ -1,0 +1,9 @@
+Keep the pointer in a variable and let the loop run while it is non-empty:
+
+  next="?page=1"
+  while [[ -n $next ]]; do
+    page=$(curl -sS --fail "$base$next")
+    next=$(printf '%s\n' "$page" | sed -nE 's/.*"next": *"([^"]*)".*/\1/p')
+  done
+
+When the JSON says `"next":null` (no quotes) the sed pattern does not match, so `next` ends up empty and the loop stops. `grep -oE 'pattern'` prints every match on a line of its own, handy for the ids. A counter incremented each round gives you the page limit.

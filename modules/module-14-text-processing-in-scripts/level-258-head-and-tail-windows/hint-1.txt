@@ -1,0 +1,1 @@
+A window is "the top of the file, minus the beginning". First cut the file off after the last line you want, then throw away the lines before the first one you want. Each half has a classic tool that works on lines.

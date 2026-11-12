@@ -1,0 +1,6 @@
+`read NAME` reads one line from standard input into `$NAME`. Add `-r` so that backslashes are not interpreted:
+
+  read -r city
+  echo "You live in $city"
+
+Test it by hand with `echo "some text" | ./solution.sh`.

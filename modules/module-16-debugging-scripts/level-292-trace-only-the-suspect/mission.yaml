@@ -1,0 +1,62 @@
+id: 292
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Trace Only the Suspect
+difficulty: intermediate
+xp: 130
+story: |
+  Gus asked why the nightly backup report claims every job takes "0 minutes".
+  Ollie turned on `set -x` for the whole script and got four hundred lines of
+  noise. "Two lines are suspicious," Gus says, tapping the screen. "Show me
+  only those."
+objective: |
+  Write solution.sh that takes two arguments, START and END (seconds), and runs
+  these steps in order:
+    1. echo "report for backup job"
+    2. elapsed=$(( $2 - $1 ))
+    3. minutes=$(( elapsed / 60 ))
+    4. echo "backup took ${minutes}m"
+  Trace ONLY steps 2 and 3: put `set -x` directly before step 2 and `set +x`
+  directly after step 3. Stdout is exactly the two echo lines. Stderr contains
+  the trace of the two assignments plus the `+ set +x` line, and nothing else
+  (the echo lines must not appear in the trace).
+concepts:
+  - "set -x ... set +x traces just a block"
+  - "the set +x command is itself traced"
+required_patterns:
+  - pattern: 'set\s+-x'
+    message: "Start the trace with set -x."
+  - pattern: 'set\s+\+x'
+    message: "Stop the trace with set +x."
+test_cases:
+  - name: ninety seconds is one minute
+    args: ["1000", "1090"]
+    expected_stdout: |-
+      report for backup job
+      backup took 1m
+    stderr_comparison: regex
+    expected_stderr: |-
+      \+ elapsed=90
+      \+ minutes=1
+      \+ set \+x
+  - name: a long job
+    args: ["200", "7400"]
+    expected_stdout: |-
+      report for backup job
+      backup took 120m
+    stderr_comparison: regex
+    expected_stderr: |-
+      \+ elapsed=7200
+      \+ minutes=120
+      \+ set \+x
+  - name: under a minute rounds to zero
+    args: ["50", "59"]
+    expected_stdout: |-
+      report for backup job
+      backup took 0m
+    stderr_comparison: regex
+    expected_stderr: |-
+      \+ elapsed=9
+      \+ minutes=0
+      \+ set \+x

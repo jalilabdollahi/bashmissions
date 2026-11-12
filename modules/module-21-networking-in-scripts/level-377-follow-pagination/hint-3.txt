@@ -1,0 +1,12 @@
+  next="?page=1"; pages=0; total=0
+  while [[ -n $next ]]; do
+    # pages >= 10 ?  -> "too many pages" and exit 1
+    url=$base$next
+    if ! page=$(curl -sS --fail "$url" 2>/dev/null); then ...; fi
+    ids=$(printf '%s\n' "$page" | grep -oE '"inv-[0-9]+"' | tr -d '"' || true)
+    # print the ids, add how many there were to total
+    next=$(... sed ...)
+  done
+  echo "total: $total"
+
+Count the ids with `wc -l` on the id list, but only when the list is not empty.

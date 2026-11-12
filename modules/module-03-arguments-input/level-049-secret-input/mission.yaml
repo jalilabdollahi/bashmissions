@@ -1,0 +1,44 @@
+id: 49
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Secret Input
+difficulty: beginner
+xp: 100
+story: |
+  Priya reviewed Theo's database-reset helper and went quiet in the way that means
+  trouble: it asked for the admin password with a plain read, so every character
+  appeared on the terminal, in screen shares and in the shell logs of the
+  recording tool. Her rule is simple: a secret is never shown and never printed
+  back, not even "to confirm".
+objective: |
+  Write solution.sh that asks for a password on stdin WITHOUT echoing it to the
+  terminal, using read's silent option, then prints exactly one line:
+    password stored (<N> characters)
+  where N is the length of what was typed. The password itself must never be
+  printed to stdout or stderr. After a silent read the cursor stays on the same
+  line, so also print an empty line to stderr (echo >&2) to finish the line.
+concepts:
+  - "read -s turns terminal echo off"
+  - "never print a secret back"
+  - "${#var} is the length of a value"
+required_patterns:
+  - pattern: '\bread\s+(-[A-Za-z]+\s+)*-[A-Za-z]*s[A-Za-z]*'
+    message: "Read the password silently with read -s (for example read -rsp ...)."
+test_cases:
+  - name: short password
+    stdin: "hunter2\n"
+    expected_stdout: |-
+      password stored (7 characters)
+  - name: passphrase with spaces
+    stdin: "correct horse battery staple\n"
+    expected_stdout: |-
+      password stored (28 characters)
+  - name: single character
+    stdin: "x\n"
+    expected_stdout: |-
+      password stored (1 characters)
+  - name: special characters and backslash
+    stdin: "p@ss\\w0rd!#\n"
+    expected_stdout: |-
+      password stored (11 characters)

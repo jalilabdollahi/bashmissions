@@ -1,1 +1,0 @@
-Spaces inside arguments are preserved only if the expansions are quoted.

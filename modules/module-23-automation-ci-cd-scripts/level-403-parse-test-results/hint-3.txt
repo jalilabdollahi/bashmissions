@@ -1,0 +1,9 @@
+Skeleton of the loop body:
+
+  if [[ $line =~ ^1\.\.([0-9]+) ]]; then planned=${BASH_REMATCH[1]}; continue; fi
+  if [[ $line =~ ^(not\ ok|ok)[[:space:]]+([0-9]+)[[:space:]]*(-[[:space:]]*)?(.*)$ ]]; then
+    status=${BASH_REMATCH[1]} num=${BASH_REMATCH[2]} desc=${BASH_REMATCH[4]}
+    # look for "# SKIP" / "# TODO" in $desc, strip it, bump the right counter
+  fi
+
+After the loop: print the summary, then ran=$(( passed + failed + skipped + todo )) and compare it with planned before choosing exit 3, 1 or 0.

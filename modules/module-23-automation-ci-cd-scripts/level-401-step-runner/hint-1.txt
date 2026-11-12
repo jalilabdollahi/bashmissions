@@ -1,0 +1,1 @@
+A pipeline is just a loop over steps with one rule: the first step that fails ends the run. The trick is that `set -e` would end your script too, but silently, before you can say which step broke. Capture each step's status yourself.

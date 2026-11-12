@@ -1,0 +1,3 @@
+Put `>` and a file name after the command. The shell creates the file (or empties it if it exists) and the command's output goes there instead of the screen. A generic example:
+
+  uptime-tool eel > uptime.out

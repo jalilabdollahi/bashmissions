@@ -1,0 +1,9 @@
+Uppercase a copy with `${name^^}` and test its ending with glob patterns in `case`:
+
+  case ${label^^} in
+    *_SALT|*_PIN) ... ;;
+  esac
+
+The last four characters of a string: `${s: -4}` (the space matters; without it Bash reads `:-` as "default value"). A regex with groups can rebuild a string around a hole:
+
+  if [[ $u =~ ^(.*//[a-z]+:)[^@]*(@.*)$ ]]; then u="${BASH_REMATCH[1]}####${BASH_REMATCH[2]}"; fi

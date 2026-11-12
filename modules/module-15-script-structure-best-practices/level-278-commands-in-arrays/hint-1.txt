@@ -1,0 +1,1 @@
+A string remembers the characters of a command but forgets where each word begins and ends. A list of words keeps that structure. Bash has exactly such a list: an array, where every element is one argument of the command you are going to run.

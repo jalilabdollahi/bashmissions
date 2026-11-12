@@ -1,0 +1,11 @@
+  if [[ $mode == regex ]]; then
+    if [[ $line =~ $pattern ]]; then       # no quotes: a real regex
+      echo "$line"
+    fi
+  else
+    if [[ $line =~ "$pattern" ]]; then     # quotes: the text, character by character
+      echo "$line"
+    fi
+  fi
+
+Also add a check so any mode other than regex or literal calls usage.

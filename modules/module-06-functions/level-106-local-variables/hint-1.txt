@@ -1,0 +1,1 @@
+By default every variable in a shell script is visible everywhere, even a "scratch" one created inside a function. Bash has a keyword to say "this name belongs to this function only". Apply it to the three working variables.

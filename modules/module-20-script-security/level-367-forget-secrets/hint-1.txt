@@ -1,0 +1,1 @@
+Every program your script starts receives a copy of the script's exported variables. So a secret that stays in the environment is handed to every later command, including ones that record or forward what they receive. Finish using it, then make the shell forget it before starting anything else.

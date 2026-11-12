@@ -1,0 +1,13 @@
+Rewriting a string character by character avoids every "what does \\ mean in a replacement" trap:
+
+  function esc(s,    out, i, c) {
+    out = ""
+    for (i = 1; i <= length(s); i++) {
+      c = substr(s, i, 1)
+      if (c == "\\") out = out "\\\\"        # one backslash in, two out
+      else out = out c
+    }
+    return out
+  }
+
+(Extra names after the real parameters are local variables.) For the commas, print each object one step late: hold the previous object in a variable and print it with "," when the next one arrives; the last one is printed in END without a comma. A number regex: /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/.

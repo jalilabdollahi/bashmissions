@@ -1,0 +1,13 @@
+start=$PWD
+built=0
+for dir in "$@"; do
+  if ( cd "$dir" && sitebuild ); then
+    echo "built $dir"
+    built=$((built + 1))
+  else
+    echo "failed $dir"
+  fi
+done
+echo "built $built of $# sites"
+
+Then compare $PWD with $start for the last line, and exit 1 if built is below $#. The usage check goes first.

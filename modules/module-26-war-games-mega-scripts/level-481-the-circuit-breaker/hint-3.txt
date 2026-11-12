@@ -1,1 +1,23 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  threshold=${THRESHOLD:-3}; cooldown=${COOLDOWN:-30}      # validate: ^[1-9][0-9]*$
+  state_file=$2; mode=$3 ...
+
+  state=closed failures=0 opened_at=0
+  load_state() {  # missing file: keep defaults; else parse 3 keys, corrupt -> exit 2
+  save_state() {  # mktemp + printf + mv -f
+
+  run_guarded() {  # now, then the command in "$@"
+    if [[ $state == open ]]; then
+      if (( now - opened_at < cooldown )); then say "circuit open, call skipped (retry in ... s)"; exit 75; fi
+      state=half-open
+    fi
+    status=0; "$@" || status=$?
+    if [[ $state == half-open ]]; then
+      success -> closed, failures=0, opened_at=0      failure -> open, opened_at=now
+    elif success -> failures=0
+    else failures+1; at threshold -> state=open opened_at=now
+    save_state; exit "$status"
+  }
+
+status prints one of the four lines; reset is rm -f plus a message. Dispatch on the mode word, check argument counts, and send everything else to usage.

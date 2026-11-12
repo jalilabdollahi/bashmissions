@@ -1,0 +1,1 @@
+The script has to keep asking, so the question belongs inside a loop that only ends when the answer is good. Do not forget the other way out: the person (or a pipe) may stop typing, and then read has nothing more to give.

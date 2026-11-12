@@ -1,1 +1,0 @@
-Increment the counter after each line is printed.

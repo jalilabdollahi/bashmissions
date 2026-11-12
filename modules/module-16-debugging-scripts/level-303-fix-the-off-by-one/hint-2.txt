@@ -1,0 +1,5 @@
+Array indexes start at 0, so a list of `total` items has indexes 0 to total-1. If `n` items must be deleted, the indexes are 0 to n-1, which means the loop condition is `i < n`, not `i <= n` (that visits n+1 items). Seeing the numbers helps:
+
+  bash -x ./solution.sh 3 <<< $'a\nb\nc\nd\ne'
+
+Look at how many times the `echo "delete: ..."` line is traced.

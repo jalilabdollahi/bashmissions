@@ -1,0 +1,1 @@
+There are two ways to end up with "nothing": a blank line and no line at all. For your logic they should look the same, an empty variable. Beware of one trap with `set -e`: a read that finds no input reports failure, and the script would stop before reaching your own check.

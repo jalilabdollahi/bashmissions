@@ -1,0 +1,1 @@
+Bash has a way to say "ignore the rest of this line", meant for people reading the file. Using it on a command switches that command off without removing it.

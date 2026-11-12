@@ -1,0 +1,14 @@
+  for (( attempt = 1; attempt <= 4; attempt++ )); do
+    code=$(curl -s -D "$headers" -o "$body" -w '%{http_code}' "$url")
+    case $code in
+      200) cat "$body"; exit 0 ;;
+      429)
+        wait_for=$(grep -i '^retry-after:' "$headers" | tr -d '\r' | cut -d: -f2 | tr -d ' ' || true)
+        # not a number? use 1.  Sleep only if attempt < 4.
+        ;;
+      *) ... ;;
+    esac
+  done
+  # all four attempts failed
+
+The mktemp files for $headers and $body need a trap to clean up.

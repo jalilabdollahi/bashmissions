@@ -1,0 +1,93 @@
+id: 340
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Audit Wrapper
+difficulty: expert
+xp: 270
+story: |
+  After the incident with the missing customer folder, Priya asks one
+  question and nobody can answer it: who ran what, and did it work? The
+  maintenance bot runs a list of commands every night, and none of them
+  leave a trace. "I will not ask you to rewrite the bot," Priya says. "I will
+  ask you to put one function between the bot and every command it runs, and
+  I will ask to read the log tomorrow."
+objective: |
+  Write solution.sh. It reads commands from standard input, one per line,
+  split into words on spaces (no quote handling needed; blank lines are
+  ignored), and runs each one through a function `audited COMMAND [ARG...]`.
+  `audited` runs the command (stdout and stderr untouched), then appends one
+  line to the audit log:
+    USER: WORDS status=N
+  where USER is the value of $USER, WORDS are the command and its arguments
+  written with `printf '%q'` and separated by single spaces (so odd characters
+  are visible: `a;b` is logged as `a\;b`), and N is the command's exit status.
+  A failing command must not stop the run, and must be logged too, including a
+  command that does not exist (status 127).
+  The log is the file named by $AUDIT_LOG, or `audit.log` in the current
+  directory if that variable is empty or unset. Do not create the file if no
+  command was run.
+  The script's own exit status is 1 if any command failed, otherwise 0.
+concepts:
+  - "a wrapper that logs after running: \"$@\" || rc=$?"
+  - "printf -v line '%q ' \"$@\" shows words exactly (escapes spaces and metacharacters)"
+  - "${VAR:-default} for a configurable log path, appending with >>"
+  - "read -ra splits a line into an array without globbing"
+required_patterns:
+  - pattern: '"\$@"'
+    message: "Run the wrapped command as \"$@\"."
+  - pattern: '%q'
+    message: "Log the words with printf '%q' so odd characters stay visible."
+  - pattern: '>>'
+    message: "Append to the log with >>."
+test_cases:
+  - name: three commands, three lines
+    stdin: |
+      echo hello world
+      mkdir reports
+      test -d reports
+    expected_stdout: "hello world"
+    expected_files:
+      audit.log: |-
+        player: echo hello world status=0
+        player: mkdir reports status=0
+        player: test -d reports status=0
+  - name: a failing command is logged and the run goes on
+    stdin: |
+      false
+      echo still here
+    expected_stdout: "still here"
+    expected_exit: 1
+    expected_files:
+      audit.log: |-
+        player: false status=1
+        player: echo still here status=0
+  - name: a command that does not exist
+    stdin: |
+      nosuch thing
+    expected_stderr: "nosuch: command not found"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      audit.log: "player: nosuch thing status=127"
+  - name: odd characters are escaped in the log, not interpreted
+    stdin: |
+      echo a;b *
+    expected_stdout: "a;b *"
+    expected_files:
+      audit.log: 'player: echo a\;b \* status=0'
+  - name: a different log file
+    env:
+      AUDIT_LOG: "ops.log"
+    stdin: |
+
+      echo night shift
+    expected_stdout: "night shift"
+    expected_files:
+      ops.log: "player: echo night shift status=0"
+      audit.log: null
+  - name: nothing to run, no log
+    stdin: ""
+    expected_stdout: ""
+    expected_files:
+      audit.log: null

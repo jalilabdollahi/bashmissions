@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Pretend health probe: `healthctl NAME`. FAKE_UNHEALTHY=name1,name2 makes the
+# named apps unhealthy (exit 1). Calls are recorded in .calls.log.
+if [[ $# -ne 1 ]]; then
+  echo "healthctl: usage: healthctl NAME" >&2
+  exit 2
+fi
+echo "healthctl $1" >> .calls.log
+[[ ",${FAKE_UNHEALTHY:-}," == *",$1,"* ]] && exit 1
+exit 0

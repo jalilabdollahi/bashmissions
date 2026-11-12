@@ -1,1 +1,0 @@
-Use this curriculum concept: know when you need bash.

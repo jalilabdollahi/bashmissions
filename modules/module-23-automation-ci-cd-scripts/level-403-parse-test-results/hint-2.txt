@@ -1,0 +1,7 @@
+Regex groups from `[[ ... =~ ... ]]` land in BASH_REMATCH:
+
+  if [[ $line =~ ^(yes|no)[[:space:]]+([0-9]+) ]]; then
+    word=${BASH_REMATCH[1]}; id=${BASH_REMATCH[2]}
+  fi
+
+Write "not ok" with a backslash-escaped space (`not\ ok`) inside an unquoted regex, or keep the pattern in a variable. `${text%% #*}` removes everything from the first " #" onward.

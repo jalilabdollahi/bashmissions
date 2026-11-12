@@ -1,3 +1,0 @@
-user id=42 name=ada
-no id here
-user id=108 name=linus

@@ -1,0 +1,6 @@
+Put a hash right after the opening brace of a parameter expansion and you get the length instead of the value:
+
+  word="starfish"
+  echo "${#word}"      # prints 8
+
+An empty variable simply has length 0. Compare the number with (( ... )) or [[ ... -lt ... ]].

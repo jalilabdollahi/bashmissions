@@ -1,1 +1,0 @@
-Use this curriculum concept: umask in scripts.

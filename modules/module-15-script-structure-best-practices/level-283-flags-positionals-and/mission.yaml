@@ -1,0 +1,68 @@
+id: 283
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Flags, Positionals and --
+difficulty: expert
+xp: 220
+story: |
+  Gus wants a little tool for the price labels on the harbour-office wall. Words go
+  in, labels come out: optionally upper-cased, optionally with a prefix. Ollie's first
+  version read $1 and $2 by position, so "label.sh -u Cod" worked and "label.sh Cod -u"
+  printed a label that said "-u". Real tools take flags in any order, understand --,
+  and complain clearly. Time to write a proper parsing loop.
+objective: |
+  solution.sh accepts options first, then words:
+    -u or --upper         print each word in UPPER CASE
+    -p VALUE or --prefix VALUE   put VALUE directly before every word
+    --                    end of options; everything after it is a word
+  and then one or more WORDS. Options can be combined in any order but must
+  come before the words. Print one word per line.
+  Errors (exit status 2, message on stderr, nothing on stdout):
+    unknown option   -> "solution.sh: unknown option: <opt>"
+    -p without value -> "solution.sh: option -p needs a value"
+    no words at all  -> "usage: solution.sh [-u] [-p PREFIX] [--] WORD..."
+  Use a while loop with case and shift. The first argument that does not start
+  with - ends option parsing; so does --.
+concepts:
+  - "while [ $# -gt 0 ]; do case ... shift; done"
+  - "-- ends the options"
+  - "options with values: shift 2"
+required_patterns:
+  - pattern: 'while\s+\[\[?\s+"?\$#'
+    message: "Parse with a loop on the remaining argument count: while [ $# -gt 0 ]; do ..."
+  - pattern: '\bshift\b'
+    message: "Consume each parsed argument with shift."
+  - pattern: '--\)'
+    message: "Add a case branch for -- (end of options)."
+test_cases:
+  - name: plain words
+    args: [cod, haddock]
+    expected_stdout: |-
+      cod
+      haddock
+  - name: upper and prefix in either order
+    args: [-p, "EUR ", -u, cod, haddock]
+    expected_stdout: |-
+      EUR COD
+      EUR HADDOCK
+  - name: long options
+    args: [--prefix, "> ", --upper, plaice]
+    expected_stdout: "> PLAICE"
+  - name: double dash lets a word start with a dash
+    args: [-u, --, -n, "--prefix"]
+    expected_stdout: |-
+      -N
+      --PREFIX
+  - name: unknown option
+    args: [-x, cod]
+    expected_stderr: "solution.sh: unknown option: -x"
+    expected_exit: 2
+  - name: prefix without value
+    args: [-p]
+    expected_stderr: "solution.sh: option -p needs a value"
+    expected_exit: 2
+  - name: options but no words
+    args: [-u]
+    expected_stderr: "usage: solution.sh [-u] [-p PREFIX] [--] WORD..."
+    expected_exit: 2

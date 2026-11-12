@@ -1,1 +1,0 @@
-Use the curriculum concept for this level: `sort -n`.

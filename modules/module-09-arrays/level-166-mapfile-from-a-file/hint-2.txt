@@ -1,0 +1,1 @@
+mapfile -t names < file fills the array names with the lines of file. The -t option trims the newline from the end of each line; forget it and every element carries a trailing newline. Blank lines become empty elements. Check the file first with [[ -r $file ]] and think about what to print for an empty array.

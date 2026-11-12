@@ -1,1 +1,0 @@
-The `else` branch handles the real admin case.

@@ -1,0 +1,5 @@
+You need two fields, in swapped order:
+
+  awk '{ print $NF, $1 }' "$1"
+
+The comma between the two expressions prints a single space between them. Without the comma awk would glue them together.

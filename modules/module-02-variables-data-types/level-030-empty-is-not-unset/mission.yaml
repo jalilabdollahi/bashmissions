@@ -1,0 +1,54 @@
+id: 30
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Empty Is Not Unset
+difficulty: beginner
+xp: 75
+story: |
+  Noor's ticket form has two optional fields. A customer who leaves the
+  NOTE field untouched should see "(no note on file)". But a customer who
+  deliberately clears the note must be left alone - an empty note is a
+  decision, not an omission. The contact address is the opposite: an empty
+  address is useless, so it always falls back to the support desk.
+  One script, two kinds of "missing".
+objective: |
+  The ticket tooling passes two settings, NOTE and CONTACT. Either may be
+  unset, empty, or filled in. Write solution.sh that prints exactly:
+
+    note=[<NOTE>]
+    contact=[<CONTACT>]
+
+  Rules:
+    - NOTE falls back to "(no note on file)" only when NOTE is completely
+      unset. An empty NOTE stays empty. Use ${NOTE-...} (no colon).
+    - CONTACT falls back to "support@lanternfish.example" when it is unset
+      OR empty. Use ${CONTACT:-...} (with a colon).
+concepts:
+  - "${var-x} fallback only when unset"
+  - "${var:-x} fallback when unset or empty"
+required_patterns:
+  - pattern: '\$\{NOTE-[^}]'
+    message: "NOTE needs the no-colon form ${NOTE-...}: only an unset NOTE gets the fallback."
+  - pattern: '\$\{CONTACT:-[^}]'
+    message: "CONTACT needs the colon form ${CONTACT:-...}: empty counts as missing."
+test_cases:
+  - name: both unset
+    expected_stdout: |-
+      note=[(no note on file)]
+      contact=[support@lanternfish.example]
+  - name: both empty
+    env: {NOTE: "", CONTACT: ""}
+    expected_stdout: |-
+      note=[]
+      contact=[support@lanternfish.example]
+  - name: both filled in
+    env: {NOTE: "call after 5pm", CONTACT: "ana@harbourbakery.example"}
+    expected_stdout: |-
+      note=[call after 5pm]
+      contact=[ana@harbourbakery.example]
+  - name: note cleared on purpose, contact given
+    env: {NOTE: "", CONTACT: "tom@tidewater.example"}
+    expected_stdout: |-
+      note=[]
+      contact=[tom@tidewater.example]

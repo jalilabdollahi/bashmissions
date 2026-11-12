@@ -1,0 +1,7 @@
+Arrays are the natural notebook for "everything that went wrong". Append with `+=`, count with `${#arr[@]}`, and print all elements joined by spaces with `${arr[*]}`:
+
+  problems=()
+  for x in "$@"; do
+    some_check "$x" || problems+=("$x")
+  done
+  echo "${#problems[@]} problems: ${problems[*]}"

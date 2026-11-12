@@ -1,0 +1,1 @@
+The helper must change a list that belongs to its caller. Passing the list's contents would only give it a copy. What you need is to pass the list's name and let the function treat that name as a handle to the real variable.

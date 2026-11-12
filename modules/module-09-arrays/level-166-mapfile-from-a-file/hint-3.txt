@@ -1,0 +1,4 @@
+if [[ ! -r $file ]]; then echo "no such file: $file" >&2; exit 1; fi
+mapfile -t hosts < "$file"
+echo "loaded: ${#hosts[@]}"
+Then print first and last. For an empty array you must not read element -1, so choose with if (( ${#hosts[@]} == 0 )).

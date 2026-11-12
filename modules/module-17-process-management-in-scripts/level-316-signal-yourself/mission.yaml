@@ -1,0 +1,79 @@
+id: 316
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Signal Yourself
+difficulty: advanced
+xp: 230
+story: |
+  Theo is building `lanternd`, a little daemon that people poke with signals
+  instead of restarting it: one signal flips verbose logging, another prints
+  a status line. Before it touches production he wants a harness that can poke
+  the program from the inside, using a scripted list of actions, so the
+  handlers can be tested without a second terminal and without `ps`.
+objective: |
+  Write solution.sh. Each argument is an action word; with no arguments print
+  `usage: solution.sh ACTION...` to stderr and exit with status 2.
+
+  Keep two variables: `verbose` (starts as `off`) and `steps` (starts at 0).
+  Install two handlers with `trap`:
+    - on `USR1`: toggle `verbose` between off and on, then print
+        verbose is now on        (or: verbose is now off)
+    - on `USR2`: print
+        status: N steps, verbose=on|off
+
+  Then handle the actions in order:
+    go        add 1 to `steps`; if verbose is on, also print `step N`
+    verbose   send USR1 to yourself with `kill -USR1 $$`
+    status    send USR2 to yourself with `kill -USR2 $$`
+    anything else   print `unknown command: WORD` to stderr and exit 2
+
+  The handlers must be reached only through the signals, never called
+  directly.
+concepts:
+  - "kill -SIGNAL $$ sends a signal to the script itself"
+  - "trap handler USR1 USR2 runs a function when the signal arrives"
+  - "a trap handler runs in the main shell and can change its variables"
+required_patterns:
+  - pattern: 'trap\s+\S+\s+USR1'
+    message: "Install a handler for USR1: trap handler_name USR1"
+  - pattern: 'trap\s+\S+\s+USR2'
+    message: "Install a handler for USR2: trap handler_name USR2"
+  - pattern: 'kill\s+-(USR1|SIGUSR1|10)\s+\$\$'
+    message: "Signal yourself with kill -USR1 $$ (the PID of this script is $$)."
+  - pattern: 'kill\s+-(USR2|SIGUSR2|12)\s+\$\$'
+    message: "Signal yourself with kill -USR2 $$."
+test_cases:
+  - name: a full session
+    args: [go, verbose, go, go, status, verbose, go, status]
+    expected_stdout: |-
+      verbose is now on
+      step 2
+      step 3
+      status: 3 steps, verbose=on
+      verbose is now off
+      status: 4 steps, verbose=off
+  - name: status before anything happened
+    args: [status]
+    expected_stdout: "status: 0 steps, verbose=off"
+  - name: toggling back and forth
+    args: [verbose, go, verbose, verbose, go, go]
+    expected_stdout: |-
+      verbose is now on
+      step 1
+      verbose is now off
+      verbose is now on
+      step 2
+      step 3
+  - name: silent steps
+    args: [go, go, go, status]
+    expected_stdout: "status: 3 steps, verbose=off"
+  - name: an unknown action stops the harness
+    args: [go, status, jump, go, status]
+    expected_stdout: "status: 1 steps, verbose=off"
+    expected_stderr: "unknown command: jump"
+    expected_exit: 2
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh ACTION..."
+    expected_exit: 2

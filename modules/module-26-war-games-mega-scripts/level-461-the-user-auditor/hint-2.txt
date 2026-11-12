@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- `declare -A hash lastseen uid_owner homedirs`, filled with `while IFS=: read -r u h _; do hash[$u]=$h; done < shadow`.
+- Tell an empty value from a missing one: `${hash[$user]+set}` is non-empty when the key exists, even if its value is empty.
+- Permissions without `stat`: `m=$(ls -l "$file" | cut -c1-10)` gives `-rw-r--r--`. Then `${m:4:6}` are the group and other bits and `${m:5:1}` / `${m:8:1}` are their write bits.
+- The orphan scan is `for d in home/*/`; strip the slash and test `[[ -d $d ]]` (an empty glob stays literal).
+- A repeatable option stores into an array each time: `skip[$2]=1; shift 2`. Remember to record an ignored user's home as owned before skipping them.
+- Final ordering: `sort -t'|' -k1,1n -k2,2 -k3,3`, then awk back into columns (the detail is the last field, rebuild it from field 5 to NF).

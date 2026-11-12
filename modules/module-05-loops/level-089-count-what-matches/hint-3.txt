@@ -1,0 +1,8 @@
+total=0
+errors=0
+while read -r client status path; do
+  total=$(( total + 1 ))
+  if [[ $status == 5* ]]; then errors=$(( errors + 1 )); fi
+done
+echo "server errors: $errors of $total requests"
+The final echo goes after done, and it has to say 0 even when the input was empty.

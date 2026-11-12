@@ -1,1 +1,0 @@
-`unset name` removes a variable entirely — different from `name=` (which sets it to empty string).

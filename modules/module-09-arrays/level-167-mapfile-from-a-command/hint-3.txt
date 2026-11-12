@@ -1,0 +1,6 @@
+mapfile -t confs < <(find "$dir" -maxdepth 1 -name '*.conf' | sort)
+echo "found: ${#confs[@]}"
+for path in "${confs[@]}"; do
+  # print just the file name: strip everything up to the last slash
+done
+For the check, use [[ -d $dir ]].

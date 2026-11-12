@@ -1,1 +1,1 @@
-`"$@"` preserves each argument as its own value.
+There is a built-in way to refer to "all arguments the user typed". The tricky part is that a name like "Harbour Bakery" is one argument, and your loop must not cut it into two words. Think about quotes.

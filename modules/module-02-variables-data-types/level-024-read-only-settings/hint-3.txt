@@ -1,0 +1,6 @@
+Four lines, in this order:
+
+  readonly RETENTION_DAYS=$KEEP_DAYS
+  echo "retention: $RETENTION_DAYS days"
+  RETENTION_DAYS=$NEW_DAYS            # the careless line - leave it as a plain assignment, Bash will refuse it
+  echo "retention now: ..."           # still shows the original value

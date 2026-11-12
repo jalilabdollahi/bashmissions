@@ -1,0 +1,1 @@
+The function should work with zero, one or two arguments. For each parameter, ask "what should it be if the caller did not give me one?" and let Bash substitute that value for you.

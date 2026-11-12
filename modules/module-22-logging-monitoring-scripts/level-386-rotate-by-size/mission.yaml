@@ -1,0 +1,90 @@
+id: 386
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Rotate by Size
+difficulty: intermediate
+xp: 150
+story: |
+  The Gull & Anchor Pub's web shop has a single `shop.log` that has grown to
+  most of a gigabyte, and Gus noticed because the disk graph "looks like a ski
+  slope". Mara does not want to install anything; she wants a tiny rotation
+  script she can drop into cron and read in one sitting.
+objective: |
+  Write solution.sh: `solution.sh LOGFILE MAXBYTES KEEP`.
+
+  1. If LOGFILE does not exist, print `no such log: LOGFILE` to stderr, exit 1.
+  2. Measure the log's size in bytes (with `wc -c`).
+  3. If the size is at most MAXBYTES, print `LOGFILE ok (N bytes)` and change
+     nothing.
+  4. Otherwise rotate: the oldest copy LOGFILE.KEEP is deleted if present, each
+     LOGFILE.i moves up to LOGFILE.i+1 (highest first), LOGFILE becomes
+     LOGFILE.1, and a new empty LOGFILE is created. Print
+     `rotated LOGFILE (N bytes)`.
+
+  With the wrong number of arguments, print
+  `usage: solution.sh LOGFILE MAXBYTES KEEP` to stderr and exit 2.
+concepts:
+  - "wc -c < file measures bytes"
+  - "arithmetic comparison (( ))"
+  - "shift old copies upward from the highest number down"
+required_patterns:
+  - pattern: 'wc\s+-c'
+    message: "Measure the size with wc -c < file."
+test_cases:
+  - name: small log is left alone
+    args: [shop.log, "100", "3"]
+    files:
+      shop.log: "0123456789"
+    expected_stdout: "shop.log ok (10 bytes)"
+    expected_files:
+      shop.log: "0123456789"
+      shop.log.1: null
+  - name: exactly at the limit is still fine
+    args: [shop.log, "10", "3"]
+    files:
+      shop.log: "0123456789"
+    expected_stdout: "shop.log ok (10 bytes)"
+    expected_files:
+      shop.log.1: null
+  - name: first rotation
+    args: [shop.log, "5", "3"]
+    files:
+      shop.log: "0123456789"
+    expected_stdout: "rotated shop.log (10 bytes)"
+    expected_files:
+      shop.log: ""
+      shop.log.1: "0123456789"
+  - name: older copies move up and the oldest is dropped
+    args: [shop.log, "5", "3"]
+    files:
+      shop.log: "current-big-log"
+      shop.log.1: "one"
+      shop.log.2: "two"
+      shop.log.3: "three-dropped"
+    expected_stdout: "rotated shop.log (15 bytes)"
+    expected_files:
+      shop.log: ""
+      shop.log.1: "current-big-log"
+      shop.log.2: "one"
+      shop.log.3: "two"
+      shop.log.4: null
+  - name: gaps in the numbering are fine
+    args: [shop.log, "3", "4"]
+    files:
+      shop.log: "abcdef"
+      shop.log.2: "old2"
+    expected_stdout: "rotated shop.log (6 bytes)"
+    expected_files:
+      shop.log: ""
+      shop.log.1: "abcdef"
+      shop.log.2: null
+      shop.log.3: "old2"
+  - name: missing log
+    args: [ghost.log, "10", "3"]
+    expected_stderr: "no such log: ghost.log"
+    expected_exit: 1
+  - name: usage
+    args: [shop.log]
+    expected_stderr: "usage: solution.sh LOGFILE MAXBYTES KEEP"
+    expected_exit: 2

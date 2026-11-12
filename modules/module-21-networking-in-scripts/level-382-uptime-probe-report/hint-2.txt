@@ -1,0 +1,7 @@
+Read a file line by line and split each line into words in one go:
+
+  while read -r kind name a b; do
+    ...
+  done < "$file"
+
+`read` assigns the first word to `kind`, the second to `name`, the third to `a`, and everything left to `b`. Skip lines with `case $kind in ''|'#'*) continue ;; esac`. A second `case` on `$kind` picks the probe. For http, `code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "$a") || true`, then `case $code in 000) ... ;; [23]??) ... ;; *) ... ;; esac`. For tcp, `if nc -z -w 2 "$a" "$b"; then ...`.

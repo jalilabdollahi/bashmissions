@@ -1,0 +1,1 @@
+An element is read with curly braces and a number in square brackets: ${fruit[0]} is the first, ${fruit[1]} the second. A negative number counts backwards, so ${fruit[-1]} is the last. To copy all the arguments into an array use fruit=("$@").

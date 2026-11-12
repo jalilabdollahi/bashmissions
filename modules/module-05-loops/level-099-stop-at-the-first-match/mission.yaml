@@ -1,0 +1,63 @@
+id: 99
+module: 5
+module_name: loops
+module_display: Loops
+title: Stop at the First Match
+difficulty: intermediate
+xp: 140
+story: |
+  Priya is hunting for a single thing: an SSH config on the fleet that still
+  allows root to log in with a password. There are dozens of config files
+  collected from the servers, and she only needs to know whether at least one
+  is guilty, and which. Reading the rest after the first hit would be a waste,
+  and some of the files, she warns, were never copied over at all.
+objective: |
+  Write solution.sh that takes config file paths as arguments and searches them
+  in the given order for a line that starts with "PermitRootLogin" followed by
+  whitespace and "yes" (a line starting with # is a comment and does not
+  count). Stop at the first file that matches.
+  - Found: print "first insecure config: <path>" and exit with status 0.
+  - Not found in any file: print "no insecure config found" and exit 1.
+  Files that do not exist are skipped quietly. With no arguments print
+  "usage: solution.sh FILE..." to stderr and exit with status 2.
+  Use a loop, test each file with grep -q, and leave the loop with break as soon
+  as you have a match. Remember what you found in a variable.
+concepts:
+  - "search loop: test, remember, break"
+  - "grep -q as a yes/no test in if"
+  - "a flag variable tells what happened after the loop"
+required_patterns:
+  - pattern: '\bbreak\b'
+    message: "Stop searching with break as soon as a file matches."
+  - pattern: '\bgrep\b[^\n]*-[A-Za-z]*q'
+    message: "Test each file with grep -q (quiet: only the exit status matters)."
+test_cases:
+  - name: second file is the culprit
+    files:
+      "a.conf": "Port 22\nPermitRootLogin no\n"
+      "b.conf": "Port 2222\nPermitRootLogin yes\n"
+      "c.conf": "PermitRootLogin yes\n"
+    args: [a.conf, b.conf, c.conf]
+    expected_stdout: "first insecure config: b.conf"
+  - name: missing files are skipped
+    files:
+      "web.conf": "PermitRootLogin   yes\nPasswordAuthentication no\n"
+    args: [gone.conf, web.conf]
+    expected_stdout: "first insecure config: web.conf"
+  - name: commented line does not count
+    files:
+      "old.conf": "#PermitRootLogin yes\nPermitRootLogin prohibit-password\n"
+      "new.conf": "PermitRootLogin no\n"
+    args: [old.conf, new.conf]
+    expected_stdout: "no insecure config found"
+    expected_exit: 1
+  - name: first file matches
+    files:
+      "db.conf": "PermitRootLogin yes\n"
+      "cache.conf": "PermitRootLogin yes\n"
+    args: [db.conf, cache.conf]
+    expected_stdout: "first insecure config: db.conf"
+  - name: nothing to search
+    args: []
+    expected_stderr: "usage: solution.sh FILE..."
+    expected_exit: 2

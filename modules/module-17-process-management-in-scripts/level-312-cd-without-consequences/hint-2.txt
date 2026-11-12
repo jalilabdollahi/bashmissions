@@ -1,0 +1,8 @@
+Wrap the `cd` and the command in parentheses. The subshell's folder change dies with it, and the whole group's exit status says whether everything inside worked, so it can be an `if` condition:
+
+  if ( cd "$some_dir" && ls ); then
+    echo "listed"
+  else
+    echo "no such folder, or ls failed"
+  fi
+  pwd     # unchanged

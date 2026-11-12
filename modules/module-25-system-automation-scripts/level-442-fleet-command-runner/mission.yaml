@@ -1,0 +1,109 @@
+id: 442
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Fleet Command Runner
+difficulty: expert
+xp: 320
+story: |
+  A kernel advisory landed at 08:55 and Priya wants to know, before the
+  stand-up, which hosts are still on the vulnerable version. There are
+  thirty-odd machines, and the old way is a terminal tab per host. Mara
+  shows you the pattern every fleet tool starts from: a loop that runs one
+  command everywhere and keeps going when one host is down.
+objective: |
+  Write solution.sh HOSTFILE COMMAND [ARGS...]. HOSTFILE lists one host per
+  line; blank lines and lines starting with `#` are ignored.
+
+  For each host, in file order, run the command with
+    ssh -n -o BatchMode=yes HOST COMMAND...
+  (give ssh all the command words as one string with "$*") and capture its
+  output (standard output and error together, `2>&1`) and exit status. Then print:
+  - every line of the output, prefixed with `HOST: `
+  - if ssh exited with 255 (host unreachable), print `HOST: UNREACHABLE`
+    instead (ignore any output)
+  - if the command exited with another non-zero status N, print the output
+    lines and then `HOST: FAILED (exit N)`
+
+  Never stop at a failing host. At the end print
+    hosts: T, ok: O, failed: F
+  and exit 1 if F is greater than 0, else 0. A host counts as failed when it
+  was unreachable or the command exited non-zero.
+
+  Remember: ssh reads standard input, and your loop is reading the host file
+  on it. With no host file readable print `cannot read FILE` to stderr and
+  exit 1. With fewer than two arguments print
+  `usage: solution.sh HOSTFILE COMMAND [ARGS...]` to stderr and exit 2.
+concepts:
+  - "ssh -n and -o BatchMode=yes for unattended runs"
+  - "ssh exit status 255 means the connection failed, anything else is the remote command's status"
+  - "ssh swallows stdin inside a while-read loop"
+required_patterns:
+  - pattern: 'ssh\b[^\n]*(\s-n\b|<\s*/dev/null)'
+    message: "ssh inside a while-read loop eats the rest of the host file; add -n (or redirect from /dev/null)."
+  - pattern: 'BatchMode=yes'
+    message: "Unattended runs must not wait for a password prompt: -o BatchMode=yes."
+test_cases:
+  - name: kernel versions, one host is down
+    args: [fleet.txt, uname, -r]
+    files:
+      fleet.txt: "# production\nanchovy\nbarracuda\n\ndory\n"
+    expected_stdout: |-
+      anchovy: 5.15.0-97
+      barracuda: UNREACHABLE
+      dory: 6.1.0-18
+      hosts: 3, ok: 2, failed: 1
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        ssh anchovy uname -r
+        ssh barracuda uname -r
+        ssh dory uname -r
+  - name: multi-line output keeps its prefix
+    args: [fleet.txt, df, -P]
+    files:
+      fleet.txt: "anchovy\ndory\n"
+    expected_stdout: |-
+      anchovy: Filesystem 1024-blocks Used Available Capacity Mounted
+      anchovy: /dev/vda1 41152736 9210416 29832256 24% /
+      dory: Filesystem 1024-blocks Used Available Capacity Mounted
+      dory: /dev/vda1 20549132 4310200 15164584 23% /
+      hosts: 2, ok: 2, failed: 0
+  - name: a command that exits non-zero on one host
+    args: [fleet.txt, systemctl, is-active, nginx]
+    files:
+      fleet.txt: "anchovy\ncuttlefish\ndory\neel\n"
+    expected_stdout: |-
+      anchovy: active
+      cuttlefish: inactive
+      cuttlefish: FAILED (exit 3)
+      dory: active
+      eel: active
+      hosts: 4, ok: 3, failed: 1
+    expected_exit: 1
+  - name: command missing on a host
+    args: [fleet.txt, uptime]
+    files:
+      fleet.txt: "anchovy\neel\ndory\n"
+    expected_stdout: |-
+      anchovy: up 41 days
+      eel: bash: uptime: command not found
+      eel: FAILED (exit 127)
+      dory: up 3 days
+      hosts: 3, ok: 2, failed: 1
+    expected_exit: 1
+  - name: empty host list
+    args: [fleet.txt, uptime]
+    files:
+      fleet.txt: "# nobody home\n\n"
+    expected_stdout: "hosts: 0, ok: 0, failed: 0"
+  - name: host file does not exist
+    args: [nope.txt, uptime]
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 1
+  - name: command is missing
+    args: [fleet.txt]
+    files:
+      fleet.txt: "anchovy\n"
+    expected_stderr: "usage: solution.sh HOSTFILE COMMAND [ARGS...]"
+    expected_exit: 2

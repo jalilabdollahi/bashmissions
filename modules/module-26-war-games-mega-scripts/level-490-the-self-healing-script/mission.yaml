@@ -1,22 +1,240 @@
 id: 490
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Self-Healing Script
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Self-Healing Script` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Self-Healing Script
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 420
+story: |
+  At 03:10 the storm killed `web`, the on-call phone rang, Theo typed
+  `restart web`, went back to bed, and at 03:40 it rang again. And at 04:10.
+  Mara has seen enough. Most outages have a boring fix that a script can
+  apply faster and more calmly than a half-asleep human: try the gentlest
+  remedy, wait, check again, try the next. But a script that restarts a sick
+  service forever is a menace, so it must also know when to stop, when a
+  service keeps coming back sick every run, and when to wake a person up.
+objective: |
+  Write solution.sh, a self-healing watchdog.
+
+    solution.sh PLAYBOOK STATE
+
+  PLAYBOOK, one service per line: `SERVICE ACTION[,ACTION...]`, the actions
+  being tried in the order given. Valid actions: `restart`, `clear-cache`,
+  `rotate-logs`, `failover`. Blank lines and `#` comments are ignored. An
+  unknown action prints `playbook line N: unknown action NAME` to stderr and
+  exits 2 before anything is touched.
+
+  STATE remembers, per service, how many runs in a row needed a heal. Lines are
+  `SERVICE COUNT`; the file may not exist yet. It is rewritten at the end,
+  sorted by service name, with every service in the playbook. (Services
+  that are in STATE but no longer in the playbook are dropped.)
+
+  Settings (environment, positive integers): GRACE seconds to wait after each
+  action [5], MAX_ACTIONS the most actions one run may take in total [6],
+  FLAP_LIMIT [3]. A bad value prints `invalid NAME` and exits 2.
+
+  Only one healer may run at a time. Take a lock by creating the directory
+  `STATE.lock` with `mkdir`; if it exists print `another healer is running` to
+  stderr and exit 1. Remove the lock on every exit path (use a trap).
+
+  For each service, in playbook order, using the stubs `svcctl` and `pagerctl`:
+    1. DETECT: `svcctl status SERVICE`. Exit status 0 means healthy: print
+       `SERVICE: healthy` and reset its count to 0. Exit status 3 means
+       svcctl does not know it: print `SERVICE: unknown service`, count it as a
+       failure, and leave its count unchanged. Any other non-zero status means
+       it is sick.
+    2. FLAPPING: if the stored count is >= FLAP_LIMIT, do not touch it. Print
+       `SERVICE: flapping (N heals), paging instead`, run
+       `pagerctl notify SERVICE "flapping after N heals"`, count a failure.
+    3. REMEDIATE: for each action in order: if MAX_ACTIONS actions have
+       already been run in this run, print `SERVICE: skipped (action budget
+       exhausted)`, count a failure and move on without paging. Otherwise run
+       `svcctl ACTION SERVICE`, then `sleep GRACE`, then check status again.
+       When it is healthy: print `SERVICE: healed by ACTION (attempt K)` (K =
+       1 for the first action tried on that service), add 1 to its count
+       and continue with the next service.
+    4. If every action failed: print `SERVICE: UNHEALED after K actions`, run
+       `pagerctl notify SERVICE "unhealed after K actions"`, count a failure.
+  Finish with `summary: healthy=A healed=B failed=C` and exit 1 when C > 0,
+  else 0. `svcctl status` output is for you to ignore (discard it).
+
+  Wrong arguments or an unreadable PLAYBOOK: print
+  `usage: solution.sh PLAYBOOK STATE` to stderr and exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "detect, remediate, verify as a loop"
+  - "escalation ladder and a global action budget"
+  - "flap detection from state saved between runs"
+  - "mkdir lock and trap cleanup"
+required_patterns:
+  - pattern: '\btrap\b'
+    message: "Release the lock with a trap, so every exit path cleans up."
+  - pattern: '\bmkdir\b'
+    message: "Take the single-instance lock with mkdir."
+test_cases:
+  - name: a healthy fleet
+    args: [playbook.txt, state.db]
+    files:
+      playbook.txt: |
+        web restart,clear-cache
+        db restart
+      svc/web: up
+      svc/db: up
+      state.db: |
+        web 2
+        db 1
+    expected_stdout: |-
+      web: healthy
+      db: healthy
+      summary: healthy=2 healed=0 failed=0
+    expected_files:
+      state.db: |-
+        db 0
+        web 0
+      .calls.log: null
+      state.db.lock: null
+  - name: the second remedy works
+    args: [playbook.txt, state.db]
+    files:
+      playbook.txt: |
+        # web first
+        web restart,clear-cache,failover
+      svc/web: down
+      svc/web.fix: clear-cache
+    expected_stdout: |-
+      web: healed by clear-cache (attempt 2)
+      summary: healthy=0 healed=1 failed=0
+    expected_files:
+      state.db: "web 1"
+      .calls.log: |-
+        svcctl restart web
+        sleep 5
+        svcctl clear-cache web
+        sleep 5
+  - name: nothing helps, so a human is paged
+    args: [playbook.txt, state.db]
+    env:
+      GRACE: "2"
+    files:
+      playbook.txt: |
+        db restart,failover
+      svc/db: down
+    expected_stdout: |-
+      db: UNHEALED after 2 actions
+      summary: healthy=0 healed=0 failed=1
+    expected_exit: 1
+    expected_files:
+      state.db: "db 0"
+      .calls.log: |-
+        svcctl restart db
+        sleep 2
+        svcctl failover db
+        sleep 2
+        page db: unhealed after 2 actions
+  - name: a service that keeps coming back is not restarted again
+    args: [playbook.txt, state.db]
+    files:
+      playbook.txt: |
+        web restart
+        db restart
+      svc/web: down
+      svc/web.fix: restart
+      svc/db: up
+      state.db: |
+        web 3
+        db 0
+    expected_stdout: |-
+      web: flapping (3 heals), paging instead
+      db: healthy
+      summary: healthy=1 healed=0 failed=1
+    expected_exit: 1
+    expected_files:
+      state.db: |-
+        db 0
+        web 3
+      .calls.log: "page web: flapping after 3 heals"
+  - name: FLAP_LIMIT is configurable
+    args: [playbook.txt, state.db]
+    env:
+      FLAP_LIMIT: "1"
+    files:
+      playbook.txt: |
+        web restart
+      svc/web: down
+      svc/web.fix: restart
+      state.db: "web 1\n"
+    expected_stdout: |-
+      web: flapping (1 heals), paging instead
+      summary: healthy=0 healed=0 failed=1
+    expected_exit: 1
+  - name: the action budget stops a restart storm
+    args: [playbook.txt, state.db]
+    env:
+      MAX_ACTIONS: "3"
+    files:
+      playbook.txt: |
+        db restart,failover
+        cache restart,clear-cache,failover
+        mail restart
+      svc/db: down
+      svc/cache: down
+      svc/mail: down
+    expected_stdout: |-
+      db: UNHEALED after 2 actions
+      cache: skipped (action budget exhausted)
+      mail: skipped (action budget exhausted)
+      summary: healthy=0 healed=0 failed=3
+    expected_exit: 1
+    expected_files:
+      .calls.log: |-
+        svcctl restart db
+        sleep 5
+        svcctl failover db
+        sleep 5
+        page db: unhealed after 2 actions
+        svcctl restart cache
+        sleep 5
+  - name: a service svcctl has never heard of
+    args: [playbook.txt, state.db]
+    files:
+      playbook.txt: |
+        ghost restart
+        web restart
+      svc/web: up
+    expected_stdout: |-
+      ghost: unknown service
+      web: healthy
+      summary: healthy=1 healed=0 failed=1
+    expected_exit: 1
+    expected_files:
+      state.db: |-
+        ghost 0
+        web 0
+  - name: another healer holds the lock
+    args: [playbook.txt, state.db]
+    files:
+      playbook.txt: "web restart\n"
+      svc/web: down
+      "state.db.lock/": ""
+    expected_stderr: "another healer is running"
+    expected_exit: 1
+    expected_files:
+      .calls.log: null
+  - name: unknown action in the playbook
+    args: [playbook.txt, state.db]
+    files:
+      playbook.txt: |
+        web restart
+        db reboot-the-sea
+      svc/web: down
+    expected_stderr: "playbook line 2: unknown action reboot-the-sea"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: bad setting
+    args: [playbook.txt, state.db]
+    env:
+      GRACE: "0"
+    files:
+      playbook.txt: "web restart\n"
+    expected_stderr: "invalid GRACE"
+    expected_exit: 2

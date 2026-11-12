@@ -1,0 +1,1 @@
+A `while read` loop pulls exactly one line per turn. You want to take three. So separate "where am I in the file" from "the loop": keep the whole file in memory with a position marker, and write a small function that hands out the next line and moves the marker.

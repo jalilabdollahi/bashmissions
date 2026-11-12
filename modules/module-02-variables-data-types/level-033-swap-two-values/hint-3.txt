@@ -1,0 +1,7 @@
+Print, shuffle in three lines, print again:
+
+  echo "before: primary=$PRIMARY standby=$STANDBY"
+  tmp=$PRIMARY
+  PRIMARY=...
+  STANDBY=...
+  echo "after: primary=$PRIMARY standby=$STANDBY"

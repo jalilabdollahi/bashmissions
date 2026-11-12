@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Fake restart: restart-site SITE. Exit status comes from RS_RC (default 0).
+if [[ $# -ne 1 ]]; then
+  echo "restart-site: usage: restart-site SITE" >&2
+  exit 2
+fi
+exit "${RS_RC:-0}"

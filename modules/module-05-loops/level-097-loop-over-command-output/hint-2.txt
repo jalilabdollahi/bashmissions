@@ -1,1 +1,1 @@
-The shape is `done < <(command)`.
+Process substitution <(command) is replaced by a file-like name that delivers the command's output. Combine it with a redirect: while read -r a b; do ...; done < <(command). Note the space between the two < signs. To track a maximum: keep best=-1 and if (( value > best )); then best=$value; name=$host; fi.

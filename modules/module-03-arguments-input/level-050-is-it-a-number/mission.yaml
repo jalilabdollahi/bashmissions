@@ -1,0 +1,53 @@
+id: 50
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Is It a Number?
+difficulty: beginner
+xp: 100
+story: |
+  The disk-quota tool takes a size in gigabytes. A customer once typed "5O" with a
+  capital letter O instead of a zero, and the tool cheerfully set their quota to
+  something else entirely. Theo wants the tool to look at the value before doing
+  anything with it, and to say clearly what it did not like.
+objective: |
+  Write solution.sh taking one argument, QUOTA. A valid quota is a whole number
+  made only of digits 0-9 (no sign, no decimal point, no spaces).
+  - Valid: print  quota set to <QUOTA> GB  and exit 0.
+  - Invalid: print nothing to stdout, print
+      error: not a whole number: <QUOTA>
+    to stderr and exit 1.
+  Check with a regular-expression test inside [[ ]], not with an external tool.
+  You may assume exactly one argument is passed.
+concepts:
+  - "[[ $x =~ ^[0-9]+$ ]] regex match"
+  - "anchors ^ and $ and the + repetition"
+required_patterns:
+  - pattern: '=~'
+    message: "Match the value against a pattern with [[ $quota =~ ... ]]."
+  - pattern: '\[0-9\]|\[\[:digit:\]\]'
+    message: "The pattern should describe digits, for example ^[0-9]+$."
+test_cases:
+  - name: ordinary quota
+    args: ["250"]
+    expected_stdout: |-
+      quota set to 250 GB
+  - name: leading zeros are still digits
+    args: ["007"]
+    expected_stdout: |-
+      quota set to 007 GB
+  - name: letter O instead of zero
+    args: ["5O"]
+    expected_stdout: ""
+    expected_stderr: "error: not a whole number: 5O"
+    expected_exit: 1
+  - name: decimal point
+    args: ["2.5"]
+    expected_stdout: ""
+    expected_stderr: "error: not a whole number: 2.5"
+    expected_exit: 1
+  - name: negative sign
+    args: ["-10"]
+    expected_stdout: ""
+    expected_stderr: "error: not a whole number: -10"
+    expected_exit: 1

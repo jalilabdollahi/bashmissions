@@ -1,22 +1,149 @@
 id: 482
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Feature Flag System
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Feature Flag System` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Feature Flag System
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 360
+story: |
+  Theo shipped the new checkout on the Friday before the worst storm of the
+  year, and it did exactly what Theo's code always does: worked on his laptop.
+  Half the shop's customers could not pay. Rolling back meant a full deploy
+  in the middle of a gale. Never again, says Mara: from now on risky features
+  ship dark, switch on for a slice of users, and switch off with one line in a
+  config file, no deploy required. She wants the flag tool by tonight.
+objective: |
+  Write solution.sh, a feature-flag evaluator.
+
+    solution.sh FLAGS check FLAG USER [ENV]
+    solution.sh FLAGS list USER [ENV]
+    solution.sh FLAGS validate
+
+  FLAGS is a config file, one flag per line:
+
+    NAME = STATE [rollout=N] [allow=u1,u2] [deny=u1,u2] [env=e1,e2]
+
+  Blank lines and lines starting with `#` are ignored; spaces around `=` and
+  between options are free. NAME matches `[a-z0-9][a-z0-9-]*`. STATE is `on`
+  or `off`. rollout is an integer 0..100 (default 100).
+  ENV defaults to `prod` when not given on the command line.
+
+  Parse problems are reported as `FILE:LINE: MESSAGE` on stderr, in file order,
+  one per bad line (the first problem on a line only), using FILE exactly as it
+  was given:
+    `expected NAME = STATE`      (no `=` on the line)
+    `bad flag name 'NAME'`
+    `state must be on or off`
+    `rollout must be 0-100`      (also for a non-number)
+    `unknown option 'KEY'`
+    `duplicate flag 'NAME'`      (second and later definitions)
+  `validate` prints these and exits 1, or prints `OK: N flags` (N = number of
+  flags) and exits 0. `check` and `list` print them too, but exit 3 and do
+  nothing else, so a typo can never half-enable a feature.
+
+  `check` decides for one user. The rules apply in this order, the first match
+  wins:
+    1. STATE is off              -> off, reason `kill switch`
+    2. USER is in deny           -> off, reason `denied`
+    3. env= is present and ENV is not in it -> off, reason `not enabled in ENV`
+    4. USER is in allow          -> on,  reason `allow list`
+    5. rollout is 100            -> on,  reason `fully on`
+    6. otherwise take BUCKET = (first number printed by `cksum` for the text
+       `FLAG:USER`, with no newline) modulo 100. On when BUCKET < rollout.
+       Reason: `rollout N%, bucket B`.
+  Print `FLAG for USER: on (REASON)` or `FLAG for USER: off (REASON)`. Exit 0
+  when on, 1 when off. An unknown FLAG prints `unknown flag FLAG` to stderr and
+  exits 2.
+
+  `list` prints one line per flag, in file order, formatted with
+  `printf '%-14s %s\n'`: the name padded to 14 columns, then `on` or `off`
+  (the same decision as `check`). Exit 0.
+
+  Wrong arguments: `usage: solution.sh FLAGS check FLAG USER [ENV] | list USER [ENV] | validate`
+  on stderr, exit 2. An unreadable FLAGS file: `cannot read FLAGS`, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "config-driven behaviour with ordered rules"
+  - "deterministic percentage rollout from a hash"
+  - "parse once, report every problem with its line number"
+  - "kill switch beats everything"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Derive the rollout bucket from cksum of FLAG:USER so a user always gets the same answer."
+  - pattern: 'declare\s+-A'
+    message: "Keep the parsed flags in associative arrays."
+forbidden_patterns:
+  - pattern: 'RANDOM'
+    message: "A random roll would flip a user on and off between page loads. Hash the user instead."
+test_cases:
+  - name: inside the rollout slice
+    args: [fixtures/flags.conf, check, new-checkout, mara]
+    expected_stdout: "new-checkout for mara: on (rollout 60%, bucket 51)"
+  - name: outside the slice
+    args: [fixtures/flags.conf, check, new-checkout, theo]
+    expected_stdout: "new-checkout for theo: off (rollout 60%, bucket 92)"
+    expected_exit: 1
+  - name: bucket equal to the rollout is off
+    args: [fixtures/flags.conf, check, new-checkout, noor]
+    expected_stdout: "new-checkout for noor: off (rollout 60%, bucket 61)"
+    expected_exit: 1
+  - name: kill switch beats the allow list
+    args: [fixtures/flags.conf, check, dark-mode, mara]
+    expected_stdout: "dark-mode for mara: off (kill switch)"
+    expected_exit: 1
+  - name: allow list beats a zero rollout
+    args: [fixtures/flags.conf, check, beta-search, ollie]
+    expected_stdout: "beta-search for ollie: on (allow list)"
+  - name: zero rollout for everyone else
+    args: [fixtures/flags.conf, check, beta-search, mara]
+    expected_stdout: "beta-search for mara: off (rollout 0%, bucket 97)"
+    expected_exit: 1
+  - name: deny list wins
+    args: [fixtures/flags.conf, check, payments-v2, theo]
+    expected_stdout: "payments-v2 for theo: off (denied)"
+    expected_exit: 1
+  - name: environment restriction
+    args: [fixtures/flags.conf, check, payments-v2, mara, dev]
+    expected_stdout: "payments-v2 for mara: off (not enabled in dev)"
+    expected_exit: 1
+  - name: environment restriction passes in staging
+    args: [fixtures/flags.conf, check, payments-v2, mara, staging]
+    expected_stdout: "payments-v2 for mara: on (fully on)"
+  - name: list every flag for one user
+    args: [fixtures/flags.conf, list, theo]
+    expected_stdout: |-
+      new-checkout   off
+      dark-mode      off
+      beta-search    off
+      payments-v2    off
+      legacy-export  on
+  - name: unknown flag
+    args: [fixtures/flags.conf, check, teleporter, mara]
+    expected_stderr: "unknown flag teleporter"
+    expected_exit: 2
+  - name: validate reports every bad line
+    args: [fixtures/broken.conf, validate]
+    expected_stderr: |-
+      fixtures/broken.conf:1: rollout must be 0-100
+      fixtures/broken.conf:2: bad flag name 'dark mode'
+      fixtures/broken.conf:3: state must be on or off
+      fixtures/broken.conf:4: expected NAME = STATE
+      fixtures/broken.conf:5: unknown option 'color'
+      fixtures/broken.conf:7: duplicate flag 'fine'
+    expected_exit: 1
+  - name: validate a good file
+    args: [fixtures/flags.conf, validate]
+    expected_stdout: "OK: 5 flags"
+  - name: a broken file blocks check
+    args: [fixtures/broken.conf, check, fine, mara]
+    expected_stderr: |-
+      fixtures/broken.conf:1: rollout must be 0-100
+      fixtures/broken.conf:2: bad flag name 'dark mode'
+      fixtures/broken.conf:3: state must be on or off
+      fixtures/broken.conf:4: expected NAME = STATE
+      fixtures/broken.conf:5: unknown option 'color'
+      fixtures/broken.conf:7: duplicate flag 'fine'
+    expected_exit: 3
+  - name: missing file
+    args: [nope.conf, validate]
+    expected_stderr: "cannot read nope.conf"
+    expected_exit: 2

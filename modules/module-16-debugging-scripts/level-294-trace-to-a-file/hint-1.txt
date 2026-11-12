@@ -1,0 +1,1 @@
+The trace goes to stderr only by default. Bash can send it to any file descriptor you name, so the plan is: create a descriptor that points to a file, then tell Bash to use it for the trace.

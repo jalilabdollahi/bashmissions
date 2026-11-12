@@ -1,0 +1,5 @@
+A regex recognises a header and captures its name:
+
+  if [[ $line =~ ^\[(.*)\]$ ]]; then name=${BASH_REMATCH[1]}; fi
+
+Split a setting at the FIRST equals sign with two expansions: `${line%%=*}` keeps everything before it, `${line#*=}` everything after. A small `trim` function (`${s#"${s%%[![:space:]]*}"}` and its mirror for the end) removes blanks. Since later definitions win, just keep overwriting the result.

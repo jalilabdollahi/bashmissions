@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake uptime (Linux format). Takes no options.
+# FAKE_LOAD="1m, 5m, 15m" sets the load averages; FAKE_UPTIME=broken prints junk.
+if [[ $# -gt 0 ]]; then
+  echo "uptime: this stub takes no options" >&2
+  exit 2
+fi
+if [[ ${FAKE_UPTIME:-} == broken ]]; then
+  echo " 10:15:02 up 12 days,  3:04,  2 users"
+  exit 0
+fi
+echo " 10:15:02 up 12 days,  3:04,  2 users,  load average: ${FAKE_LOAD:-0.52, 0.58, 0.59}"

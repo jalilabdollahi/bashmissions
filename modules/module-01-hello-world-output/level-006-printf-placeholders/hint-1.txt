@@ -1,0 +1,1 @@
+printf can work like a form letter: you write the sentence once with blanks, then list the values that go into the blanks. The first value fills the first blank, and so on.

@@ -1,0 +1,54 @@
+id: 110
+module: 6
+module_name: functions
+module_display: Functions
+title: Source a Library
+difficulty: intermediate
+xp: 130
+story: |
+  The storage team has a small shell library with their unit conversions, and
+  three different scripts keep pasting copies of it. When Ollie noticed that one
+  copy rounded down and another rounded up, Gus sent a company-wide email titled
+  "ONE source of truth". The library lives in fixtures/storage.sh; your job is to
+  use it, not copy it.
+objective: |
+  A library file already exists at fixtures/storage.sh (look at it with cat). It
+  defines the variable STORAGE_LIB_VERSION and the function kb_to_mb, which prints a
+  size in kilobytes converted to whole megabytes, rounded UP.
+  Write solution.sh that loads that library with source (or the dot command) and
+  then prints:
+    storage lib v<STORAGE_LIB_VERSION>
+    and for every argument (a size in KB), one line:  <KB> KB = <MB> MB
+  where <MB> comes from calling kb_to_mb. Do not write the conversion yourself and
+  do not use the number 1024 in your script.
+concepts:
+  - "source file loads its functions and variables into the current shell"
+  - ". file is the short form"
+required_patterns:
+  - pattern: '(^|\n)\s*(source|\.)\s+\S*storage\.sh'
+    message: "Load the library with: source fixtures/storage.sh"
+  - pattern: '\bkb_to_mb\b'
+    message: "Call the library function kb_to_mb."
+forbidden_patterns:
+  - pattern: '1024'
+    message: "The conversion lives in the library; do not repeat the number."
+test_cases:
+  - name: one size
+    args: ["2048"]
+    expected_stdout: |-
+      storage lib v3
+      2048 KB = 2 MB
+  - name: rounds up
+    args: ["1", "1025", "5000"]
+    expected_stdout: |-
+      storage lib v3
+      1 KB = 1 MB
+      1025 KB = 2 MB
+      5000 KB = 5 MB
+  - name: no sizes
+    expected_stdout: "storage lib v3"
+  - name: zero
+    args: ["0"]
+    expected_stdout: |-
+      storage lib v3
+      0 KB = 0 MB

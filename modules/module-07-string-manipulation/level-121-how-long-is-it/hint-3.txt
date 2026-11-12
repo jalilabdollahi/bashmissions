@@ -1,0 +1,14 @@
+Skeleton:
+
+  name=${1-}
+  len=${#name}
+  echo "length=$len"
+  if (( len < 3 )); then
+    echo "status=too-short"
+  elif ... ; then
+    echo "status=too-long"
+  else
+    ...
+  fi
+
+Fill in the too-long test (more than 12) and the final ok branch.

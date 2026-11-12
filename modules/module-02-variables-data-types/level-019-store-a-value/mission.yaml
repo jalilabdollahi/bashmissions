@@ -1,0 +1,52 @@
+id: 19
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Store a Value
+difficulty: beginner
+xp: 50
+story: |
+  Mara slides the server inventory binder across the desk. It is forty pages of
+  sticky notes, and Ollie has been retyping "anchovy" at the top of every one.
+  "Computers are good at remembering things," she says. "Teach this script to
+  remember the name once, and to remember where the machine is racked."
+objective: |
+  Write solution.sh that stores two values in variables and prints them.
+
+    1. Store the text anchovy in a variable called server.
+    2. Store the value of the environment setting RACK in a variable called rack
+       (the inventory tool passes RACK in, just like $USER and $HOME).
+    3. Print exactly two lines, using the variables rather than retyping the values:
+
+         server: anchovy
+         rack: <value of RACK>
+
+  Remember: no spaces around the = sign when you assign.
+concepts:
+  - "name=value assignment (no spaces)"
+  - "reading a variable with $name"
+required_patterns:
+  - pattern: '^\s*server='
+    message: "Assign the server name with server=anchovy (no spaces around =)."
+  - pattern: '^\s*rack='
+    message: "Copy the rack into your own variable with rack=$RACK."
+  - pattern: '\$\{?server\b'
+    message: "Print the server variable with $server instead of typing the name again."
+  - pattern: '\$\{?rack\b'
+    message: "Print the rack variable with $rack."
+test_cases:
+  - name: rack A3
+    env: {RACK: A3}
+    expected_stdout: |-
+      server: anchovy
+      rack: A3
+  - name: rack with a number
+    env: {RACK: B07}
+    expected_stdout: |-
+      server: anchovy
+      rack: B07
+  - name: rack with dashes
+    env: {RACK: D-12-top}
+    expected_stdout: |-
+      server: anchovy
+      rack: D-12-top

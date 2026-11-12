@@ -1,0 +1,42 @@
+id: 22
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Glue Strings Together
+difficulty: beginner
+xp: 60
+story: |
+  Gus wants a clickable link to every status page in the weekly report, and
+  he wants it by lunch. Each link is the same kind of string with different
+  pieces: a site, a port and a stage. Rather than typing forty URLs, you will
+  build one piece at a time, the way Mara builds a sentence she is not sure
+  about yet.
+objective: |
+  The report tool passes in three settings: SITE (a hostname), PORT (a number)
+  and STAGE (a word such as live or test).
+
+  Write solution.sh that builds a variable called url in steps and prints it
+  as a single line:
+
+    https://<SITE>:<PORT>/status/<STAGE>
+
+  Start with url=https://..., then add the remaining pieces to url one by
+  one with the += operator. Finally print the url.
+concepts:
+  - "concatenating strings"
+  - "var+=text appends to a variable"
+required_patterns:
+  - pattern: '^\s*url='
+    message: "Start the link with url=https://... in your own variable."
+  - pattern: 'url\+='
+    message: "Add the remaining pieces with url+=... (append to the variable)."
+test_cases:
+  - name: live status page
+    env: {SITE: anchovy.lanternfish.example, PORT: "8443", STAGE: live}
+    expected_stdout: "https://anchovy.lanternfish.example:8443/status/live"
+  - name: test stage on another host
+    env: {SITE: dory.lanternfish.example, PORT: "9000", STAGE: test}
+    expected_stdout: "https://dory.lanternfish.example:9000/status/test"
+  - name: default https port is still written out
+    env: {SITE: eel.lanternfish.example, PORT: "443", STAGE: live}
+    expected_stdout: "https://eel.lanternfish.example:443/status/live"

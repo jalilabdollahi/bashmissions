@@ -1,0 +1,1 @@
+You need two things: the current time in a fixed layout, and a way to add to the end of a file instead of replacing it. Also, the message arrives as several separate arguments; think about how to peel the first one off and keep the rest together.

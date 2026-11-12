@@ -1,0 +1,7 @@
+Two captures, three prints:
+
+  first=$(sort fixtures/servers.txt | head -n 1)
+  last=$(sort fixtures/servers.txt | ...)      # the other end
+  echo "first: $first"
+  echo "last: $last"
+  echo "range: ..."                             # both variables, two dots between

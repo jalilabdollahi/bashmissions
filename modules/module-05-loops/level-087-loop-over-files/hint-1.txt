@@ -1,1 +1,1 @@
-A glob like `fixtures/*.txt` expands to matching text files.
+You do not need a command to list the files. The shell itself can expand a pattern with a star into the matching file names, and a for loop can walk over them. Think about what the shell does when nothing matches.

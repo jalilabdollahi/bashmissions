@@ -1,1 +1,21 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton for dispatch:
+
+  top=$(last_seq)
+  for name in $(subscriber_names); do                  # sorted
+    read_sub "$name"                                   # pattern, handler
+    seq=$(( $(read_cursor "$name") + 1 ))
+    while (( seq <= top )); do
+      { read -r topic; read -r msg; } < "$spool/$(printf '%06d' "$seq")"
+      if ! matches "$pattern" "$topic"; then write cursor=seq; seq++; continue; fi
+      if "$handler" "$topic" "$seq" "$msg"; then
+        print ok; delivered++; cursor=seq; remove the tries file; seq++; continue
+      fi
+      attempts = (stored count when stored SEQ == seq, else 0) + 1; save "SEQ COUNT"
+      if (( attempts >= max_tries )); then copy to dead/NAME.NNNNNN, print dead-letter, cursor=seq, remove tries, seq++; continue; fi
+      print "failed (attempt K/MAX)"; failed++; break          # blocks only this subscriber
+    done
+  done
+  summary; exit status 0 only when failed and dead are both 0
+
+publish: n=$(( $(last_seq) + 1 )), the noclobber loop, then count the subscribers whose pattern matches.
+status: per subscriber count pending matching messages above the cursor and the files named NAME.* in dead/.

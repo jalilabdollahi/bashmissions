@@ -1,0 +1,7 @@
+  exec 4>&1
+  exec > build.log
+  echo "site=$site"
+  compile-site "$site"
+  exec 1>&4 4>&-
+
+Then count the lines of build.log and print the closing message, which the starter already prepares.

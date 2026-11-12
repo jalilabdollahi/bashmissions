@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Background jobs: `for i in "${!n_of[@]}"; do ( check ... > "$work/$i" ) & done; wait`. A subshell per job keeps one failing check from stopping the others, and numbering the files by index keeps the order.
+- Scratch space: `work=$(mktemp -d); trap 'rm -rf "$work"' EXIT`.
+- Reading a result: `IFS='|' read -r state detail < "$work/$i"`.
+- curl status with a fallback: `code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "$url" 2>/dev/null) || code=000`.
+- Group order of first appearance: an associative array of groups already seen plus an ordered array.
+- Colour only on request: `printf '\033[32m%s\033[0m' "$(printf '%-8s' "$state")"`, pad first so the columns still line up.
+- Critical marker: `[[ $name == *! ]]`.

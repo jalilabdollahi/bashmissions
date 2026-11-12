@@ -1,0 +1,9 @@
+delay=$base; total=0
+for (( k=1; k<=attempts; k++ )); do
+  if (( delay > cap )); then delay=$cap; fi
+  echo "attempt $k: wait ${delay}s"
+  total=$(( total + delay ))
+  delay=$(( delay * 2 ))
+done
+echo "total wait: ${total}s"
+Check for three arguments first and name them base, attempts and cap.

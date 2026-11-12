@@ -1,0 +1,4 @@
+dir=$1
+find "$dir" -type f -name '*.log' -print0 | xargs -0 cksum | sort
+
+Before that line: the usage check (no argument, stderr, exit 2) and the "not a folder: DIR" check (stderr, exit 1).

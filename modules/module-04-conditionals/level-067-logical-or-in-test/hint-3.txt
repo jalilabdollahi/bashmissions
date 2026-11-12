@@ -1,1 +1,0 @@
-Only print `denied` when neither comparison matches.

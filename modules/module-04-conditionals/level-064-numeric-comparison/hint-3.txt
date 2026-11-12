@@ -1,1 +1,0 @@
-After less-than and equal are handled, the remaining numeric case is greater-than.

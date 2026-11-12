@@ -1,0 +1,1 @@
+You already know how to strip a prefix and a suffix when the text is a known string. Here the text is "however many blanks there happen to be". You need a pattern that means "one or more whitespace characters", and you need to apply it once at the front and once at the back. Plain globs cannot say "one or more", but Bash has an optional extension for that.

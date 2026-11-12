@@ -1,0 +1,1 @@
+Bash can cut a section out of an array, much like substring extraction on a string: you say where to start and how many elements to take. The original array stays as it was. Also think about what printing an empty list does.

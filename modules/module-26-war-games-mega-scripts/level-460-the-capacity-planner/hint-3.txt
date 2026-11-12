@@ -1,1 +1,16 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  rows=$(awk -F, -v warn="$warn" -v crit="$crit" '
+    function days(y, m, d,   era, yoe, doy, doe) { ... }      # Hinnant: y -= (m <= 2); era = int(y / 400); ...
+    function civil(z,   ...) { ... return sprintf("%04d-%02d-%02d", ...) }
+    NR == 1 && $1 == "date" { next }
+    /^[ \t]*$/ { next }
+    { validate: NF == 5, date regex, numbers regex, total > 0, else { bad++; next }
+      k = $2 SUBSEP $3; c = ++n[k]; xs[k, c] = days(...); ys[k, c] = $4 + 0
+      remember first day, and used/total/last day of the newest sample }
+    END { warning for bad > 0 to /dev/stderr
+          for (k in n) { fewer than 3 -> NODATA row
+            sums -> slope; pct; left = int((total - used) / slope); full = civil(last + left)
+            status rules; printf "%d|%s|%s|%.1f|%.2f|%s|%s|%s\n", rank, ... } }' "$file" | sort -t'|' -k1,1n -k2,2 -k3,3)
+
+Print the header with printf, the rows with a second awk -F'|', count statuses, and exit 2 / 1 / 0.

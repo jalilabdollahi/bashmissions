@@ -1,0 +1,11 @@
+  declare -A installed=()
+  while read -r name version; do installed[$name]=$version; done < <(dpkg-query -W -f='${Package} ${Version}\n')
+  older() { local IFS=.; local -a a=($1) b=($2); ...loop i over the longer array...; return 0 if a<b at the first difference...; }
+  while read -r word name want _; do
+    case $word in
+      require) [[ -n ${installed[$name]:-} ]] || ...MISSING... ;;
+      forbid)  ...FORBIDDEN with ${installed[$name]}... ;;
+      minver)  ...MISSING, or numeric part + older "$have" "$want" -> OUTDATED... ;;
+    esac
+  done < <(grep -Ev '^[[:space:]]*(#|$)' "$policy" || true)
+Check unknown rule words in a separate first pass so nothing is printed before the error.

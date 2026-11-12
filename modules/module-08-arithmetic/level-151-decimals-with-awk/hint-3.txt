@@ -1,0 +1,5 @@
+awk -v gb="$1" -v rate="$2" -v servers="$3" 'BEGIN {
+  total = gb * rate
+  printf "total=$%.2f\n", ...
+  printf "per_server=$%.2f\n", ... / servers
+}'

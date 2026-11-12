@@ -1,1 +1,0 @@
-`declare -i name` gives a variable the **integer** attribute. After that, every assignment is evaluated in arithmetic context.

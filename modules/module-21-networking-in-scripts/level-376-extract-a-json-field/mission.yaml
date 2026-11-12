@@ -1,0 +1,71 @@
+id: 376
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Extract a JSON Field
+difficulty: advanced
+xp: 220
+story: |
+  The customer API answers in JSON, and Noor only ever needs one value out
+  of it: the plan, or the balance, or whether the account is active. Mara
+  does not want to install a JSON tool on every server just for that. "The
+  replies are small and flat," she says. "Text tools will do. Just be
+  careful which text you grab."
+objective: |
+  Write solution.sh with two arguments: a customer ID and a FIELD name.
+  Fetch
+    https://billing.lanternfish.example/api/v1/customers/ID
+  (use `-sS --fail`) and print the value of FIELD, without quotes around
+  strings. Numbers and booleans are printed as they are.
+
+  The reply is one flat JSON object on a single line. Values never contain
+  commas, quotes or braces; there may be a space after each colon and after
+  each comma. Use `sed` or `grep` (jq is not available). Match the whole
+  quoted field name: asking for `id` must not return `customer_id`.
+
+  - field missing from the reply: print `field not found: FIELD` to stderr,
+    exit 1
+  - curl fails (unknown customer gives HTTP 404): print
+    `customer not found: ID` to stderr, exit 1
+  - not exactly two arguments: print `usage: solution.sh ID FIELD` to
+    stderr, exit 2
+concepts:
+  - "sed -E with a capture group pulls out a value"
+  - "match the quoted key, not just a word"
+  - "knowing the limits of text tools on JSON"
+required_patterns:
+  - pattern: '\b(sed|grep)\b'
+    message: "Extract the value with sed or grep."
+test_cases:
+  - name: a string field
+    args: [c-204, plan]
+    expected_stdout: "pro"
+  - name: a number
+    args: [c-204, balance]
+    expected_stdout: "42.5"
+  - name: a value with spaces inside
+    args: [c-204, name]
+    expected_stdout: "Tidewater Books"
+  - name: id must not match customer_id, and spaces after colons
+    args: [c-310, id]
+    expected_stdout: "c-310"
+  - name: a boolean in the spaced format
+    args: [c-310, active]
+    expected_stdout: "false"
+  - name: a negative number
+    args: [c-415, balance]
+    expected_stdout: "-12.75"
+  - name: unknown field
+    args: [c-204, email]
+    expected_stdout: ""
+    expected_stderr: "field not found: email"
+    expected_exit: 1
+  - name: unknown customer
+    args: [c-999, plan]
+    expected_stdout: ""
+    expected_stderr: "customer not found: c-999"
+    expected_exit: 1
+  - name: one argument
+    args: [c-204]
+    expected_stderr: "usage: solution.sh ID FIELD"
+    expected_exit: 2

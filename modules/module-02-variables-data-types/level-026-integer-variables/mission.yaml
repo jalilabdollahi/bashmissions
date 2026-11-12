@@ -1,0 +1,47 @@
+id: 26
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Integer Variables
+difficulty: beginner
+xp: 70
+story: |
+  Gus is pricing next year's harbour-side rack space and needs one number:
+  how many servers does Lanternfish run? The three team leads each reported
+  a count, and Ollie's first attempt printed "3+2+1" as the answer. Gus did
+  not laugh. Teach the variable to do arithmetic.
+objective: |
+  The inventory tooling passes three counts as settings: WEB, DB and CACHE
+  (whole numbers, possibly 0).
+
+  Write solution.sh that:
+    1. Declares a variable called total as an integer variable.
+    2. Sets total to WEB + DB + CACHE and prints:   servers: <total>
+    3. Adds 2 spare machines to total with total+=2 and prints:
+                                                    with spares: <total>
+
+  Example: WEB=3 DB=2 CACHE=1 prints "servers: 6" and "with spares: 8".
+concepts:
+  - "declare -i integer attribute"
+  - "arithmetic on assignment and +="
+required_patterns:
+  - pattern: '\b(declare|typeset)\s+-[a-zA-Z]*i'
+    message: "Mark total as an integer variable with declare -i total."
+  - pattern: 'total\+=2'
+    message: "Add the spares with total+=2 (on an integer variable this adds)."
+test_cases:
+  - name: three, two, one
+    env: {WEB: "3", DB: "2", CACHE: "1"}
+    expected_stdout: |-
+      servers: 6
+      with spares: 8
+  - name: bigger fleet
+    env: {WEB: "12", DB: "4", CACHE: "9"}
+    expected_stdout: |-
+      servers: 25
+      with spares: 27
+  - name: an empty team reports zero
+    env: {WEB: "0", DB: "0", CACHE: "0"}
+    expected_stdout: |-
+      servers: 0
+      with spares: 2

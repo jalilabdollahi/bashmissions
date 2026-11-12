@@ -1,0 +1,12 @@
+Body of the loop:
+
+  for (( attempt = 1; attempt <= max; attempt++ )); do
+    if lanternpush > /dev/null 2>&1; then
+      echo "pushed on attempt $attempt"
+      exit 0
+    fi
+    echo "attempt $attempt failed"
+    (( attempt < max )) && sleep 0.1
+  done
+
+Careful if you add `set -e`: a bare `(( attempt < max )) && sleep` can return 1 on the last round, so prefer an `if`. After the loop print the giving-up message to stderr and exit 1.

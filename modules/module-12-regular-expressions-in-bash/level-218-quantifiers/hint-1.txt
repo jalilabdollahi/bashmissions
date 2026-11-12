@@ -1,0 +1,1 @@
+Each part of a reference has a count attached: "one or more", "three to five", "maybe, maybe not", "any number". Regex has a short symbol for each kind of count, and the symbol always goes right after the thing it counts. For a whole optional chunk like "-P1" you need a way to treat several characters as one thing.

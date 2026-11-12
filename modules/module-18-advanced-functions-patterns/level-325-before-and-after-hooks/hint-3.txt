@@ -1,0 +1,12 @@
+  before_hooks=(); after_hooks=()
+  for spec in "$@"; do
+    phase=${spec%%:*}      # text before the first colon
+    name=${spec#*:}        # text after it
+    # validate: spec must contain ":" and name must be lock|snapshot|notify|cache
+    # else: echo "bad hook spec: $spec" >&2; exit 2
+    case $phase in
+      before) before_hooks+=("hook_$name") ;;
+      after)  # same for after_hooks
+    esac
+  done
+  # then: loop before_hooks calling "$h" "$site"; echo deploying; loop after_hooks

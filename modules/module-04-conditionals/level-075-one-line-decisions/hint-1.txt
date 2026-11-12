@@ -1,0 +1,1 @@
+The compact form is: test && do-this || otherwise-do-that. It reads like if/else but it is not the same thing. Try the pager-down case in your head: which part of the line runs when notify itself fails?

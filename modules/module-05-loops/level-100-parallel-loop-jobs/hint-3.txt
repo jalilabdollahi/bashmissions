@@ -1,1 +1,0 @@
-Collect output and print it in order so the test stays deterministic.

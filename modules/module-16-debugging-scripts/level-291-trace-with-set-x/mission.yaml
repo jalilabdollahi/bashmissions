@@ -1,0 +1,54 @@
+id: 291
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Trace with set -x
+difficulty: intermediate
+xp: 130
+story: |
+  At 03:12 the pager goes off: Harbour Bakery's backup folder is nowhere to be
+  found, yet Theo's setup script printed "ready". Mara, in a dressing gown and
+  very calm, says: "Don't guess. Make the script show its work." The easiest way
+  to watch a script think is to turn on its trace.
+objective: |
+  Write solution.sh that takes one argument, a CUSTOMER name, and runs exactly
+  these three commands, in this order:
+    dest=backups/$1
+    mkdir -p "$dest"
+    echo "ready: $dest"
+  Turn on tracing with `set -x` before the first of them and leave it on until
+  the script ends (do not turn it off). The normal output is unchanged
+  (`ready: backups/NAME` on stdout), while the trace of the three commands goes
+  to stderr, each line starting with `+ `.
+concepts:
+  - "set -x prints each command, after expansion, to stderr"
+  - "trace lines start with + (the PS4 prefix)"
+  - "the trace shows the quoting Bash would need"
+required_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*x'
+    message: "Turn the trace on with set -x."
+test_cases:
+  - name: plain customer name
+    args: [harbour]
+    expected_stdout: "ready: backups/harbour"
+    stderr_comparison: regex
+    expected_stderr: |-
+      \+ dest=backups/harbour
+      \+ mkdir -p backups/harbour
+      \+ echo 'ready: backups/harbour'
+  - name: a name with a space shows its quoting
+    args: [Tidewater Books]
+    expected_stdout: "ready: backups/Tidewater Books"
+    stderr_comparison: regex
+    expected_stderr: |-
+      \+ dest='backups/Tidewater Books'
+      \+ mkdir -p 'backups/Tidewater Books'
+      \+ echo 'ready: backups/Tidewater Books'
+  - name: another customer
+    args: [gull-anchor]
+    expected_stdout: "ready: backups/gull-anchor"
+    stderr_comparison: regex
+    expected_stderr: |-
+      \+ dest=backups/gull-anchor
+      \+ mkdir -p backups/gull-anchor
+      \+ echo 'ready: backups/gull-anchor'

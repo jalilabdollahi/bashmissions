@@ -1,0 +1,1 @@
+`sed` normally prints every line it reads. There is a switch that silences that default, and a command that prints a line on demand, so you can ask it for "only line N". Think about what comes back when the file has fewer lines than that.

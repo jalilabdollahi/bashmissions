@@ -1,0 +1,9 @@
+`local` limits a variable to the function that declares it (and anything that function calls):
+
+  helper() {
+    local tmp=$1
+    tmp=${tmp^^}
+    echo "$tmp"
+  }
+
+An assignment without `local` writes to a global with the same name, even if the caller was using it for something else. Declaring a caller's own loop variables local in the caller is good hygiene too.

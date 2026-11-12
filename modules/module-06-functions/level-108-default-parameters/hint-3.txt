@@ -1,0 +1,9 @@
+  retention_line() {
+    local days=${1:-30}
+    local tier=...      # fall back to standard
+    echo "keep backups for $days days ($tier tier)"
+  }
+
+  retention_line "$@"
+
+Passing "$@" forwards exactly the arguments the script got, including an empty first one.

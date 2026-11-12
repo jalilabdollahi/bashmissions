@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Reading a link without readlink:   out=$(ls -ld site/current); target=${out##* -> }
+
+Making the new link:               ln -sfn releases/green .current.tmp
+(-n: if the name already exists as a link to a directory, replace it instead of creating a link inside it)
+
+The trap: mv renames, but if the destination is a symlink to a directory, mv puts the source INSIDE that directory (you would find releases/blue/.current.tmp and current unchanged). Tell mv to treat the destination as a plain name:
+  GNU/Linux:  mv -fT .current.tmp current
+  macOS/BSD:  mv -fh .current.tmp current
+Try the GNU form first, silencing its error, and fall back to the BSD form.
+
+A trap  trap 'rm -f "$tmplink"' EXIT  keeps the folder clean when something fails in the middle.

@@ -1,0 +1,16 @@
+  # guards: usage (2 args), [[ -r $old ]], first real line == "version=2" -> echo and exit 0,
+  #         [[ -e $new ]] -> refuse
+  out=(); count=0; lineno=0
+  while IFS= read -r line || [[ -n $line ]]; do
+    lineno=$(( lineno + 1 )); line=$(trim "$line")
+    [[ -n $line ]] || continue
+    if [[ $line == \#* ]]; then out+=("$line"); continue; fi
+    if [[ $line != *:* ]]; then echo "skipped line $lineno" >&2; continue; fi
+    name=$(trim "${line%%:*}"); value=$(trim "${line#*:}")
+    case $name in
+      Listen)  out+=("port=$value") ;;
+      ...                                   # Hostname, Debug, Timeout, unknown
+    esac
+    count=$(( count + 1 ))
+  done < "$old"
+  { echo "version=2"; printf '%s\n' "${out[@]}"; } > "$new"

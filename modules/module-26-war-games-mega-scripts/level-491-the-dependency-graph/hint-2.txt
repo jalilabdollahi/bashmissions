@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Data structures (associative arrays):
+  deps[$name]="dep1 dep2"          what it needs
+  unmet[$name]=2                   how many are not placed yet
+  dependents[$dep]+="$name "       who waits for it (the reverse edges)
+
+One round of Kahn: collect every unplaced name with unmet == 0 into `ready`, sort it (printf '%s\n' "${ready[@]}" | LC_ALL=C sort), record it as a layer, mark them placed and decrement unmet for each of their dependents. Stop when a round finds nothing ready.
+
+Targets: a stack walk collects the closure:  push the targets; pop one; skip if seen; mark; push its deps.
+
+Finding a cycle among the leftovers: start at the first leftover name (sorted), repeatedly move to its first leftover dependency (sorted), remembering the position of each name in a `path` array and in onpath[name]; when you reach a name already on the path, print the path from that name's position to the end, then the name again.
+Beware: ${#inplay[@]} counts the services in play; a plain `for name in "${!inplay[@]}"` iterates in no particular order, so sort anything that you print.

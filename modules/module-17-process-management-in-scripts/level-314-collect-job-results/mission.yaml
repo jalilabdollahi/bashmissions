@@ -1,0 +1,67 @@
+id: 314
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Collect Job Results
+difficulty: advanced
+xp: 220
+story: |
+  Ollie wrote a neat latency probe: `result=$(latency "$host") &` inside a loop,
+  then he printed `$result` and got nothing. Five times. He is close to tears.
+  Mara explains that every background job is a separate process with its own
+  copy of the variables, so a variable assigned in it never comes back. The
+  way out is old and humble: let every job write to its own file.
+objective: |
+  Write solution.sh. Every argument is a host name; with no arguments print
+  `usage: solution.sh HOST...` to stderr and exit with status 2.
+
+  1. Make a private scratch folder with `mktemp -d` and remember its name.
+  2. Start `latency HOST` in the background for every host, all at once. Each
+     job writes both its output and its error messages to its own file in the
+     scratch folder: `> "$tmp/N" 2>&1`, with N the position of the host
+     (1, 2, 3, ...).
+  3. `wait` for all the jobs.
+  4. Print the contents of the files in the order the hosts were given, so
+     that the report does not depend on which job finished first.
+  5. Remove the scratch folder completely.
+  6. Print `checked N hosts`.
+
+  `latency HOST` prints `HOST NNms`; for a host that does not answer it prints
+  `HOST: unreachable` on stderr and exits with status 1. Both kinds of line
+  belong in the report. Exit with status 0.
+concepts:
+  - "variables set in a background job are lost"
+  - "one temp file per job, read back in submission order"
+  - "mktemp -d and cleaning up"
+required_patterns:
+  - pattern: 'mktemp\s+-d'
+    message: "Create the scratch folder with mktemp -d."
+  - pattern: '>\s*"?\$\{?[A-Za-z_]+\}?/'
+    message: "Send each job's output to its own file inside the scratch folder: > \"$tmp/$n\" 2>&1."
+  - pattern: '\bwait\b'
+    message: "Wait for the jobs before reading the files."
+test_cases:
+  - name: three hosts, different speeds
+    args: [anchovy, barracuda, cuttlefish]
+    expected_stdout: |-
+      anchovy 60ms
+      barracuda 74ms
+      cuttlefish 81ms
+      checked 3 hosts
+  - name: a host that is down
+    args: [dory, dory-down, eel, flounder]
+    expected_stdout: |-
+      dory 39ms
+      dory-down: unreachable
+      eel 32ms
+      flounder 67ms
+      checked 4 hosts
+  - name: a single host
+    args: [eel]
+    expected_stdout: |-
+      eel 32ms
+      checked 1 hosts
+  - name: no hosts
+    args: []
+    expected_stderr: "usage: solution.sh HOST..."
+    expected_exit: 2

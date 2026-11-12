@@ -1,1 +1,0 @@
-Out-of-range slices return whatever fits — `${var:0:1000}` on a 5-char string just gives the whole string.

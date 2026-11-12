@@ -1,0 +1,75 @@
+id: 117
+module: 6
+module_name: functions
+module_display: Functions
+title: A log() Helper
+difficulty: advanced
+xp: 160
+story: |
+  Marlin's disk-watch script is noisy: when everything is fine it still prints
+  twelve lines, and when something is wrong the important line is lost among them.
+  Priya wants levels. Debug chatter appears only when asked, warnings and errors
+  are tagged clearly, and the verbosity is chosen with an environment variable so
+  the cron job can stay quiet while a human can turn the noise up.
+objective: |
+  Write solution.sh. It takes one argument PCT (disk usage, a whole number).
+  Define a function named log that takes a LEVEL word and a message:
+      log INFO "checking disk usage"
+  It prints  [LEVEL] message  to stderr, but only when LEVEL is at least as
+  important as the threshold in the environment variable LOG_LEVEL
+  (default INFO). Importance order, lowest first: DEBUG, INFO, WARN, ERROR.
+  The main script runs, in this order:
+      log DEBUG "raw argument: <PCT>"
+      log INFO  "checking disk usage"
+      PCT >= 90:  log ERROR "disk almost full: <PCT>%"
+      PCT >= 75:  log WARN  "disk filling up: <PCT>%"     (when not >= 90)
+      and finally prints to stdout:   checked: <PCT>%
+  Example: PCT=80 with the default threshold prints to stderr
+      [INFO] checking disk usage
+      [WARN] disk filling up: 80%
+  Use ${LOG_LEVEL:-INFO} for the default. The script exits 0 in every case.
+concepts:
+  - "a log helper with a threshold"
+  - "level names mapped to numbers with case"
+  - "defaults from the environment: ${LOG_LEVEL:-INFO}"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?log\s*(\(\s*\))?\s*\{'
+    message: "Define a function called log."
+  - pattern: '\$\{LOG_LEVEL:-INFO\}'
+    message: "Read the threshold with ${LOG_LEVEL:-INFO}."
+  - pattern: '>&2'
+    message: "Log lines go to stderr (>&2)."
+test_cases:
+  - name: healthy disk is quiet
+    args: ["40"]
+    expected_stdout: "checked: 40%"
+    expected_stderr: "[INFO] checking disk usage"
+  - name: warning
+    args: ["80"]
+    expected_stdout: "checked: 80%"
+    expected_stderr: |-
+      [INFO] checking disk usage
+      [WARN] disk filling up: 80%
+  - name: error
+    args: ["95"]
+    expected_stdout: "checked: 95%"
+    expected_stderr: |-
+      [INFO] checking disk usage
+      [ERROR] disk almost full: 95%
+  - name: debug turned on
+    args: ["10"]
+    env: {LOG_LEVEL: DEBUG}
+    expected_stdout: "checked: 10%"
+    expected_stderr: |-
+      [DEBUG] raw argument: 10
+      [INFO] checking disk usage
+  - name: only errors
+    args: ["80"]
+    env: {LOG_LEVEL: ERROR}
+    expected_stdout: "checked: 80%"
+    expected_stderr: ""
+  - name: warnings and up
+    args: ["99"]
+    env: {LOG_LEVEL: WARN}
+    expected_stdout: "checked: 99%"
+    expected_stderr: "[ERROR] disk almost full: 99%"

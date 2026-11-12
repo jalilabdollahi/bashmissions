@@ -1,0 +1,14 @@
+  stage=$(mktemp -d)
+  trap 'rm -rf "${stage:?}"' EXIT
+  shopt -s nullglob
+  count=0
+  for page in "$site"/*.html; do
+    name=${page##*/}
+    [[ $name == draft-* ]] && continue
+    cp "$page" "$stage/$name"
+    echo "$name" >> "$stage/MANIFEST"
+    count=$(( count + 1 ))
+  done
+  # if count is 0 -> message + exit 1
+  ( cd "$stage" && tar -cf "$PWD_BEFORE/release.tar" -- * )   # save $PWD in a variable first
+  tar -tf release.tar | sort

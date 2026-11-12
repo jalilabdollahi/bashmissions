@@ -1,0 +1,1 @@
+Bash has a built-in that reads a whole file straight into an array, one line per element, in one step. No loop is needed and no command substitution, so line breaks and spaces cannot be mangled by word splitting.

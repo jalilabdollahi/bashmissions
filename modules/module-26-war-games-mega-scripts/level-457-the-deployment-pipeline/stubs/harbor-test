@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# harbor-test APP  (FAKE_FAIL=test makes it fail)
+[[ $# -eq 1 ]] || { echo "harbor-test: usage: harbor-test APP" >&2; exit 2; }
+echo "harbor-test $1" >> .calls.log
+if [[ ${FAKE_FAIL:-} == *test* ]]; then echo "3 tests failed" >&2; exit 1; fi
+exit 0

@@ -1,0 +1,99 @@
+id: 439
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Verify a Backup
+difficulty: expert
+xp: 280
+story: |
+  Last quarter Noor restored a customer database from the backup disk and
+  found the dump was half a megabyte of zeros. The disk had been failing
+  for weeks and every nightly job reported "success". Priya's rule since
+  then: a backup folder carries a manifest of checksums, and a verifier
+  runs before anyone trusts a single file in it.
+objective: |
+  Write solution.sh DIR. DIR holds backup files and a manifest called
+  MANIFEST, one line per file in the format `cksum` prints:
+    CRC SIZE NAME
+  (for example `3650393976 6 orders.sql`).
+
+  For each manifest line, in manifest order, recompute the checksum of
+  DIR/NAME with `cksum` and print exactly one of:
+    OK NAME          (CRC and SIZE both match)
+    FAILED NAME      (the file exists but CRC or SIZE differs)
+    MISSING NAME     (the file does not exist)
+  Then print `UNLISTED NAME` for every file in DIR (other than MANIFEST
+  itself) that the manifest does not mention, in file-name order, and a
+  summary line:
+    verified: A ok, B failed, C missing, D unlisted
+  Exit with status 0 only when there are no FAILED and no MISSING files
+  (unlisted files are only a warning); otherwise exit 1.
+
+  If DIR has no MANIFEST print `no manifest in DIR` to stderr and exit 1.
+  With no argument print `usage: solution.sh DIR` to stderr and exit 2.
+  Use `cksum` (it is the same on every platform), not sha256sum or md5.
+concepts:
+  - "cksum prints CRC and byte count"
+  - "read -r a b c splits a manifest line into fields"
+  - "compare what the manifest says with what the disk says"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Recompute each checksum with cksum."
+forbidden_patterns:
+  - pattern: 'sha256sum|md5sum|shasum'
+    message: "Use cksum; it exists everywhere and prints the format the manifest uses."
+test_cases:
+  - name: every file is intact
+    args: [bk]
+    files:
+      bk/orders.sql: "alpha\n"
+      bk/users.sql: "beta\n"
+      bk/MANIFEST: "3650393976 6 orders.sql\n3703342344 5 users.sql\n"
+    expected_stdout: |-
+      OK orders.sql
+      OK users.sql
+      verified: 2 ok, 0 failed, 0 missing, 0 unlisted
+  - name: corrupt, missing and unlisted files
+    args: [bk]
+    files:
+      bk/orders.sql: "alpha\n"
+      bk/users.sql: "bata\n"
+      bk/scratch.tmp: "leftover\n"
+      bk/MANIFEST: "3650393976 6 orders.sql\n3703342344 5 users.sql\n3677655623 6 audit.sql\n"
+    expected_stdout: |-
+      OK orders.sql
+      FAILED users.sql
+      MISSING audit.sql
+      UNLISTED scratch.tmp
+      verified: 1 ok, 1 failed, 1 missing, 1 unlisted
+    expected_exit: 1
+  - name: an extra file alone is only a warning
+    args: [bk]
+    files:
+      bk/orders.sql: "alpha\n"
+      bk/notes.txt: "hi\n"
+      bk/MANIFEST: "3650393976 6 orders.sql\n"
+    expected_stdout: |-
+      OK orders.sql
+      UNLISTED notes.txt
+      verified: 1 ok, 0 failed, 0 missing, 1 unlisted
+  - name: same checksum is not enough if the size differs
+    args: [bk]
+    files:
+      bk/orders.sql: "alpha\n"
+      bk/MANIFEST: "3650393976 7 orders.sql\n"
+    expected_stdout: |-
+      FAILED orders.sql
+      verified: 0 ok, 1 failed, 0 missing, 0 unlisted
+    expected_exit: 1
+  - name: folder without manifest
+    args: [bk]
+    files:
+      bk/orders.sql: "alpha\n"
+    expected_stdout: ""
+    expected_stderr: "no manifest in bk"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

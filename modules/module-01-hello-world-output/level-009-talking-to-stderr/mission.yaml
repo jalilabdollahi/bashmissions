@@ -1,0 +1,40 @@
+id: 9
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: Talking to stderr
+difficulty: beginner
+xp: 80
+story: |
+  Every night a cron job emails whatever the sync script prints to the
+  customer, and last Tuesday the Harbour Bakery received "WARNING: spare disk
+  almost full" in their inbox. Priya was not amused. The fix is to keep the
+  customer's report and the team's warnings in separate channels. The tool
+  sets HOST to the machine being synced.
+objective: |
+  Write solution.sh so that it prints two messages, each to its own stream.
+  To standard output (the report for the customer):
+    report: nightly sync complete on <HOST>
+  To standard error (the warning for the team):
+    warning: <HOST> is using the spare disk
+  Read the machine name from $HOST. Send the warning to stderr by adding
+  >&2 to its command.
+concepts:
+  - "stdout versus stderr"
+  - ">&2 sends a command's output to stderr"
+required_patterns:
+  - pattern: '>&2'
+    message: "Send the warning to stderr by ending its command with >&2."
+test_cases:
+  - name: marlin
+    env: {HOST: "marlin"}
+    expected_stdout: "report: nightly sync complete on marlin"
+    expected_stderr: "warning: marlin is using the spare disk"
+  - name: octopus
+    env: {HOST: "octopus"}
+    expected_stdout: "report: nightly sync complete on octopus"
+    expected_stderr: "warning: octopus is using the spare disk"
+  - name: name with a dash
+    env: {HOST: "sea-urchin-2"}
+    expected_stdout: "report: nightly sync complete on sea-urchin-2"
+    expected_stderr: "warning: sea-urchin-2 is using the spare disk"

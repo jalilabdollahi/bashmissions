@@ -1,0 +1,73 @@
+id: 208
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Meaningful Exit Codes
+difficulty: advanced
+xp: 165
+story: |
+  Noor's monitoring dashboard has one red light per script, and "exit 1" is the
+  only thing it ever sees. At 03:00 the pager goes off and nobody knows whether
+  the config was deleted, the config was broken, or the service itself fell over.
+  Each of those needs a different person. Noor asks for an agreed code per
+  failure so the dashboard can route the alert to the right one.
+objective: |
+  Write solution.sh, a health check that takes one argument, a config file.
+  It must look for a line `port=NUMBER` (digits only) and probe that port with
+  `probe NUMBER`. Exit codes and stderr messages:
+    no argument given         usage: solution.sh CONFIG                 exit 2
+    config file not readable  config not found: CONFIG                  exit 3
+    no valid port=NUMBER line config has no valid port: CONFIG          exit 4
+    probe fails               service on port NUMBER is down            exit 5
+    all good                  stdout: healthy: port NUMBER              exit 0
+  CONFIG is the argument as given and NUMBER the port. If the file has several
+  port= lines use the first one. Messages go to stderr, the success line to
+  stdout. Silence the probe tool's own complaint with `2>/dev/null` so only
+  your message appears. Check the problems in the order listed above.
+concepts:
+  - "a distinct exit code for each kind of failure"
+  - "codes are a contract with whoever calls the script"
+  - "name the codes in variables, not magic numbers"
+required_patterns:
+  - pattern: 'exit\s+"?\$?\{?[A-Za-z_0-9]+'
+    message: "Leave through exit with a specific code for each failure."
+test_cases:
+  - name: service is healthy
+    args: [dory.conf]
+    files:
+      dory.conf: "name=dory\nport=8080\n"
+    expected_stdout: "healthy: port 8080"
+  - name: first port line wins
+    args: [eel.conf]
+    files:
+      eel.conf: "port=9090\nport=1\n"
+    expected_stdout: "healthy: port 9090"
+  - name: no argument
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh CONFIG"
+    expected_exit: 2
+  - name: config missing
+    args: [ghost.conf]
+    expected_stderr: "config not found: ghost.conf"
+    expected_exit: 3
+  - name: port line missing
+    args: [flat.conf]
+    files:
+      flat.conf: "name=flounder\nhost=flounder.lan\n"
+    expected_stderr: "config has no valid port: flat.conf"
+    expected_exit: 4
+  - name: port is not a number
+    args: [odd.conf]
+    files:
+      odd.conf: "port=http\n"
+    expected_stderr: "config has no valid port: odd.conf"
+    expected_exit: 4
+  - name: service is down
+    args: [dory.conf]
+    env:
+      FAKE_PROBE_DOWN: "1"
+    files:
+      dory.conf: "port=8080\n"
+    expected_stdout: ""
+    expected_stderr: "service on port 8080 is down"
+    expected_exit: 5

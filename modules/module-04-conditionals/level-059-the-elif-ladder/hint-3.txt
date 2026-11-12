@@ -1,0 +1,9 @@
+code="$1"
+if [[ $code == 200 ]]; then
+  echo "healthy: nothing to do"
+elif [[ $code == 301 ]]; then
+  echo "moved: check the redirect"
+# ... one more elif for 404 and one for 503 ...
+else
+  echo "unexpected status $code: ask Theo"
+fi

@@ -1,0 +1,9 @@
+Finding a position in an array, and comparing dotted numbers without sort -V:
+
+  list=(a b c)
+  for i in "${!list[@]}"; do [[ ${list[i]} == "$want" ]] && echo "$i"; done
+
+  IFS=. read -r x1 x2 x3 <<< "1.10.0"      # x1=1 x2=10 x3=0
+  (( x1 > y1 || (x1 == y1 && x2 > y2) ))   # and so on for the last part
+
+Reading a one-line file: `v=$(<versions/dev)`. Write state safely with `printf '%s\n' "$v" > f.tmp && mv f.tmp f`. A function can `return` the status of an `(( ... ))` test.

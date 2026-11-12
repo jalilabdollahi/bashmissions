@@ -1,0 +1,54 @@
+id: 257
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Delete and Squeeze
+difficulty: intermediate
+xp: 150
+story: |
+  The support desk exports its ticket list from a Windows laptop in the front
+  office, and every line arrives with an invisible carriage return at the end and
+  a random number of spaces between the words. Noor's import script rejects
+  the lot. Nothing is wrong with the content; it just needs a wash.
+objective: |
+  Write solution.sh. It reads text from standard input and prints it cleaned:
+    1. delete every carriage return (the character \r, usually the last
+       one on each line)
+    2. squeeze every run of spaces into a single space
+  Newlines, tabs and all other characters stay exactly as they are. A line
+  such as `T-77   printer    jams\r` becomes `T-77 printer jams`.
+  Use tr for both steps, in one pipeline: tr -d for the first and tr -s for
+  the second. Empty input prints nothing.
+concepts:
+  - "tr -d deletes characters"
+  - "tr -s squeezes repeats into one"
+required_patterns:
+  - pattern: '\btr\s+(-\w*d\w*\s+)?-d\b|\btr\s+-\w*d'
+    message: "Delete the carriage returns with tr -d."
+  - pattern: '\btr\s+-\w*s'
+    message: "Squeeze the repeated spaces with tr -s."
+forbidden_patterns:
+  - pattern: '\b(sed|awk)\b'
+    message: "Stay with tr for this one."
+test_cases:
+  - name: windows export
+    stdin: "T-77   printer    jams\r\nT-78 refund  request\r\nT-79    wifi\r\n"
+    expected_stdout: |-
+      T-77 printer jams
+      T-78 refund request
+      T-79 wifi
+  - name: only the spaces are messy
+    stdin: |
+      status:    open
+      owner:  noor
+      note: a  b   c
+    expected_stdout: |-
+      status: open
+      owner: noor
+      note: a b c
+  - name: tabs and newlines are untouched
+    stdin: "id\t\tname  x\r\n\r\nend\r\n"
+    expected_stdout: "id\t\tname x\n\nend"
+  - name: empty
+    stdin: ""
+    expected_stdout: ""

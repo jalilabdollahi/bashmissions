@@ -1,0 +1,82 @@
+id: 285
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Settings from the Environment
+difficulty: expert
+xp: 210
+story: |
+  The health poller on barracuda is configured by exporting variables before it
+  starts, which is nice and flexible and also how Theo once set the interval to
+  "fast" and took down the monitoring for a weekend. Priya's rule for anything read
+  from the environment: it has a default if it can, a check always, and an error
+  message that says exactly which variable is wrong.
+objective: |
+  solution.sh reads three environment variables and prints one summary line:
+    host=<POLL_HOST> every=<POLL_SECONDS>s mode=<POLL_MODE>
+  Rules:
+    POLL_HOST     required, must not be empty
+    POLL_SECONDS  optional, default 30; a whole number from 1 to 3600
+    POLL_MODE     optional, default normal; must be exactly fast or normal
+  A variable that is unset or set to the empty string counts as "not given"
+  and gets its default. Report the first problem found, checking in the order
+  host, seconds, mode, with exit status 2 and a message on stderr, nothing on stdout:
+    solution.sh: POLL_HOST is required
+    solution.sh: POLL_SECONDS must be a whole number from 1 to 3600
+    solution.sh: POLL_MODE must be fast or normal
+  Use ${NAME:-default} for the defaults.
+concepts:
+  - "${VAR:-default}"
+  - "validate before use"
+  - "empty and unset treated the same with :-"
+required_patterns:
+  - pattern: '\$\{POLL_SECONDS:-30\}'
+    message: "Default the interval with ${POLL_SECONDS:-30}."
+  - pattern: '\$\{POLL_MODE:-normal\}'
+    message: "Default the mode with ${POLL_MODE:-normal}."
+test_cases:
+  - name: defaults
+    env:
+      POLL_HOST: anchovy
+    expected_stdout: "host=anchovy every=30s mode=normal"
+  - name: everything given
+    env:
+      POLL_HOST: barracuda
+      POLL_SECONDS: "5"
+      POLL_MODE: fast
+    expected_stdout: "host=barracuda every=5s mode=fast"
+  - name: empty values count as unset
+    env:
+      POLL_HOST: dory
+      POLL_SECONDS: ""
+      POLL_MODE: ""
+    expected_stdout: "host=dory every=30s mode=normal"
+  - name: host is required
+    env:
+      POLL_SECONDS: "10"
+    expected_stderr: "solution.sh: POLL_HOST is required"
+    expected_exit: 2
+  - name: seconds must be a number
+    env:
+      POLL_HOST: eel
+      POLL_SECONDS: fast
+    expected_stderr: "solution.sh: POLL_SECONDS must be a whole number from 1 to 3600"
+    expected_exit: 2
+  - name: seconds out of range low
+    env:
+      POLL_HOST: eel
+      POLL_SECONDS: "0"
+    expected_stderr: "solution.sh: POLL_SECONDS must be a whole number from 1 to 3600"
+    expected_exit: 2
+  - name: seconds out of range high
+    env:
+      POLL_HOST: eel
+      POLL_SECONDS: "3601"
+    expected_stderr: "solution.sh: POLL_SECONDS must be a whole number from 1 to 3600"
+    expected_exit: 2
+  - name: unknown mode
+    env:
+      POLL_HOST: eel
+      POLL_MODE: turbo
+    expected_stderr: "solution.sh: POLL_MODE must be fast or normal"
+    expected_exit: 2

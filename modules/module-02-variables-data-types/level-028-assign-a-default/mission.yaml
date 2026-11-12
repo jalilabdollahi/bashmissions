@@ -1,0 +1,55 @@
+id: 28
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Assign a Default
+difficulty: beginner
+xp: 70
+story: |
+  The deploy helper mentions the target region in three different places:
+  the banner, the backup folder and the tag on the release. Last Tuesday
+  someone forgot to set REGION, and the banner said "north-pier" (from a
+  default) while the backup folder was called "/backups/" with nothing after
+  it. Mara frowns at the diff. "Decide the default once," she says. "Then
+  everything agrees."
+objective: |
+  The deploy tool may pass a setting called REGION (it may be missing or
+  empty). Write solution.sh that settles REGION once, near the top, with the
+  default north-pier, and then uses plain $REGION in three lines:
+
+    deploying to <REGION>
+    backups: /backups/<REGION>
+    tag: release-<REGION>
+
+  Use the ${REGION:=north-pier} form so the default is assigned to the
+  variable. Do not write a separate REGION=... line and do not repeat the
+  default anywhere else.
+concepts:
+  - "${var:=default} assigns the default"
+  - "the no-op : command"
+required_patterns:
+  - pattern: '\$\{REGION:=north-pier\}'
+    message: "Settle the default once with ${REGION:=north-pier}."
+forbidden_patterns:
+  - pattern: '^\s*REGION='
+    message: "Do not assign REGION with a separate line; let ${REGION:=...} do it."
+  - pattern: '\$\{REGION:-'
+    message: "Use := (assign) rather than :- (only substitute) so later lines see the value."
+test_cases:
+  - name: region not provided
+    expected_stdout: |-
+      deploying to north-pier
+      backups: /backups/north-pier
+      tag: release-north-pier
+  - name: region provided
+    env: {REGION: harbour-east}
+    expected_stdout: |-
+      deploying to harbour-east
+      backups: /backups/harbour-east
+      tag: release-harbour-east
+  - name: region empty
+    env: {REGION: ""}
+    expected_stdout: |-
+      deploying to north-pier
+      backups: /backups/north-pier
+      tag: release-north-pier

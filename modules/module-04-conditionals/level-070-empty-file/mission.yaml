@@ -1,0 +1,58 @@
+id: 70
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Empty File?
+difficulty: beginner
+xp: 110
+story: |
+  Gus gets a revenue CSV mailed to him at 6 a.m. every day. On Monday the mail
+  arrived on time with a perfectly polite attachment of zero bytes. Nobody
+  noticed until Gus tried to read it in a meeting. Insert a checkpoint before the
+  mail is sent: an empty report must stop the pipeline.
+objective: |
+  Write solution.sh that takes one argument: the path of a report file.
+  If the file exists and has any content (size greater than zero), print
+    ok: <file>, lines: <n>
+  where <n> is the number of lines in the file.
+  If the file is empty or does not exist, print to stderr
+    empty or missing: <file>
+  and exit with status 1, printing nothing to stdout.
+  Use `-s` for the check. (Tip: the line count is `wc -l < "$file"`; wrap it
+  in `$(( ... ))` or the output may contain extra spaces on macOS.)
+concepts:
+  - "-s true when the file has a size greater than zero"
+required_patterns:
+  - pattern: '-s\b'
+    message: "Use [[ -s \"$file\" ]]: true when the file exists and is not empty."
+test_cases:
+  - name: three line report
+    args: [revenue.csv]
+    files:
+      revenue.csv: |
+        day,total
+        mon,1200
+        tue,1350
+    expected_stdout: "ok: revenue.csv, lines: 3"
+  - name: single line report
+    args: [tiny.csv]
+    files:
+      tiny.csv: "day,total\n"
+    expected_stdout: "ok: tiny.csv, lines: 1"
+  - name: zero bytes
+    args: [monday.csv]
+    files:
+      monday.csv: ""
+    expected_stdout: ""
+    expected_stderr: "empty or missing: monday.csv"
+    expected_exit: 1
+  - name: file never created
+    args: [tuesday.csv]
+    expected_stdout: ""
+    expected_stderr: "empty or missing: tuesday.csv"
+    expected_exit: 1
+  - name: a blank line is still content
+    args: [blank.csv]
+    files:
+      blank.csv: "\n"
+    expected_stdout: "ok: blank.csv, lines: 1"

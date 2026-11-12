@@ -1,0 +1,1 @@
+Counting "how many times does each value occur" is a classic pipeline: reduce every line to just the part you group by (here, the date and minute), put equal values next to each other, then count the runs. Be careful to count only lines whose level really is ERROR.

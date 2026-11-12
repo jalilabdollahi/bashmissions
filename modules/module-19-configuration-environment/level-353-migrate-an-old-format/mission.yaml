@@ -1,0 +1,129 @@
+id: 353
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Migrate an Old Format
+difficulty: expert
+xp: 290
+story: |
+  Version 2 of the Lanternfish proxy changes its config format: `key=value`
+  instead of `Key: value`, new setting names, and a log level in place of the old
+  debug switch. Two hundred customers still have version 1 files, and Gus does not
+  want two hundred support calls. Mara's brief for the migration tool: never touch
+  the old file, never overwrite an existing new one, and never convert a file twice.
+objective: |
+  Write solution.sh, called as `solution.sh OLD_FILE NEW_FILE`. OLD_FILE is a
+  version 1 config, NEW_FILE is the version 2 file to create.
+  A v1 file has `Name: value` lines (split at the FIRST colon; blanks around the
+  name and the value are dropped), blank lines, and `#` comment lines. Convert
+  each setting:
+    Listen: V      ->  port=V
+    Hostname: V    ->  host=V
+    Debug: V       ->  log_level=debug when V is `on` (any letter case),
+                       otherwise log_level=info
+    Timeout: V     ->  timeout_seconds=V with one trailing `s` removed, if any
+    any other Name: V -> the name in lowercase, `=V`; also print
+                       `unknown key: Name (copied as lowercase)` to stderr
+  A non-blank, non-comment line without a colon is not converted; print
+  `skipped line N` to stderr (N counts from 1 in the old file).
+  NEW_FILE starts with the line `version=2`, followed by the old comment lines
+  (unchanged) and the converted settings, in their original order. Blank lines
+  are dropped. After writing, print `migrated N settings` to stdout, where N
+  counts converted settings (unknown keys included, skipped lines not).
+  Checks, in this order:
+    - not exactly two arguments: `usage: solution.sh OLD_FILE NEW_FILE`, exit 2
+    - OLD_FILE unreadable: `cannot read OLD_FILE`, exit 1
+    - the first line of OLD_FILE that is neither blank nor a comment is exactly
+      `version=2`: print `already v2: nothing to do` and exit 0 without creating
+      NEW_FILE
+    - NEW_FILE already exists: `refusing to overwrite NEW_FILE`, exit 1
+  OLD_FILE is never modified.
+concepts:
+  - "config migration: map old keys and values to the new schema"
+  - "idempotence: refuse to convert twice, refuse to overwrite"
+  - "build the output first, write the file last"
+test_cases:
+  - name: a full v1 file
+    args: [proxy.conf, proxy2.conf]
+    files:
+      proxy.conf: |
+        # Harbour Bakery proxy
+        Hostname: db.harbour.example
+
+        Listen:   8080
+        Debug: on
+        Timeout: 30s
+    expected_stdout: "migrated 4 settings"
+    expected_files:
+      proxy2.conf: |
+        version=2
+        # Harbour Bakery proxy
+        host=db.harbour.example
+        port=8080
+        log_level=debug
+        timeout_seconds=30
+  - name: colons in values, unknown keys, junk lines, old file untouched
+    args: [proxy.conf, proxy2.conf]
+    files:
+      proxy.conf: |
+        Hostname:  127.0.0.1:5432
+        Timeout: 45
+        Debug: OFF
+        Theme: Dark
+        this line has no colon
+        Listen: 0.0.0.0:80
+    expected_stdout: "migrated 5 settings"
+    expected_stderr: |-
+      unknown key: Theme (copied as lowercase)
+      skipped line 5
+    expected_files:
+      proxy2.conf: |
+        version=2
+        host=127.0.0.1:5432
+        timeout_seconds=45
+        log_level=info
+        theme=Dark
+        port=0.0.0.0:80
+      proxy.conf: |
+        Hostname:  127.0.0.1:5432
+        Timeout: 45
+        Debug: OFF
+        Theme: Dark
+        this line has no colon
+        Listen: 0.0.0.0:80
+  - name: already migrated
+    args: [proxy.conf, proxy2.conf]
+    files:
+      proxy.conf: |
+        # converted last week
+        version=2
+        port=8080
+    expected_stdout: "already v2: nothing to do"
+    expected_files:
+      proxy2.conf: null
+  - name: never overwrite an existing file
+    args: [proxy.conf, proxy2.conf]
+    files:
+      proxy.conf: "Listen: 1\n"
+      proxy2.conf: "hand-edited, precious\n"
+    expected_stderr: "refusing to overwrite proxy2.conf"
+    expected_exit: 1
+    expected_files:
+      proxy2.conf: "hand-edited, precious\n"
+  - name: an empty old file still gets a header
+    args: [proxy.conf, proxy2.conf]
+    files:
+      proxy.conf: "# nothing here\n\n"
+    expected_stdout: "migrated 0 settings"
+    expected_files:
+      proxy2.conf: "version=2\n# nothing here\n"
+  - name: unreadable old file
+    args: [missing.conf, proxy2.conf]
+    expected_stderr: "cannot read missing.conf"
+    expected_exit: 1
+    expected_files:
+      proxy2.conf: null
+  - name: wrong arguments
+    args: [proxy.conf]
+    expected_stderr: "usage: solution.sh OLD_FILE NEW_FILE"
+    expected_exit: 2

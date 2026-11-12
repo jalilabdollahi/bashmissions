@@ -1,0 +1,15 @@
+list='^[^,]+(,[^,]+)*$'
+# (( $# < 2 )) or either list not matching $list -> usage, exit 2
+IFS=, read -ra oses <<< "$1"
+IFS=, read -ra runtimes <<< "$2"
+shift 2
+excluded=" $* "
+
+for os in "${oses[@]}"; do
+  for rt in "${runtimes[@]}"; do
+    # excluded? print skipped and continue
+    # ran++ ; rc=0 ; build-job --os "$os" --runtime "$rt" || rc=$?
+    # print ok / FAILED, count passed
+  done
+done
+# summary line, then make the last command's status reflect failed jobs

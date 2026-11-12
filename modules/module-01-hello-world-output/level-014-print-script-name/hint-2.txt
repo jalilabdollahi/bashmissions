@@ -1,1 +1,0 @@
-The `basename` command strips the directory part of a path: `basename /tmp/foo/solution.sh` prints `solution.sh`.

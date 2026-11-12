@@ -1,0 +1,1 @@
+Redirecting one command is easy. Here you want to redirect the script's own output for a stretch, which means changing the shell's descriptor 1. Before you change it, you must remember where it pointed, or you cannot go back.

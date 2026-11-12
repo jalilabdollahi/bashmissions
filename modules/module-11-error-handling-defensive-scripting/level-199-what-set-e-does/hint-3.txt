@@ -1,0 +1,9 @@
+Put `set -e` right under the shebang. Then replace the TODO with:
+
+  if grep -q FATAL "$1"; then
+    echo "fatal lines present"
+  else
+    echo ...
+  fi
+
+Leave the cp and the final echo as they are: when cp fails, set -e ends the script before "done" is printed.

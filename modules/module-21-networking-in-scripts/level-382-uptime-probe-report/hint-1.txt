@@ -1,0 +1,1 @@
+This is a small monitoring tool made from pieces you already have: a status code check for web entries, a port check for TCP entries, and a loop that reads the list. Decide first what each kind of entry should print, then handle the three outcomes of an HTTP probe (fine, error code, no connection) separately.

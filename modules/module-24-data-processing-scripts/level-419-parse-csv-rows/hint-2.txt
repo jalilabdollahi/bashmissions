@@ -1,0 +1,9 @@
+Setting IFS in front of read changes the separator for that command only:
+
+  while IFS=: read -r user pass uid rest; do
+    echo "$user has uid $uid"
+  done < /etc/passwd
+
+The last variable gets the whole remainder of the line. read returns failure on a final line with no newline, but still fills the variables, so test them: `while read -r a b || [[ -n $a ]]`.
+
+To drop a trailing carriage return use ${var%$'\r'}. To skip the header, run one plain `read` before the loop, inside the same redirected group.

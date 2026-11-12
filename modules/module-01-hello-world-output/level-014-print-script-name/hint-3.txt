@@ -1,1 +1,0 @@
-Combine them with command substitution: `echo "script: $(basename "$0")"` — the inner double quotes around `$0` matter when paths contain spaces.

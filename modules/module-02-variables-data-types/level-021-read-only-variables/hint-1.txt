@@ -1,1 +1,0 @@
-`readonly NAME=value` (or `declare -r NAME=value`) makes a variable immutable — later assignments fail with an error.

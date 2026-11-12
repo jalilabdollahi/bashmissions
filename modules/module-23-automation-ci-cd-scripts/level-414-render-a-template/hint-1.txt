@@ -1,0 +1,1 @@
+Treat the template as text to walk through from left to right: copy everything up to the next placeholder, work out its replacement, then carry on with what is left. Text you have already copied is never looked at again, which is also what keeps values from being expanded twice. Collect problems instead of stopping at the first.

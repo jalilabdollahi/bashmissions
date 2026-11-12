@@ -1,0 +1,6 @@
+awk arrays are created by using them, and any string can be the index:
+
+  awk '{ n[$1]++ } END { for (k in n) print k, n[k] }' file       # count per key
+  awk -F, '{ sum[$2] += $3 } END { for (k in sum) print k, sum[k] }' file
+
+NR is the line number, so NR > 1 as a pattern skips a header. The for-in order is unspecified (it differs even between awk versions), so pipe the result into sort.

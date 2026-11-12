@@ -1,0 +1,9 @@
+  cat <<EOF
+  Dear $customer,
+
+  We will update ${host^^} starting at $start UTC.
+  ...
+  Signed: $USER, Lanternfish Hosting
+  EOF
+
+Fill the "..." with the restart sentence from the objective, and keep the blank lines. (In your file the lines start at column 1, no indentation.)

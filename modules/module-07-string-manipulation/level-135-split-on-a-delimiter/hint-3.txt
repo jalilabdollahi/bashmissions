@@ -1,0 +1,8 @@
+  line=$1
+  IFS=: read -ra fields <<< "$line"
+  echo "user=${fields[0]}"
+  echo "uid=${fields[2]}"
+  echo "home=${fields[?]}"     # home is the 6th field -> which index?
+  echo "shell=${fields[?]}"    # shell is the 7th field
+
+Replace the question marks.

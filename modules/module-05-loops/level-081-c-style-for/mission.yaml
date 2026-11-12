@@ -1,0 +1,53 @@
+id: 81
+module: 5
+module_name: loops
+module_display: Loops
+title: C-Style for
+difficulty: beginner
+xp: 90
+story: |
+  Theo has a habit: before every big deploy he wants a countdown on the team
+  screen, "so nobody is surprised when the site blinks". The length of the
+  countdown depends on the day. Friday is a long one. The range trick from the
+  last level cannot help, because the length arrives as an argument.
+objective: |
+  Write solution.sh that takes one argument, a whole number N (the number of
+  seconds). Print a countdown from N down to 1, one line each:
+    T-<number>
+  and then a final line:
+    deploy!
+  With N=0 only the line "deploy!" is printed.
+  If no argument is given, print "usage: solution.sh SECONDS" to stderr and
+  exit with status 2.
+  Use a C-style loop: for (( i=N; i>=1; i-- )).
+concepts:
+  - "for (( init; condition; step ))"
+  - "counting down with i--"
+required_patterns:
+  - pattern: 'for\s*\(\('
+    message: "Use a C-style loop: for (( i=...; ...; ... )); do"
+test_cases:
+  - name: count down from three
+    args: ["3"]
+    expected_stdout: |-
+      T-3
+      T-2
+      T-1
+      deploy!
+  - name: count down from six
+    args: ["6"]
+    expected_stdout: |-
+      T-6
+      T-5
+      T-4
+      T-3
+      T-2
+      T-1
+      deploy!
+  - name: zero seconds
+    args: ["0"]
+    expected_stdout: "deploy!"
+  - name: missing number
+    args: []
+    expected_stderr: "usage: solution.sh SECONDS"
+    expected_exit: 2

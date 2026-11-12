@@ -1,0 +1,11 @@
+The three docker verbs, with a generic example:
+
+  docker build --build-arg COLOUR=blue -t shop/web:1.0.0 ./web
+  docker tag shop/web:1.0.0 shop/web:latest
+  docker push shop/web:latest
+
+A regex can capture the parts of a version and an optional suffix in one go:
+
+  [[ $v =~ ^([0-9]+)\.([0-9]+)\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]   # 1=major 2=minor 3=suffix
+
+Keep the tags to push in an array and loop over it. `if ! cmd; then ... fi` handles a failing command under `set -e`.

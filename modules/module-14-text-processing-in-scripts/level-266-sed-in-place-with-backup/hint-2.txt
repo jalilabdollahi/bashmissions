@@ -1,0 +1,9 @@
+-i means in place. Give it a suffix, attached with no space:
+
+  sed -i.bak 's/foo/bar/g' app.conf     # app.conf edited, app.conf.bak = original
+
+To use shell variables in the substitution, use double quotes:
+
+  sed -i.bak "s/$a/$b/g" "$file"
+
+Never use a bare -i: GNU sed accepts it, BSD sed on macOS treats the next argument as the suffix.

@@ -1,0 +1,134 @@
+id: 398
+module: 22
+module_name: logging-monitoring-scripts
+module_display: Logging & Monitoring
+title: Tamper-Evident Audit Trail
+difficulty: expert
+xp: 220
+story: |
+  After an incident, Priya found that someone had quietly edited the admin
+  activity log to remove their own tracks. She cannot stop a person with root
+  from editing a file, but she can make sure the edit *shows*. Her design
+  fits on a napkin: every entry carries a sequence number and a checksum that
+  also covers the previous entry's checksum, so changing, deleting or reordering
+  one line breaks every line after it.
+objective: |
+  Write solution.sh with two modes.
+
+  Entry format, one per line: `SEQ|SUM|MESSAGE`
+  - SEQ is 1 for the first entry, then 2, 3, ...
+  - SUM is the first number printed by `cksum` when it reads the text
+    `PREV|SEQ|MESSAGE` (exactly that text, no trailing newline), where PREV is
+    the previous entry's SUM, or `0` for the first entry.
+  - MESSAGE is the rest of the line; it may contain `|`.
+
+  `solution.sh append LOG MESSAGE` first verifies the log. If it is
+  intact (or does not exist yet) it appends the next entry and prints
+  `appended #N`. If it is tampered it prints
+  `refusing to append: log is tampered` to stderr and exits 1, changing nothing.
+
+  `solution.sh verify LOG` checks every line in order: the sequence number must
+  equal the line number and SUM must match the recomputed value (using the SUM
+  *stored* on the previous line as PREV). On success print `OK: N entries`
+  (N = number of lines; an empty log is fine). At the first bad line print
+  `TAMPERED: line N` and exit 1.
+
+  `verify` on a missing file: `cannot read LOG` to stderr, exit 2. Any other
+  mode or wrong argument count: `usage: solution.sh append LOG MESSAGE | verify LOG`
+  to stderr, exit 2.
+concepts:
+  - "a hash chain: each entry's checksum covers the previous one"
+  - "cksum reads a stream; no trailing newline when you want the exact text"
+  - "IFS='|' read splits fields, the last one keeps the rest"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Use cksum to compute each entry's checksum."
+test_cases:
+  - name: untouched log verifies
+    args: [verify, audit.log]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+        2|2845761124|bob granted admin
+        3|1402443377|alice removed bob
+    expected_stdout: "OK: 3 entries"
+  - name: an edited message is caught
+    args: [verify, audit.log]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+        2|2845761124|bob granted nothing
+        3|1402443377|alice removed bob
+    expected_stdout: "TAMPERED: line 2"
+    expected_exit: 1
+  - name: a deleted line is caught
+    args: [verify, audit.log]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+        3|1402443377|alice removed bob
+    expected_stdout: "TAMPERED: line 2"
+    expected_exit: 1
+  - name: forging your own checksum still breaks the next line
+    args: [verify, audit.log]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+        2|2368907205|bob granted nothing
+        3|1402443377|alice removed bob
+    expected_stdout: "TAMPERED: line 3"
+    expected_exit: 1
+  - name: empty log is fine
+    args: [verify, audit.log]
+    files:
+      audit.log: ""
+    expected_stdout: "OK: 0 entries"
+  - name: verify a missing log
+    args: [verify, nope.log]
+    expected_stderr: "cannot read nope.log"
+    expected_exit: 2
+  - name: first entry of a new log
+    args: [append, audit.log, "first entry"]
+    expected_stdout: "appended #1"
+    expected_files:
+      audit.log: "1|2324798023|first entry"
+  - name: append continues the chain
+    args: [append, audit.log, "root logged in"]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+        2|2845761124|bob granted admin
+        3|1402443377|alice removed bob
+    expected_stdout: "appended #4"
+    expected_files:
+      audit.log: |-
+        1|3387189980|alice created account bob
+        2|2845761124|bob granted admin
+        3|1402443377|alice removed bob
+        4|90277177|root logged in
+  - name: message may contain the separator
+    args: [append, audit.log, "bob granted | pipe"]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+    expected_stdout: "appended #2"
+    expected_files:
+      audit.log: |-
+        1|3387189980|alice created account bob
+        2|3799903419|bob granted | pipe
+  - name: refuses to extend a tampered log
+    args: [append, audit.log, "new entry"]
+    files:
+      audit.log: |
+        1|3387189980|alice created account bob
+        2|2845761124|bob granted nothing
+    expected_stderr: "refusing to append: log is tampered"
+    expected_exit: 1
+    expected_files:
+      audit.log: |-
+        1|3387189980|alice created account bob
+        2|2845761124|bob granted nothing
+  - name: unknown mode
+    args: [rewrite, audit.log]
+    expected_stderr: "usage: solution.sh append LOG MESSAGE | verify LOG"
+    expected_exit: 2

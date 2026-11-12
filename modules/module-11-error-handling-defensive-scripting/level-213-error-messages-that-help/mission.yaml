@@ -1,0 +1,82 @@
+id: 213
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Error Messages That Help
+difficulty: expert
+xp: 180
+story: |
+  Noor forwards a screenshot from North Pier Dental: their site config check says
+  only "error: bad config". Which file? Which line? What should they change? The
+  support desk spent forty minutes finding out. Mara's three-question test for any
+  error message: What went wrong? Where? What should the reader do about it?
+  The checker below already catches every problem; its messages are what need work.
+objective: |
+  Write solution.sh, a validator for site config files, taking one argument.
+  Config lines look like `name=value`; empty lines and lines starting with # are
+  ignored. Every failure is two lines on stderr (the second one starts with
+  two spaces) and exit status 1. Check in this order, report only the first
+  problem found:
+    no argument:     usage: solution.sh CONFIG                (one line, exit 2)
+    file not readable:
+      error: config file not found: CONFIG
+        fix: create it with: lanternctl init CONFIG
+    a line that is not blank, not a comment and has no "=" (first such line):
+      error: CONFIG:LINE: not a key=value line: "TEXT"
+        fix: write it as name=value, or start the line with # to comment it out
+    no line starting with domain=:
+      error: CONFIG: required key "domain" is missing
+        fix: add a line such as domain=example.com
+  LINE is the line number in the file (first line is 1) and TEXT the line as it
+  is written. Both lines go to stderr. When the file is valid print
+    config ok: N keys
+  on stdout (N counts the name=value lines) and exit 0.
+concepts:
+  - "an error says what, where and how to fix it"
+  - "errors go to stderr, results to stdout"
+  - "line numbers from a read loop"
+required_patterns:
+  - pattern: '>&2'
+    message: "Error messages belong on stderr: end the echo with >&2."
+test_cases:
+  - name: valid config
+    args: [dental.conf]
+    files:
+      dental.conf: "# North Pier Dental\ndomain=northpier.example\n\nport=8443\ntls=on\n"
+    expected_stdout: "config ok: 3 keys"
+  - name: no argument
+    expected_stderr: "usage: solution.sh CONFIG"
+    expected_exit: 2
+  - name: file is missing
+    args: [nowhere.conf]
+    expected_stdout: ""
+    expected_stderr: |-
+      error: config file not found: nowhere.conf
+        fix: create it with: lanternctl init nowhere.conf
+    expected_exit: 1
+  - name: malformed line is located
+    args: [pub.conf]
+    files:
+      pub.conf: "domain=gull-anchor.example\n# listener\nport 9000\nother=1\n"
+    expected_stdout: ""
+    expected_stderr: |-
+      error: pub.conf:3: not a key=value line: "port 9000"
+        fix: write it as name=value, or start the line with # to comment it out
+    expected_exit: 1
+  - name: first malformed line wins
+    args: [bad.conf]
+    files:
+      bad.conf: "oops\nalso wrong\n"
+    expected_stderr: |-
+      error: bad.conf:1: not a key=value line: "oops"
+        fix: write it as name=value, or start the line with # to comment it out
+    expected_exit: 1
+  - name: required key missing
+    args: [books.conf]
+    files:
+      books.conf: "port=80\n# domain=old.example\nsubdomain=shop\n"
+    expected_stdout: ""
+    expected_stderr: |-
+      error: books.conf: required key "domain" is missing
+        fix: add a line such as domain=example.com
+    expected_exit: 1

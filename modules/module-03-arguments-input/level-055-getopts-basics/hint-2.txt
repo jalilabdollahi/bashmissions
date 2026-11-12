@@ -1,1 +1,10 @@
-Match the mission output exactly, including punctuation, spacing, and exit status. Test the edge case shown in the mission before moving on.
+`getopts "ab:" opt` is used as a loop condition. It sets `opt` to the next option letter and, for letters followed by a colon in the list, puts the value in `$OPTARG`:
+
+  while getopts "ab:" opt; do
+    case $opt in
+      a) flag=yes ;;
+      b) size=$OPTARG ;;
+    esac
+  done
+
+Set your defaults before the loop.

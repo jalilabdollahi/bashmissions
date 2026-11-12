@@ -1,0 +1,5 @@
+Replace the TODO with a single line:
+
+  set -x
+
+It must come before `dest=backups/$1`, because only commands that run after it are traced. Leave the three commands untouched and do not add `set +x`.

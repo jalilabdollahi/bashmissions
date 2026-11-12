@@ -1,0 +1,12 @@
+`trap handler HUP` runs `handler` when SIGHUP arrives. A handler can set a flag the main loop checks. Keep the main loop short-sleeping so the trap gets its turn: bash runs traps between commands, and a long `sleep` delays them.
+
+  reloaded=0
+  on_hup() { reloaded=1; }
+  trap on_hup HUP
+  helper "$$" &
+  for ((i = 0; i < 20; i++)); do
+    sleep 0.1
+    [[ $reloaded -eq 1 ]] && break
+  done
+
+To keep everything after the first `=`: `sed -n 's/^greeting=//p' file`.

@@ -1,0 +1,67 @@
+id: 137
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Starts With, Ends With
+difficulty: intermediate
+xp: 130
+story: |
+  Priya is writing the upload filter for the customer file portal. Customers drop
+  files into one shared folder, and each file name tells the filter what to do:
+  hidden dot-files are ignored, private keys must be quarantined, and anything
+  from the backup robot is archived. Names that fit several rules must follow a
+  strict order, because a key called backup-server.pem is still a key.
+objective: |
+  Write solution.sh. For every argument (a file name, possibly with spaces) print
+  one line:
+
+    <name>: <label>
+
+  Pick the label with the FIRST rule that fits:
+    1. the name starts with "."        -> hidden
+    2. the name ends with ".pem"       -> quarantine
+    3. the name starts with "backup-"  -> archive
+    4. anything else                   -> accept
+  Test the names with [[ ... == pattern ]] comparisons (a * at the end checks a
+  start, a * at the beginning checks an end). No grep, sed, awk or case.
+concepts:
+  - "[[ $s == pre* ]] starts with"
+  - "[[ $s == *suf ]] ends with"
+required_patterns:
+  - pattern: '\[\[[^]]*==\s*[^ ]*\*'
+    message: 'Test the name with [[ $name == prefix* ]] or [[ $name == *suffix ]].'
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|case)\b'
+    message: "Use [[ $name == pattern ]] tests (no grep, sed, awk or case) in this level."
+test_cases:
+  - name: one of each kind
+    args: [.env, id_rsa.pem, backup-2024.tar.gz, menu.pdf]
+    expected_stdout: |-
+      .env: hidden
+      id_rsa.pem: quarantine
+      backup-2024.tar.gz: archive
+      menu.pdf: accept
+  - name: rule order matters
+    args: [backup-server.pem, .backup-old, .secret.pem]
+    expected_stdout: |-
+      backup-server.pem: quarantine
+      .backup-old: hidden
+      .secret.pem: hidden
+  - name: only the true ends count
+    args: [pem, my.pem.txt, xbackup-1, backup]
+    expected_stdout: |-
+      pem: accept
+      my.pem.txt: accept
+      xbackup-1: accept
+      backup: accept
+  - name: names with spaces
+    args: ["backup- march.zip", "Q3 report.pem"]
+    expected_stdout: |-
+      backup- march.zip: archive
+      Q3 report.pem: quarantine
+  - name: bare edge names
+    args: [., .pem, backup-]
+    expected_stdout: |-
+      .: hidden
+      .pem: hidden
+      backup-: archive

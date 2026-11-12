@@ -1,0 +1,13 @@
+release="releases/$version"
+[[ -d $release ]] || { echo "no such release: $version" >&2; exit 2; }
+
+previous=""
+[[ -L current ]] && previous=$(readlink current)   # careful with set -e: this is an && list
+# same as the new target? -> "already on ..." and exit 0
+
+ln -sfn "$release" current
+rc=0; smoke-test || rc=$?
+# rc 0: two stdout lines, exit 0
+# otherwise: stderr message; with $previous restore it with ln -sfn and print
+#   "rolled back to ${previous#releases/}" and "current -> $previous";
+#   without it rm -f current and print the "no previous release" error. Exit 1.

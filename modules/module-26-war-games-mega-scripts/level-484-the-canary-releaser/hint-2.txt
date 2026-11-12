@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Integer error rates: permille = errors * 1000 / requests, guarding the division by zero. To print 25 as 2.5%:
+
+  printf '%d.%d%%' $(( pm / 10 )) $(( pm % 10 ))
+
+Metrics lookup: read each line into an associative array keyed by the step (declare -A c_reqs c_errs ...). A step with no entry gives an empty value, which is how you detect "no metrics recorded": [[ -z ${c_reqs[$step]:-} ]].
+
+The three judgements, in order: no data, too few requests, rate above baseline + tolerance. Only evidence that passes all three is "ok".
+
+Calls that may fail are tested directly:  if ! lbctl weight "$n"; then ...  (set -e does not fire inside an if). For the best-effort rollback write  lbctl weight 0 || true.

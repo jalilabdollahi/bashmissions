@@ -1,0 +1,5 @@
+Standard input goes into the first tr, and its output into the second:
+
+  tr -d '\r' | tr -s ' '
+
+Nothing else is needed. The squeeze only affects the space character, so tabs inside a line and empty lines are left alone.

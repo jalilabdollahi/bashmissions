@@ -1,0 +1,94 @@
+id: 431
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Pivot Table
+difficulty: expert
+xp: 360
+story: |
+  The harbour-town shops that resell Lanternfish hosting report their monthly
+  signups as one long list: town, plan, number of signups, one line each. Gus
+  wants to see it the way a spreadsheet would show it, with towns going down,
+  plans going across, and a total at the end of every row and column. He has
+  asked for it "by lunchtime", and for the third time that week he has
+  mentioned that he does not want to open Excel.
+objective: |
+  Write solution.sh that takes one argument, a CSV file with a header line:
+    region,plan,signups
+  signups is a whole number. Print a pivot table as CSV: one row per region,
+  one column per plan, each cell the sum of the signups for that pair (0 when
+  the pair never occurs):
+    region,<plan 1>,<plan 2>,...,total
+    <region>,<n>,<n>,...,<row total>
+    ...
+    total,<column total>,...,<grand total>
+  Regions (rows) and plans (columns) are both in plain character order.
+  A row whose signups is not a whole number prints `skipped line <N>` to
+  stderr (N is its line number in the file) and is left out. Skip blank lines,
+  ignore `\r`. With no valid rows print
+    region,total
+    total,0
+  Awk has no built-in sort for array keys that works everywhere; sort the
+  distinct names yourself.
+concepts:
+  - "composite keys: cell[$1, $2] += $3"
+  - "row totals, column totals and a grand total in one pass"
+  - "sorting distinct keys yourself (insertion sort) in portable awk"
+  - "empty combinations are 0, not missing"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Accumulate the cells in awk with a two-key array."
+  - pattern: '\w+\[\s*\$\d+\s*(,|SUBSEP)\s*\$\d+\s*\]'
+    message: "Index one array by two fields, for example cell[$1, $2] += $3."
+test_cases:
+  - name: three towns, three plans
+    args: [signups.csv]
+    files:
+      signups.csv: |
+        region,plan,signups
+        Port Alder,pro,5
+        Saltmarsh,basic,3
+        Port Alder,basic,2
+        Saltmarsh,pro,1
+        Port Alder,pro,1
+        Kelp Cove,team,4
+    expected_stdout: |-
+      region,basic,pro,team,total
+      Kelp Cove,0,0,4,4
+      Port Alder,2,6,0,8
+      Saltmarsh,3,1,0,4
+      total,5,7,4,16
+  - name: one region and a bad row
+    args: [one.csv]
+    files:
+      one.csv: |
+        region,plan,signups
+        North Pier,pro,2
+        North Pier,pro,lots
+        North Pier,basic,
+
+        North Pier,basic,7
+    expected_stdout: |-
+      region,basic,pro,total
+      North Pier,7,2,9
+      total,7,2,9
+    expected_stderr: |-
+      skipped line 3
+      skipped line 4
+  - name: header only
+    args: [hdr.csv]
+    files:
+      hdr.csv: |
+        region,plan,signups
+    expected_stdout: |-
+      region,total
+      total,0
+  - name: numeric looking names sort as text
+    args: [num.csv]
+    files:
+      num.csv: "region,plan,signups\r\n9,100,1\r\n10,20,2\r\n9,20,3\r\n"
+    expected_stdout: |-
+      region,100,20,total
+      10,0,2,2
+      9,1,3,4
+      total,1,5,6

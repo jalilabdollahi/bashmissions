@@ -1,0 +1,127 @@
+id: 155
+module: 8
+module_name: arithmetic
+module_display: Arithmetic
+title: Sum, Min, Max
+difficulty: advanced
+xp: 180
+story: |
+  Quarter-end. Gus has a file of daily bandwidth readings from the whole
+  cluster, one number per line, and wants to know the total, the quietest day
+  and the busiest day. He also wants the average, "but please don't tell me
+  it's 41.67, tell me 41, I've had enough decimals for one week." The file is
+  piped in, so your script gets exactly one chance to look at each number.
+objective: |
+  Write solution.sh that reads whole numbers from standard input, one per
+  line (they may be negative; ignore blank lines). In a single pass print
+  exactly:
+
+    count=<how many numbers>
+    sum=<total>
+    min=<smallest>
+    max=<largest>
+    avg=<sum / count, whole number, rounded toward zero>
+
+  If there are no numbers at all, print "no data" to stderr and exit with
+  status 1, printing nothing on stdout.
+
+  Do not use sort, awk, head or tail, and do not store the numbers in a file:
+  keep running totals in variables while you read.
+concepts:
+  - "single-pass accumulation"
+  - "initialising min and max from the first value"
+  - "running sum with +="
+required_patterns:
+  - pattern: '\bwhile\b[^\n]*\bread\b'
+    message: "Read the numbers one by one with while read."
+forbidden_patterns:
+  - pattern: '\b(sort|awk|head|tail|bc|dc|paste|cat)\b'
+    message: "Keep running totals in variables while you read, instead of reaching for another tool."
+test_cases:
+  - name: a normal week
+    stdin: |
+      40
+      35
+      52
+      41
+      38
+      47
+      39
+    expected_stdout: |-
+      count=7
+      sum=292
+      min=35
+      max=52
+      avg=41
+  - name: a single reading
+    stdin: |
+      17
+    expected_stdout: |-
+      count=1
+      sum=17
+      min=17
+      max=17
+      avg=17
+  - name: negative numbers, smallest is below zero
+    stdin: |
+      -5
+      12
+      -30
+      8
+    expected_stdout: |-
+      count=4
+      sum=-15
+      min=-30
+      max=12
+      avg=-3
+  - name: all readings are bigger than zero, so min must not start at zero
+    stdin: |
+      900
+      850
+      975
+    expected_stdout: |-
+      count=3
+      sum=2725
+      min=850
+      max=975
+      avg=908
+  - name: all readings negative, so max must not start at zero
+    stdin: |
+      -9
+      -4
+      -20
+    expected_stdout: |-
+      count=3
+      sum=-33
+      min=-20
+      max=-4
+      avg=-11
+  - name: blank lines are ignored
+    stdin: |
+      10
+
+      20
+
+
+      60
+    expected_stdout: |-
+      count=3
+      sum=90
+      min=10
+      max=60
+      avg=30
+  - name: huge values stay exact
+    stdin: |
+      3000000000
+      5000000000
+    expected_stdout: |-
+      count=2
+      sum=8000000000
+      min=3000000000
+      max=5000000000
+      avg=4000000000
+  - name: nothing to read
+    stdin: ""
+    expected_stderr: "no data"
+    expected_exit: 1
+    expected_stdout: ""

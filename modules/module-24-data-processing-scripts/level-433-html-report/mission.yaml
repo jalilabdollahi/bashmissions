@@ -1,0 +1,126 @@
+id: 433
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: HTML Report
+difficulty: expert
+xp: 380
+story: |
+  Gus wants the incident list on the internal status page so that customers
+  stop emailing Noor to ask whether it is "just them". The summaries are typed
+  by whoever was on call at three in the morning: they contain commas,
+  ampersands, comparisons like "load > 8", and last month somebody pasted a
+  whole `<script>` tag from a customer's ticket. Priya says the page may show
+  that text, but it must never run it.
+objective: |
+  Write solution.sh that takes one argument, an incident CSV with a header:
+    time,server,summary
+  The summary is the last column and may contain commas. Print this HTML
+  page, with one `<tr>` per data row and the page's own text filled in:
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"><title>Incident report</title></head>
+    <body>
+    <h1>Incident report</h1>
+    <table>
+    <tr><th>Time</th><th>Server</th><th>Summary</th></tr>
+    <tr><td>TIME</td><td>SERVER</td><td>SUMMARY</td></tr>
+    </table>
+    <p>N incident(s)</p>
+    </body>
+    </html>
+  In every cell, replace `&` by `&amp;`, `<` by `&lt;` and `>` by `&gt;` (in
+  that order of thinking: `&` first, or the new `&` signs get escaped again).
+  Skip blank lines, ignore `\r`, and handle a last line with no newline.
+  Produce the page from a here-document (`cat <<EOF`), not from a long chain
+  of `echo` calls.
+concepts:
+  - "here-document as a template: cat <<EOF with $variables inside"
+  - "escape & first, then < and >"
+  - "shopt -u patsub_replacement (Bash 5.2 treats & in a replacement specially)"
+  - "never trust text that will be shown to other people"
+required_patterns:
+  - pattern: '<<-?\s*["'']?\w+'
+    message: "Use a here-document template: cat <<EOF ... EOF."
+  - pattern: '&lt;'
+    message: "Replace < by &lt;."
+  - pattern: '&gt;'
+    message: "Replace > by &gt;."
+  - pattern: '&amp;'
+    message: "Replace & by &amp;."
+test_cases:
+  - name: two incidents with dangerous text
+    args: [incidents.csv]
+    files:
+      incidents.csv: |
+        time,server,summary
+        2026-09-02T03:12:00Z,eel,Disk at 97%, load > 8 & rising
+        2026-09-02T03:40:00Z,dory,Customer pasted <script>alert("x")</script> into a ticket
+    expected_stdout: |-
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"><title>Incident report</title></head>
+      <body>
+      <h1>Incident report</h1>
+      <table>
+      <tr><th>Time</th><th>Server</th><th>Summary</th></tr>
+      <tr><td>2026-09-02T03:12:00Z</td><td>eel</td><td>Disk at 97%, load &gt; 8 &amp; rising</td></tr>
+      <tr><td>2026-09-02T03:40:00Z</td><td>dory</td><td>Customer pasted &lt;script&gt;alert("x")&lt;/script&gt; into a ticket</td></tr>
+      </table>
+      <p>2 incident(s)</p>
+      </body>
+      </html>
+  - name: ampersand must not be escaped twice
+    args: [amp.csv]
+    files:
+      amp.csv: |
+        time,server,summary
+        2026-09-03T10:00:00Z,flounder,Tom &amp; Jerry & co
+    expected_stdout: |-
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"><title>Incident report</title></head>
+      <body>
+      <h1>Incident report</h1>
+      <table>
+      <tr><th>Time</th><th>Server</th><th>Summary</th></tr>
+      <tr><td>2026-09-03T10:00:00Z</td><td>flounder</td><td>Tom &amp;amp; Jerry &amp; co</td></tr>
+      </table>
+      <p>1 incident(s)</p>
+      </body>
+      </html>
+  - name: windows endings, no final newline, blank line
+    args: [win.csv]
+    files:
+      win.csv: "time,server,summary\r\n2026-09-04T01:00:00Z,grouper,Cert expires <3 days\r\n\r\n2026-09-04T02:00:00Z,halibut,All clear"
+    expected_stdout: |-
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"><title>Incident report</title></head>
+      <body>
+      <h1>Incident report</h1>
+      <table>
+      <tr><th>Time</th><th>Server</th><th>Summary</th></tr>
+      <tr><td>2026-09-04T01:00:00Z</td><td>grouper</td><td>Cert expires &lt;3 days</td></tr>
+      <tr><td>2026-09-04T02:00:00Z</td><td>halibut</td><td>All clear</td></tr>
+      </table>
+      <p>2 incident(s)</p>
+      </body>
+      </html>
+  - name: no incidents
+    args: [none.csv]
+    files:
+      none.csv: |
+        time,server,summary
+    expected_stdout: |-
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"><title>Incident report</title></head>
+      <body>
+      <h1>Incident report</h1>
+      <table>
+      <tr><th>Time</th><th>Server</th><th>Summary</th></tr>
+      </table>
+      <p>0 incident(s)</p>
+      </body>
+      </html>

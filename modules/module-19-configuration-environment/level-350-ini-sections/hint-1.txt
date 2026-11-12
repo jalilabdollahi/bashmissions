@@ -1,0 +1,1 @@
+A line only means something in the context of the last header above it, so your loop needs memory: a variable that says "the section I am reading right now is the one I want" (yes or no). Header lines change that variable; setting lines are only looked at while it says yes.

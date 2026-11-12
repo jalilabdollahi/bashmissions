@@ -1,1 +1,1 @@
-Compound assignment updates the variable in place.
+Each month the previous size is the starting point for the next one, so you keep two variables and update each of them every pass of a loop. Writing "size = size + something" over and over is exactly what a shorthand operator was invented for.

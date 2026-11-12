@@ -1,0 +1,1 @@
+Two jobs: walk every file in the tree, and keep a tally with one counter per extension. The extension must come from the file's own name, since folders can contain dots too. Remember that a loop at the end of a pipe runs in a subshell and its variables vanish when it ends; there is a way to feed a loop without a pipe.

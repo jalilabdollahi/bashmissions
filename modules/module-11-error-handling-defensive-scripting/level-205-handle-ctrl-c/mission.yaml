@@ -1,0 +1,65 @@
+id: 205
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Handle Ctrl-C
+difficulty: advanced
+xp: 155
+story: |
+  Gus loves the nightly customer import, and hates it when someone presses Ctrl-C
+  on it at batch 37 of 40. The next run starts again from batch 1 and re-bills
+  everyone. The import loop already works. What it lacks is manners: when it is
+  interrupted it should remember how far it got, say so, and leave with the
+  traditional "interrupted" status of 130.
+objective: |
+  solution.sh runs five import batches. The loop is already in the starter, along
+  with a line that simulates the operator pressing Ctrl-C after batch N
+  (`kill -INT $$`, only when the environment variable INTERRUPT_AFTER equals the
+  batch number). Add an INT trap with a handler that:
+    - prints "interrupted after batch N" (N is the last finished batch)
+    - writes N to the file import.state
+    - exits with status 130
+  The loop prints "batch N done" after each batch, and
+  "import complete" at the end when it was never interrupted. A finished import
+  must not create import.state. Keep the variable `last` that the loop updates:
+  it is what your handler reports. Register the trap before the loop.
+concepts:
+  - "trap 'handler' INT catches Ctrl-C (SIGINT)"
+  - "the handler decides: save state, say something, exit 130"
+  - "130 = 128 + signal number 2"
+required_patterns:
+  - pattern: 'trap\s+.*\bINT\b'
+    message: "Catch Ctrl-C with trap ... INT."
+  - pattern: 'exit\s+130'
+    message: "Leave the handler with exit 130, the conventional status for Ctrl-C."
+test_cases:
+  - name: runs to the end
+    expected_stdout: |-
+      batch 1 done
+      batch 2 done
+      batch 3 done
+      batch 4 done
+      batch 5 done
+      import complete
+    expected_files:
+      import.state: null
+  - name: interrupted after batch 3
+    env:
+      INTERRUPT_AFTER: "3"
+    expected_stdout: |-
+      batch 1 done
+      batch 2 done
+      batch 3 done
+      interrupted after batch 3
+    expected_exit: 130
+    expected_files:
+      import.state: "3"
+  - name: interrupted right after the first batch
+    env:
+      INTERRUPT_AFTER: "1"
+    expected_stdout: |-
+      batch 1 done
+      interrupted after batch 1
+    expected_exit: 130
+    expected_files:
+      import.state: "1"

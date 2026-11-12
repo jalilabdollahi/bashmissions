@@ -1,0 +1,1 @@
+Think of the tag as something you may only create when two questions have the right answer: is anything uncommitted, and does the name already exist? Ask git both questions first, and only then change anything. Git answers scripts through output (status) and through exit codes (verify).

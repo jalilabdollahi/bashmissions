@@ -1,7 +1,0 @@
-A compact solution can be shaped like this:
-
-if (( $# == 0 )); then
-  exit 1
-fi
-
-echo "arg: $1"

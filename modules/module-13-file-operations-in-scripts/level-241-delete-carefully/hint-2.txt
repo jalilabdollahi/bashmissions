@@ -1,0 +1,7 @@
+`[[ -z $x ]]` tests for empty. `(cd "$x" && pwd -P)` prints the real absolute path of a folder, with `..` and symlinks resolved. To test "is below base", a `case` on the path with a trailing slash is safe:
+
+  base="$(pwd -P)/shared"
+  case "$resolved/" in
+    "$base"/*) echo inside ;;
+    *)         echo outside ;;
+  esac

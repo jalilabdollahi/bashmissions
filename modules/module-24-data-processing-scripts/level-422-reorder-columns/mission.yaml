@@ -1,0 +1,82 @@
+id: 422
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Reorder Columns
+difficulty: expert
+xp: 270
+story: |
+  The newsletter tool wants "email,name" and nothing else. The billing tool
+  wants "id,plan,email". The customer export that feeds both has five columns
+  in an order nobody chose, and Theo has already said, twice, that he will not
+  hard-code column numbers because the export team keeps adding columns.
+objective: |
+  Write solution.sh that takes two arguments: a CSV file with a header line
+  (for example `id,name,email,plan,signup`) and a comma-separated list of
+  column names, for example `email,name`. Print the CSV again with only those
+  columns, in the order requested, header included. The columns are found by
+  looking their names up in the file's own header, never by fixed numbers, so
+  the same script works if the export gains or loses columns. A column may be
+  requested more than once. Lines may end in `\r\n`; do not print the `\r`.
+  Values contain spaces but never commas.
+  If a requested name is not in the header, print `unknown column: <name>` to
+  stderr, print nothing to stdout, and exit 1. A row shorter than the header
+  yields empty values for the missing columns.
+concepts:
+  - "map header names to positions: pos[$i] = i"
+  - "$(expr) selects a field by computed number"
+  - "split(string, array, separator) returns the count"
+  - "OFS joins output fields"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk: build a name-to-position table from the header row."
+  - pattern: '\$\(\s*\w+\['
+    message: "Select a field by a looked-up number, for example $(pos[name])."
+test_cases:
+  - name: swap and drop columns
+    args: [customers.csv, "email,name"]
+    files:
+      customers.csv: |
+        id,name,email,plan,signup
+        1,Harbour Bakery,hello@harbourbakery.example,pro,2026-01-04
+        2,Tidewater Books,books@tidewater.example,basic,2026-01-19
+        3,Gull Anchor Pub,pub@gullanchor.example,pro,2026-02-02
+    expected_stdout: |-
+      email,name
+      hello@harbourbakery.example,Harbour Bakery
+      books@tidewater.example,Tidewater Books
+      pub@gullanchor.example,Gull Anchor Pub
+  - name: different layout, same script
+    args: [other.csv, "id,plan,id"]
+    files:
+      other.csv: |
+        signup,plan,id,region,name
+        2026-03-01,basic,77,north pier,Salt Sail
+        2026-03-02,pro,78,harbour,Red Buoy
+    expected_stdout: |-
+      id,plan,id
+      77,basic,77
+      78,pro,78
+  - name: unknown column
+    args: [customers.csv, "name,phone"]
+    files:
+      customers.csv: |
+        id,name,email
+        1,Kelp Yoga,hi@kelp.example
+    expected_stdout: ""
+    expected_stderr: "unknown column: phone"
+    expected_exit: 1
+  - name: short rows and windows endings
+    args: [win.csv, "plan,signup"]
+    files:
+      win.csv: "id,plan,signup\r\n5,pro,2026-04-01\r\n6,basic\r\n"
+    expected_stdout: |-
+      plan,signup
+      pro,2026-04-01
+      basic,
+  - name: header only
+    args: [hdr.csv, "b,a"]
+    files:
+      hdr.csv: |
+        a,b,c
+    expected_stdout: "b,a"

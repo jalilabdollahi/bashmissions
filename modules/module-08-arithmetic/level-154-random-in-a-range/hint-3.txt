@@ -1,0 +1,5 @@
+RANDOM="$seed"
+size=$(( ... - ... + 1 ))        # how many values, counting both ends
+for (( i = 0; i < count; i++ )); do
+  echo "slot=$(( low + RANDOM % size ))"
+done

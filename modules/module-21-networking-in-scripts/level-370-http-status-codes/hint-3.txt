@@ -1,0 +1,11 @@
+  problems=0
+  for url in "$@"; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$url") || true
+    printf '%s %s\n' "$code" "$url"
+    case $code in
+      000|[45]??) problems=... ;;
+    esac
+  done
+  echo "problems: ..."
+
+Finish the counter, then exit 1 when there were problems. The usage check goes first.

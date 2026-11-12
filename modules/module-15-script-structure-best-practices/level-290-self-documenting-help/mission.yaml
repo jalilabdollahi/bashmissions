@@ -1,0 +1,93 @@
+id: 290
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Self-Documenting Help
+difficulty: expert
+xp: 260
+story: |
+  Every script at Lanternfish has a documentation comment at the top, and every
+  script has a --help that prints a hand-copied version of it, which is out of date
+  after the first edit. Mara's final lesson for the craft module: keep one copy. The
+  header comment is the help. Make the script read its own first lines and show them.
+  If you edit the header tomorrow, the help changes with it.
+objective: |
+  solution.sh is tidy-tmp.sh, a small cleanup tool. It already has a header
+  comment block (the comment lines that follow the shebang, up to the first
+  line that is not a comment). Keep that block exactly as it is.
+
+  Add the behaviour:
+    --help or -h as the only argument: print the header block to stdout,
+      with the leading "# " (or a bare "#") removed from each line, and exit 0.
+      The shebang line is not part of the help. The text must be read from
+      the script file itself (through $0), not copied into the code.
+    no arguments: print the same help text to stderr, exit 2.
+    DIR: delete the files named *.tmp directly inside DIR, then print
+      removed <N>. If DIR is not a directory print
+      tidy-tmp.sh: no such directory: <DIR>  to stderr and exit 1.
+  A checker will insert an extra line into your header and run --help again;
+  the new line must appear.
+concepts:
+  - "$0 / BASH_SOURCE[0] is the script's own path"
+  - "awk or sed reading the leading comment block"
+  - "one source of truth for documentation"
+required_patterns:
+  - pattern: '\$\{?0\}?|BASH_SOURCE'
+    message: "Read the script's own file through $0 (or ${BASH_SOURCE[0]})."
+test_cases:
+  - name: long help flag prints the header
+    args: [--help]
+    expected_stdout: |-
+      tidy-tmp.sh - remove stale .tmp files from one directory
+
+      Usage: tidy-tmp.sh [--help] DIR
+
+      Deletes every *.tmp file directly inside DIR (not in subfolders) and
+      prints how many were removed.
+
+      Exit status: 0 success, 1 DIR is not a directory, 2 bad usage.
+  - name: short help flag
+    args: [-h]
+    expected_stdout: |-
+      tidy-tmp.sh - remove stale .tmp files from one directory
+
+      Usage: tidy-tmp.sh [--help] DIR
+
+      Deletes every *.tmp file directly inside DIR (not in subfolders) and
+      prints how many were removed.
+
+      Exit status: 0 success, 1 DIR is not a directory, 2 bad usage.
+  - name: no arguments shows the help on stderr
+    expected_stdout: ""
+    expected_stderr: "Usage: tidy-tmp.sh [--help] DIR"
+    stderr_comparison: contains
+    expected_exit: 2
+  - name: removes tmp files
+    args: [cache]
+    files:
+      cache/a.tmp: "x"
+      cache/b.tmp: "x"
+      cache/keep.txt: "keep"
+      cache/sub/deep.tmp: "not directly inside"
+    expected_stdout: "removed 2"
+    expected_files:
+      cache/a.tmp: null
+      cache/b.tmp: null
+      cache/keep.txt: "keep"
+      cache/sub/deep.tmp: "not directly inside"
+  - name: names with spaces and nothing to remove
+    args: [Old Cache]
+    files:
+      "Old Cache/Q3 draft.tmp": "x"
+    expected_stdout: "removed 1"
+    expected_files:
+      "Old Cache/Q3 draft.tmp": null
+  - name: no tmp files at all
+    args: [empty]
+    files:
+      empty/readme.txt: "hi"
+    expected_stdout: "removed 0"
+  - name: missing directory
+    args: [nowhere]
+    expected_stderr: "tidy-tmp.sh: no such directory: nowhere"
+    expected_exit: 1

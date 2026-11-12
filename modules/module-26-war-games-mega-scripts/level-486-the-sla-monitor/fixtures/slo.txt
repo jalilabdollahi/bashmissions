@@ -1,0 +1,4 @@
+# service  target uptime in percent (up to 3 decimals)
+shop   99.5
+mail   99.9
+blog   99

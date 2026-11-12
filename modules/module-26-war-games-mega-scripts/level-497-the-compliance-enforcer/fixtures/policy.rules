@@ -1,0 +1,6 @@
+# ID    SEVERITY TYPE     PATH                      ARGUMENTS
+R001    high     mode     etc/shadow                0600
+R002    high     setting  etc/ssh/sshd_config        PermitRootLogin no
+R003    medium   noline   etc/passwd                ^guest:
+R004    low      line     etc/motd                  Authorized use only
+R005    high     absent   www/.env.backup

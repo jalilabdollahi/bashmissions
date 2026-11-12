@@ -1,1 +1,1 @@
-Use this curriculum concept: swap algorithm functions.
+Write the three rounding rules as three functions with exactly the same shape: cents in, euros out. Decide which one applies before you start reading amounts, remember the decision in a variable, and let the loop use whatever the variable says.

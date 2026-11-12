@@ -1,0 +1,1 @@
+The names of the variables are data here: for the name given on the command line you must look at two other variables whose names you build from it. For each name decide, in order: is it ambiguous, is it a file, is it a direct value, or is it missing? Report problems but keep going, and only fail at the very end.

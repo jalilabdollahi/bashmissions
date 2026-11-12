@@ -1,0 +1,5 @@
+`${VAR:-fallback}` gives VAR's value, or the fallback when VAR is unset or empty. So the environment layer is a one-liner per setting:
+
+  size=${APP_SIZE:-$size}
+
+For the file, `IFS='=' read -r key value` splits each line at the first `=`, and a `case $key in` picks the settings you know. Comments and unknown names then match nothing.

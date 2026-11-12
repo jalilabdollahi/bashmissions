@@ -1,0 +1,1 @@
+Try the starter with a failing download and notice that it still says "summary ready". A pipeline normally reports only what its last command said. You need to tell Bash to look at every stage of the pipeline instead.

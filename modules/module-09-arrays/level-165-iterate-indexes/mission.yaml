@@ -1,0 +1,52 @@
+id: 165
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Iterate Indexes
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie has walked the machine room with a clipboard and typed up each slot of
+  Rack 4 in order: a machine name, or a dash where the slot is empty. The
+  printed map should say "slot 3: dory" for the machine in the third slot,
+  numbered from 1 like the labels on the rack, and it should say nothing about
+  empty slots. Slot numbers must come from where the machine really sits.
+objective: |
+  Write solution.sh. Its arguments describe a rack from the top slot down;
+  an argument that is exactly "-" means the slot is empty. Store them in an
+  array and loop over the INDEXES of the array (`"${!rack[@]}"`). For every
+  slot that holds a machine, print:
+    slot <index plus one>: <machine>
+  Skip empty slots but keep numbering: a dash in position 2 makes the next
+  machine "slot 3". A rack with no machines prints nothing.
+  Machine names may contain spaces.
+concepts:
+  - "${!arr[@]} expands to the indexes"
+  - "loop with the index to get position and value"
+required_patterns:
+  - pattern: 'for\s+\w+\s+in\s+"\$\{!\w+\[@\]\}"'
+    message: 'Loop over the indexes with: for i in "${!rack[@]}"; do'
+test_cases:
+  - name: full rack
+    args: [anchovy, barracuda, cuttlefish]
+    expected_stdout: |-
+      slot 1: anchovy
+      slot 2: barracuda
+      slot 3: cuttlefish
+  - name: gaps keep their numbers
+    args: [dory, "-", "-", eel, "-", flounder]
+    expected_stdout: |-
+      slot 1: dory
+      slot 4: eel
+      slot 6: flounder
+  - name: names with spaces
+    args: ["-", "giant grouper", "harbour hake"]
+    expected_stdout: |-
+      slot 2: giant grouper
+      slot 3: harbour hake
+  - name: empty rack
+    args: ["-", "-"]
+    expected_stdout: ""
+  - name: no arguments
+    args: []
+    expected_stdout: ""

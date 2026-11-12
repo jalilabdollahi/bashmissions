@@ -1,0 +1,95 @@
+id: 286
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Idempotent Scripts
+difficulty: expert
+xp: 230
+story: |
+  Whenever a customer's site setup fails halfway, support re-runs the provisioning
+  script, and every time Mara holds her breath. The current version crashes if the
+  folder already exists, overwrites the page the customer spent an hour editing,
+  and adds the site to the list of sites a second time, which makes the nightly
+  backup run twice. A safe script can be run once, twice or ten times and leave the
+  world in the same state.
+objective: |
+  solution.sh takes a site name and makes sure three things exist, creating only
+  what is missing, and never failing because something is already there:
+    1. the directory sites/<name>
+    2. the file sites/<name>/index.html containing  <h1><name></h1>
+       (an existing index.html must be left exactly as it is)
+    3. a line equal to <name> in the file sites.list (appended only if no
+       identical line is there yet; sites.list is created if needed)
+  Print exactly three status lines, one per thing:
+    dir: created        or   dir: exists
+    index: created      or   index: exists
+    list: added         or   list: present
+  Exit 0 in every case. With no argument print
+  "usage: solution.sh NAME" to stderr and exit 2.
+  The name may contain spaces.
+concepts:
+  - "mkdir -p and check-before-create"
+  - "never overwrite what is already there"
+  - "grep -qxF to test for an exact whole line"
+required_patterns:
+  - pattern: 'grep\s+-[a-zA-Z]*q[a-zA-Z]*x|grep\s+-[a-zA-Z]*x[a-zA-Z]*q'
+    message: "Test for the exact line with grep -qxF (quiet, whole line, fixed string)."
+test_cases:
+  - name: first run creates everything
+    args: [harbour-bakery]
+    expected_stdout: |-
+      dir: created
+      index: created
+      list: added
+    expected_files:
+      sites/harbour-bakery/index.html: "<h1>harbour-bakery</h1>\n"
+      sites.list: "harbour-bakery\n"
+  - name: second run changes nothing
+    args: [harbour-bakery]
+    files:
+      sites/harbour-bakery/index.html: "<h1>Hand edited by the customer</h1>\n"
+      sites.list: "tidewater\nharbour-bakery\n"
+    expected_stdout: |-
+      dir: exists
+      index: exists
+      list: present
+    expected_files:
+      sites/harbour-bakery/index.html: "<h1>Hand edited by the customer</h1>\n"
+      sites.list: "tidewater\nharbour-bakery\n"
+  - name: half finished setup is completed
+    args: [gull]
+    files:
+      sites/gull/notes.txt: "left over from a failed run\n"
+      sites.list: "tidewater\n"
+    expected_stdout: |-
+      dir: exists
+      index: created
+      list: added
+    expected_files:
+      sites/gull/index.html: "<h1>gull</h1>\n"
+      sites/gull/notes.txt: "left over from a failed run\n"
+      sites.list: "tidewater\ngull\n"
+  - name: only an exact line counts as present
+    args: [gull]
+    files:
+      sites.list: "gull-and-anchor\nthe-gull\nGull\n"
+    expected_stdout: |-
+      dir: created
+      index: created
+      list: added
+    expected_files:
+      sites.list: "gull-and-anchor\nthe-gull\nGull\ngull\n"
+  - name: name with a space
+    args: [Tide Books]
+    files:
+      sites.list: "dory\n"
+    expected_stdout: |-
+      dir: created
+      index: created
+      list: added
+    expected_files:
+      "sites/Tide Books/index.html": "<h1>Tide Books</h1>\n"
+      sites.list: "dory\nTide Books\n"
+  - name: no argument
+    expected_stderr: "usage: solution.sh NAME"
+    expected_exit: 2

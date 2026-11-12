@@ -1,0 +1,7 @@
+for login in "$@"; do
+  if [[ -v roster[$login] ]]; then
+    unset 'roster[$login]'
+    revoked=$(( revoked + 1 ))
+  fi
+done
+Then print "revoked: N" and loop over the sorted keys, printing "$login=${roster[$login]}" (skip the loop when the map is empty).

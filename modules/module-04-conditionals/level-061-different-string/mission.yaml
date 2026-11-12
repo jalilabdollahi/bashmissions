@@ -1,0 +1,45 @@
+id: 61
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Different String?
+difficulty: beginner
+xp: 80
+story: |
+  The nightly customer report must run on exactly one machine: dory, the quiet
+  standby. Last Tuesday Theo started it on barracuda, the busiest server in the
+  fleet, in the middle of the lunch rush. Gus noticed the slow checkout before
+  anyone noticed the cause. Add a guard to the front of the job.
+objective: |
+  Write solution.sh that takes one argument: the name of the host it is running on.
+  If the host is anything other than exactly `dory`, print this to stderr and
+  exit with status 1, printing nothing to stdout:
+    refusing to run on <host>: this job belongs to dory
+  If the host is `dory`, print to stdout:
+    dory: starting nightly report
+  Use `!=` for the guard.
+concepts:
+  - "[[ $a != $b ]]"
+  - "a guard clause that exits early"
+required_patterns:
+  - pattern: '!='
+    message: "Write the guard with the != operator."
+test_cases:
+  - name: the right host
+    args: [dory]
+    expected_stdout: "dory: starting nightly report"
+  - name: a busy host is refused
+    args: [barracuda]
+    expected_stdout: ""
+    expected_stderr: "refusing to run on barracuda: this job belongs to dory"
+    expected_exit: 1
+  - name: capital letter means refused
+    args: [Dory]
+    expected_stdout: ""
+    expected_stderr: "refusing to run on Dory: this job belongs to dory"
+    expected_exit: 1
+  - name: similar name is still refused
+    args: [dory-2]
+    expected_stdout: ""
+    expected_stderr: "refusing to run on dory-2: this job belongs to dory"
+    expected_exit: 1

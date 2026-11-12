@@ -1,1 +1,0 @@
-A `die` helper centralizes error output and exiting.

@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Numeric version comparison: split with `IFS=. read -ra a <<< "$1"` and compare each part with `(( 10#${a[i]} < 10#${b[i]} ))` (the `10#` stops `08` being read as octal). Comparing the strings would call `1.9.0` newer than `1.10.0`.
+- Never trust the server's text: check `[[ $latest =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]` before using it.
+- Verification: `read -r crc size _ < <(cksum < "$work/new.sh")` against the first two fields of the `.cksum` file; `bash -n file` checks syntax without running; `bash file version` asks the script what it thinks it is.
+- Atomic install: `cp -p "$0" "$0.new"` copies the permissions, `cat "$work/new.sh" > "$0.new"` fills it, `mv "$0.new" "$0"` swaps it in one step. Writing into `$0` itself would corrupt the running script, because Bash reads a script as it executes.
+- After the `mv`, print the result and `exit 0` in the same breath.
+- `trap 'rm -rf "$work"' EXIT` cleans the scratch directory on every exit path.

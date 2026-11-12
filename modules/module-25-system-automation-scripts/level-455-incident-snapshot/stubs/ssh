@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# ssh stand-in for evidence gathering. Accepts: -n, -o BatchMode=yes, HOST, COMMAND...
+# Output of "COMMAND" comes from fixtures/hosts/HOST/outputs/<command, blanks as _>.txt;
+# a command without a file "does not exist" (exit 127). fixtures/hosts/HOST/unreachable
+# makes every call fail with 255, like a dead machine.
+host= quiet=0
+while (( $# )); do
+  case $1 in
+    -n) quiet=1 ;;
+    -o) [[ $2 == BatchMode=yes ]] || { echo "ssh: stub only knows -o BatchMode=yes" >&2; exit 2; }; shift ;;
+    -*) echo "ssh: stub does not know flag $1" >&2; exit 2 ;;
+    *)  host=$1; shift; break ;;
+  esac
+  shift
+done
+[[ -n $host ]] || { echo "usage: ssh [-n] [-o BatchMode=yes] host command" >&2; exit 2; }
+(( quiet )) || cat > /dev/null
+echo "ssh $host $*" >> .calls.log
+root=fixtures/hosts/$host
+if [[ ! -d $root ]] || [[ -e $root/unreachable ]]; then
+  echo "ssh: connect to host $host port 22: No route to host" >&2; exit 255
+fi
+cmd="$*"
+file=$root/outputs/${cmd// /_}.txt
+if [[ ! -f $file ]]; then
+  echo "bash: ${cmd%% *}: command not found" >&2; exit 127
+fi
+cat "$file"

@@ -1,0 +1,99 @@
+id: 416
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Cron Wrapper
+difficulty: expert
+xp: 400
+story: |
+  The nightly backup of Tidewater Books started at 02:00, was still running at
+  02:00 the next night because the disk was slow, and two copies fought over the
+  same files until the dory server fell over. Cron does not care. It starts
+  jobs on time, whether or not the last one has finished, and it throws away
+  output nobody redirected. Mara wants one wrapper that every cron entry goes
+  through: only one copy at a time, a log you can read in the morning, and the
+  real exit status preserved.
+objective: |
+  Write solution.sh, called as `solution.sh NAME COMMAND [ARG...]`. NAME is
+  letters, digits, `_` and `-` only; otherwise, or without a COMMAND, print
+  `usage: solution.sh NAME COMMAND [ARG...]` to stderr and exit 2.
+  Use the files `locks/NAME.lock` (a directory) and `logs/NAME.log`; create
+  `locks` and `logs` if they do not exist.
+  1. Take the lock with `mkdir locks/NAME.lock` (mkdir is atomic: exactly one
+     caller can create it). If that fails, another run is active: append
+       [NAME] skipped: previous run still active
+     to the log, run nothing, and exit 0. Do NOT remove that other run's lock.
+  2. Otherwise make sure the lock is removed when the script ends, however it
+     ends (normal exit, failure, SIGINT or SIGTERM), then append
+       [NAME] start: COMMAND ARG...
+     (command and arguments joined by single spaces) to the log.
+  3. Run COMMAND with its arguments. Its stdout AND stderr are appended to the
+     log; the wrapper itself prints nothing.
+  4. Append `[NAME] finish: exit CODE` to the log and exit with CODE, the
+     command's own exit status.
+concepts:
+  - "mkdir as an atomic lock"
+  - "trap ... EXIT to always release the lock (only a lock you took)"
+  - "append output to a log; pass the command's exit status through"
+required_patterns:
+  - pattern: '\btrap\b'
+    message: "Release the lock with a trap, so it is removed even if the job fails or is interrupted."
+  - pattern: '\bmkdir\b'
+    message: "Take the lock with mkdir: it either creates the directory or fails, atomically."
+test_cases:
+  - name: a job that succeeds
+    args: [nightly-backup, bash, -c, "echo copied 3 files; echo slow disk >&2"]
+    expected_stdout: ""
+    expected_files:
+      logs/nightly-backup.log: |
+        [nightly-backup] start: bash -c echo copied 3 files; echo slow disk >&2
+        copied 3 files
+        slow disk
+        [nightly-backup] finish: exit 0
+      locks/nightly-backup.lock: null
+  - name: the job fails and its code is passed on
+    args: [reindex, bash, -c, "echo disk full; exit 3"]
+    expected_exit: 3
+    expected_files:
+      logs/reindex.log: |
+        [reindex] start: bash -c echo disk full; exit 3
+        disk full
+        [reindex] finish: exit 3
+      locks/reindex.lock: null
+  - name: a previous run is still going
+    args: [nightly-backup, touch, ran.txt]
+    files:
+      "locks/nightly-backup.lock/": ""
+    expected_exit: 0
+    expected_files:
+      logs/nightly-backup.log: "[nightly-backup] skipped: previous run still active"
+      ran.txt: null
+      locks/nightly-backup.lock: true
+  - name: the log is appended to, not replaced
+    args: [report, bash, -c, "echo again"]
+    files:
+      logs/report.log: |
+        [report] start: old run
+        [report] finish: exit 0
+    expected_files:
+      logs/report.log: |
+        [report] start: old run
+        [report] finish: exit 0
+        [report] start: bash -c echo again
+        again
+        [report] finish: exit 0
+  - name: a command with no arguments
+    args: [cleanup, "true"]
+    expected_files:
+      logs/cleanup.log: |
+        [cleanup] start: true
+        [cleanup] finish: exit 0
+      locks/cleanup.lock: null
+  - name: a name that tries to leave the folder
+    args: ["../evil", "true"]
+    expected_stderr: "usage: solution.sh NAME COMMAND [ARG...]"
+    expected_exit: 2
+  - name: no command
+    args: [report]
+    expected_stderr: "usage: solution.sh NAME COMMAND [ARG...]"
+    expected_exit: 2

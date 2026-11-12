@@ -1,0 +1,6 @@
+# ITEM  UNIT  TIERS
+# a tier is UPTO:PRICE, UPTO being the cumulative top of the tier and PRICE
+# dollars per unit (up to 4 decimals); the last tier ends with *
+storage    GB    100:0.0800 1000:0.0500 *:0.0300
+bandwidth  GB    50:0 *:0.0900
+vm-hours   hour  *:0.0125

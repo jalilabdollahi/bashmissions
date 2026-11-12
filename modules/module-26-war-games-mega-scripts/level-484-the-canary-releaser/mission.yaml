@@ -1,22 +1,178 @@
 id: 484
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Canary Releaser
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Canary Releaser` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Canary Releaser
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 380
+story: |
+  Blue-green moves everyone at once, which is lovely until the new release has
+  a bug that only shows up under real traffic. Priya has seen it twice: the
+  smoke test is green, the flip happens, and ten minutes later the support
+  desk is on fire. A canary sends the new version 5% of the traffic, then 10%,
+  then 50%, and watches the error rate each time. Mara does not want a human
+  staring at graphs during a gale: the script must notice, pull the traffic
+  back to zero, and say exactly why.
+objective: |
+  Write solution.sh, the canary controller.
+
+    solution.sh PLAN METRICS RELEASE
+
+  PLAN lists traffic steps in percent, one integer per line (blank lines and
+  `#` comments ignored). The steps must be strictly increasing, each between
+  1 and 100, and the last one must be 100. Otherwise print
+  `bad plan: steps must increase and end at 100` to stderr and exit 2.
+
+  METRICS records what was observed at each step, one line per step:
+  `STEP CANARY_REQS CANARY_ERRS BASE_REQS BASE_ERRS` (integers; blank and `#`
+  lines ignored). Lines are looked up by STEP; if a step appears twice the later
+  line wins. An unreadable PLAN or METRICS file: `cannot read FILE` on stderr,
+  exit 2.
+
+  Settings from the environment (positive integers, defaults in brackets):
+  SOAK [60] seconds to wait at each step, MIN_REQS [100] fewest canary requests
+  needed to trust a step, TOLERANCE_PM [20] how many permille (tenths of a
+  percent) the canary's error rate may exceed the baseline's.
+
+  Run the steps in order. For every step below 100:
+    1. `lbctl weight STEP`
+    2. `sleep SOAK`
+    3. Look up the metrics for STEP. Rates are integer permille:
+       RATE = ERRS * 1000 / REQS (integer division, 0 when REQS is 0). Show a
+       rate as tenths: 25 -> `2.5%`, 5 -> `0.5%`, 0 -> `0.0%`.
+    4. Judge the step:
+       - no metrics line  -> abort, reason `no metrics recorded`
+       - CANARY_REQS < MIN_REQS -> abort, reason
+         `only N canary requests (need MIN_REQS)`
+       - canary rate > baseline rate + TOLERANCE_PM -> abort, reason
+         `canary C% vs baseline B% (limit L%)` where L = baseline + tolerance
+       - otherwise print `step STEP%: canary C% baseline B% ok` and continue.
+  For step 100 (never judged: nothing is left to compare with) run
+  `lbctl weight 100` then `lbctl promote`, print `step 100%: all traffic on the
+  canary` and finally `RELEASE promoted`.
+
+  Abort means: run `lbctl weight 0`, print `RELEASE aborted at STEP%: REASON`
+  to stdout, exit 1. Nothing runs after an abort.
+
+  If any `lbctl` call fails (non-zero) print `cannot set weight N%` (N is the
+  weight you were setting) to stderr, make one attempt at `lbctl weight 0`
+  (ignoring its result) and exit 3. A failing `promote` prints
+  `cannot promote RELEASE` to stderr, exit 3 (no rollback attempt: at that point
+  all traffic is already on the canary).
+
+  Wrong argument count: `usage: solution.sh PLAN METRICS RELEASE` to stderr,
+  exit 2. A SOAK, MIN_REQS or TOLERANCE_PM that is not a positive integer:
+  `invalid NAME` (the variable's name) on stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "progressive delivery with an automatic abort"
+  - "integer permille instead of floating point"
+  - "judging evidence: rates, minimum sample size, tolerance"
+  - "always roll back on any failure"
+required_patterns:
+  - pattern: 'lbctl\s+weight'
+    message: "Shift traffic with `lbctl weight PERCENT`."
+test_cases:
+  - name: a healthy canary reaches 100 percent
+    args: [fixtures/plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    expected_stdout: |-
+      step 5%: canary 0.5% baseline 0.3% ok
+      step 10%: canary 0.5% baseline 0.3% ok
+      step 50%: canary 0.7% baseline 0.5% ok
+      step 100%: all traffic on the canary
+      v1.5.0 promoted
+    expected_files:
+      .calls.log: |-
+        lbctl weight 5
+        sleep 60
+        lbctl weight 10
+        sleep 60
+        lbctl weight 50
+        sleep 60
+        lbctl weight 100
+        lbctl promote
+  - name: a bad step aborts and rolls back
+    args: [fixtures/plan.txt, fixtures/metrics-bad-at-50.txt, v1.5.0]
+    env:
+      SOAK: "30"
+    expected_stdout: |-
+      step 5%: canary 0.5% baseline 0.3% ok
+      step 10%: canary 0.5% baseline 0.3% ok
+      v1.5.0 aborted at 50%: canary 5.0% vs baseline 0.5% (limit 2.5%)
+    expected_exit: 1
+    expected_files:
+      .calls.log: |-
+        lbctl weight 5
+        sleep 30
+        lbctl weight 10
+        sleep 30
+        lbctl weight 50
+        sleep 30
+        lbctl weight 0
+  - name: too little traffic is not evidence
+    args: [fixtures/plan.txt, fixtures/metrics-thin.txt, v1.5.0]
+    expected_stdout: "v1.5.0 aborted at 5%: only 40 canary requests (need 100)"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |-
+        lbctl weight 5
+        sleep 60
+        lbctl weight 0
+  - name: a step without metrics aborts
+    args: [fixtures/plan.txt, fixtures/metrics-gap.txt, v1.5.0]
+    expected_stdout: |-
+      step 5%: canary 0.5% baseline 0.3% ok
+      v1.5.0 aborted at 10%: no metrics recorded
+    expected_exit: 1
+  - name: tolerance and minimum come from the environment
+    args: [fixtures/plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    env:
+      TOLERANCE_PM: "1"
+      MIN_REQS: "500"
+    expected_stdout: "v1.5.0 aborted at 5%: only 400 canary requests (need 500)"
+    expected_exit: 1
+  - name: tight tolerance trips on a small gap
+    args: [fixtures/plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    env:
+      TOLERANCE_PM: "1"
+    expected_stdout: "v1.5.0 aborted at 5%: canary 0.5% vs baseline 0.3% (limit 0.4%)"
+    expected_exit: 1
+  - name: bad plan
+    args: [bad-plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    files:
+      bad-plan.txt: |
+        5
+        50
+        25
+        100
+    expected_stderr: "bad plan: steps must increase and end at 100"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: plan that never reaches 100
+    args: [bad-plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    files:
+      bad-plan.txt: |
+        5
+        50
+    expected_stderr: "bad plan: steps must increase and end at 100"
+    expected_exit: 2
+  - name: load balancer failure rolls back and stops
+    args: [fixtures/plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    env:
+      FAKE_LB: fail
+    expected_stderr: "cannot set weight 5%"
+    expected_exit: 3
+    expected_files:
+      .calls.log: |-
+        lbctl weight 5
+        lbctl weight 0
+  - name: invalid setting
+    args: [fixtures/plan.txt, fixtures/metrics-good.txt, v1.5.0]
+    env:
+      SOAK: soon
+    expected_stderr: "invalid SOAK"
+    expected_exit: 2
+  - name: missing metrics file
+    args: [fixtures/plan.txt, nope.txt, v1.5.0]
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 2

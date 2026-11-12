@@ -1,0 +1,7 @@
+In a printf format, a number after the % is the minimum width and a dot-number is the maximum length of a string. A minus sign makes it left-aligned:
+
+  printf '[%-6.6s]\n' "ab"          # [ab    ]
+  printf '[%-6.6s]\n' "abcdefghi"   # [abcdef]
+  printf '[%6.6s]\n'  "ab"          # [    ab]
+
+Split a line at commas with:  IFS=, read -r first second

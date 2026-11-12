@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# curl stand-in for the usage API: -s, -S, --fail. Every request is logged.
+silent=0 show_err=0 fail=0 url=
+for arg in "$@"; do
+  case $arg in
+    -s|--silent) silent=1 ;;
+    -S|--show-error) show_err=1 ;;
+    -sS|-Ss) silent=1; show_err=1 ;;
+    -f|--fail) fail=1 ;;
+    -*) echo "curl: option $arg: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$arg ;;
+  esac
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+echo "GET ${url##*/customers/}" >> .calls.log
+rest=${url#*://}; host=${rest%%/*}; path=/${rest#*/}
+file=fixtures/http/$host$path.body
+if [[ -f $file ]]; then
+  cat "$file"
+elif (( fail )); then
+  if (( ! silent || show_err )); then echo "curl: (22) The requested URL returned error: 404" >&2; fi
+  exit 22
+else
+  echo "404 no such customer"
+fi

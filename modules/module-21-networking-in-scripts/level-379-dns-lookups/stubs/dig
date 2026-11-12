@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# dig stand-in: dig [+short] NAME [TYPE]   (TYPE defaults to A)
+# Records come from fixtures/dns/<name>.<TYPE>, one answer per line.
+# A name without a file answers NXDOMAIN, which with +short prints nothing and exits 0.
+# FAKE_DNS=down simulates unreachable resolvers (dig exits 9).
+short=0 name= type=
+for arg in "$@"; do
+  case $arg in
+    +short) short=1 ;;
+    +*) echo ";; Invalid option: $arg" >&2; exit 1 ;;
+    -*) echo "Invalid option: $arg" >&2; echo "Usage:  dig [@global-server] [domain] [q-type] [q-opt]..." >&2; exit 1 ;;
+    *) if [[ -z $name ]]; then name=$arg; else type=$arg; fi ;;
+  esac
+done
+type=${type:-A}
+if [[ -z $name ]]; then
+  echo "dig: no name given (the real dig would query the root servers)" >&2
+  exit 1
+fi
+echo "dig $( (( short )) && echo +short ) $name $type" | tr -s ' ' >> .calls.log
+if [[ ${FAKE_DNS:-up} == down ]]; then
+  echo ";; communications error to 192.0.2.53#53: timed out" >&2
+  echo ";; no servers could be reached" >&2
+  exit 9
+fi
+file=fixtures/dns/$name.$type
+if (( short )); then
+  [[ -f $file ]] && cat "$file"
+  exit 0
+fi
+# Long form: the part of a real answer a script would have to wade through.
+if [[ -f $file ]]; then status=NOERROR; else status=NXDOMAIN; fi
+echo "; <<>> DiG 9.18.1 <<>> $name $type"
+echo ";; ->>HEADER<<- opcode: QUERY, status: $status, id: 41234"
+echo ";; QUESTION SECTION:"
+echo ";$name.		IN	$type"
+if [[ -f $file ]]; then
+  echo ";; ANSWER SECTION:"
+  while read -r line; do printf '%s.\t300\tIN\t%s\t%s\n' "$name" "$type" "$line"; done < "$file"
+fi
+echo ";; Query time: 12 msec"

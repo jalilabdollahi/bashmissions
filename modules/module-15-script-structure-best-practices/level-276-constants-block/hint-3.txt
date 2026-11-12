@@ -1,0 +1,7 @@
+Between `set -euo pipefail` and the usage check:
+
+  readonly BACKUP_ROOT=/srv/backups
+  readonly KEEP_DAYS=14
+  readonly SUFFIX=tar.gz
+
+Then the two echo lines use "$BACKUP_ROOT", "$KEEP_DAYS" and "$SUFFIX" instead of literals. Delete the `root=${BACKUP_ROOT:-...}` line; that fallback is the hole.

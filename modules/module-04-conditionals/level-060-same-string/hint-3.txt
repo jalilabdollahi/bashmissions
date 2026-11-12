@@ -1,0 +1,7 @@
+expected="$1"
+running="$2"
+if [[ $running == "$expected" ]]; then
+  echo "in sync: $running"
+else
+  echo "DRIFT: expected ... but found ..."   # fill in with both variables
+fi

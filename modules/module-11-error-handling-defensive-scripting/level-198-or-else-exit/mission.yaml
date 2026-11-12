@@ -1,0 +1,63 @@
+id: 198
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Or Else Exit
+difficulty: intermediate
+xp: 125
+story: |
+  Here is what really happened to Theo. His script ran `cd "$RELEASE_DIR"`, the
+  folder did not exist, `cd` complained and the script carried on anyway, now
+  standing in the wrong directory, and cheerfully ran `rm -f *.old` there. Mara
+  has a name for the missing piece: "an or-else". If this step fails, stop right
+  here. Add one to the cleanup script before anyone runs it again.
+objective: |
+  Write solution.sh that takes one argument: a release directory. It must
+    1. enter that directory with `cd`,
+    2. delete every file ending in .old inside it (`rm -f -- ./*.old`),
+    3. print "cleaned DIR" (DIR is the argument) and finish with status 0.
+  If `cd` fails, print
+    deploy: cannot enter DIR
+  to stderr and exit with status 1 immediately, before anything is deleted.
+  Hide the shell's own cd complaint with `2>/dev/null` so only your message shows.
+  Guard the `cd` with `||` followed by a group `{ ...; }` that prints the message
+  and exits. Never run the delete after a failed `cd`.
+concepts:
+  - "cmd || exit 1"
+  - "a { ...; } group after || runs several commands"
+  - "a failed cd leaves you in the wrong directory"
+required_patterns:
+  - pattern: 'cd\s+"?\$[{]?1[}]?"?[^|\n]*\|\|'
+    message: "Guard the cd directly: cd \"$1\" 2>/dev/null || { ...; exit 1; }"
+test_cases:
+  - name: cleans the release folder
+    args: [releases/v12]
+    files:
+      releases/v12/app.bin: "binary\n"
+      releases/v12/app.bin.old: "old\n"
+      releases/v12/config.old: "old\n"
+      keep.old: "must survive\n"
+    expected_stdout: "cleaned releases/v12"
+    expected_files:
+      releases/v12/app.bin: true
+      releases/v12/app.bin.old: null
+      releases/v12/config.old: null
+      keep.old: true
+  - name: nothing to delete
+    args: [releases/v13]
+    files:
+      releases/v13/app.bin: "binary\n"
+    expected_stdout: "cleaned releases/v13"
+    expected_files:
+      releases/v13/app.bin: true
+  - name: missing folder must not touch the current folder
+    args: [releases/v99]
+    files:
+      keep.old: "must survive\n"
+      notes.old: "so must this\n"
+    expected_stdout: ""
+    expected_stderr: "deploy: cannot enter releases/v99"
+    expected_exit: 1
+    expected_files:
+      keep.old: true
+      notes.old: true

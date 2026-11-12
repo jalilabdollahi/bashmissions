@@ -1,0 +1,61 @@
+id: 339
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Timing Wrapper
+difficulty: expert
+xp: 250
+story: |
+  The nightly report got slower and nobody can say which command is to blame.
+  Gus has a theory about the database; Theo has a theory about the network;
+  Ollie suggests, shyly, that someone could simply measure. "Good idea," Mara
+  says. "And do it without editing any of the commands. Wrap them, and let the
+  wrapper tell us how long each one took."
+objective: |
+  Write solution.sh, called as `solution.sh COMMAND [ARG...]`.
+  Define a function `timed COMMAND [ARG...]` that runs the command with its
+  arguments, then prints one line to stderr:
+    timed: COMMAND ARG... took S.mmms
+  where the words of the command are joined by single spaces and the duration is
+  in seconds with exactly three decimals (milliseconds), for example
+  "timed: sleep 1 took 1.002s" or "timed: echo hi took 0.000s".
+  The command's stdout passes through untouched, and `timed` returns the
+  command's own exit status (the line is printed even when the command fails).
+  Measure with Bash's `EPOCHREALTIME` (seconds since 1970 with microseconds);
+  do not use `date` or `time`.
+  The script calls `timed "$@"` and exits with its status. With no COMMAND
+  print "usage: solution.sh COMMAND [ARG...]" to stderr and exit 2.
+concepts:
+  - "EPOCHREALTIME: seconds.microseconds; strip the dot and use integer math"
+  - "SECONDS counts whole seconds: too coarse for this"
+  - "printf '%d.%03d' to format milliseconds"
+required_patterns:
+  - pattern: 'EPOCHREALTIME'
+    message: "Read the clock with $EPOCHREALTIME (microsecond precision)."
+  - pattern: '"\$@"'
+    message: "Run the wrapped command as \"$@\"."
+forbidden_patterns:
+  - pattern: '\$\(\s*date\b|\btime\s+"'
+    message: "Use EPOCHREALTIME, not date or time."
+test_cases:
+  - name: a one second command
+    args: ["sleep", "1"]
+    expected_stderr: 'timed: sleep 1 took [12]\.[0-9]{3}s'
+    stderr_comparison: regex
+  - name: a fraction of a second
+    args: ["sleep", "0.3"]
+    expected_stderr: 'timed: sleep 0\.3 took (0\.[3-9][0-9]{2}|1\.[0-9]{3})s'
+    stderr_comparison: regex
+  - name: output flows through, a quick command
+    args: ["echo", "hello", "world"]
+    expected_stdout: "hello world"
+    expected_stderr: 'timed: echo hello world took 0\.[0-9]{3}s'
+    stderr_comparison: regex
+  - name: a failing command keeps its status
+    args: ["false"]
+    expected_stderr: 'timed: false took 0\.[0-9]{3}s'
+    stderr_comparison: regex
+    expected_exit: 1
+  - name: no command
+    expected_stderr: "usage: solution.sh COMMAND [ARG...]"
+    expected_exit: 2

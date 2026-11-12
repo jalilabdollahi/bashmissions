@@ -1,1 +1,0 @@
-Trailing trim works from the end of the string.

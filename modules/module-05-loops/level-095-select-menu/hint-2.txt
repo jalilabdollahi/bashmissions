@@ -1,1 +1,0 @@
-Use a here-string from `$1` so the test can run non-interactively.

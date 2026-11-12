@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Separate the problem into three jobs: normalise, merge, report. Normalising means teaching one awk program to recognise each of the three line shapes and to turn every line into the same record: timestamp, source order, service, level, message. Once every record looks the same, merging is just sorting and reporting is a couple of small passes over the sorted result. Keep counters for the summary while you parse, not afterwards.

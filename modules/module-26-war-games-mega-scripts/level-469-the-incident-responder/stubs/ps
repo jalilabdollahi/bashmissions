@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# ps aux stand-in (FAKE_FAIL_COLLECTOR=ps makes it fail)
+[[ ${1:-} == aux && $# -eq 1 ]] || { echo "ps: this stand-in supports only: ps aux" >&2; exit 2; }
+[[ ${FAKE_FAIL_COLLECTOR:-} == ps ]] && { echo "ps: cannot read process table" >&2; exit 1; }
+cat <<'OUT'
+USER   PID %CPU COMMAND
+root     1  0.0 init
+www    311 91.5 tide-sync
+www    312 12.0 nginx
+OUT

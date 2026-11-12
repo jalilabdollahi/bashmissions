@@ -1,1 +1,0 @@
-Use the nameref inside the function like an array.

@@ -1,0 +1,1 @@
+Run the starter with a bad name in the middle and look at what remains: the first file is already gone. The problem is the order of work. Split the script into two passes over the arguments: one that only looks, one that only moves.

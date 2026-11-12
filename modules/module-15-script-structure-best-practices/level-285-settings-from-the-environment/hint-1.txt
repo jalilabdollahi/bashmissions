@@ -1,0 +1,1 @@
+Treat the environment like user input, because it is. For each variable decide: is it required, does it have a sensible default, and what values are acceptable? Then read it once at the top into an ordinary variable, check it, and only afterwards use it.

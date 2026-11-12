@@ -1,0 +1,6 @@
+`${name:-fallback}` expands to `$name`, unless it is unset or empty, in which case it expands to `fallback`. Positional parameters work too:
+
+  level=${3:-info}     # $3 if given, otherwise "info"
+  echo "log level: $level"
+
+The braces and the colon are part of the syntax.

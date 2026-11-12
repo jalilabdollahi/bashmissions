@@ -1,0 +1,9 @@
+Between if and else you can add as many elif (short for "else if") rungs as you need. Each has its own test and its own then. Generic example:
+
+  if [[ $fruit == apple ]]; then
+    echo "red"
+  elif [[ $fruit == lime ]]; then
+    echo "green"
+  else
+    echo "unknown fruit"
+  fi

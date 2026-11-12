@@ -1,0 +1,1 @@
+Write a dollar sign in front of the variable's name to use its value: $USER. It only works in double quotes or unquoted, not in single quotes (level 4). Example: echo "Hello $USER" prints Hello followed by the current user name.

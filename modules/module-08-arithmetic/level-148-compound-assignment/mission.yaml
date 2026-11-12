@@ -4,23 +4,72 @@ module_name: arithmetic
 module_display: Arithmetic
 title: Compound Assignment
 difficulty: intermediate
-xp: 155
-objective: Start with the first integer argument, add 5 with compound assignment,
-  multiply by 2 with compound assignment, then print `value=<result>`.
-expected_script_name: solution.sh
-test_cases:
-- args:
-  - '3'
-  expected_stdout: value=16
-  expected_exit: 0
-  comparison: exact
-- args:
-  - '10'
-  expected_stdout: value=30
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 130
+story: |
+  The database volume on dory holds 100 GB and grows by a steady chunk every
+  month. Gus has a worry, though: what if the new analytics customer makes the
+  data double every month instead? "Show me both futures side by side,"
+  he says, "the boring one and the scary one. Month by month. I want to see
+  where they split."
+objective: |
+  Write solution.sh that takes three whole numbers:
+    $1  START   the current size in GB
+    $2  ADD     GB added every month in the steady scenario
+    $3  MONTHS  how many months to project (zero or more)
+
+  First print the line
+    start=<START>
+  then, for each month from 1 to MONTHS, one line
+    month <M>: steady=<size> doubling=<size>
+  where "steady" has ADD added to it every month and "doubling" is
+  multiplied by 2 every month, both starting from START.
+
+  Update the two sizes in place with the compound operators += and *=.
 concepts:
-- '`(( i += 5 ))`'
-scaffold: true
+  - "+= compound addition"
+  - "*= compound multiplication"
+required_patterns:
+  - pattern: '\+='
+    message: "Grow the steady size with +=."
+  - pattern: '\*='
+    message: "Grow the doubling size with *=."
+test_cases:
+  - name: four months from 100 GB
+    args: ["100", "15", "4"]
+    expected_stdout: |-
+      start=100
+      month 1: steady=115 doubling=200
+      month 2: steady=130 doubling=400
+      month 3: steady=145 doubling=800
+      month 4: steady=160 doubling=1600
+  - name: zero months prints only the start
+    args: ["250", "10", "0"]
+    expected_stdout: "start=250"
+  - name: no growth in the steady case
+    args: ["8", "0", "3"]
+    expected_stdout: |-
+      start=8
+      month 1: steady=8 doubling=16
+      month 2: steady=8 doubling=32
+      month 3: steady=8 doubling=64
+  - name: a longer run shows the gap exploding
+    args: ["1", "1", "10"]
+    expected_stdout: |-
+      start=1
+      month 1: steady=2 doubling=2
+      month 2: steady=3 doubling=4
+      month 3: steady=4 doubling=8
+      month 4: steady=5 doubling=16
+      month 5: steady=6 doubling=32
+      month 6: steady=7 doubling=64
+      month 7: steady=8 doubling=128
+      month 8: steady=9 doubling=256
+      month 9: steady=10 doubling=512
+      month 10: steady=11 doubling=1024
+  - name: shrinking volume after a clean-up
+    args: ["500", "-100", "3"]
+    expected_stdout: |-
+      start=500
+      month 1: steady=400 doubling=1000
+      month 2: steady=300 doubling=2000
+      month 3: steady=200 doubling=4000

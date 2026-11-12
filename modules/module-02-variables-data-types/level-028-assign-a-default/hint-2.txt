@@ -1,0 +1,4 @@
+${name:=default} does the same as ${name:-default} and additionally assigns the default to name. To run it without printing anything, give it to the "do nothing" command ":" . Generic example:
+
+  : "${COLOUR:=blue}"
+  echo "paint it $COLOUR"

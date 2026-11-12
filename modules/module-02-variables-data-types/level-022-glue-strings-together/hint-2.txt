@@ -1,0 +1,6 @@
+Bash has an "append" operator for variables: name+=text adds text to whatever name already holds. Generic example:
+
+  msg=Hello
+  msg+=,
+  msg+=" world"
+  echo "$msg"      # Hello, world

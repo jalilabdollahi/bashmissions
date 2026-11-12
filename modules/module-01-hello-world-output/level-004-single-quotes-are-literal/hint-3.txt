@@ -1,0 +1,1 @@
+Keep the two echo lines of the starter and change only the quote marks around each text, from " to ': echo 'Never paste $HOME or $USER into a ticket.' and then the same for the fee line.

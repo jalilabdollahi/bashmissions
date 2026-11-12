@@ -1,0 +1,105 @@
+id: 343
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Flags Beat Everything
+difficulty: advanced
+xp: 240
+story: |
+  Ollie ran the nightly backup by hand for North Pier Dental and typed
+  `--retention 3` because the disk was almost full. Next morning the cron job
+  still used 30 days: the config file said so, and the file had won. "A flag you
+  type on the command line is the most deliberate thing anyone can say to a
+  program," Mara explains. "It has to beat the environment, the file and the
+  defaults, every time."
+objective: |
+  Write solution.sh, a mini front end for `tide-backup`. It accepts these
+  options, in any order:
+    --retention DAYS      (or --retention=DAYS)
+    --dest DIR            (or --dest=DIR)
+    --compress            (no value; means "yes")
+    --config FILE         (or --config=FILE)
+  and prints the final value of each of the three settings with the layer it
+  came from, one per line, in exactly this format:
+    retention: <value> (<source>)
+    dest: <value> (<source>)
+    compress: <value> (<source>)
+  <source> is `flag`, `env`, `file` or `default`; the first one that provides a
+  value wins, in that order:
+    flag      the options above
+    env       TIDE_RETENTION, TIDE_DEST, TIDE_COMPRESS (empty counts as unset)
+    file      `name=value` lines in the --config file, names retention, dest
+              and compress (ignore comments, blank lines, unknown names, and
+              blanks around names and values); without --config there is no file
+    default   retention 7, dest /var/backups, compress no
+  Errors go to stderr with exit status 2: `unknown option: OPT` for any other
+  option starting with `-`, `unexpected argument: ARG` for anything else, and
+  `missing value for OPT` when an option that needs a value is last on the line.
+  An unreadable --config file prints `cannot read FILE` and exits 1.
+concepts:
+  - "precedence: flag, environment, file, default"
+  - "while (( $# )); case $1 in ...; shift"
+  - "associative arrays to track value and source"
+required_patterns:
+  - pattern: '\bshift\b'
+    message: "Walk through the arguments with a while loop, a case, and shift."
+test_cases:
+  - name: nothing given
+    expected_stdout: |-
+      retention: 7 (default)
+      dest: /var/backups (default)
+      compress: no (default)
+  - name: everything from the file
+    args: [--config, tide.conf]
+    files:
+      tide.conf: |
+        # North Pier Dental
+        retention = 30
+        dest=/mnt/nas/dental
+        compress=yes
+        colour=teal
+    expected_stdout: |-
+      retention: 30 (file)
+      dest: /mnt/nas/dental (file)
+      compress: yes (file)
+  - name: flag over env over file
+    args: ["--config=tide.conf", "--retention=3"]
+    env:
+      TIDE_RETENTION: "14"
+      TIDE_DEST: /mnt/spare
+    files:
+      tide.conf: |
+        retention=30
+        dest=/mnt/nas
+        compress=yes
+    expected_stdout: |-
+      retention: 3 (flag)
+      dest: /mnt/spare (env)
+      compress: yes (file)
+  - name: a boolean flag, a path with a space, flag before --config
+    args: [--dest, "/mnt/big disk/backups", --compress, --config, tide.conf]
+    env:
+      TIDE_COMPRESS: "no"
+      TIDE_RETENTION: ""
+    files:
+      tide.conf: "retention=21\ndest=/ignored\n"
+    expected_stdout: |-
+      retention: 21 (file)
+      dest: /mnt/big disk/backups (flag)
+      compress: yes (flag)
+  - name: unknown option
+    args: [--verbose]
+    expected_stderr: "unknown option: --verbose"
+    expected_exit: 2
+  - name: stray argument
+    args: [--compress, nightly]
+    expected_stderr: "unexpected argument: nightly"
+    expected_exit: 2
+  - name: option without its value
+    args: [--compress, --retention]
+    expected_stderr: "missing value for --retention"
+    expected_exit: 2
+  - name: unreadable config
+    args: [--config, nope.conf]
+    expected_stderr: "cannot read nope.conf"
+    expected_exit: 1

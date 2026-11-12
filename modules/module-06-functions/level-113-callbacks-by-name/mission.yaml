@@ -1,0 +1,60 @@
+id: 113
+module: 6
+module_name: functions
+module_display: Functions
+title: Callbacks by Name
+difficulty: advanced
+xp: 150
+story: |
+  Noor keeps asking for slightly different views of the same server list: today
+  she wants the names in capitals for a poster, tomorrow she wants each name with
+  its length for a label printer. Rewriting the loop each time is silly. Mara has
+  a better idea: write the loop once, and hand it the name of the function that
+  does the per-item work.
+objective: |
+  solution.sh already contains two small "worker" functions, upper_line and
+  length_line (read them). Write the rest:
+    1. A function named apply_each. Its first argument is the NAME of a function;
+       the remaining arguments are items. It calls the named function once for
+       every item, passing the item as the argument.
+    2. The main script takes a MODE and then items:  ./solution.sh MODE ITEM...
+       MODE upper  -> apply_each upper_line ITEM...
+       MODE length -> apply_each length_line ITEM...
+       any other MODE: print "unknown mode: <MODE>" to stderr, exit 2
+       (a missing MODE counts as unknown and prints "unknown mode: ").
+  Call the function through the variable holding its name, e.g. "$callback" "$item".
+concepts:
+  - "a function name can be stored in a variable and called: \"$name\" args"
+  - "higher-order helpers: loop once, vary the action"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?apply_each\s*(\(\s*\))?\s*\{'
+    message: "Define a function called apply_each."
+  - pattern: '"\$\{?[A-Za-z_][A-Za-z0-9_]*\}?"\s+"\$'
+    message: "Run the callback through its variable, like  \"$callback\" \"$item\"."
+test_cases:
+  - name: shout the servers
+    args: [upper, dory, eel, marlin]
+    expected_stdout: |-
+      DORY
+      EEL
+      MARLIN
+  - name: lengths
+    args: [length, anchovy, cuttlefish, ok]
+    expected_stdout: |-
+      anchovy: 7
+      cuttlefish: 10
+      ok: 2
+  - name: items with spaces
+    args: [upper, "gull & anchor"]
+    expected_stdout: "GULL & ANCHOR"
+  - name: no items prints nothing
+    args: [upper]
+    expected_stdout: ""
+  - name: unknown mode
+    args: [reverse, dory]
+    expected_stderr: "unknown mode: reverse"
+    expected_exit: 2
+  - name: missing mode
+    expected_stderr: "unknown mode:"
+    stderr_comparison: contains
+    expected_exit: 2

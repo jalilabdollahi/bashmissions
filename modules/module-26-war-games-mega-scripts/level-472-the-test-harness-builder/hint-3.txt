@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  names_of[$f]=$(sed -n -E -e 's/^function +(test_[A-Za-z0-9_]+).*/\1/p' -e 's/^(test_[A-Za-z0-9_]+) *\(\).*/\1/p' "$f")      # for each file; zero total -> "no tests found"
+  work=$(mktemp -d); trap 'rm -rf "$work"' EXIT; msg_file=$work/msg
+  fail() { printf '%s\n' "$*" > "$msg_file"; exit 1; }     skip() { ...; exit 77; }
+  assert_eq() { [[ $1 == "$2" ]] || fail "expected '$1' but got '$2'"; }   (and the other three)
+
+  run_test() {
+    tmp=$(mktemp -d "$work/t.XXXXXX"); : > "$msg_file"
+    set +e
+    ( set -e; cd "$tmp"; export TEST_DIR=<absolute dir of the file>; source <the file>
+      declare -F teardown >/dev/null && trap teardown EXIT
+      declare -F setup >/dev/null && setup
+      "$name" ) > "$work/out.txt" 2>&1
+    status=$?; set -e; rm -rf "$tmp"
+    0 -> PASS, 77 -> SKIP, else FAIL with detail=$(head -n 1 "$msg_file") or "exited with status $status"
+  }
+
+  per file: echo path; bash -n or "  ERROR syntax error"; loop over names (filter), run_test, print the line,
+  --verbose output with "    | " prefix, --fail-fast break; summary line, "file errors", exit status.

@@ -1,1 +1,0 @@
-The pattern `*/` reaches the last slash when used with `##`.

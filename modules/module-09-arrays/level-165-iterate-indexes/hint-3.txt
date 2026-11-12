@@ -1,0 +1,6 @@
+for i in "${!rack[@]}"; do
+  if [[ ${rack[i]} == "-" ]]; then
+    continue
+  fi
+  echo "slot $(( i + 1 )): ${rack[i]}"
+done

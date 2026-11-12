@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fake registrar lookup. Real ones take a second or two and rate-limit you.
+if [[ $# -ne 1 ]]; then
+  echo "usage: whois-lookup DOMAIN" >&2
+  exit 2
+fi
+echo "$1" >> .calls.log
+case $1 in
+  harbourbakery.example)   echo "Reef Registry" ;;
+  tidewaterbooks.example)  echo "Kelp Names" ;;
+  gullanchor.example)      echo "Reef Registry" ;;
+  northpierdental.example) echo "Pelican Domains" ;;
+  *)                       echo "unknown" ;;
+esac

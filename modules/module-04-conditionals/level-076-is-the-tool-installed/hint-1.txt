@@ -1,0 +1,1 @@
+Bash itself knows how to answer "if I typed this command, would it run?" without running it. You only need the yes/no answer, so the answer's output should be silenced and the exit status used in an if. Do not forget the case where no tool name was given at all.

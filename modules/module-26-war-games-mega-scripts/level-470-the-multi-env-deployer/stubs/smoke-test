@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# smoke-test ENV APP VERSION : FAKE_SMOKE_FAIL=ENV makes it fail
+[[ $# -eq 3 ]] || { echo "smoke-test: usage: smoke-test ENV APP VERSION" >&2; exit 2; }
+echo "smoke-test $*" >> .calls.log
+[[ ${FAKE_SMOKE_FAIL:-} != "$1" ]]

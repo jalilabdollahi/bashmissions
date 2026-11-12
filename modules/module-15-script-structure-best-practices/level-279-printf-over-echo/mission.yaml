@@ -1,0 +1,61 @@
+id: 279
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: printf Over echo
+difficulty: advanced
+xp: 170
+story: |
+  Gus wants a label printer script for the server-room shelf tags. Whatever
+  words people give it must appear on separate lines, exactly as typed. The first
+  version used echo, and the tag for the spare machine named "-n" came out blank.
+  Another tag said "50%d" and printed "50" followed by an error. Priya points out
+  that data should never be allowed to pose as options or as a format.
+objective: |
+  solution.sh takes any number of arguments. It prints each argument on its own
+  line, exactly as given (backslashes, percent signs and leading dashes
+  included), and then a final line
+    count: <number of arguments>
+  With no arguments print only "count: 0".
+  Use printf with a fixed format string such as '%s\n'. Do not use echo at all.
+concepts:
+  - "printf '%s\\n' \"$data\""
+  - "echo treats -n and -e as options"
+  - "never put data in the format string"
+required_patterns:
+  - pattern: 'printf\s+(--\s+)?[''"]%s\\n[''"]'
+    message: "Print data with a fixed format: printf '%s\\n' \"$arg\"."
+forbidden_patterns:
+  - pattern: '\becho\b'
+    message: "Leave echo out; arguments such as -n or -e would be eaten as options."
+test_cases:
+  - name: plain words
+    args: [anchovy, barracuda]
+    expected_stdout: |-
+      anchovy
+      barracuda
+      count: 2
+  - name: arguments that look like echo options
+    args: ["-n", "-e", "-E", "--", "-"]
+    expected_stdout: |-
+      -n
+      -e
+      -E
+      --
+      -
+      count: 5
+  - name: backslashes and percent signs are data
+    args: ['C:\new\table', "50%d", '%s and %b', 'a\tb']
+    expected_stdout: |-
+      C:\new\table
+      50%d
+      %s and %b
+      a\tb
+      count: 4
+  - name: spaces survive
+    args: ["Spare  Machine"]
+    expected_stdout: |-
+      Spare  Machine
+      count: 1
+  - name: nothing to print
+    expected_stdout: "count: 0"

@@ -1,0 +1,68 @@
+id: 199
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: What set -e Does
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie has read that `set -e` makes scripts safe and wants it everywhere. Gus
+  needs the nightly log archiver to stop the moment a copy fails, but he also wants
+  its summary to say whether the log contains FATAL lines, and a plain grep with
+  no match "fails" with status 1. Ollie is about to learn that set -e is a
+  tripwire with some very specific exceptions.
+objective: |
+  solution.sh takes one argument, a log file, and must run these steps in order:
+    1. print "start"
+    2. print "fatal lines present" if the log contains the text FATAL,
+       otherwise print "no fatal lines"
+    3. copy the log to archive/log.copy with `cp`
+    4. print "done"
+  Turn on `set -e` at the top so the script stops at the first command that
+  fails: if the copy fails (for example the archive folder does not exist) the
+  script must exit with cp's status and never print "done".
+  Careful with step 2: a log without FATAL makes grep exit with 1, and that
+  must NOT stop the script. Put grep where set -e does not trigger on its
+  failure: as the condition of an `if`.
+concepts:
+  - "set -e exits when a command fails"
+  - "exception: a command used as an if condition may fail"
+  - "exception: failures in && and || lists (except the last command)"
+required_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*e'
+    message: "Turn on errexit with set -e."
+  - pattern: '\bif\s+(!\s+)?grep\b'
+    message: "Test the log with if grep ...; then ...; else ...; fi so grep's status 1 does not trip set -e."
+test_cases:
+  - name: log with a fatal line
+    args: [app.log]
+    files:
+      app.log: "INFO boot\nFATAL disk gone\nINFO retry\n"
+      archive/.keep: ""
+    expected_stdout: |-
+      start
+      fatal lines present
+      done
+    expected_files:
+      archive/log.copy: "INFO boot\nFATAL disk gone\nINFO retry\n"
+  - name: clean log must not abort the script
+    args: [clean.log]
+    files:
+      clean.log: "INFO boot\nINFO all quiet\n"
+      archive/.keep: ""
+    expected_stdout: |-
+      start
+      no fatal lines
+      done
+    expected_files:
+      archive/log.copy: "INFO boot\nINFO all quiet\n"
+  - name: failed copy stops the script
+    args: [app.log]
+    files:
+      app.log: "INFO boot\n"
+    expected_stdout: |-
+      start
+      no fatal lines
+    expected_exit: 1
+    expected_files:
+      archive/log.copy: null

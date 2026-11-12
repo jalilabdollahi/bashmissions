@@ -1,0 +1,1 @@
+When one value is compared against a list of fixed possibilities, an elif ladder repeats the same variable over and over. Bash has a dedicated menu-style statement for exactly this: you give it the value once and list what to do for each possibility, including a final "anything else".

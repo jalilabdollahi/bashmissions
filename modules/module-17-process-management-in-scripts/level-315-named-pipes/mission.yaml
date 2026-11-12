@@ -1,0 +1,82 @@
+id: 315
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Named Pipes
+difficulty: advanced
+xp: 225
+story: |
+  `tailfeed` streams a server's log line by line, slowly, the way a real log
+  grows. Noor wants every ERROR line shouted out the moment it arrives, without
+  storing a huge copy of the log and without waiting for the stream to end.
+  A normal `|` pipe would do, but `tailfeed` insists on being given a pipe by
+  name, so you are going to build one in the file system.
+objective: |
+  Write solution.sh that takes one argument, SRC, the log for `tailfeed` to
+  stream. With no argument print `usage: solution.sh SRC` to stderr and
+  exit with status 2.
+
+  1. Create a named pipe called `feed.pipe` in the current folder with `mkfifo`.
+  2. Start `tailfeed SRC feed.pipe` in the background (it writes the log lines
+     into the pipe) and keep its PID.
+  3. In the foreground, read the pipe line by line with a `while read` loop
+     whose input is `feed.pipe`. For every line that contains `ERROR`, print
+     `!! ` followed by the line, and count it.
+  4. When the stream ends, print `errors=N`.
+  5. Collect `tailfeed` with `wait`, delete `feed.pipe` with `rm`, and exit
+     with tailfeed's own exit status.
+
+  Read with `IFS= read -r` so lines are kept exactly. Do the counting in the
+  `while` loop itself (not behind another pipe) so the count survives.
+concepts:
+  - "mkfifo creates a named pipe in the file system"
+  - "a writer in the background, a reader in the foreground"
+  - "opening a FIFO blocks until the other end is open"
+required_patterns:
+  - pattern: '\bmkfifo\b'
+    message: "Create the named pipe with mkfifo feed.pipe."
+  - pattern: '<\s*"?(\./)?feed\.pipe'
+    message: "Feed the while loop from the pipe: done < feed.pipe"
+  - pattern: 'tailfeed\b[^\n]*&\s*$'
+    message: "tailfeed must run in the background (&) or the pipe never gets a reader."
+test_cases:
+  - name: two errors in a stream
+    args: [web.log]
+    files:
+      web.log: "INFO started\nERROR disk almost full\nINFO request ok\nERROR timeout talking to db\nINFO bye\n"
+    expected_stdout: |-
+      !! ERROR disk almost full
+      !! ERROR timeout talking to db
+      errors=2
+    expected_files:
+      feed.pipe: null
+  - name: a quiet log
+    args: [calm.log]
+    files:
+      calm.log: "INFO one\nINFO two\nWARN three\n"
+    expected_stdout: "errors=0"
+    expected_files:
+      feed.pipe: null
+  - name: indented and odd lines are kept as they are
+    args: [odd.log]
+    files:
+      odd.log: "  ERROR  leading spaces\nINFO a\\b backslash\nERROR a\\b\n"
+    expected_stdout: |-
+      !!   ERROR  leading spaces
+      !! ERROR a\b
+      errors=2
+  - name: an empty log
+    args: [empty.log]
+    files:
+      empty.log: ""
+    expected_stdout: "errors=0"
+  - name: the log does not exist
+    args: [ghost.log]
+    expected_stdout: "errors=0"
+    expected_exit: 1
+    expected_files:
+      feed.pipe: null
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh SRC"
+    expected_exit: 2

@@ -1,0 +1,5 @@
+`dig +short NAME` prints only the answer lines. Note the unusual syntax: `+short` with a plus sign, not a dash. If dig cannot reach a resolver it exits non-zero; a missing name still exits 0 with empty output, so test the output, not the status, for that case.
+
+  answers=$(dig +short "$name") || echo "dig failed"
+
+Filter with `grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'` and join lines with `paste -sd, -`. With `set -e` and `pipefail`, add `|| true` after a grep that may find nothing.

@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Expand a field with `split(field, parts, ",")`, then handle each part: `*`, `N`, `A-B`, optional `/S` step. Loop `for (x = a; x <= b; x += step) set[x] = 1`. Return 0 for anything you cannot parse so the caller can print the warning for that field.
+- Membership tests are `(minute in set)`. After expanding day-of-week, copy `7` to `0`.
+- The day rule: if the day-of-month field or the day-of-week field *starts with a star* both must match; otherwise either one is enough.
+- Occupancy: `occ[job, t]++` for `t` from the start to `start + run - 1`, capped at 1439. Then for every minute `t` and every pair `a < b` with `occ[a,t]` and `occ[b,t]` non-zero, count `shared[a SUBSEP b]++`; if `occ[a,t] > 1` the job overlaps itself.
+- Let awk print rows with a tag (`T|` table, `O|` overlap); the shell can split them with `sed -n 's/^T|//p'` and sort the overlaps.

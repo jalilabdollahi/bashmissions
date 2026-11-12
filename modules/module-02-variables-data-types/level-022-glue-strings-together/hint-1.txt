@@ -1,0 +1,1 @@
+You do not need to write the whole link in one go. Start a variable with the first piece, then keep adding pieces to the end of it until the string is complete.

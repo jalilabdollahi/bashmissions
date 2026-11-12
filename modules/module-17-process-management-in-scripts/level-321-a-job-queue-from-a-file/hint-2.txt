@@ -1,0 +1,7 @@
+Put the worker loop in a function and start it several times with `&`. The remainder operator `%` decides whose job it is: `(( n % workers == id ))`. Count every real job (skip blank and `#` lines first) so the numbering is the same for all workers.
+
+  worker() { local id=$1; ...; }
+  for ((id = 0; id < workers; id++)); do worker "$id" & done
+  wait
+
+To sort what all the workers print, put the starting loop and the `wait` in a `{ ...; }` group and pipe that group into `sort`, e.g. `results=$( { ...; wait; } | sort )`.

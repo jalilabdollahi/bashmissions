@@ -1,0 +1,62 @@
+id: 179
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Write to a File
+difficulty: beginner
+xp: 100
+story: |
+  Gus keeps asking for "the morning numbers" and Mara is tired of pasting
+  terminal output into chat. Her new rule: every health check leaves a file
+  behind. The tool `tide-report` already exists, but it only talks to the
+  screen. Your first job on the logging team is to catch what it says.
+objective: |
+  Write solution.sh that takes one argument, a HOST name, and runs
+  `tide-report HOST`. Everything the tool prints must end up in the file
+  `report.txt` (in the current directory) and nothing may appear on the
+  screen.
+
+  If report.txt already exists, its old content must be replaced, not kept:
+  the file should only ever hold the latest report.
+concepts:
+  - "> redirects stdout to a file"
+  - "> truncates an existing file"
+required_patterns:
+  - pattern: '>\s*"?report\.txt'
+    message: "Send the tool's output into report.txt with the > operator."
+forbidden_patterns:
+  - pattern: '>>'
+    message: "Appending would keep old reports; you want the file replaced."
+  - pattern: '\btee\b'
+    message: "Use plain redirection here; tee comes later."
+test_cases:
+  - name: first report
+    args: [anchovy]
+    expected_stdout: ""
+    expected_files:
+      report.txt: |-
+        host=anchovy
+        disks=ok
+        load=0.7
+  - name: old report is replaced
+    args: [barracuda]
+    files:
+      report.txt: |-
+        host=stale-data
+        disks=FULL
+        load=9.9
+        extra=old line
+    expected_stdout: ""
+    expected_files:
+      report.txt: |-
+        host=barracuda
+        disks=ok
+        load=0.9
+  - name: another host name length
+    args: [dory]
+    expected_stdout: ""
+    expected_files:
+      report.txt: |-
+        host=dory
+        disks=ok
+        load=0.4

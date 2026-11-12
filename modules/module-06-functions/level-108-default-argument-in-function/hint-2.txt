@@ -1,1 +1,0 @@
-Use `${1:-guest}` inside the function.

@@ -1,0 +1,1 @@
+Some of your commands should see a different environment, and you want the change to disappear on its own afterwards, with no cleanup code. Ask the shell for a temporary copy of itself to run those commands in. Whatever that copy sets or exits with cannot reach you, except for one number it hands back.

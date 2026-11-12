@@ -1,0 +1,6 @@
+Line 2 of the script is `set -euo pipefail`. The report line needs the number of lines in the stats file; `wc -l < file` prints it (padded with spaces on macOS), so wrap it in arithmetic:
+
+  lines=$(wc -l < "$BACKUP_DIR/$1/stats.txt")
+  echo "archived $1: $(( lines )) lines"
+
+Put the report last, so it only runs when everything above succeeded.

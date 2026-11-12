@@ -1,0 +1,74 @@
+id: 313
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Command Groups
+difficulty: advanced
+xp: 215
+story: |
+  Gus wants a one-page fleet report he can print: a title, the list of servers
+  in alphabetical order, and a total at the bottom. Theo's first draft has
+  three separate `>>` redirections and twice it left half a report behind when
+  a step failed. Mara suggests grouping the commands so the whole page is
+  written through a single door, and using a second group to bail out neatly.
+objective: |
+  Write solution.sh that takes one argument, LIST, a file with one server
+  name per line (it may contain blank lines and repeated names).
+
+  - With no argument print `usage: solution.sh LIST` to stderr, exit 2.
+  - If LIST is not a readable file, print `cannot read LIST` to stderr and
+    exit with status 1, without creating report.txt. Do this with a command
+    group after `||`: `[[ -r $list ]] || { ...; exit 1; }`.
+  - Otherwise create `report.txt` with a single redirection on a command
+    group: `{ command1; command2; command3; } > report.txt`. Its content is
+      == fleet report ==
+      <every server once, blank lines skipped, sorted alphabetically>
+      total: N
+    where N is the number of distinct servers.
+  - Finally print `wrote report.txt (N servers)` to stdout.
+
+  Use awk 'NF' to drop blank lines and sort -u for sorting and de-duplicating.
+concepts:
+  - "{ cmd1; cmd2; } groups commands in the current shell"
+  - "one redirection for the whole group"
+  - "exit inside a group ends the script (unlike a subshell)"
+required_patterns:
+  - pattern: '^\s*\}\s*>\s*\S'
+    message: "Close the group with } > report.txt so one redirect covers all of it."
+  - pattern: '\|\|\s*\{'
+    message: "Use a command group after || for the error exit: [[ -r $list ]] || { ...; exit 1; }"
+forbidden_patterns:
+  - pattern: '>>'
+    message: "One redirection on the group is the point: no >> needed."
+test_cases:
+  - name: duplicates and blank lines
+    args: [fleet.txt]
+    files:
+      fleet.txt: "marlin\nanchovy\n\nmarlin\ndory\n"
+    expected_stdout: "wrote report.txt (3 servers)"
+    expected_files:
+      report.txt: "== fleet report ==\nanchovy\ndory\nmarlin\ntotal: 3"
+  - name: single server
+    args: [one.txt]
+    files:
+      one.txt: "octopus\n"
+    expected_stdout: "wrote report.txt (1 servers)"
+    expected_files:
+      report.txt: "== fleet report ==\noctopus\ntotal: 1"
+  - name: an empty list
+    args: [none.txt]
+    files:
+      none.txt: "\n\n"
+    expected_stdout: "wrote report.txt (0 servers)"
+    expected_files:
+      report.txt: "== fleet report ==\ntotal: 0"
+  - name: list is missing
+    args: [ghost.txt]
+    expected_stderr: "cannot read ghost.txt"
+    expected_exit: 1
+    expected_files:
+      report.txt: null
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh LIST"
+    expected_exit: 2

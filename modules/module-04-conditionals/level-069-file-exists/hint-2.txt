@@ -1,1 +1,0 @@
-Check the more specific file/directory cases before the fallback.

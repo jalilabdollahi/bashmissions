@@ -1,0 +1,7 @@
+uid=$(id -u)
+if (( uid == 0 )); then
+  ...message to stderr, exit 1...
+fi
+mv logs/app.log logs/app.log.1
+: > logs/app.log
+printf 'rotated as uid %d\n' "$uid"

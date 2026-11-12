@@ -1,0 +1,59 @@
+id: 104
+module: 6
+module_name: functions
+module_display: Functions
+title: Functions in Conditions
+difficulty: intermediate
+xp: 120
+story: |
+  The nightly backup job leaves a file per customer, and when the job fails it
+  leaves a zero-byte file behind. Noor wants a triage list: which of the files she
+  was handed are missing, which are empty shells, and which hold real data. The
+  "is it empty?" question comes up in three other scripts too, so it deserves its
+  own function.
+objective: |
+  Write solution.sh. It receives file names as arguments. Define a function named
+  is_empty_file that takes one path and returns 0 (success) when the path is a
+  regular file with size zero, and non-zero otherwise.
+  For each argument print one line:
+    <file>: missing      if the path does not exist at all
+    <file>: empty        if is_empty_file succeeds
+    <file>: ok           otherwise
+  Check "missing" first. Use the function directly as the condition of an if,
+  like  if is_empty_file "$f"; then  (no [[ ]] around the call, no $? needed).
+concepts:
+  - "if fn args; then ... fi uses the function's status"
+  - "a function that returns 0 means true"
+required_patterns:
+  - pattern: '(^|\n)\s*(function\s+)?is_empty_file\s*(\(\s*\))?\s*\{'
+    message: "Define a function called is_empty_file."
+  - pattern: '\b(if|elif)\s+!?\s*is_empty_file\b'
+    message: "Use the function directly as the condition: if is_empty_file \"$f\"; then"
+test_cases:
+  - name: one of each
+    args: [a.tar, b.tar, c.tar]
+    files:
+      a.tar: "data data"
+      b.tar: ""
+    expected_stdout: |-
+      a.tar: ok
+      b.tar: empty
+      c.tar: missing
+  - name: only empty ones
+    args: [x.sql, y.sql]
+    files:
+      x.sql: ""
+      y.sql: ""
+    expected_stdout: |-
+      x.sql: empty
+      y.sql: empty
+  - name: file name with a space
+    args: ["tide table.csv", "log.txt"]
+    files:
+      "tide table.csv": "1,2,3"
+      log.txt: "x"
+    expected_stdout: |-
+      tide table.csv: ok
+      log.txt: ok
+  - name: no arguments prints nothing
+    expected_stdout: ""

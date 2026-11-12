@@ -1,0 +1,7 @@
+A here-document starts with `<<WORD` after a command and ends at a line containing only WORD:
+
+  cat <<END
+  Hello $name, your server is ${server^^}.
+  END
+
+The closing word must be alone on its line, with nothing before or after it.

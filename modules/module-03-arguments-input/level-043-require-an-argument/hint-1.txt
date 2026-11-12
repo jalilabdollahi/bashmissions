@@ -1,0 +1,1 @@
+Before using the argument, check that it exists. You can count the arguments you got. If there are none, the script should complain and stop right there, and only the happy path continues. The complaint is not part of the normal output, so think about which channel it goes to.

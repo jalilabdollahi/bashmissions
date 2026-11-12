@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake statistics exporter: "pullstats SITE" prints "metric=value" lines.
+# FAKE_STATS_FAIL=1 makes it die after the first line (status 1).
+[[ $# -eq 1 ]] || { echo "usage: pullstats SITE" >&2; exit 2; }
+case $1 in
+  dory) out=("visits=412" "orders=9" "errors=0") ;;
+  eel)  out=("visits=88" "orders=0" "errors=2") ;;
+  *) echo "pullstats: no such site '$1'" >&2; exit 2 ;;
+esac
+echo "${out[0]}"
+if [[ ${FAKE_STATS_FAIL:-0} == 1 ]]; then
+  echo "pullstats: exporter crashed" >&2
+  exit 1
+fi
+printf '%s\n' "${out[@]:1}"

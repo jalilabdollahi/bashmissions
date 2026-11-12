@@ -1,0 +1,7 @@
+used="$1"
+quota="$2"
+if (( used > quota )); then
+  echo "over quota: $used GB used of $quota GB (+$(( used - quota )) GB)"
+else
+  echo "within quota: ..."   # the remaining GB is quota minus used
+fi

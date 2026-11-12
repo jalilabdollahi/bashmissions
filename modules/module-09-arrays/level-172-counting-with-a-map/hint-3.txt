@@ -1,0 +1,10 @@
+declare -A count=()
+while IFS= read -r plan || [[ -n $plan ]]; do
+  [[ -z $plan ]] && continue
+  count[$plan]=$(( ${count[$plan]:-0} + 1 ))
+done
+if (( ${#count[@]} > 0 )); then
+  while IFS= read -r plan; do
+    # print "<plan>: <its count>"
+  done < <(printf '%s\n' "${!count[@]}" | sort)
+fi

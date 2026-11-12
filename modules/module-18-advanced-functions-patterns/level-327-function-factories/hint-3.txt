@@ -1,0 +1,10 @@
+  make_logger() {
+    local level=$1
+    if [[ ! $level =~ ^[a-z]+$ ]]; then
+      echo "make_logger: bad level name '$level'" >&2
+      exit 2
+    fi
+    eval "log_$level() { printf '[%s] %s\\n' '${level^^}' \"\$*\"; }"
+  }
+  for level in "$@"; do make_logger "$level"; done
+  for level in "$@"; do "log_$level" "$message"; done

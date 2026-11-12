@@ -1,0 +1,1 @@
+This time you are the one who keeps the counter. Decide what it starts at, what question the loop asks before every round, and where the counter moves forward. Two things change every week: the week number and the size.

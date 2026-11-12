@@ -1,0 +1,71 @@
+id: 300
+module: 16
+module_name: debugging-scripts
+module_display: Debugging
+title: Dry-Run Mode
+difficulty: advanced
+xp: 170
+story: |
+  Priya will not let Theo's new site-provisioning script near production until
+  it can answer one question without touching anything: "What are you about to
+  do?" The company ethos, since the day somebody deleted the wrong bucket, is
+  look first, then act. Give the script a `--dry-run` flag.
+objective: |
+  Write solution.sh, called as `solution.sh [--dry-run] SITE`. It provisions a
+  site by running these three commands, each through a helper function `run`:
+    mkdir -p "sites/$SITE/logs"
+    touch "sites/$SITE/logs/access.log"
+    chmod 750 "sites/$SITE"
+  The helper `run` takes a command and its arguments. Normally it executes the
+  command. In dry-run mode it executes nothing and instead prints one line to
+  stdout: `would run:` followed by each word of the command, each preceded by a
+  space and written with `printf %q` (so names with spaces stay unambiguous), e.g.
+    would run: mkdir -p sites/eel/logs
+  After the commands, print `provisioned SITE` (real mode) or `dry run only,
+  nothing changed` (dry-run mode). If SITE is missing, print
+  `usage: solution.sh [--dry-run] SITE` to stderr and exit 2.
+concepts:
+  - "a run() wrapper decides: execute or print"
+  - "printf ' %q' quotes words so they can be pasted back"
+  - "dry-run changes nothing"
+required_patterns:
+  - pattern: '%q'
+    message: "Print each word of the command with printf ' %q' so spaces are shown safely."
+  - pattern: '(^|\s)run\s*\(\)'
+    message: "Define a helper function named run."
+test_cases:
+  - name: real run does the work
+    args: [eel]
+    expected_stdout: "provisioned eel"
+    expected_files:
+      sites/eel/logs/access.log: true
+  - name: dry run changes nothing
+    args: [--dry-run, marlin]
+    expected_stdout: |-
+      would run: mkdir -p sites/marlin/logs
+      would run: touch sites/marlin/logs/access.log
+      would run: chmod 750 sites/marlin
+      dry run only, nothing changed
+    expected_files:
+      sites/marlin/logs/access.log: null
+      sites/marlin/logs: null
+      sites/marlin: null
+  - name: dry run quotes awkward names
+    args: [--dry-run, Tidewater Books]
+    expected_stdout: |-
+      would run: mkdir -p sites/Tidewater\ Books/logs
+      would run: touch sites/Tidewater\ Books/logs/access.log
+      would run: chmod 750 sites/Tidewater\ Books
+      dry run only, nothing changed
+    expected_files:
+      sites/Tidewater Books: null
+  - name: real run with a space in the name
+    args: [Gull & Anchor]
+    expected_stdout: "provisioned Gull & Anchor"
+    expected_files:
+      sites/Gull & Anchor/logs/access.log: true
+  - name: a site is required
+    args: [--dry-run]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh [--dry-run] SITE"
+    expected_exit: 2

@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Reading a manifest or a state file: while IFS='=' read -r key val || [[ -n $key ]]; do case $key in version) ... ;; esac; done < "$file"
+Collect problems instead of stopping at the first one:  problem() { echo "invalid manifest $rel: $1" >&2; bad=1; }  and test  (( bad == 0 )) || exit 2  after the loop over all files.
+
+Plan order (order number first, then name):
+  for n in "${names[@]}"; do printf '%02d %s\n' "${dorder[$n]}" "$n"; done | LC_ALL=C sort | cut -d' ' -f2
+
+Orphans are names that have a state file but no manifest. Associative arrays make that a one-line test:  [[ -z ${dver[$n]:-} ]].
+
+Undoing an update needs the OLD values, so remember them before you overwrite anything: lver[], lrep[], lport[] come from the state files and are never modified.
+Atomic lock with cleanup:  mkdir "$live/.lock" 2>/dev/null || { echo ... >&2; exit 1; }   and   trap 'rmdir "$live/.lock"' EXIT
+Run a command and keep its status:  rc=0; deployctl apply ... || rc=$?     Test a command directly:  if healthctl "$n"; then ... else ... fi

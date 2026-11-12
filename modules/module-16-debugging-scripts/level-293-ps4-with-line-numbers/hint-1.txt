@@ -1,0 +1,1 @@
+The `+ ` in front of every trace line is not fixed: it lives in a shell variable that you can change. Put the current line number into it, and make sure Bash looks at the line number when each trace line is printed, not just once.

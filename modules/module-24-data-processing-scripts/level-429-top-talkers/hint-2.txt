@@ -1,0 +1,7 @@
+Several arrays can share one key:
+
+  awk '{ n[$2]++; sum[$2] += $3 } END { for (k in n) print k, n[k], sum[k] }' file
+
+sort accepts several keys, each with its own options: `sort -k3,3nr -k1,1` means "by field 3, numeric, reversed; ties by field 1 as text". `-k3,3` limits the key to that one field. Print sums with `%.0f` so big numbers do not turn into 1e+06.
+
+A default for an optional argument: `limit=${2:-3}`. Validate with `[[ $limit =~ ^[1-9][0-9]*$ ]]`. To number the sorted lines and cut off after N, `NR <= limit` in a second awk does both. The line `10.0.0.7 -` must still make the client exist, even though it adds no bytes.

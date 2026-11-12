@@ -1,0 +1,68 @@
+id: 183
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Merge stderr into stdout
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie wrote `sync-tool "$1" 2>&1 > sync.log` and was baffled: the log had
+  the progress, but the error showed up on screen and was lost from the file.
+  "Same characters, wrong order," Mara says, and slides the keyboard over.
+  "Redirections are read left to right. Let's find out why that matters."
+objective: |
+  Write solution.sh that takes one argument, a TARGET, and runs
+  `sync-tool TARGET`.
+
+  Both of the tool's streams (stdout and stderr) must end up in the file
+  `sync.log`, and nothing from the tool may reach the screen. Write it the
+  portable way: send stdout to the file first, then point stderr at wherever
+  stdout now goes. Do not use `&>`.
+
+  Afterwards print one line to stdout: `sync exit status: N`, where N is the
+  exit status of sync-tool. The script itself must exit 0.
+concepts:
+  - "2>&1 copies where stdout points"
+  - "redirections are processed left to right"
+required_patterns:
+  - pattern: '>\s*"?sync\.log"?\s+2>&1'
+    message: "Write the file redirection first, then 2>&1: > sync.log 2>&1."
+forbidden_patterns:
+  - pattern: '&>'
+    message: "Spell it out with > file 2>&1 instead of the &> shortcut."
+test_cases:
+  - name: everything lands in the file
+    args: [marlin]
+    expected_stdout: "sync exit status: 0"
+    expected_stderr: ""
+    expected_files:
+      sync.log: |-
+        syncing to marlin
+        error: marlin: permission denied on /srv/uploads
+        synced 6 items
+  - name: failing tool, status is reported
+    args: [octopus]
+    env:
+      SYNC_RC: "4"
+    expected_stdout: "sync exit status: 4"
+    expected_stderr: ""
+    expected_exit: 0
+    expected_files:
+      sync.log: |-
+        syncing to octopus
+        error: octopus: permission denied on /srv/uploads
+        synced 7 items
+  - name: replaces an old log
+    args: [eel]
+    env:
+      SYNC_RC: "1"
+    files:
+      sync.log: |
+        old line
+    expected_stdout: "sync exit status: 1"
+    expected_stderr: ""
+    expected_files:
+      sync.log: |-
+        syncing to eel
+        error: eel: permission denied on /srv/uploads
+        synced 3 items

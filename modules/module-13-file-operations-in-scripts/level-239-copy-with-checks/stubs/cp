@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Fake cp for BashMissions: behaves like the real cp, except when
+# FAKE_CP_BAD=1, where it "succeeds" but writes a truncated copy (a full disk,
+# a flaky network share...). The last argument is the destination.
+if [[ ${FAKE_CP_BAD:-0} == 1 ]]; then
+  dest=${!#}
+  echo "trunc" > "$dest"
+  exit 0
+fi
+exec /bin/cp "$@"

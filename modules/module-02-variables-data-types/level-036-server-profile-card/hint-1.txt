@@ -1,0 +1,1 @@
+This card uses every idea from the module, one per line of the card. Work through the requirements in order and give each one its own line of script: required setting, locked constant, defaults, a calculation, a captured value, then the printout.

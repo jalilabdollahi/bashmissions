@@ -1,1 +1,0 @@
-Use [[ $value =~ ^[0-9]+$ ]] for a simple all-digits check.

@@ -1,0 +1,1 @@
+Round brackets after the equals sign create an array, and the items go inside separated by spaces: colours=(red "dark blue" green). Quote an item if it might contain spaces. Afterwards, declare -p colours prints the array with its indexes so you can check it.

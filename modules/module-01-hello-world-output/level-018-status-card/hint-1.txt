@@ -1,0 +1,1 @@
+Split the job in four pieces and use the tool this module gave you for each: a block of text, two aligned rows, one message for the log channel, and the final number. Do them in the order of the card.

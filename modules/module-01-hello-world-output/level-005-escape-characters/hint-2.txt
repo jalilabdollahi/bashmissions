@@ -1,1 +1,0 @@
-Always quote "$1" and "$2" so spaces and special characters are preserved.

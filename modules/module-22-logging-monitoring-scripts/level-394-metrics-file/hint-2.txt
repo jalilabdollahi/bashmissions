@@ -1,0 +1,9 @@
+A sample line is `name{label="value"} number`. printf builds it neatly:
+
+  printf 'jobs_done_total{queue="%s"} %s\n' "$queue" "$count"
+
+awk can validate and count in one go (NF is the number of fields, $4 ~ /^[0-9]+$/ tests for digits):
+
+  awk 'NF == 3 && $2 ~ /^[0-9]+$/ { seen[$1]++ } END { for (k in seen) print k, seen[k] }' file | sort -n
+
+To publish atomically, write { ...; } > "$out.tmp" and then mv "$out.tmp" "$out" (a rename inside one folder is all-or-nothing).

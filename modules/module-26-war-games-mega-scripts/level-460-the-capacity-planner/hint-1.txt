@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Split the job in two: first turn every disk's history into three numbers (growth per day, percent used, days until full), then turn those numbers into a status and a sorted table. The first part is one awk program that remembers every sample under a host+mount key and does its maths in the END block. The only genuinely new difficulty is dates: you must turn a date into a plain day count so that "days between" is a subtraction, and turn a day count back into a date for the FULL_ON column.

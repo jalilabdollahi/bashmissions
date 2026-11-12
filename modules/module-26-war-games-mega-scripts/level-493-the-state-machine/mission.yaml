@@ -1,22 +1,202 @@
 id: 493
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The State Machine
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The State Machine` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The State Machine
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 440
+story: |
+  Noor's ticket board turned into a free-for-all during the storm. Tickets went
+  from "open" straight to "closed" without anyone fixing anything, a resolved
+  ticket was resolved again with no summary, and an intern "reopened" a ticket
+  that had been closed by the CFO on purpose. Mara wants the life of a ticket
+  written down as a state machine: which states exist, which events move a
+  ticket between them, who may fire each event, and what must be filled in
+  first. The rules should live in a file Noor can read, and the script should
+  enforce them without exception.
+objective: |
+  Write solution.sh, a ticket state machine.
+
+    solution.sh MACHINE validate
+    solution.sh MACHINE show TICKET
+    solution.sh MACHINE fire TICKET EVENT ROLE [FIELD=VALUE...]
+
+  MACHINE is the definition file. Blank lines and `#` comments are ignored.
+    `initial STATE`
+    `final STATE[,STATE...]`
+    `FROM EVENT TO [role=R1,R2] [require=FIELD]`   a transition
+  State, event, role and field names match `[a-z][a-z0-9_-]*`. `role=` limits
+  who may fire the transition (without it anyone may), `require=` names a
+  field that must be non-empty before the transition. States are all names
+  that appear in `initial`, `final` or as FROM/TO. A line that does not fit
+  (transition with fewer than 3 fields, unknown option, bad name, `initial`
+  or `final` without a value) is reported on stderr as
+  `MACHINE:LINE: bad line` and makes every command exit 2 (all bad lines are
+  listed first, in order). A machine without an `initial` line prints
+  `MACHINE: no initial state` and exits 2. If two transitions share FROM and
+  EVENT the first one is used.
+
+  validate prints problems on stdout, then exits 1 if there were any:
+    `duplicate transition: FROM EVENT`          (file order)
+    `unreachable state: S`                      (not reachable from initial; sorted)
+    `dead end: S`                               (not final, no outgoing transition; sorted)
+    `final state has outgoing transitions: S`   (sorted)
+  and as the last line `N problems found`. Without problems print
+  `OK: S states, T transitions` and exit 0 (T counts the transitions in use,
+  without duplicates).
+
+  A TICKET file holds lines (any order is accepted when reading):
+    `state=NAME`   `history=FROM EVENT TO ROLE` (several)   `FIELD=VALUE`
+  A ticket file that does not exist is a new ticket in the initial state. A
+  state that the machine does not know prints
+  `corrupt ticket TICKET: unknown state 'X'` to stderr and exits 2.
+
+  show prints `state: S`, `allowed: e1, e2` (sorted events that leave S, or
+  `none`), `steps: N` (number of history lines) and one `field NAME=VALUE` line
+  per field, sorted by name.
+
+  fire applies EVENT as ROLE; each FIELD=VALUE argument sets a field first
+  (a bad argument without `=` or with a bad name is a usage error). Checks,
+  in this order:
+    1. EVENT not allowed in the current state:
+       `illegal: event 'E' not allowed in state 'S' (allowed: a, b)` (or
+       `allowed: none`), exit 1.
+    2. ROLE not in the transition's role list:
+       `denied: role 'R' may not 'E' (needs: r1, r2)`, exit 3, the roles in the
+       order written in the machine.
+    3. A required field missing or empty (after applying the arguments):
+       `blocked: field 'F' is required`, exit 4.
+  A failed check changes nothing. On success rewrite TICKET (write a
+  temporary file next to it, then `mv` it over): first `state=NEW`, then the
+  fields sorted by name as `NAME=VALUE`, then every `history=` line in order,
+  with `history=FROM EVENT TO ROLE` appended. Print
+  `FROM -> TO (EVENT by ROLE)`.
+
+  Wrong arguments: `usage: solution.sh MACHINE validate | show TICKET | fire TICKET EVENT ROLE [FIELD=VALUE...]`
+  on stderr, exit 2. An unreadable MACHINE: `cannot read MACHINE`, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "states, events and a transition table"
+  - "guards: who may fire, what must be filled in"
+  - "static validation: reachability, dead ends, duplicates"
+  - "a failed transition changes nothing; a good one is written atomically"
+required_patterns:
+  - pattern: 'declare\s+-A'
+    message: "Store the transition table in associative arrays."
+  - pattern: '\bmv\b'
+    message: "Write the ticket to a temp file and mv it over the old one."
+test_cases:
+  - name: validate a healthy machine
+    args: [fixtures/ticket.machine, validate]
+    expected_stdout: "OK: 5 states, 6 transitions"
+  - name: validate finds every kind of problem
+    args: [fixtures/leaky.machine, validate]
+    expected_stdout: |-
+      duplicate transition: open triage
+      unreachable state: mitigating
+      unreachable state: orphan
+      dead end: mitigating
+      dead end: pager
+      final state has outgoing transitions: closed
+      6 problems found
+    expected_exit: 1
+  - name: a garbled machine file
+    args: [fixtures/garbled.machine, show, t.ticket]
+    expected_stderr: |-
+      fixtures/garbled.machine:2: bad line
+      fixtures/garbled.machine:3: bad line
+      fixtures/garbled.machine:4: bad line
+      fixtures/garbled.machine:5: bad line
+    expected_exit: 2
+  - name: a new ticket starts in the initial state
+    args: [fixtures/ticket.machine, show, t.ticket]
+    expected_stdout: |-
+      state: open
+      allowed: triage
+      steps: 0
+  - name: first event creates the ticket
+    args: [fixtures/ticket.machine, fire, t.ticket, triage, oncall]
+    expected_stdout: "open -> triaged (triage by oncall)"
+    expected_files:
+      t.ticket: |-
+        state=triaged
+        history=open triage triaged oncall
+  - name: an event that is not allowed here
+    args: [fixtures/ticket.machine, fire, t.ticket, resolve, oncall]
+    files:
+      t.ticket: |
+        state=triaged
+        history=open triage triaged oncall
+    expected_stderr: "illegal: event 'resolve' not allowed in state 'triaged' (allowed: dismiss, mitigate)"
+    expected_exit: 1
+    expected_files:
+      t.ticket: |-
+        state=triaged
+        history=open triage triaged oncall
+  - name: the wrong role is denied
+    args: [fixtures/ticket.machine, fire, t.ticket, triage, intern]
+    expected_stderr: "denied: role 'intern' may not 'triage' (needs: oncall, lead)"
+    expected_exit: 3
+    expected_files:
+      t.ticket: null
+  - name: a required field blocks the transition
+    args: [fixtures/ticket.machine, fire, t.ticket, resolve, oncall]
+    files:
+      t.ticket: |
+        state=mitigating
+        summary=
+        history=open triage triaged oncall
+        history=triaged mitigate mitigating oncall
+    expected_stderr: "blocked: field 'summary' is required"
+    expected_exit: 4
+  - name: setting the field in the same call unblocks it
+    args: [fixtures/ticket.machine, fire, t.ticket, resolve, oncall, "summary=pump replaced"]
+    files:
+      t.ticket: |
+        history=open triage triaged oncall
+        state=mitigating
+        history=triaged mitigate mitigating oncall
+        severity=2
+    expected_stdout: "mitigating -> resolved (resolve by oncall)"
+    expected_files:
+      t.ticket: |-
+        state=resolved
+        severity=2
+        summary=pump replaced
+        history=open triage triaged oncall
+        history=triaged mitigate mitigating oncall
+        history=mitigating resolve resolved oncall
+  - name: a transition without a role list is open to anyone
+    args: [fixtures/ticket.machine, fire, t.ticket, reopen, intern]
+    files:
+      t.ticket: "state=resolved\n"
+    expected_stdout: "resolved -> open (reopen by intern)"
+  - name: a final state allows nothing
+    args: [fixtures/ticket.machine, fire, t.ticket, reopen, lead]
+    files:
+      t.ticket: "state=closed\n"
+    expected_stderr: "illegal: event 'reopen' not allowed in state 'closed' (allowed: none)"
+    expected_exit: 1
+  - name: show a ticket with fields
+    args: [fixtures/ticket.machine, show, t.ticket]
+    files:
+      t.ticket: |
+        state=triaged
+        customer=North Pier Dental
+        severity=2
+        history=open triage triaged lead
+    expected_stdout: |-
+      state: triaged
+      allowed: dismiss, mitigate
+      steps: 1
+      field customer=North Pier Dental
+      field severity=2
+  - name: a ticket in an unknown state
+    args: [fixtures/ticket.machine, show, t.ticket]
+    files:
+      t.ticket: "state=exploded\n"
+    expected_stderr: "corrupt ticket t.ticket: unknown state 'exploded'"
+    expected_exit: 2
+  - name: a malformed field argument
+    args: [fixtures/ticket.machine, fire, t.ticket, triage, oncall, summary]
+    expected_stderr: "usage: solution.sh MACHINE validate | show TICKET | fire TICKET EVENT ROLE [FIELD=VALUE...]"
+    expected_exit: 2

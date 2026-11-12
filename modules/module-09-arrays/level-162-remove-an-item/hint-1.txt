@@ -1,0 +1,1 @@
+There is a built-in command to remove a variable, and it can also remove a single element of an array. The remaining elements will keep the numbers they had; nothing slides down to fill the hole. That is why the order of removal does not matter here.

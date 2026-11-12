@@ -1,0 +1,89 @@
+id: 228
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Count and Invert
+difficulty: intermediate
+xp: 150
+story: |
+  The nightly sshd report is supposed to go to Gus as a two-number summary, not
+  a wall of text: how many real entries the log has, and how many of those are
+  failed passwords. The log files that Ollie rotates also contain comment lines
+  starting with "#" and empty lines, which are not entries at all and must not be
+  counted. Priya says the number of failures divided by the number of entries is
+  what she looks at first.
+objective: |
+  Write solution.sh that takes one argument, a log file, and prints exactly two
+  lines:
+
+    entries: <number of lines that are neither empty nor start with #>
+    failed: <number of lines containing "Failed password">
+
+  Count lines with grep -c, and skip comments and empty lines with an inverted
+  match (grep -v). A comment line or empty line is never an entry, even if it
+  contains "Failed password" (a "# Failed password" note is just a comment, so it
+  does not count in "failed" either). The counts must also print as 0 when there is no
+  match, and the script must exit with status 0. If no argument is given, print
+  "usage: solution.sh LOGFILE" to stderr and exit with status 2.
+concepts:
+  - "grep -c counts matching lines"
+  - "grep -v selects the lines that do NOT match"
+  - "grep -c prints 0 but exits 1 when nothing matches"
+required_patterns:
+  - pattern: 'grep\s+[^|\n]*-[A-Za-z]*c'
+    message: "Count with grep -c instead of piping into wc."
+  - pattern: 'grep\s+[^|\n]*-[A-Za-z]*v'
+    message: "Skip comments and empty lines with grep -v."
+forbidden_patterns:
+  - pattern: '\bwc\b|\bawk\b|\bsed\b'
+    message: "Let grep do the counting; no wc, awk or sed."
+test_cases:
+  - name: a normal log
+    files:
+      "sshd.log": |
+        # rotated 2024-11-07
+        Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+
+        Nov  7 09:31:02 anchovy sshd[2214]: Accepted publickey for mara from 198.51.100.4 port 52114 ssh2
+        Nov  7 09:31:40 anchovy sshd[2220]: Failed password for deploy from 203.0.113.9 port 4031 ssh2
+        # end of file
+    args: [sshd.log]
+    expected_stdout: |-
+      entries: 3
+      failed: 2
+  - name: commented-out failures do not count
+    files:
+      "notes.log": |
+        # Failed password for root from 1.2.3.4  (example from the wiki)
+        Nov  8 10:00:00 barracuda sshd[1]: Accepted password for ollie from 10.0.0.5 port 22 ssh2
+    args: [notes.log]
+    expected_stdout: |-
+      entries: 1
+      failed: 0
+  - name: no failures at all prints zero
+    files:
+      "calm.log": |
+        Nov  9 08:00:00 cuttlefish sshd[7]: Accepted publickey for mara from 10.0.0.2 port 22 ssh2
+        Nov  9 08:00:05 cuttlefish sshd[7]: Accepted publickey for tom from 10.0.0.3 port 22 ssh2
+    args: [calm.log]
+    expected_stdout: |-
+      entries: 2
+      failed: 0
+  - name: only comments and blanks
+    files:
+      "empty.log": "# nothing yet\n\n# still nothing\n"
+    args: [empty.log]
+    expected_stdout: |-
+      entries: 0
+      failed: 0
+  - name: zero-length file
+    files:
+      "zero.log": ""
+    args: [zero.log]
+    expected_stdout: |-
+      entries: 0
+      failed: 0
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh LOGFILE"
+    expected_exit: 2

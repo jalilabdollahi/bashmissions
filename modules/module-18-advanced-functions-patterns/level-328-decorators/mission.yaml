@@ -1,0 +1,66 @@
+id: 328
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Decorators
+difficulty: advanced
+xp: 230
+story: |
+  Ollie is trying to find out why `restart_service` sometimes says nothing and
+  then the site is down. "I want to see when it starts and how it ended,"
+  he says, "but I do not want to touch the function: it is Theo's, and it
+  is used in forty places." Mara smiles. "You do not have to. Wrap it. Same
+  name, same arguments, a little more around it."
+objective: |
+  Write solution.sh, called as `solution.sh FUNCTION ARG`.
+  The script defines two functions of its own:
+    restart_service NAME   prints "restarting NAME"; returns status 3 when NAME is "broken"
+    rotate_logs NAME       prints "rotated logs for NAME"
+  Write `decorate FN` which replaces the existing function FN by a wrapper
+  with the same name. The wrapper, for a call `FN args...`:
+    1. prints ">> FN args..."            (words joined by spaces)
+    2. runs the ORIGINAL function with the same arguments
+    3. prints "<< FN rc=STATUS"          (the original's exit status)
+    4. returns that same status.
+  Keep the original body without editing it: copy its definition under a
+  new name (hint: `declare -f`).
+  The script then runs `decorate FUNCTION` and calls `FUNCTION ARG`, and its
+  own exit status is the wrapper's status.
+  If FUNCTION is not a defined function, decorate prints
+  "decorate: no such function: FUNCTION" to stderr and returns 1,
+  and the script exits with that status.
+concepts:
+  - "declare -f NAME prints a function's source (fails if it does not exist)"
+  - "eval \"orig_${def}\" re-defines the body under a new name"
+  - "a wrapper that forwards \"$@\" and preserves the exit status"
+required_patterns:
+  - pattern: 'declare\s+-f\b'
+    message: "Use declare -f to fetch the original function's definition."
+test_cases:
+  - name: wrap restart_service
+    args: [restart_service, web]
+    expected_stdout: |-
+      >> restart_service web
+      restarting web
+      << restart_service rc=0
+  - name: the other function, same decorator
+    args: [rotate_logs, harbour-bakery]
+    expected_stdout: |-
+      >> rotate_logs harbour-bakery
+      rotated logs for harbour-bakery
+      << rotate_logs rc=0
+  - name: a failing original keeps its status
+    args: [restart_service, broken]
+    expected_stdout: |-
+      >> restart_service broken
+      restarting broken
+      << restart_service rc=3
+    expected_exit: 3
+  - name: a function that does not exist
+    args: [reboot_the_harbour, now]
+    expected_stderr: "decorate: no such function: reboot_the_harbour"
+    expected_exit: 1
+  - name: an external command is not a function
+    args: [ls, x]
+    expected_stderr: "decorate: no such function: ls"
+    expected_exit: 1

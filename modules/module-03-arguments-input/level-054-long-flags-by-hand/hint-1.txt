@@ -1,0 +1,1 @@
+You do not know how many flags will come or in what order, so look at only the first argument at a time: decide what it is, act on it, remove it, and repeat until none are left. Flags that carry a value use two arguments, flags that are switches use one. Set defaults before the loop starts.

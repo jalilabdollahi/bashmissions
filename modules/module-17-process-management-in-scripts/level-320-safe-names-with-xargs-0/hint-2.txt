@@ -1,0 +1,5 @@
+`find ... -print0` ends every name with a NUL byte instead of a newline, and `xargs -0` splits its input on NUL bytes only, doing no quote or space processing at all:
+
+  find photos -type f -name '*.jpg' -print0 | xargs -0 ls -l
+
+`find -type f` matches regular files only (not folders), and `-name '*.log'` needs its quotes so the shell does not expand the star itself.

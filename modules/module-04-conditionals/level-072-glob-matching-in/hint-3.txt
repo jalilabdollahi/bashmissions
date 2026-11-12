@@ -1,0 +1,10 @@
+name="$1"
+if [[ $name == tmp-* ]]; then
+  echo "$name -> delete"
+elif [[ $name == *.log ]]; then
+  echo "$name -> archive"
+elif [[ $name == ... ]]; then      # crash-, ONE character, .dump
+  echo "$name -> ticket"
+else
+  echo "$name -> ignore"
+fi

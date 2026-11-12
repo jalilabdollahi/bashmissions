@@ -1,1 +1,0 @@
-Wrap a command in `$(...)` to capture its output and embed it in another string. This is called command substitution.

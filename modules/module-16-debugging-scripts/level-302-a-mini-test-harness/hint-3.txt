@@ -1,0 +1,13 @@
+  source "$1"
+  while IFS= read -r name; do
+    if ( "$name" ) > /dev/null 2>&1; then
+      echo "PASS $name"
+      passed=$(( passed + 1 ))
+    else
+      echo "FAIL $name"
+      ...                       # count it as failed
+    fi
+  done < <(compgen -A function test_ | sort)
+
+  echo "$passed passed, $failed failed"
+  (( failed == 0 ))             # the last command decides the exit status

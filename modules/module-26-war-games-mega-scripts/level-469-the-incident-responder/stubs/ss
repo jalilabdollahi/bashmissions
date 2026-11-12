@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# ss -tn stand-in (FAKE_FAIL_COLLECTOR=ss makes it fail)
+[[ ${1:-} == -tn && $# -eq 1 ]] || { echo "ss: this stand-in supports only: ss -tn" >&2; exit 2; }
+[[ ${FAKE_FAIL_COLLECTOR:-} == ss ]] && { echo "ss: netlink error" >&2; exit 1; }
+cat <<'OUT'
+State Recv-Q Send-Q Local:Port Peer:Port
+ESTAB 0 0 10.0.0.5:443 203.0.113.9:51234
+ESTAB 0 0 10.0.0.5:443 203.0.113.10:40022
+OUT

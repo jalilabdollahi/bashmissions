@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Two techniques carry this level.
+
+1. The lock. Check for the file first and exit if it exists, and only after that create it and register the cleanup:
+     [[ -e $lock ]] && { echo "..." >&2; exit 7; }
+     : > "$lock"
+     trap 'rm -f "$lock"' EXIT
+   If you set the trap before the check, the refused second run deletes the first run's lock.
+
+2. A function that takes a command: `run_stage NAME CMD...` does `local name=$1; shift` and then runs "$@". Use it in an `if`, so `set -e` does not kill the script when a stage fails:
+     if ! run_stage build harbor-build "$app" "$version"; then ...; exit 3; fi
+   For the retry loop use `for attempt in 1 2 3`, and only sleep when another attempt is coming.

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Pretend fault-injection agent.
+#   chaosctl kill SERVICE | delay SERVICE MS | drop SERVICE PERCENT
+#   chaosctl status SERVICE      prints healthy|down|slow|lossy
+#   chaosctl heal SERVICE        restores the service
+# FAKE_STUCK=NAME makes `heal NAME` do nothing. Injections and heals are
+# recorded in .calls.log; state lives in chaos-state/.
+cmd=${1:-}
+svc=${2:-}
+usage() { echo "chaosctl: bad usage: $*" >&2; exit 2; }
+[[ -n $svc ]] || usage "$cmd needs a service"
+mkdir -p chaos-state
+case $cmd in
+  kill)  [[ $# -eq 2 ]] || usage kill; echo down > "chaos-state/$svc"; echo "kill $svc" >> .calls.log ;;
+  delay) [[ $# -eq 3 && $3 =~ ^[0-9]+$ ]] || usage delay; echo slow > "chaos-state/$svc"; echo "delay $svc $3" >> .calls.log ;;
+  drop)  [[ $# -eq 3 && $3 =~ ^[0-9]+$ ]] || usage drop; echo lossy > "chaos-state/$svc"; echo "drop $svc $3" >> .calls.log ;;
+  heal)
+    echo "heal $svc" >> .calls.log
+    [[ ${FAKE_STUCK:-} == "$svc" ]] || echo healthy > "chaos-state/$svc" ;;
+  status)
+    if [[ -r chaos-state/$svc ]]; then cat "chaos-state/$svc"; else echo healthy; fi ;;
+  *) usage "unknown command $cmd" ;;
+esac

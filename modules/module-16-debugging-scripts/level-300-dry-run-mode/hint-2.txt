@@ -1,0 +1,6 @@
+A wrapper receives a whole command as its arguments, so `"$@"` runs it. To print the words so that a person could paste them back, `printf` with `%q` shell-quotes each one, and a format string is reused for every argument:
+
+  show() { printf 'would run:'; printf ' %q' "$@"; printf '\n'; }
+  show ls "my folder"        # would run: ls my\ folder
+
+In the real branch simply write `"$@"`.

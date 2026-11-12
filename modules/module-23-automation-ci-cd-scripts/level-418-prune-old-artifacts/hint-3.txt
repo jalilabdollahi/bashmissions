@@ -1,0 +1,15 @@
+shopt -s nullglob
+files=()
+for path in "$dir"/*; do
+  # regular files only: -f and not -L
+done
+
+for path in "${files[@]+"${files[@]}"}"; do
+  rank=0
+  for other in "${files[@]}"; do
+    [[ $other == "$path" ]] && continue
+    # newer by mtime ($other -nt $path), or same mtime and a later name -> rank+1
+  done
+  # rank < keep -> "keep NAME", else "remove NAME" and rm -f -- "$path"
+done
+# summary line with both counters

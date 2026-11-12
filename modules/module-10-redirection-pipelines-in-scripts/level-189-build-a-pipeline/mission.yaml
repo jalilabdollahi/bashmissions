@@ -1,0 +1,92 @@
+id: 189
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Build a Pipeline
+difficulty: intermediate
+xp: 150
+story: |
+  Someone is hammering the Tidewater Books storefront with requests for pages
+  that do not exist: hundreds of 404s an hour, and Priya smells a scanner. She
+  does not need a dashboard, she needs a short list: which three addresses
+  are asking for missing pages the most? The web log is a plain text file
+  with one request per line. Five small tools, each doing one thing, will
+  answer the question in one line of shell.
+objective: |
+  Write solution.sh that takes one argument: the path of an access log.
+  Each line looks like this:
+
+    203.0.113.9 - - [10/Nov/2026:09:14:02 +0000] "GET /missing HTTP/1.1" 404 512
+
+  (client address first, then the quoted request, then the status code and
+  the size.)
+
+  Print the (up to) three client addresses with the most requests whose
+  status is 404, most active first, one per line as `<address>: <count>`.
+  Counts will never tie in the tests.
+  If the log has no 404 lines, print `no 404 responses`.
+  If the file does not exist, print `log not found: <path>` to stderr and
+  exit with status 1.
+  Build it as one pipeline of at least four commands (grep, cut, sort,
+  uniq -c, sort -rn, head ... and a final tool to reformat uniq's output).
+concepts:
+  - "a | b | c: stdout of one command becomes stdin of the next"
+  - "sort | uniq -c | sort -rn counting idiom"
+required_patterns:
+  - pattern: '\|[^|]*\|[^|]*\|'
+    message: "Chain at least four commands with three or more pipes."
+  - pattern: 'uniq\s+-c'
+    message: "Count repeats with uniq -c (after sorting)."
+test_cases:
+  - name: scanner on top
+    args: [access.log]
+    files:
+      access.log: |
+        203.0.113.9 - - [10/Nov/2026:09:14:02 +0000] "GET /wp-login.php HTTP/1.1" 404 512
+        198.51.100.4 - - [10/Nov/2026:09:14:03 +0000] "GET /index.html HTTP/1.1" 200 2048
+        203.0.113.9 - - [10/Nov/2026:09:14:04 +0000] "GET /admin HTTP/1.1" 404 512
+        192.0.2.77 - - [10/Nov/2026:09:14:05 +0000] "GET /old HTTP/1.1" 404 512
+        203.0.113.9 - - [10/Nov/2026:09:14:06 +0000] "GET /.env HTTP/1.1" 404 512
+        192.0.2.77 - - [10/Nov/2026:09:14:07 +0000] "GET /backup.zip HTTP/1.1" 404 512
+        198.51.100.4 - - [10/Nov/2026:09:14:08 +0000] "GET /missing HTTP/1.1" 404 512
+    expected_stdout: |-
+      203.0.113.9: 3
+      192.0.2.77: 2
+      198.51.100.4: 1
+  - name: only top three are shown
+    args: [web.log]
+    files:
+      web.log: |
+        10.0.0.1 - - [10/Nov/2026:10:00:01 +0000] "GET /a HTTP/1.1" 404 10
+        10.0.0.2 - - [10/Nov/2026:10:00:02 +0000] "GET /a HTTP/1.1" 404 10
+        10.0.0.2 - - [10/Nov/2026:10:00:03 +0000] "GET /b HTTP/1.1" 404 10
+        10.0.0.3 - - [10/Nov/2026:10:00:04 +0000] "GET /a HTTP/1.1" 404 10
+        10.0.0.3 - - [10/Nov/2026:10:00:05 +0000] "GET /b HTTP/1.1" 404 10
+        10.0.0.3 - - [10/Nov/2026:10:00:06 +0000] "GET /c HTTP/1.1" 404 10
+        10.0.0.4 - - [10/Nov/2026:10:00:07 +0000] "GET /a HTTP/1.1" 404 10
+        10.0.0.4 - - [10/Nov/2026:10:00:08 +0000] "GET /b HTTP/1.1" 404 10
+        10.0.0.4 - - [10/Nov/2026:10:00:09 +0000] "GET /c HTTP/1.1" 404 10
+        10.0.0.4 - - [10/Nov/2026:10:00:10 +0000] "GET /d HTTP/1.1" 404 10
+        10.0.0.5 - - [10/Nov/2026:10:00:11 +0000] "GET /a HTTP/1.1" 200 99
+        10.0.0.5 - - [10/Nov/2026:10:00:12 +0000] "GET /b HTTP/1.1" 500 99
+    expected_stdout: |-
+      10.0.0.4: 4
+      10.0.0.3: 3
+      10.0.0.2: 2
+  - name: a 404 size or path must not fool the filter
+    args: [odd.log]
+    files:
+      odd.log: |
+        192.0.2.5 - - [10/Nov/2026:11:00:00 +0000] "GET /page404 HTTP/1.1" 200 404
+        192.0.2.6 - - [10/Nov/2026:11:00:01 +0000] "GET /gone HTTP/1.1" 404 404
+    expected_stdout: "192.0.2.6: 1"
+  - name: no 404 at all
+    args: [clean.log]
+    files:
+      clean.log: |
+        192.0.2.5 - - [10/Nov/2026:11:00:00 +0000] "GET / HTTP/1.1" 200 1500
+    expected_stdout: "no 404 responses"
+  - name: log is missing
+    args: [nope.log]
+    expected_stderr: "log not found: nope.log"
+    expected_exit: 1

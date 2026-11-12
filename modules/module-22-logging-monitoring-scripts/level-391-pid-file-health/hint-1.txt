@@ -1,0 +1,1 @@
+Two questions, in order: is there any process with the number in the file, and if so, is it the program we expect? The second question exists because the system recycles numbers, so a live process alone proves nothing. Handle the odd cases (no file, junk inside) before asking the system anything.

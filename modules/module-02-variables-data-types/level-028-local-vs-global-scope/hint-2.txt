@@ -1,1 +1,0 @@
-Without `local`, an assignment inside a function modifies (or creates) a global variable. That's a common source of bugs in larger scripts.

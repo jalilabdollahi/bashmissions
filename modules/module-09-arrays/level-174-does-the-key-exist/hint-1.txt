@@ -1,0 +1,1 @@
+There are three answers, but the starter's single default can only give two: a missing key and an empty value both look like an empty string when you read them. You need a test that asks about the key itself, not about its value.

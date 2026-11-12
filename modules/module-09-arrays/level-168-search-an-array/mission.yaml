@@ -1,0 +1,66 @@
+id: 168
+module: 9
+module_name: arrays
+module_display: Arrays & Maps
+title: Search an Array
+difficulty: intermediate
+xp: 130
+story: |
+  Maintenance windows at Lanternfish are guarded by Priya's allow-list: only
+  people and machines on the list may touch production. A previous guard script
+  used a substring match, and the day "eel" was on the list, a user called
+  "wheelbarrow" walked straight in. Priya would like the guard rewritten so
+  that a name is allowed only if it matches an entry exactly.
+objective: |
+  Write solution.sh. The first argument is the NAME to check; every other
+  argument is an entry of the allow-list. Store the entries in an array and
+  look for a whole-element exact match (case-sensitive, spaces included).
+  If found print
+    <name>: allowed
+  and exit with status 0. If not found print
+    <name>: denied
+  and exit with status 1. An empty list denies everyone. An empty NAME matches
+  only an empty entry. With no arguments at all print
+  "usage: solution.sh NAME [ENTRY...]" to stderr and exit with status 2.
+  Do not use grep or regular expressions (=~); compare each element with ==.
+concepts:
+  - "membership test: loop and compare each element"
+  - "exact match versus substring match"
+  - "return/exit status carries the answer"
+required_patterns:
+  - pattern: 'for\s+\w+\s+in\s+"\$\{\w+\[@\]\}"'
+    message: 'Walk the list with: for entry in "${allowed[@]}"; do'
+forbidden_patterns:
+  - pattern: '=~|\bgrep\b|\[\*\]'
+    message: "Compare whole elements with == inside a loop; regex, grep and [*] all risk substring matches."
+test_cases:
+  - name: present in the middle
+    args: [dory, anchovy, dory, eel]
+    expected_stdout: "dory: allowed"
+  - name: absent
+    args: [halibut, anchovy, dory, eel]
+    expected_stdout: "halibut: denied"
+    expected_exit: 1
+  - name: substring of an entry is not a match
+    args: [eel, wheelbarrow, eelpout, "reel"]
+    expected_stdout: "eel: denied"
+    expected_exit: 1
+  - name: entry with spaces
+    args: ["Gull & Anchor", marlin, "Gull & Anchor", octopus]
+    expected_stdout: "Gull & Anchor: allowed"
+  - name: a prefix made of two entries is not a match
+    args: ["marlin octopus", marlin, octopus]
+    expected_stdout: "marlin octopus: denied"
+    expected_exit: 1
+  - name: empty list denies
+    args: [anchovy]
+    expected_stdout: "anchovy: denied"
+    expected_exit: 1
+  - name: glob characters are literal
+    args: ["*", anchovy, dory]
+    expected_stdout: "*: denied"
+    expected_exit: 1
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh NAME [ENTRY...]"
+    expected_exit: 2

@@ -1,0 +1,9 @@
+Square brackets match ONE character out of a set. Inside them you can write a range or a named POSIX class:
+
+  [a-f]          one of a b c d e f
+  [[:digit:]]    one digit
+  [[:upper:]]    one capital letter
+
+Put each one where one character is expected, anchor the ends, and keep the regex in a variable:
+
+  re='^id-[A-Z][[:digit:]]$'     # id-Q7

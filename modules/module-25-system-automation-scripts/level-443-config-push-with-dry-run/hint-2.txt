@@ -1,0 +1,1 @@
+`scp -q LOCAL host:/remote/path` copies one file; the part before the colon is the host. `[[ -s file ]]` is true only when the file exists and is not empty. Use the scp command itself as the `if` condition so a failure is a branch, not an abort: `if scp ...; then ...; else ...; fi`. The flag can be parsed like `if [[ ${1:-} == -n ]]; then dry=1; shift; fi`.

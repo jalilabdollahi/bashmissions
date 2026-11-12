@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Fake git for version stamping. State files in the current directory:
+#   .describe  what "git describe --tags --long --dirty" would print (may end in -dirty)
+#   .head      the abbreviated hash of HEAD
+echo "git $*" >> .calls.log
+die() { echo "$1" >&2; exit "${2:-128}"; }
+
+case ${1:-} in
+  describe)
+    shift
+    tags=0 long=0 dirty=0 match='*'
+    while (( $# )); do
+      case $1 in
+        --tags)  tags=1 ;;
+        --long)  long=1 ;;
+        --dirty) dirty=1 ;;
+        --match) shift; [[ $# -gt 0 ]] || die "error: option 'match' requires a value" 129; match=$1 ;;
+        *) die "git describe: option '$1' is not implemented in this stub" 2 ;;
+      esac
+      shift
+    done
+    [[ -f .describe ]] || die "fatal: No names found, cannot describe anything."
+    out=$(<.describe)
+    # split "<tag>-<n>-g<hash>[-dirty]" the way git builds it
+    re='^(.+)-([0-9]+)-g([0-9a-f]+)(-dirty)?$'
+    [[ $out =~ $re ]] || die "stub: malformed .describe file" 2
+    tag=${BASH_REMATCH[1]} n=${BASH_REMATCH[2]} hash=${BASH_REMATCH[3]} isdirty=${BASH_REMATCH[4]}
+    # shellcheck disable=SC2254
+    case $tag in $match) ;; *) die "fatal: No names found, cannot describe anything." ;; esac
+    (( tags )) || die "stub: annotated tags only without --tags; add --tags" 2
+    [[ -n $isdirty && $dirty -eq 0 ]] && isdirty=""
+    if (( long )) || (( n > 0 )) || [[ -n $isdirty ]]; then
+      echo "$tag-$n-g$hash$isdirty"
+    else
+      echo "$tag"
+    fi
+    exit 0 ;;
+  rev-parse)
+    [[ ${2:-} == --short && ${3:-} == HEAD && $# -eq 3 ]] || die "git rev-parse: only '--short HEAD' is implemented" 2
+    [[ -f .head ]] || die "fatal: ambiguous argument 'HEAD': unknown revision"
+    cat .head
+    exit 0 ;;
+  *) die "git: '${1:-}' is not implemented in this stub" 2 ;;
+esac

@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Parsing the config: `while IFS='|' read -r kind f2 f3 f4; do case $kind in order) read -ra order <<< "$f2" ;; gate) ... ;; esac; done < pipeline.conf`. Keep `gate_envs`, `gate_names`, `gate_args` as parallel arrays and filter on `${gate_envs[i]} == "$to"` when evaluating.
+- Adjacency check: find the index of FROM and TO in the order array; valid only when `pos_to == pos_from + 1`.
+- Evaluate every gate in a loop that records failures (`failed=$((failed + 1))`) instead of exiting, then decide once at the end.
+- Minutes: `$(( (now - since) / 60 ))`.
+- Separation of duties: `approver=$(sed -n 's/^approver=//p' "$file" | head -n 1)` compared with `${DEPLOYER:-$USER}`.
+- Reading a state file that may not exist: `[[ -f $f ]] && cat "$f" || true`, so `set -e` stays quiet.
+- After a failed health check call `deployctl push "$app" "$previous" "$to"` and exit with a distinct status.

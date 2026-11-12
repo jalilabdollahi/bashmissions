@@ -1,0 +1,1 @@
+grep -q PATTERN FILE prints nothing and succeeds only when the pattern is found, which makes it a perfect if condition: if grep -q -E '^word[[:space:]]+yes' "$file"; then. It also fails for a file that does not exist. Save the winner with hit=$file, then break. After the loop, [[ -n $hit ]] tells you whether anything was found.

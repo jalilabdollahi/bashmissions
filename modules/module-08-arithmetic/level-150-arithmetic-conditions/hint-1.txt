@@ -1,0 +1,1 @@
+A disk that is 95% full is also "at least 75% full", so the order of your checks decides the answer: start with the most serious one. And to compare fractions without decimals, multiply both sides until nothing is left to divide.

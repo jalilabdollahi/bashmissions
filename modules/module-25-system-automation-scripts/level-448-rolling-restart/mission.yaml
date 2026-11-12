@@ -1,0 +1,152 @@
+id: 448
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Rolling Restart
+difficulty: expert
+xp: 380
+story: |
+  Theo shipped a config change for nginx and, in a moment of enthusiasm,
+  asked for "restart it everywhere". Everywhere at once is also known as an
+  outage. The load balancer can lose one web host without anyone noticing,
+  but not all four. Mara's rule for restarts: one host at a time, wait until
+  it is healthy again, and if one does not come back, stop and leave the rest
+  of the fleet exactly as it was.
+objective: |
+  Write solution.sh HOSTFILE SERVICE. HOSTFILE lists one host per line
+  (blank lines and `#` comments ignored). SERVICE is a systemd unit name such
+  as `nginx` (letters, digits and `@._-` only; anything else prints
+  `bad service name: SERVICE` to stderr and exits 2).
+
+  Process the hosts strictly one after another. For each host HOST:
+  1. Print `restarting HOST`.
+  2. Run `ssh -n -o BatchMode=yes HOST systemctl restart SERVICE`. If that
+     fails (any non-zero status), abort as described below with reason
+     `restart failed`.
+  3. Ask for the state with `ssh -n -o BatchMode=yes HOST systemctl is-active SERVICE`
+     (it prints the state, `active` when healthy; its exit status is non-zero
+     when not active). Check at most 3 times in total, immediately one after
+     the other (a real script would sleep between checks; this simulated
+     fleet answers at once). As soon as the state is `active`, print
+     `HOST healthy after N check(s)` (N = checks used) and go on to the next host.
+  4. If it is still not active after 3 checks, abort with reason
+     `did not recover (last state: STATE)`.
+
+  Abort means: print `ABORT: HOST REASON; K hosts left untouched` to stderr
+  (K = hosts after this one in the file), do not touch any further host, and
+  exit 1 (ssh's own error text may also appear on stderr before it). When every host went well print `rolling restart complete: N hosts`.
+  Unreadable host file: `cannot read FILE` (stderr, exit 1). Wrong argument
+  count: `usage: solution.sh HOSTFILE SERVICE` (stderr, exit 2).
+concepts:
+  - "serial rollout: one host at a time, health gate before the next"
+  - "bounded retry loop"
+  - "stop the line on the first failure; report what was left untouched"
+required_patterns:
+  - pattern: 'is-active'
+    message: "Ask the host for the service state with systemctl is-active."
+test_cases:
+  - name: all four hosts restart cleanly
+    args: [web.txt, nginx]
+    files:
+      web.txt: "# web tier\nanchovy\nbarracuda\n\ncuttlefish\ndory\n"
+    expected_stdout: |-
+      restarting anchovy
+      anchovy healthy after 1 check(s)
+      restarting barracuda
+      barracuda healthy after 1 check(s)
+      restarting cuttlefish
+      cuttlefish healthy after 1 check(s)
+      restarting dory
+      dory healthy after 1 check(s)
+      rolling restart complete: 4 hosts
+    expected_files:
+      .calls.log: |
+        ssh anchovy systemctl restart nginx
+        ssh anchovy systemctl is-active nginx
+        ssh barracuda systemctl restart nginx
+        ssh barracuda systemctl is-active nginx
+        ssh cuttlefish systemctl restart nginx
+        ssh cuttlefish systemctl is-active nginx
+        ssh dory systemctl restart nginx
+        ssh dory systemctl is-active nginx
+  - name: a slow host is given time to come back
+    args: [web.txt, nginx]
+    env:
+      FAKE_SLOW: barracuda
+    files:
+      web.txt: "anchovy\nbarracuda\ncuttlefish\n"
+    expected_stdout: |-
+      restarting anchovy
+      anchovy healthy after 1 check(s)
+      restarting barracuda
+      barracuda healthy after 3 check(s)
+      restarting cuttlefish
+      cuttlefish healthy after 1 check(s)
+      rolling restart complete: 3 hosts
+  - name: a host that never recovers stops the rollout
+    args: [web.txt, nginx]
+    env:
+      FAKE_BROKEN: barracuda
+    files:
+      web.txt: "anchovy\nbarracuda\ncuttlefish\ndory\n"
+    expected_stdout: |-
+      restarting anchovy
+      anchovy healthy after 1 check(s)
+      restarting barracuda
+    expected_stderr: "ABORT: barracuda did not recover (last state: failed); 2 hosts left untouched"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        ssh anchovy systemctl restart nginx
+        ssh anchovy systemctl is-active nginx
+        ssh barracuda systemctl restart nginx
+        ssh barracuda systemctl is-active nginx
+        ssh barracuda systemctl is-active nginx
+        ssh barracuda systemctl is-active nginx
+  - name: the restart command itself fails on the first host
+    args: [web.txt, nginx]
+    env:
+      FAKE_RESTART_FAIL: anchovy
+    files:
+      web.txt: "anchovy\nbarracuda\ncuttlefish\n"
+    expected_stdout: "restarting anchovy"
+    expected_stderr: "ABORT: anchovy restart failed; 2 hosts left untouched"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        ssh anchovy systemctl restart nginx
+  - name: an unreachable host aborts too
+    args: [web.txt, nginx]
+    env:
+      FAKE_DOWN: barracuda
+    files:
+      web.txt: "anchovy\nbarracuda\n"
+    expected_stdout: |-
+      restarting anchovy
+      anchovy healthy after 1 check(s)
+      restarting barracuda
+    expected_stderr: "ABORT: barracuda restart failed; 0 hosts left untouched"
+    stderr_comparison: contains
+    expected_exit: 1
+  - name: empty host list
+    args: [web.txt, nginx]
+    files:
+      web.txt: "# nobody\n"
+    expected_stdout: "rolling restart complete: 0 hosts"
+  - name: nonsense service name
+    args: [web.txt, "nginx; reboot"]
+    files:
+      web.txt: "anchovy\n"
+    expected_stderr: "bad service name: nginx; reboot"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: host file missing
+    args: [none.txt, nginx]
+    expected_stderr: "cannot read none.txt"
+    expected_exit: 1
+  - name: wrong argument count
+    args: [web.txt]
+    expected_stderr: "usage: solution.sh HOSTFILE SERVICE"
+    expected_exit: 2

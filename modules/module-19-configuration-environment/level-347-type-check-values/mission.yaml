@@ -1,0 +1,116 @@
+id: 347
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Type-Check Values
+difficulty: advanced
+xp: 250
+story: |
+  A customer set `workers=lots` in the web tier's config, and the service
+  cheerfully started with no workers at all. Another typed `debug=Yes`, which
+  the app read as "no" because it only knew lowercase `true`. Everything in a
+  config file is text; somebody has to decide what the text means before the
+  rest of the program trusts it. Mara hands you that job.
+objective: |
+  Write solution.sh, called as `solution.sh CONFIG_FILE`. The file holds
+  `name=value` lines (ignore blank lines, `#` comments and blanks around names
+  and values; a name that is not one of the three below is ignored). Check
+  these settings, using the default when the name does not appear:
+    workers    integer from 1 to 64, default 2. Digits only (no sign, no
+               decimals, no arithmetic). Leading zeros are allowed and are
+               read as decimal: `08` means 8.
+    debug      boolean, default false. Case-insensitive `true`, `yes`, `on`,
+               `1` mean true; `false`, `no`, `off`, `0` mean false.
+    log_level  one of `debug`, `info`, `warn`, `error` (case-insensitive),
+               default `info`.
+  If every setting is valid, print the normalised values, nothing else:
+    workers=<number without leading zeros>
+    debug=<true or false>
+    log_level=<lowercase level>
+  Otherwise print nothing on stdout and, for each invalid setting, in the order
+  workers, debug, log_level, one line on stderr (the value shown in double
+  quotes, exactly as written after trimming):
+    invalid workers: "VALUE" (expected an integer from 1 to 64)
+    invalid debug: "VALUE" (expected true/false, yes/no, on/off or 1/0)
+    invalid log_level: "VALUE" (expected debug, info, warn or error)
+  and exit with status 1. If CONFIG_FILE is unreadable print
+  `cannot read CONFIG_FILE` to stderr and exit 2. If a name appears twice the
+  last line counts. An empty value is invalid.
+concepts:
+  - "validate before use: integers, booleans, enums"
+  - "10#$value forces base ten so 08 is not octal"
+  - "${var,,} normalises case; case patterns match word lists"
+test_cases:
+  - name: valid, written sloppily
+    args: [web.conf]
+    files:
+      web.conf: |
+        # web tier
+        workers = 08
+        debug=YES
+        log_level=WARN
+    expected_stdout: |-
+      workers=8
+      debug=true
+      log_level=warn
+  - name: everything defaulted
+    args: [web.conf]
+    files:
+      web.conf: "colour=blue\n"
+    expected_stdout: |-
+      workers=2
+      debug=false
+      log_level=info
+  - name: range edges and alternative spellings
+    args: [web.conf]
+    files:
+      web.conf: |
+        workers=64
+        debug=0
+        log_level=Debug
+    expected_stdout: |-
+      workers=64
+      debug=false
+      log_level=debug
+  - name: all three invalid
+    args: [web.conf]
+    files:
+      web.conf: |
+        workers=lots
+        debug=maybe
+        log_level=loud
+    expected_stdout: ""
+    expected_stderr: |-
+      invalid workers: "lots" (expected an integer from 1 to 64)
+      invalid debug: "maybe" (expected true/false, yes/no, on/off or 1/0)
+      invalid log_level: "loud" (expected debug, info, warn or error)
+    expected_exit: 1
+  - name: out of range, signs and arithmetic are not integers
+    args: [a.conf]
+    files:
+      a.conf: "workers=0\n"
+    expected_stderr: 'invalid workers: "0" (expected an integer from 1 to 64)'
+    expected_exit: 1
+  - name: arithmetic is text, not code
+    args: [b.conf]
+    files:
+      b.conf: |
+        workers=$((2+2))
+        debug=on
+    expected_stderr: 'invalid workers: "$((2+2))" (expected an integer from 1 to 64)'
+    expected_exit: 1
+  - name: negative and too big
+    args: [c.conf]
+    files:
+      c.conf: |
+        workers=-3
+        workers=65
+        debug=
+    expected_stderr: |-
+      invalid workers: "65" (expected an integer from 1 to 64)
+      invalid debug: "" (expected true/false, yes/no, on/off or 1/0)
+    expected_exit: 1
+  - name: unreadable file
+    args: [missing.conf]
+    expected_stderr: "cannot read missing.conf"
+    expected_exit: 2

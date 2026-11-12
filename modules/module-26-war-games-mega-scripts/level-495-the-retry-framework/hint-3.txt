@@ -1,1 +1,24 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  wait_after() {   # STRATEGY DELAY MAX N
+    case $1 in
+      fixed) w=$2 ;;
+      linear) w=$(( $2 * $4 )) ;;
+      exponential) w=$2; for (( i = 1; i < $4; i++ )); do w=$(( w * 2 )); (( w >= 86400 )) && break; done ;;
+    esac
+    cap with MAX (when > 0) and with 86400; echo "$w"
+  }
+
+  plan:  for (( n = 1; n < attempts; n++ )); do w=$(wait_after ...); echo "after attempt $n: wait ${w}s"; total+=...; done; echo "total wait: ${total}s"
+
+  run:   defaults; option loop; shift past --; validate everything; then
+         waited=0
+         for (( n = 1; n <= attempts; n++ )); do
+           status=0; "$@" || status=$?
+           (( status == 0 )) && { echo "succeeded on attempt $n" >&2; exit 0; }
+           not retryable (retry_on list, or default: not 126/127) -> message, exit "$status"
+           (( n == attempts )) -> "gave up after ..." exit "$status"
+           w=$(wait_after ...); budget check -> message, exit "$status"
+           echo "attempt $n/$attempts failed (exit $status), retrying in ${w}s" >&2
+           (( w > 0 )) && sleep "$w"; waited=$(( waited + w ))
+         done

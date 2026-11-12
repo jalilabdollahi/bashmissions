@@ -1,0 +1,9 @@
+die() { echo "solution.sh: $1" >&2; exit 2; }
+
+host=${POLL_HOST:-}
+seconds=${POLL_SECONDS:-30}
+mode=${POLL_MODE:-normal}
+
+[ -n "$host" ] || die "POLL_HOST is required"
+# if seconds is not digits or is outside 1..3600 -> die with the seconds message
+# case "$mode" in fast|normal) ;; *) die ... ;; esac

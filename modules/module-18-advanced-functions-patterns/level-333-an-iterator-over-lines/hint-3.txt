@@ -1,0 +1,14 @@
+  [[ -r $file ]] || { echo "lines: cannot read '$file'" >&2; exit 1; }
+  mapfile -t lines < "$file"
+  cursor=0
+  next_line() {
+    (( cursor < ${#lines[@]} )) || return 1
+    LINE=${lines[cursor]}
+    cursor=$(( cursor + 1 ))
+  }
+  while next_line; do
+    name=$LINE
+    start=$cursor                       # 1-based line number of the name
+    next_line && plan=$LINE && next_line && price=$LINE || { ...incomplete: stderr, exit 1...; }
+    echo "$name: $plan plan, $price EUR/month"
+  done

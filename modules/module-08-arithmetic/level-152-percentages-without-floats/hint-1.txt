@@ -1,0 +1,1 @@
+You can fake one decimal place by counting in units ten times smaller: work with tenths of a percent, which are whole numbers. The trick is the order of operations: scale up before you divide, then split the result back into "whole part" and "digit after the point" when you print.

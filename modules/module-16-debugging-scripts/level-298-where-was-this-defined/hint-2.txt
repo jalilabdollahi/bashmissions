@@ -1,0 +1,7 @@
+`$0` is the name of the script that was started. `${BASH_SOURCE[0]}` is the file containing the code that is running right now. Run directly they are equal; when another script does `source file.sh`, `$0` stays the caller while `BASH_SOURCE[0]` is still `file.sh`:
+
+  if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    echo "I was executed"
+  fi
+
+`basename PATH` removes the directories from a path.

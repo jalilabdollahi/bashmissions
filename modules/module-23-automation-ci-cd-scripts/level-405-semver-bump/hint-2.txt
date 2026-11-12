@@ -1,0 +1,8 @@
+One regex can both validate and split:
+
+  re='^([a-z]*)(0|[1-9][0-9]*)-(0|[1-9][0-9]*)$'
+  if [[ $text =~ $re ]]; then
+    head=${BASH_REMATCH[1]} a=${BASH_REMATCH[2]} b=${BASH_REMATCH[3]}
+  fi
+
+Keeping the regex in a variable avoids quoting trouble; do not quote the variable on the right of `=~`. A `case $word in a|b) ... ;; *) ... ;; esac` picks one of several branches.

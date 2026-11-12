@@ -1,0 +1,11 @@
+# incident ticket lifecycle
+initial open
+final closed
+
+# FROM       EVENT     TO          options
+open         triage    triaged     role=oncall,lead
+triaged      mitigate  mitigating  role=oncall
+triaged      dismiss   closed      role=lead
+mitigating   resolve   resolved    require=summary
+resolved     close     closed      role=lead
+resolved     reopen    open

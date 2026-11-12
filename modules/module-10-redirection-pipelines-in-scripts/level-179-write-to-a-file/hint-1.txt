@@ -1,0 +1,1 @@
+Every command writes its normal output to a channel called standard output. By default that channel is connected to your screen, but the shell can reconnect it to a file before the command even starts.

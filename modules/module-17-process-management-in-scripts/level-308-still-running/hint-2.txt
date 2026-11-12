@@ -1,0 +1,9 @@
+`kill -0 PID` sends signal number 0, which means "do nothing, just check". It exits 0 if the process exists and non-zero if it does not (it also prints an error, so add `2>/dev/null`):
+
+  if kill -0 "$pid" 2>/dev/null; then
+    echo "still there"
+  else
+    echo "gone"
+  fi
+
+A counting loop in Bash: `for ((n = 1; n <= limit; n++)); do ... done`.

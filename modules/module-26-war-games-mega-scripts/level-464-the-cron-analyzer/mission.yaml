@@ -1,22 +1,351 @@
 id: 464
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Cron Analyzer
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Cron Analyzer` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Cron Analyzer
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 390
+story: |
+  Hurricane prep added eleven new cron jobs to the shared server in three days:
+  tide-sync every half hour, webcam archiving, a nightly database dump, a report for
+  the insurer. At 02:15 on Thursday the dump, the log rotation and the sync all fought
+  for the same disk and the ferry site crawled. Nobody can tell from `crontab -l`
+  which jobs collide, because nobody wants to expand `*/30` and `1-5` by hand at two
+  in the morning. Mara asks you for the tool that does it for them.
+objective: |
+  Write solution.sh: `solution.sh [--min-shared N] MONTH DOM DOW CRONTAB`
+
+  MONTH (1-12), DOM (1-31) and DOW (0-6, Sunday is 0) name the day to analyse and
+  must be whole numbers in range. `--min-shared N` (default 1, whole number >= 1)
+  hides overlaps shorter than N minutes. Errors, exit 2, on stderr:
+  `usage: solution.sh [--min-shared N] MONTH DOM DOW CRONTAB`, `error: bad day 'X'`
+  for an out-of-range or non-numeric day part, `error: cannot read CRONTAB`.
+
+  CRONTAB lines: blank lines, `#` comments and environment lines (`NAME=value`)
+  are ignored; `@reboot` lines are ignored; `@hourly` (0 * * * *), `@daily` and
+  `@midnight` (0 0 * * *), `@weekly` (0 0 * * 0), `@monthly` (0 0 1 * *), `@yearly`
+  and `@annually` (0 0 1 1 *) are shortcuts. Otherwise a job is five fields
+  `minute hour day-of-month month day-of-week` followed by the command. Each field is
+  a comma-separated list of `*`, `N`, `A-B`, `*/S` or `A-B/S` (numbers only). Day of
+  week 7 also means Sunday. A job may end with a comment `# runs 25m` or `# runs 2h`
+  giving its run time (default 1 minute); strip it from the command.
+  A job whose line cannot be parsed prints `warning: line N skipped: bad FIELDNAME field`
+  to stderr (FIELDNAME: minute, hour, day-of-month, month or day-of-week; a line with fewer than 6
+  words: `warning: line N skipped: too few fields`) and is otherwise ignored.
+
+  A job runs on the chosen day when MONTH is in its month field and the day matches.
+  Cron's day rule: if neither day-of-month nor day-of-week field starts with `*`, the job
+  runs when EITHER matches; otherwise when BOTH match.
+  The job name is the basename of the command's first word; a repeated name gets `#2`,
+  `#3` ... Jobs are numbered 1, 2, ... in file order (parsed jobs only).
+  A start at minute S occupies minutes S .. S+run-1; ignore anything past 23:59.
+
+  Output:
+    == Jobs on MONTH-DOM (weekday DOW) ==
+    printf '%-3s %-12s %6s %-5s %-5s %4s\n' with columns ID NAME STARTS FIRST LAST RUN
+    one row per parsed job (FIRST/LAST are HH:MM of the first and last start, `-` when
+    STARTS is 0; RUN is like `25m`)
+    == Overlaps ==
+    For every pair of jobs A < B (by id) that are running at the same minute at least
+    MIN times: `A x B: N shared minutes, first at HH:MM`; for a job that overlaps with
+    itself (two of its own runs at once): `A x A: N minutes running twice, first at HH:MM`.
+    Names, not ids. Sort by the number of minutes, largest first, then by ids.
+    With no overlaps print `(none)`.
+  Exit status 0 when there are no overlaps to report, 1 otherwise.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "expanding cron fields (lists, ranges, steps) into sets"
+  - "cron's day-of-month OR day-of-week rule"
+  - "a minute-by-minute occupancy table"
+  - "tagged awk output split and sorted by the shell"
+  - "warnings to stderr that do not stop the run"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk to expand the fields and build the occupancy table."
+test_cases:
+  - name: a stormy Thursday
+    args:
+    - '11'
+    - '12'
+    - '4'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: |-
+      == Jobs on 11-12 (weekday 4) ==
+      ID  NAME         STARTS FIRST LAST   RUN
+      1   backup-db         1 02:00 02:00  25m
+      2   logrotate         1 02:15 02:15  20m
+      3   sync-tides       48 00:00 23:30  40m
+      4   report            1 02:15 02:15  10m
+      5   heartbeat        24 00:00 23:00   1m
+      6   month-end         0 -     -      60m
+      == Overlaps ==
+      sync-tides x sync-tides: 470 minutes running twice, first at 00:30
+      backup-db x sync-tides: 25 shared minutes, first at 02:00
+      sync-tides x heartbeat: 24 shared minutes, first at 00:00
+      logrotate x sync-tides: 20 shared minutes, first at 02:15
+      backup-db x logrotate: 10 shared minutes, first at 02:15
+      backup-db x report: 10 shared minutes, first at 02:15
+      logrotate x report: 10 shared minutes, first at 02:15
+      sync-tides x report: 10 shared minutes, first at 02:15
+      backup-db x heartbeat: 1 shared minutes, first at 02:00
+    expected_stderr: |-
+      warning: line 10 skipped: too few fields
+      warning: line 11 skipped: bad minute field
+    expected_exit: 1
+  - name: the first of the month, a Sunday-or-first job wakes up
+    args:
+    - '11'
+    - '1'
+    - '6'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: |-
+      == Jobs on 11-1 (weekday 6) ==
+      ID  NAME         STARTS FIRST LAST   RUN
+      1   backup-db         1 02:00 02:00  25m
+      2   logrotate         1 02:15 02:15  20m
+      3   sync-tides       48 00:00 23:30  40m
+      4   report            0 -     -      10m
+      5   heartbeat        24 00:00 23:00   1m
+      6   month-end         1 03:00 03:00  60m
+      == Overlaps ==
+      sync-tides x sync-tides: 470 minutes running twice, first at 00:30
+      sync-tides x month-end: 60 shared minutes, first at 03:00
+      backup-db x sync-tides: 25 shared minutes, first at 02:00
+      sync-tides x heartbeat: 24 shared minutes, first at 00:00
+      logrotate x sync-tides: 20 shared minutes, first at 02:15
+      backup-db x logrotate: 10 shared minutes, first at 02:15
+      backup-db x heartbeat: 1 shared minutes, first at 02:00
+      heartbeat x month-end: 1 shared minutes, first at 03:00
+    expected_stderr: |-
+      warning: line 10 skipped: too few fields
+      warning: line 11 skipped: bad minute field
+    expected_exit: 1
+  - name: sunday joins the OR rule through the weekday
+    args:
+    - '11'
+    - '8'
+    - '0'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: |-
+      == Jobs on 11-8 (weekday 0) ==
+      ID  NAME         STARTS FIRST LAST   RUN
+      1   backup-db         1 02:00 02:00  25m
+      2   logrotate         1 02:15 02:15  20m
+      3   sync-tides       48 00:00 23:30  40m
+      4   report            0 -     -      10m
+      5   heartbeat        24 00:00 23:00   1m
+      6   month-end         1 03:00 03:00  60m
+      == Overlaps ==
+      sync-tides x sync-tides: 470 minutes running twice, first at 00:30
+      sync-tides x month-end: 60 shared minutes, first at 03:00
+      backup-db x sync-tides: 25 shared minutes, first at 02:00
+      sync-tides x heartbeat: 24 shared minutes, first at 00:00
+      logrotate x sync-tides: 20 shared minutes, first at 02:15
+      backup-db x logrotate: 10 shared minutes, first at 02:15
+      backup-db x heartbeat: 1 shared minutes, first at 02:00
+      heartbeat x month-end: 1 shared minutes, first at 03:00
+    expected_stderr: |-
+      warning: line 10 skipped: too few fields
+      warning: line 11 skipped: bad minute field
+    expected_exit: 1
+  - name: threshold hides small overlaps
+    args:
+    - --min-shared
+    - '20'
+    - '11'
+    - '12'
+    - '4'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: |-
+      == Jobs on 11-12 (weekday 4) ==
+      ID  NAME         STARTS FIRST LAST   RUN
+      1   backup-db         1 02:00 02:00  25m
+      2   logrotate         1 02:15 02:15  20m
+      3   sync-tides       48 00:00 23:30  40m
+      4   report            1 02:15 02:15  10m
+      5   heartbeat        24 00:00 23:00   1m
+      6   month-end         0 -     -      60m
+      == Overlaps ==
+      sync-tides x sync-tides: 470 minutes running twice, first at 00:30
+      backup-db x sync-tides: 25 shared minutes, first at 02:00
+      sync-tides x heartbeat: 24 shared minutes, first at 00:00
+      logrotate x sync-tides: 20 shared minutes, first at 02:15
+    expected_stderr: |-
+      warning: line 10 skipped: too few fields
+      warning: line 11 skipped: bad minute field
+    expected_exit: 1
+  - name: a calm crontab
+    args:
+    - '6'
+    - '3'
+    - '2'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        # tidy
+        5 4 * * * /usr/local/bin/tidy       # runs 10m
+        30 4 * * * /usr/local/bin/tidy      # runs 10m
+        0 6 * 3-9 * /usr/local/bin/summer   # runs 30m
+        @weekly /opt/bin/sunday-sweep
+    expected_stdout: |-
+      == Jobs on 6-3 (weekday 2) ==
+      ID  NAME         STARTS FIRST LAST   RUN
+      1   tidy              1 04:05 04:05  10m
+      2   tidy#2            1 04:30 04:30  10m
+      3   summer            1 06:00 06:00  30m
+      4   sunday-sweep      0 -     -       1m
+      == Overlaps ==
+      (none)
+  - name: sunday as 7 and stepped ranges
+    args:
+    - '2'
+    - '9'
+    - '0'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        10-50/20 5 * * 7 /srv/a/farm-sync   # runs 15m
+        0,30 5 * * 0 /srv/b/farm-sync       # runs 15m
+    expected_stdout: |-
+      == Jobs on 2-9 (weekday 0) ==
+      ID  NAME         STARTS FIRST LAST   RUN
+      1   farm-sync         3 05:10 05:50  15m
+      2   farm-sync#2       2 05:00 05:30  15m
+      == Overlaps ==
+      farm-sync x farm-sync#2: 20 shared minutes, first at 05:10
+    expected_exit: 1
+  - name: unknown month number
+    args:
+    - '13'
+    - '1'
+    - '1'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: ''
+    expected_stderr: 'error: bad day ''13'''
+    expected_exit: 2
+  - name: non-numeric day
+    args:
+    - '11'
+    - first
+    - '1'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: ''
+    expected_stderr: 'error: bad day ''first'''
+    expected_exit: 2
+  - name: missing crontab
+    args:
+    - '11'
+    - '12'
+    - '4'
+    - nope.txt
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read nope.txt'
+    expected_exit: 2
+  - name: bad threshold
+    args:
+    - --min-shared
+    - '0'
+    - '11'
+    - '12'
+    - '4'
+    - crontab.txt
+    files:
+      crontab.txt: |
+        MAILTO=ops@lanternfish.example
+        # nightly stuff
+        0 2 * * * /opt/bin/backup-db      # runs 25m
+        15 2 * * * /opt/bin/logrotate     # runs 20m
+        */30 * * * * /opt/bin/sync-tides  # runs 40m
+        15 2 * * 1-5 /opt/bin/report      # runs 10m
+        @hourly /opt/bin/heartbeat
+        0 3 1 * 0 /opt/bin/month-end      # runs 1h
+
+        this line has too few
+        61 * * * * /opt/bin/oops
+        @reboot /opt/bin/startup
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--min-shared N] MONTH DOM DOW CRONTAB'
+    expected_exit: 2

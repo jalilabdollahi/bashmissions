@@ -1,0 +1,88 @@
+id: 355
+module: 20
+module_name: script-security
+module_display: Security
+title: Quote to Stop Injection
+difficulty: advanced
+xp: 160
+story: |
+  Priya has started her security review with the smallest script in the repo:
+  Theo's ticket filer, which Noor's desk uses to open one text file per customer.
+  Last week someone typed a customer name that contained a space, and another
+  typed a lone `*`. The filer overwrote a ticket that belonged to somebody else.
+  Priya's note on the pull request: "Input is data until you let the shell
+  re-read it. Show me where you stop it."
+objective: |
+  Write solution.sh that opens a ticket for the customer named in the first
+  argument. The folder `tickets` already exists, and the template is
+  `fixtures/ticket-template.txt`.
+
+  1. With no argument, print `usage: solution.sh CUSTOMER` to stderr, exit 2.
+  2. Otherwise copy the template to `tickets/CUSTOMER.txt` (CUSTOMER exactly as
+     typed, even if it contains spaces, `*`, `;`, `$(...)` or a leading dash)
+     and print `filed: tickets/CUSTOMER.txt`.
+
+  The customer name is data. It must never be split into several words, never
+  expand into a list of existing files, and never be run as a command.
+concepts:
+  - "\"$1\" keeps one value as one word"
+  - "unquoted expansion splits on spaces and expands globs"
+  - "data never becomes code"
+test_cases:
+  - name: ordinary name
+    args: [Harbour]
+    files:
+      "tickets/": ""
+    expected_stdout: "filed: tickets/Harbour.txt"
+    expected_files:
+      tickets/Harbour.txt: |-
+        status: open
+        owner: unassigned
+  - name: name with spaces stays one file
+    args: ["Gull & Anchor Pub"]
+    files:
+      "tickets/": ""
+    expected_stdout: "filed: tickets/Gull & Anchor Pub.txt"
+    expected_files:
+      "tickets/Gull & Anchor Pub.txt": |-
+        status: open
+        owner: unassigned
+  - name: a lone star does not touch other tickets
+    args: ["*"]
+    files:
+      tickets/Tidewater.txt: "status: closed"
+      tickets/Dental.txt: "status: waiting"
+    expected_stdout: "filed: tickets/*.txt"
+    expected_files:
+      tickets/Tidewater.txt: "status: closed"
+      tickets/Dental.txt: "status: waiting"
+      "tickets/*.txt": |-
+        status: open
+        owner: unassigned
+  - name: shell syntax in the name is only text
+    args: ["x; touch pwned"]
+    files:
+      "tickets/": ""
+    expected_stdout: "filed: tickets/x; touch pwned.txt"
+    expected_files:
+      pwned: null
+      "tickets/x; touch pwned.txt": true
+  - name: command substitution in the name is only text
+    args: ['$(touch pwned)']
+    files:
+      "tickets/": ""
+    expected_stdout: 'filed: tickets/$(touch pwned).txt'
+    expected_files:
+      pwned: null
+      'tickets/$(touch pwned).txt': true
+  - name: a leading dash is fine inside a path
+    args: ["-rf"]
+    files:
+      "tickets/": ""
+    expected_stdout: "filed: tickets/-rf.txt"
+    expected_files:
+      tickets/-rf.txt: true
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh CUSTOMER"
+    expected_exit: 2

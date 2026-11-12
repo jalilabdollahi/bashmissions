@@ -1,0 +1,9 @@
+A group is `{ cmd1; cmd2; }` (a space after the opening brace, and a `;` or newline before the closing one). Put redirections after the closing brace:
+
+  {
+    echo "start"
+    some-tool eel
+    echo "stop"
+  } > out.txt 2> warnings.txt
+
+A `for` loop can sit inside the group as well.

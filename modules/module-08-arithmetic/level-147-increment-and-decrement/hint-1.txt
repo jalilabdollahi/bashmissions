@@ -1,0 +1,1 @@
+A counter is a variable you nudge by one each time something happens. Read the lines one at a time, decide which kind of event each is, and bump the right counters. Bash has a short form for "add one" and "subtract one".

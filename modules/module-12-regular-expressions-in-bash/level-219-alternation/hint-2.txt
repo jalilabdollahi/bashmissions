@@ -1,0 +1,6 @@
+The vertical bar separates alternatives, and parentheses decide how far the choice reaches:
+
+  [[ $s =~ cat|dog ]]          # "cat" anywhere, or "dog" anywhere
+  [[ $s =~ ^pet=(cat|dog)$ ]]  # pet= followed by exactly cat or exactly dog
+
+To say "followed by a space or the end of the line", use another group: ( |$)

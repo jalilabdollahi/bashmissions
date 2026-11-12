@@ -1,2 +1,0 @@
-{ "name": "api", "status": "ok" }
-{ "name": "worker", "status": "ok" }

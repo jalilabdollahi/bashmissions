@@ -1,0 +1,7 @@
+Declare first, then assign an expression made of the three settings, joined with plus signs and no spaces:
+
+  declare -i total
+  total=$WEB+...
+  echo "servers: $total"
+  total+=2
+  echo "with spares: $total"

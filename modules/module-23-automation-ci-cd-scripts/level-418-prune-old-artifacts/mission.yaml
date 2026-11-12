@@ -1,0 +1,127 @@
+id: 418
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Prune Old Artifacts
+difficulty: expert
+xp: 440
+story: |
+  The artifact store behind Lanternfish's pipeline now holds four hundred
+  tarballs, one per build, and Gus has noticed the storage bill. Theo's cleanup
+  one-liner, `ls -t | tail -n +6 | xargs rm`, deleted a file called
+  `release notes.tar` as two non-existent files and left the real thing behind.
+  Mara asks for a cleanup that keeps the newest few builds, whatever their
+  names look like, and can be trusted to run unattended.
+objective: |
+  Write solution.sh, called as `solution.sh DIR KEEP`. KEEP is a whole number
+  (0 or more); anything else prints `usage: solution.sh DIR KEEP` to stderr
+  and exits 2. If DIR is not a directory print `no such directory: DIR` to
+  stderr and exit 1.
+  Consider the regular files directly inside DIR whose names do not start with
+  a dot (not directories, not symbolic links, nothing deeper). The KEEP newest
+  by modification time stay; all others are deleted. If two files have the
+  same modification time, the name that sorts LATER counts as newer.
+  Print one line per file in name order (the order a `DIR/*` glob gives):
+    keep <file name>
+    remove <file name>
+  then `kept K file(s), removed R file(s)`.
+  File names can contain spaces or start with `-`. Do not parse `ls` output;
+  compare modification times with the `-nt` test of `[[ ]]`.
+concepts:
+  - "rank files by mtime without ls: [[ a -nt b ]]"
+  - "globs and arrays are safe with spaces; ls output is not"
+  - "rm -- for names that start with a dash; deleting only what you decided to"
+forbidden_patterns:
+  - pattern: '\bls\b'
+    message: "Do not parse ls output; it breaks on spaces and newlines. Compare files with [[ a -nt b ]]."
+  - pattern: '\bxargs\b'
+    message: "No xargs: loop over an array of names and call rm yourself, so spaces cannot split a name."
+required_patterns:
+  - pattern: '-nt'
+    message: "Use [[ $a -nt $b ]] to ask which of two files is newer."
+test_cases:
+  - name: keep the newest two, names with spaces
+    args: [artifacts, "2"]
+    files:
+      artifacts/a.tar: {content: "a", mtime: 1700000300}
+      artifacts/b.tar: {content: "b", mtime: 1700000100}
+      artifacts/c.tar: {content: "c", mtime: 1700000200}
+      "artifacts/d e.tar": {content: "d", mtime: 1700000400}
+    expected_stdout: |-
+      keep a.tar
+      remove b.tar
+      remove c.tar
+      keep d e.tar
+      kept 2 file(s), removed 2 file(s)
+    expected_files:
+      artifacts/a.tar: true
+      artifacts/b.tar: null
+      artifacts/c.tar: null
+      "artifacts/d e.tar": true
+  - name: keep zero removes everything
+    args: [builds, "0"]
+    files:
+      builds/one.tar: {content: "1", mtime: 1700000100}
+      builds/two.tar: {content: "2", mtime: 1700000200}
+    expected_stdout: |-
+      remove one.tar
+      remove two.tar
+      kept 0 file(s), removed 2 file(s)
+    expected_files:
+      builds/one.tar: null
+      builds/two.tar: null
+  - name: fewer files than the limit
+    args: [builds, "5"]
+    files:
+      builds/one.tar: {content: "1", mtime: 1700000100}
+      builds/two.tar: {content: "2", mtime: 1700000200}
+    expected_stdout: |-
+      keep one.tar
+      keep two.tar
+      kept 2 file(s), removed 0 file(s)
+  - name: equal timestamps, the later name wins
+    args: [builds, "1"]
+    files:
+      builds/x.tar: {content: "x", mtime: 1700000500}
+      builds/y.tar: {content: "y", mtime: 1700000500}
+    expected_stdout: |-
+      remove x.tar
+      keep y.tar
+      kept 1 file(s), removed 1 file(s)
+    expected_files:
+      builds/x.tar: null
+      builds/y.tar: true
+  - name: dashes, directories, dotfiles and links are left alone
+    args: [store, "1"]
+    files:
+      store/-old.tar: {content: "o", mtime: 1700000100}
+      store/new.tar: {content: "n", mtime: 1700000900}
+      store/.hidden: {content: "h", mtime: 1600000000}
+      "store/sub/": ""
+      store/latest: {symlink: new.tar}
+    expected_stdout: |-
+      remove -old.tar
+      keep new.tar
+      kept 1 file(s), removed 1 file(s)
+    expected_files:
+      store/-old.tar: null
+      store/new.tar: true
+      store/.hidden: true
+      store/latest: true
+  - name: an empty directory
+    args: [empty, "3"]
+    files:
+      "empty/": ""
+    expected_stdout: "kept 0 file(s), removed 0 file(s)"
+  - name: KEEP is not a number
+    args: [store, "two"]
+    expected_stderr: "usage: solution.sh DIR KEEP"
+    expected_exit: 2
+  - name: negative KEEP
+    args: [store, "-1"]
+    expected_stderr: "usage: solution.sh DIR KEEP"
+    expected_exit: 2
+  - name: directory does not exist
+    args: [nowhere, "3"]
+    expected_stderr: "no such directory: nowhere"
+    expected_exit: 1

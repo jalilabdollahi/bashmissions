@@ -1,0 +1,41 @@
+id: 44
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Optional Second Argument
+difficulty: beginner
+xp: 80
+story: |
+  Almost every Lanternfish server listens for remote logins on port 22, so typing
+  it every time is noise. Theo's connect helper should take just the hostname in
+  the normal case, and still let him name a port for the odd box that is
+  different, like the old backup server behind the harbour firewall.
+objective: |
+  Write solution.sh taking HOST (required) and PORT (optional). Print one line:
+    connect <HOST> on port <PORT>
+  When PORT is not given, or is given as an empty string (""), use 22.
+  You may assume HOST is always supplied. Use the ${name:-default} expansion,
+  not a separate check.
+concepts:
+  - "${2:-default} supplies a default"
+  - ":- also treats an empty value as missing"
+required_patterns:
+  - pattern: '\$\{[A-Za-z0-9_]+:-[^}]+\}'
+    message: 'Give the port a default with ${2:-22}.'
+test_cases:
+  - name: default port
+    args: [anchovy]
+    expected_stdout: |-
+      connect anchovy on port 22
+  - name: custom port
+    args: [backup-eel, "2222"]
+    expected_stdout: |-
+      connect backup-eel on port 2222
+  - name: empty port falls back to the default
+    args: [barracuda, ""]
+    expected_stdout: |-
+      connect barracuda on port 22
+  - name: another host and port
+    args: [cuttlefish, "8022"]
+    expected_stdout: |-
+      connect cuttlefish on port 8022

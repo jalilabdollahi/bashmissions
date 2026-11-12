@@ -1,0 +1,1 @@
+A pipe holds data until somebody reads it, and a read from an empty pipe waits. Fill a pipe with exactly as many small items as you want jobs running at once. A job may start only after it has taken one item out; if none are left, the loop simply pauses. When a job finishes it puts its item back. The number of items in the pipe is the number of free seats.

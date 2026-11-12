@@ -1,0 +1,9 @@
+The id command prints identities; with -u it prints just the numeric user id:
+
+  me=$(id -u)
+  if (( me == 0 )); then
+    echo "too powerful" >&2
+    exit 1
+  fi
+
+(( ... )) does arithmetic comparison, so you compare numbers instead of strings. Put the guard near the top, before the mv.

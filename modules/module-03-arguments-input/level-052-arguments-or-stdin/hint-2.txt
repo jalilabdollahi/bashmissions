@@ -1,0 +1,7 @@
+Combine pieces from earlier levels:
+
+  value=${1:-}                      # empty if no argument
+  [[ -z $value ]] && { read -r value || true; }    # fall back to stdin
+  [[ -z $value ]] && { echo "usage: ..." >&2; exit 2; }
+
+The braces around `read` let you attach `|| true` to it inside the guard.

@@ -1,1 +1,0 @@
-After the failed reassignment, `$NAME` still holds the original value — that's the whole point.

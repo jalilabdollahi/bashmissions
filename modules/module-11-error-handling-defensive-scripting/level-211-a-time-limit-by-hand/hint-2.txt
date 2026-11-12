@@ -1,0 +1,10 @@
+The pieces:
+
+  slow_thing &          # start in the background
+  pid=$!                # its PID
+  sleep 2               # the budget
+  kill -0 "$pid" 2>/dev/null    # exit status 0 if it is still running
+  kill "$pid"           # ask it to stop (TERM)
+  wait "$pid"           # collect it; $? then holds its exit status
+
+`wait` is also how you read the status of a job that finished by itself.

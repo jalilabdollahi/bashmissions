@@ -1,0 +1,62 @@
+id: 259
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: awk Fields
+difficulty: intermediate
+xp: 150
+story: |
+  At every shift change the support desk appends one line to handover.txt:
+  who wrote it, the time, a few free-form words about what happened, and
+  the ticket number at the very end. Mara wants an index of "ticket, then
+  who" for the audit, and the free text in the middle is a different length on
+  every line, so counting columns from the left is no good.
+objective: |
+  Write solution.sh that takes one argument, a handover file. Each line is
+  words separated by spaces or tabs: the first word is the engineer, the
+  last word is the ticket number, and anything in between is free text, of
+  any length. Print for each line
+    <ticket> <engineer>
+  separated by one space:
+    noor 09:14 printer jammed again T-1042   ->   T-1042 noor
+  Extra spaces at the start, the end or between words must not matter.
+  Use awk with the field variables $1 and $NF.
+concepts:
+  - "awk splits each line into fields $1 $2 ..."
+  - "NF is the number of fields, $NF the last one"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk to work with the fields."
+  - pattern: '\$NF'
+    message: "Use $NF for the last field, whatever the line length."
+test_cases:
+  - name: free text of different lengths
+    args: [handover.txt]
+    files:
+      handover.txt: |
+        noor 09:14 printer jammed again in the harbour office T-1042
+        theo 10:02 rolled back deploy T-1043
+        mara 11:30 rotated certs on all three servers before lunch T-1044
+    expected_stdout: |-
+      T-1042 noor
+      T-1043 theo
+      T-1044 mara
+  - name: messy spacing and tabs
+    args: [messy.txt]
+    files:
+      messy.txt: "  ollie   13:05   asked a good   question   T-1050   \npriya\t14:00\ttightened\tssh\tT-1051\n"
+    expected_stdout: |-
+      T-1050 ollie
+      T-1051 priya
+  - name: shortest legal line
+    args: [short.txt]
+    files:
+      short.txt: |
+        gus 08:00 T-9
+    expected_stdout: |-
+      T-9 gus
+  - name: empty file
+    args: [none.txt]
+    files:
+      none.txt: ""
+    expected_stdout: ""

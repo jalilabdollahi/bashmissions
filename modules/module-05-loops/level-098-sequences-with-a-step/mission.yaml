@@ -1,0 +1,63 @@
+id: 98
+module: 5
+module_name: loops
+module_display: Loops
+title: Sequences with a Step
+difficulty: intermediate
+xp: 130
+story: |
+  The nightly backups all start at 02:00, and every night the storage array
+  groans under fifty simultaneous uploads. Noor suggests staggering them: the
+  first server starts at 02:00, the next a few minutes later, and so on. The
+  gap between servers depends on how nervous the storage team is that week.
+  Gus just wants the schedule printed, so he can pin it to the fridge.
+objective: |
+  Write solution.sh that takes two arguments: COUNT (number of servers, 0 or
+  more) and STEP (minutes between starts, at least 1). Server number n
+  (starting at 1) starts (n-1)*STEP minutes after 02:00. Print one line per
+  server:
+    host-<n> starts at <HH>:<MM>
+  with HH and MM as two digits, for example "host-3 starts at 02:30". The
+  schedule never goes past 23:59 in the tests. With COUNT=0 print nothing.
+  If fewer than two arguments are given, print
+  "usage: solution.sh COUNT STEP" to stderr and exit with status 2.
+  Generate the minute offsets with seq FIRST STEP LAST.
+concepts:
+  - "seq FIRST INCREMENT LAST"
+  - "a three-argument seq as a stepped range with variable ends"
+  - "guard the empty case before calling seq"
+required_patterns:
+  - pattern: '\bseq\s+\S+\s+\S+\s+\S+'
+    message: "Use seq with three numbers: seq FIRST STEP LAST."
+test_cases:
+  - name: every fifteen minutes
+    args: ["4", "15"]
+    expected_stdout: |-
+      host-1 starts at 02:00
+      host-2 starts at 02:15
+      host-3 starts at 02:30
+      host-4 starts at 02:45
+  - name: crossing the hour
+    args: ["3", "45"]
+    expected_stdout: |-
+      host-1 starts at 02:00
+      host-2 starts at 02:45
+      host-3 starts at 03:30
+  - name: a single server
+    args: ["1", "30"]
+    expected_stdout: "host-1 starts at 02:00"
+  - name: one minute apart
+    args: ["5", "1"]
+    expected_stdout: |-
+      host-1 starts at 02:00
+      host-2 starts at 02:01
+      host-3 starts at 02:02
+      host-4 starts at 02:03
+      host-5 starts at 02:04
+  - name: no servers
+    args: ["0", "15"]
+    expected_stdout: ""
+  - name: missing step
+    args: ["4"]
+    expected_stderr: "usage: solution.sh COUNT STEP"
+    expected_exit: 2

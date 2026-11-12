@@ -1,0 +1,1 @@
+Matching a date is easy; the trick is moving its parts around. You can have sed remember pieces of what it matched and then paste them into the replacement in any order you like. Mark the day, the month and the year, and decide what the replacement says.

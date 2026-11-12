@@ -1,0 +1,6 @@
+`${VAR:-}` is safe under `set -u` even when VAR is not set. A glob test checks the first character:
+
+  dir=${SOME_DIR:-}
+  if [[ $dir != /* ]]; then dir=$HOME/fallback; fi
+
+An array keeps candidates in order: `list=("$a" "$b")` and `for p in "${list[@]}"`. `[[ -f $p ]]` is true for regular files only. `${p#"$HOME"}` removes a leading $HOME from p.

@@ -1,1 +1,1 @@
-The inner loop runs completely for each outer loop value.
+Think of the output as a table: one thing changes down the rows, another changes along each row. That is two loops, one living inside the other. The inner loop prints a whole row, and something must end the row afterwards.

@@ -1,0 +1,6 @@
+The guard goes first, the real work after it:
+
+  [[ $# -lt 1 ]] && { echo "usage: solution.sh CUSTOMER" >&2; exit 2; }
+  echo "Looking up customer: $1"
+
+Copy the usage text exactly as written in the objective.

@@ -1,0 +1,5 @@
+command -v NAME succeeds (and prints a path or name) when NAME can be found, and fails silently otherwise. Redirect its output with >/dev/null so only the status matters. Inside double quotes you can run a command with $( ... ). Generic example:
+
+  if command -v figlet >/dev/null 2>&1; then
+    echo "banner tool present"
+  fi

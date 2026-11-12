@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Floating point is not available in Bash arithmetic, and you do not need it. With SECONDS_PER_TOKEN as an integer, earned tokens are  elapsed / spt  (integer division). The trap is the remainder: if 25 seconds passed at 10 s per token, you earned 2 tokens and 5 seconds of progress toward the third. Move LAST forward by earned*spt (to 20 s after the old LAST), not to TS, or that progress is thrown away.
+
+  declare -A tokens last
+  added=$(( (ts - last[$c]) / spt[$c] ))
+  last[$c]=$(( last[$c] + added * spt[$c] ))
+
+Special case: a full bucket has no progress to keep, so set LAST=TS there.
+The retry time is when the missing tokens will have arrived: last + missing*spt - ts.
+Write the state with  for c in "${!tokens[@]}"; do echo "$c ..."; done | sort > "$state".

@@ -1,0 +1,1 @@
+Arrays are indexed from 0: with colors=(red green blue), ${colors[1]} is green and ${#colors[@]} is 3. Copy your arguments into one with people=("$@"). The remainder operator wraps a counter: $(( 8 % 7 )) is 1, $(( 7 % 7 )) is 0. Loop i from 0 below ${#people[@]}.

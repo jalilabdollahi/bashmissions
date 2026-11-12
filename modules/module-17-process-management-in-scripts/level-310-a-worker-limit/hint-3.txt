@@ -1,0 +1,16 @@
+max=$1; shift
+running=0; ok=0; failed=0
+
+reap_one() {
+  if wait -n; then ok=$((ok + 1)); else failed=$((failed + 1)); fi
+  running=$((running - 1))
+}
+
+for name in "$@"; do
+  while (( running >= max )); do reap_one; done
+  resize "$name" &
+  running=$((running + 1))
+done
+while (( running > 0 )); do reap_one; done
+
+Finish with the summary line and the exit status.

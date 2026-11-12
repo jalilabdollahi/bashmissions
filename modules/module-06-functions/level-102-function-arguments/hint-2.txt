@@ -1,0 +1,8 @@
+Arguments go after the function name, and inside the body they appear as $1, $2 and so on, exactly like script arguments:
+
+  shout() {
+    echo "$1 says: $2"
+  }
+  shout "Ollie" "good morning"
+
+Careful: inside the function these numbers refer to the call of the function, not to the script's own command line.

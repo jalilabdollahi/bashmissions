@@ -1,0 +1,8 @@
+`exec 3> file` opens `file` for writing as descriptor 3 for the rest of the script. Write with `>&3`. `exec 3>&-` closes it. Generic example:
+
+  exec 3> notes.log
+  echo "first" >&3
+  echo "second" >&3
+  exec 3>&-
+
+To count failures, `state=$(cmd) || failed=$(( failed + 1 ))` runs the increment only when the command fails.

@@ -1,0 +1,38 @@
+id: 38
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Several Arguments
+difficulty: beginner
+xp: 60
+story: |
+  Gus is building the monthly report and needs one line per customer: who they
+  are, which plan they are on and how many seats they pay for. The sales sheet
+  gives him those three facts in that order, and he would rather paste them onto
+  a command line than retype a sentence forty times.
+objective: |
+  Write solution.sh taking three arguments in this order: CUSTOMER, PLAN, SEATS.
+  Print exactly one line:
+    <CUSTOMER> -> <SEATS> seats on the <PLAN> plan
+  Example: ./solution.sh "North Pier Dental" harbour 12 prints
+    North Pier Dental -> 12 seats on the harbour plan
+concepts:
+  - "$1 $2 $3 are separate arguments"
+required_patterns:
+  - pattern: '\$2|\$\{2\}'
+    message: "Use $2 as well: each argument has its own number."
+  - pattern: '\$3|\$\{3\}'
+    message: "The seat count is the third argument, $3."
+test_cases:
+  - name: typical row
+    args: ["North Pier Dental", harbour, "12"]
+    expected_stdout: |-
+      North Pier Dental -> 12 seats on the harbour plan
+  - name: single seat
+    args: [Dory, starter, "1"]
+    expected_stdout: |-
+      Dory -> 1 seats on the starter plan
+  - name: ampersand and spaces in the first argument
+    args: ["Gull & Anchor Pub", deepwater, "250"]
+    expected_stdout: |-
+      Gull & Anchor Pub -> 250 seats on the deepwater plan

@@ -1,0 +1,13 @@
+Fill in your three flags in that skeleton, with defaults before it:
+
+  customer=""; plan="basic"; dry_run="no"
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --customer) ... ;;
+      --plan) ... ;;
+      --dry-run) ... ;;
+      *) echo "error: unknown option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+After the loop, check that customer is not empty (level 51), then print the summary line.

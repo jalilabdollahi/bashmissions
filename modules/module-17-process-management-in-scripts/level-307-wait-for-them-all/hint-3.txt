@@ -1,0 +1,15 @@
+servers=("$@")
+pids=()
+for server in "${servers[@]}"; do
+  vmbackup "$server" &
+  pids+=("$!")
+done
+
+statuses=()
+for pid in "${pids[@]}"; do
+  status=0
+  wait "$pid" || status=$?
+  statuses+=("$status")
+done
+
+Then loop over "${!servers[@]}" to print ok / failed (N) and count both kinds.

@@ -1,0 +1,18 @@
+  declare -A flag file default
+  default=([retention]=7 [dest]=/var/backups [compress]=no)
+  while (( $# )); do
+    case $1 in
+      --retention|--dest|--config) (( $# >= 2 )) || { echo "missing value for $1" >&2; exit 2; }
+                                   flag[${1#--}]=$2; shift 2 ;;
+      --retention=*|...)           # name is between -- and =, value after the first =
+      --compress)                  flag[compress]=yes; shift ;;
+      ...                          # unknown option / unexpected argument
+    esac
+  done
+  # read flag[config] if set -> file[...]
+  for name in retention dest compress; do
+    envvar=TIDE_${name^^}
+    if [[ -n ${flag[$name]:-} ]]; then ... source=flag
+    elif [[ -n ${!envvar:-} ]]; then ... source=env
+    ...
+  done

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# An external program that happens to be called check_pier. It is NOT a shell function.
+echo "external check_pier ran (it should not have)"

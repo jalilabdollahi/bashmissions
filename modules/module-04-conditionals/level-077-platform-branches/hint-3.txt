@@ -1,0 +1,9 @@
+os="$(uname -s)"
+if [[ $os == Linux ]]; then
+  echo "cpu count: nproc"
+elif [[ $os == Darwin ]]; then
+  echo "..."   # the macOS command from the objective
+else
+  echo "unsupported platform: $os" >&2
+  exit 1
+fi

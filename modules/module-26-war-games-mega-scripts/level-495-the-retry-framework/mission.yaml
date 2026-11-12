@@ -1,22 +1,231 @@
 id: 495
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Retry Framework
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Retry Framework` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Retry Framework
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 460
+story: |
+  The storm made everything flaky at once: the DNS resolver, the backup
+  uploader, the payment gateway. Theo's fix was `until command; do sleep 1;
+  done`, and at 04:00 four hundred of those loops hit a recovering gateway
+  every second and knocked it flat again. Mara has a better idea: one wrapper
+  every script in the company uses, with a policy you can choose (wait the
+  same time, wait a little longer each time, or double it), a ceiling, a total
+  budget, and the good sense not to retry a command that does not exist.
+objective: |
+  Write solution.sh, a retry wrapper with three back-off strategies.
+
+    solution.sh plan STRATEGY ATTEMPTS DELAY [MAX]
+    solution.sh run [OPTIONS] -- COMMAND [ARGS...]
+
+  STRATEGY is `fixed`, `linear` or `exponential`. After the failed attempt
+  number N (1, 2, 3, ...) the wait is
+    fixed:        DELAY
+    linear:       DELAY * N
+    exponential:  DELAY * 2^(N-1)
+  in whole seconds, and never more than MAX when MAX is given and above 0
+  (a cap of 0 means "no cap"). Nothing may exceed 86400 seconds, whatever the
+  settings. ATTEMPTS is the total number of tries, so there are ATTEMPTS-1
+  waits.
+
+  plan prints the waits without running anything, one line per wait,
+    `after attempt N: wait Ds`
+  and finally `total wait: Ts`. ATTEMPTS must be 1..30, DELAY a non-negative
+  integer, MAX a non-negative integer.
+
+  run options (all optional, any order, before the `--`):
+    --strategy S      default exponential
+    --attempts N      default 4 (1..30)
+    --delay D         default 1 (non-negative integer, seconds)
+    --max-delay M     default 0 (no cap)
+    --budget B        default 0 (unlimited): the most total waiting allowed
+    --retry-on C,C    exit codes worth retrying, e.g. 7,28. Default: every
+                      non-zero code except 126 and 127.
+  Run COMMAND (its stdout and stderr pass through untouched). All messages of
+  the wrapper itself go to STDERR:
+    - exit 0: print `succeeded on attempt K`, exit 0.
+    - the exit code is not retryable (not in --retry-on, or 126/127 with the
+      default): print `not retrying: exit E is not retryable`, exit E at once.
+    - a retryable failure on the last attempt: print
+      `gave up after N attempts (last exit E)` and exit E.
+    - otherwise compute the wait W (as in `plan`). If --budget is set and the
+      total already waited plus W would exceed it, print
+      `retry budget of Bs exhausted after K attempts` and exit E. Else print
+      `attempt K/N failed (exit E), retrying in Ws`, call `sleep W` (only when
+      W is above 0; `sleep` is a stub in the tests), and try again.
+  In every failure case the wrapper exits with the command's own last exit
+  status.
+
+  Wrong arguments, an unknown option or strategy, a value that is out of range,
+  or a missing command after `--`: print
+  `usage: solution.sh plan STRATEGY ATTEMPTS DELAY [MAX] | run [--strategy S] [--attempts N] [--delay D] [--max-delay M] [--budget B] [--retry-on C,C] -- COMMAND...`
+  to stderr and exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "fixed, linear and exponential back-off"
+  - "caps and budgets so waiting stays bounded"
+  - "deciding what is retryable from the exit status"
+  - "wrapping a command while keeping its output and exit status"
+required_patterns:
+  - pattern: '\bsleep\b'
+    message: "Wait between attempts with sleep."
+forbidden_patterns:
+  - pattern: '\bbc\b|\*\*'
+    message: "Compute the exponential wait with a loop or a shift (<<), not with ** or bc."
+test_cases:
+  - name: exponential plan
+    args: [plan, exponential, "5", "2"]
+    expected_stdout: |-
+      after attempt 1: wait 2s
+      after attempt 2: wait 4s
+      after attempt 3: wait 8s
+      after attempt 4: wait 16s
+      total wait: 30s
+  - name: linear plan with a cap
+    args: [plan, linear, "5", "3", "8"]
+    expected_stdout: |-
+      after attempt 1: wait 3s
+      after attempt 2: wait 6s
+      after attempt 3: wait 8s
+      after attempt 4: wait 8s
+      total wait: 25s
+  - name: fixed plan
+    args: [plan, fixed, "3", "5"]
+    expected_stdout: |-
+      after attempt 1: wait 5s
+      after attempt 2: wait 5s
+      total wait: 10s
+  - name: waits never exceed the hard limit
+    args: [plan, exponential, "6", "50000"]
+    expected_stdout: |-
+      after attempt 1: wait 50000s
+      after attempt 2: wait 86400s
+      after attempt 3: wait 86400s
+      after attempt 4: wait 86400s
+      after attempt 5: wait 86400s
+      total wait: 395600s
+  - name: succeeds on the third attempt
+    args: [run, --, flaky]
+    env:
+      FAKE_FAILS: "2"
+    expected_stdout: |-
+      flaky: attempt 1
+      flaky: attempt 2
+      flaky: attempt 3
+    expected_stderr: |-
+      attempt 1/4 failed (exit 7), retrying in 1s
+      attempt 2/4 failed (exit 7), retrying in 2s
+      succeeded on attempt 3
+    expected_files:
+      .calls.log: |-
+        flaky call 1
+        sleep 1
+        flaky call 2
+        sleep 2
+        flaky call 3
+  - name: first try works, no waiting
+    args: [run, --, flaky]
+    expected_stdout: "flaky: attempt 1"
+    expected_stderr: "succeeded on attempt 1"
+    expected_files:
+      .calls.log: "flaky call 1"
+  - name: linear strategy gives up and keeps the exit status
+    args: [run, --strategy, linear, --attempts, "3", --delay, "2", --, flaky]
+    env:
+      FAKE_FAILS: "9"
+      FAKE_CODE: "28"
+    expected_stdout: |-
+      flaky: attempt 1
+      flaky: attempt 2
+      flaky: attempt 3
+    expected_stderr: |-
+      attempt 1/3 failed (exit 28), retrying in 2s
+      attempt 2/3 failed (exit 28), retrying in 4s
+      gave up after 3 attempts (last exit 28)
+    expected_exit: 28
+    expected_files:
+      .calls.log: |-
+        flaky call 1
+        sleep 2
+        flaky call 2
+        sleep 4
+        flaky call 3
+  - name: max delay caps each wait
+    args: [run, --delay, "4", --max-delay, "6", --, flaky]
+    env:
+      FAKE_FAILS: "3"
+    expected_stdout: |-
+      flaky: attempt 1
+      flaky: attempt 2
+      flaky: attempt 3
+      flaky: attempt 4
+    expected_stderr: |-
+      attempt 1/4 failed (exit 7), retrying in 4s
+      attempt 2/4 failed (exit 7), retrying in 6s
+      attempt 3/4 failed (exit 7), retrying in 6s
+      succeeded on attempt 4
+    expected_files:
+      .calls.log: |-
+        flaky call 1
+        sleep 4
+        flaky call 2
+        sleep 6
+        flaky call 3
+        sleep 6
+        flaky call 4
+  - name: command not found is never retried
+    args: [run, --, flaky]
+    env:
+      FAKE_FAILS: "5"
+      FAKE_CODE: "127"
+    expected_stdout: "flaky: attempt 1"
+    expected_stderr: "not retrying: exit 127 is not retryable"
+    expected_exit: 127
+    expected_files:
+      .calls.log: "flaky call 1"
+  - name: retry-on restricts the retryable codes
+    args: [run, --retry-on, "7,28", --, flaky]
+    env:
+      FAKE_FAILS: "5"
+      FAKE_CODE: "2"
+    expected_stdout: "flaky: attempt 1"
+    expected_stderr: "not retrying: exit 2 is not retryable"
+    expected_exit: 2
+  - name: the budget stops the retries
+    args: [run, --attempts, "6", --delay, "2", --budget, "5", --, flaky]
+    env:
+      FAKE_FAILS: "9"
+    expected_stdout: |-
+      flaky: attempt 1
+      flaky: attempt 2
+    expected_stderr: |-
+      attempt 1/6 failed (exit 7), retrying in 2s
+      retry budget of 5s exhausted after 2 attempts
+    expected_exit: 7
+    expected_files:
+      .calls.log: |-
+        flaky call 1
+        sleep 2
+        flaky call 2
+  - name: zero delay means no sleep call
+    args: [run, --delay, "0", --, flaky]
+    env:
+      FAKE_FAILS: "1"
+    expected_stdout: |-
+      flaky: attempt 1
+      flaky: attempt 2
+    expected_stderr: |-
+      attempt 1/4 failed (exit 7), retrying in 0s
+      succeeded on attempt 2
+    expected_files:
+      .calls.log: |-
+        flaky call 1
+        flaky call 2
+  - name: unknown strategy
+    args: [plan, random, "3", "1"]
+    expected_stderr: "usage: solution.sh plan STRATEGY ATTEMPTS DELAY [MAX] | run [--strategy S] [--attempts N] [--delay D] [--max-delay M] [--budget B] [--retry-on C,C] -- COMMAND..."
+    expected_exit: 2
+  - name: missing command
+    args: [run, --attempts, "3", --]
+    expected_stderr: "usage: solution.sh plan STRATEGY ATTEMPTS DELAY [MAX] | run [--strategy S] [--attempts N] [--delay D] [--max-delay M] [--budget B] [--retry-on C,C] -- COMMAND..."
+    expected_exit: 2

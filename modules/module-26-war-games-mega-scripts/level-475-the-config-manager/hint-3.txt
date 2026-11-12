@@ -1,1 +1,18 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  while IFS='|' read -r key type def flags _; do keys+=("$key"); type_of[$key]=$type; ...; value[$key]=$def; source[$key]=default; done < "$schema"
+
+  for f in "${layers[@]}"; do
+    lineno=0
+    while IFS= read -r line || [[ -n $line ]]; do
+      trim, skip blanks/comments; no "=" -> errors+=("bad line in $f:$lineno: expected key = value")
+      k=$(trim "${t%%=*}"); v=$(unquote "$(trim "${t#*=}")")
+      unknown key -> errors+=("unknown key '$k' in $f:$lineno"); else value[$k]=$v; source[$k]=${f##*/}
+    done < "$f"
+  done
+  for k in "${keys[@]}"; do name=...; [[ -v $name ]] && { value[$k]=${!name}; source[$k]=env; }; done
+  for kv in "${sets[@]}"; do ... source[$k]=--set; done
+
+  for k in "${keys[@]}": empty -> required check; else case ${type_of[$k]} in int) port) bool) enum:*) esac
+  errors? print each as "config error: ..." on stderr; exit 1
+  case $command in validate) show) get) export) ... esac

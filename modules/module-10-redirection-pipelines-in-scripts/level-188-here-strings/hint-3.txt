@@ -1,0 +1,4 @@
+  words=$(( $(wc -w <<< "$text") ))
+  loud=$(tr 'a-z' 'A-Z' <<< "$text")
+  echo "words=$words"
+  echo "LOUD: $loud"

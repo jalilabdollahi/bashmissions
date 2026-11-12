@@ -1,0 +1,5 @@
+awk arrays can be indexed by text, so the header can become a dictionary from name to column number:
+
+  awk -F, 'NR == 1 { for (i = 1; i <= NF; i++) pos[$i] = i }' file
+
+awk can select a field with a computed number: `$3`, `$i` and `$(pos["email"])` all work. `split("a,b,c", arr, ",")` fills arr[1..3] and returns 3. `("x" in arr)` asks if a key exists without creating it. `-v OFS=,` makes `print a, b` join with commas. Errors go to stderr with `print "msg" > "/dev/stderr"`.

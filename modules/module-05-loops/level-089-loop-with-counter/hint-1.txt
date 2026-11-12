@@ -1,1 +1,0 @@
-Initialize a counter before the loop.

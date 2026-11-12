@@ -1,0 +1,96 @@
+id: 225
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Regex in a Variable
+difficulty: advanced
+xp: 170
+story: |
+  Priya's team keeps asking for one more variant of the same log filter, so she
+  wants a small reusable tool: you hand it the pattern, it filters lines.
+  Ollie wrote a first version and it behaves strangely: patterns with
+  anchors and classes never match, but they work fine in the terminal with
+  grep. The starter below is his script. Something about the way the pattern
+  reaches =~ is wrong.
+objective: |
+  Fix solution.sh. It takes two arguments: a MODE (regex or literal) and a
+  PATTERN. It reads lines from standard input and prints every line that
+  matches, unchanged:
+
+    regex     the PATTERN is a POSIX extended regex
+    literal   the PATTERN is plain text, every character stands for itself
+              (a dot is a dot, a bracket is a bracket)
+
+  Any other mode: print "usage: solution.sh regex|literal PATTERN" to stderr
+  and exit 2. Missing arguments: the same message and exit status.
+  Use [[ =~ ]] for both modes. In regex mode the pattern must reach =~
+  UNQUOTED, through a variable ([[ $line =~ $pattern ]]). Quoted, it would be
+  taken literally. In literal mode that quoting is exactly what you want.
+concepts:
+  - "an unquoted right-hand side is a regex"
+  - "a quoted right-hand side is literal text"
+  - "keep the regex in a variable and use it unquoted"
+required_patterns:
+  - pattern: '=~\s*\$\{?[A-Za-z_]'
+    message: 'In regex mode, use the variable unquoted: [[ $line =~ $pattern ]].'
+  - pattern: '=~\s*"\$\{?[A-Za-z_]'
+    message: 'In literal mode, quote the variable on purpose: [[ $line =~ "$pattern" ]].'
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk)\b'
+    message: "Use [[ =~ ]] for both modes."
+test_cases:
+  - name: regex with anchors and classes
+    args: [regex, '^[0-9]+$']
+    stdin: |
+      4410
+      44x10
+      ticket 4410
+      7
+    expected_stdout: |-
+      4410
+      7
+  - name: regex with a space and alternation
+    args: [regex, 'Failed password for (root|admin) ']
+    stdin: |
+      sshd: Failed password for root from 1.2.3.4
+      sshd: Failed password for mara from 1.2.3.4
+      sshd: Failed password for admin from 5.6.7.8
+    expected_stdout: |-
+      sshd: Failed password for root from 1.2.3.4
+      sshd: Failed password for admin from 5.6.7.8
+  - name: literal mode treats the dot as a dot
+    args: [literal, '10.0.0.1']
+    stdin: |
+      src=10.0.0.1 dst=8.8.8.8
+      src=10x0y0z1 dst=8.8.8.8
+      src=110.0.0.12 dst=8.8.8.8
+    expected_stdout: |-
+      src=10.0.0.1 dst=8.8.8.8
+      src=110.0.0.12 dst=8.8.8.8
+  - name: literal mode treats brackets as text
+    args: [literal, '[ERROR]']
+    stdin: |
+      [ERROR] disk full
+      E disk full
+      [WARN] disk 90%
+      note: [ERROR]
+    expected_stdout: |-
+      [ERROR] disk full
+      note: [ERROR]
+  - name: same text, different modes
+    args: [regex, '10.0.0.1']
+    stdin: |
+      src=10.0.0.1
+      src=10x0y0z1
+      src=20.0.0.1
+    expected_stdout: |-
+      src=10.0.0.1
+      src=10x0y0z1
+  - name: unknown mode
+    args: [fuzzy, abc]
+    expected_stderr: "usage: solution.sh regex|literal PATTERN"
+    expected_exit: 2
+  - name: missing pattern
+    args: [regex]
+    expected_stderr: "usage: solution.sh regex|literal PATTERN"
+    expected_exit: 2

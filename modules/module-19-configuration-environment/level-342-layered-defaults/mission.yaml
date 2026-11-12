@@ -1,0 +1,91 @@
+id: 342
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Layered Defaults
+difficulty: advanced
+xp: 230
+story: |
+  Three customers use the shared mail relay and each wants it slightly
+  different: the pub needs port 2525 because their router blocks 25, the
+  bookshop sends over TLS, and everyone else just wants it to work. Noor is
+  tired of three copies of the same script. "One script," says Mara, "three
+  layers: what we ship, what the customer's file says, and what the
+  environment says on the day. Higher layers win."
+objective: |
+  Write solution.sh, called as `solution.sh [CONFIG_FILE]`. It decides three
+  settings and prints them in this format:
+    host=<RELAY_HOST>
+    port=<RELAY_PORT>
+    tls=<RELAY_TLS>
+  Each setting is taken from the first layer that provides it, highest first:
+    1. an environment variable with that name (RELAY_HOST, RELAY_PORT, RELAY_TLS)
+    2. a `NAME=VALUE` line in CONFIG_FILE
+    3. the built-in default: host `localhost`, port `25`, tls `off`
+  An empty value (in the environment or in the file) counts as "not provided".
+  CONFIG_FILE is optional and may not exist; then the file layer is simply
+  empty. In the file, ignore comment lines (starting with `#`), blank lines,
+  unknown names, and blanks around the name and the value. A value may itself
+  contain `=`. Use `${VAR:-default}` for the environment layer.
+concepts:
+  - "layers: built-in default, config file, environment"
+  - "${VAR:-fallback} treats unset and empty alike"
+  - "IFS='=' read -r key value splits at the first ="
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*:-'
+    message: "Let the environment layer fall back with ${VAR:-fallback}."
+test_cases:
+  - name: nothing configured
+    expected_stdout: |-
+      host=localhost
+      port=25
+      tls=off
+  - name: only the file speaks
+    args: [relay.conf]
+    files:
+      relay.conf: |
+        # Gull & Anchor Pub
+        RELAY_HOST = smtp.gullanchor.example
+        RELAY_PORT=2525
+        # RELAY_TLS=on
+        COLOUR=blue
+    expected_stdout: |-
+      host=smtp.gullanchor.example
+      port=2525
+      tls=off
+  - name: the environment beats the file
+    args: [relay.conf]
+    env:
+      RELAY_PORT: "465"
+      RELAY_TLS: "on"
+    files:
+      relay.conf: |
+        RELAY_HOST=smtp.tidewater.example
+        RELAY_PORT=587
+        RELAY_TLS=off
+    expected_stdout: |-
+      host=smtp.tidewater.example
+      port=465
+      tls=on
+  - name: empty values are ignored, equals signs survive
+    args: [relay.conf]
+    env:
+      RELAY_HOST: ""
+    files:
+      relay.conf: |
+
+        RELAY_HOST=relay.example/?zone=eu
+        RELAY_PORT=
+        RELAY_TLS=on
+    expected_stdout: |-
+      host=relay.example/?zone=eu
+      port=25
+      tls=on
+  - name: config file that does not exist
+    args: [nowhere.conf]
+    env:
+      RELAY_HOST: dory.lan
+    expected_stdout: |-
+      host=dory.lan
+      port=25
+      tls=off

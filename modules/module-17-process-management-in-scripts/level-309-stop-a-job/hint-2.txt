@@ -1,0 +1,7 @@
+`kill PID` sends SIGTERM (a polite "please stop"). It exits 0 if the signal was delivered and non-zero if there was no such process, so it works as an `if` condition. After that, `wait PID` returns the status; a process ended by signal N reports 128+N, so SIGTERM (15) shows as 143:
+
+  sleep 100 &
+  pid=$!
+  kill "$pid"
+  wait "$pid"
+  echo $?        # 143

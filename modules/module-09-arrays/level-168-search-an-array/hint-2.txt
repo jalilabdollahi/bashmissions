@@ -1,0 +1,1 @@
+Loop with for e in "${list[@]}"; do. Inside, if [[ $e == "$needle" ]]; then ...; fi compares two whole strings. The quotes on the right side matter: without them the right side is treated as a pattern, so a star would match everything. An early exit (or return inside a function) ends the search when the first match is found.

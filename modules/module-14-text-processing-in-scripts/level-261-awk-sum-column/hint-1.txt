@@ -1,1 +1,0 @@
-Use the curriculum concept for this level: `awk '{sum+=$1} END{print sum}'`.

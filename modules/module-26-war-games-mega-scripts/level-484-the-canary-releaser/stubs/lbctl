@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Pretend load-balancer control tool.
+#   lbctl weight PERCENT   send PERCENT of traffic to the canary
+#   lbctl promote          make the canary the stable release
+# FAKE_LB=fail makes every call fail. Calls are recorded in .calls.log.
+case ${1:-} in
+  weight)
+    if [[ ! ${2:-} =~ ^[0-9]+$ ]] || (( $# != 2 )); then
+      echo "lbctl: weight needs a number" >&2; exit 2
+    fi
+    echo "lbctl weight $2" >> .calls.log ;;
+  promote)
+    echo "lbctl promote" >> .calls.log ;;
+  *)
+    echo "lbctl: unknown command '${1:-}'" >&2; exit 2 ;;
+esac
+if [[ ${FAKE_LB:-ok} == fail ]]; then
+  exit 1
+fi

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-while IFS='=' read -r key value; do
-  [[ -z ${key:-} || $key == \#* ]] && continue
-  case $key in
-    host|port) echo "$key=$value" ;;
-  esac
-done < fixtures/data.txt

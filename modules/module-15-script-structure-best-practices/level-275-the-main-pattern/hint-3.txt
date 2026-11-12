@@ -1,0 +1,11 @@
+count_lines() { ... }          # keep the helper as it is
+
+main() {
+  if [ "$#" -eq 0 ]; then ... return 2; fi
+  # total and missed start at 0 here
+  # the for loop over "$@" moves in unchanged
+  echo "total: $total"
+  return "$missed"
+}
+
+main "$@"

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake confpush for BashMissions: confpush PID CONF
+# After 0.3 s copies ./push.conf over CONF and sends HUP to PID.
+# With FAKE_NO_HUP set it exits without doing anything.
+if [[ $# -ne 2 ]]; then
+  echo "usage: confpush PID CONF" >&2
+  exit 2
+fi
+[[ -n ${FAKE_NO_HUP:-} ]] && exit 0
+sleep 0.3
+cp push.conf "$2"
+kill -HUP "$1"

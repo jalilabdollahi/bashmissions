@@ -1,0 +1,81 @@
+id: 226
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: grep -E Filters
+difficulty: intermediate
+xp: 140
+story: |
+  The reverse proxy in front of the customer sites logs a status code on every
+  request. Priya cares about the ones that look like someone knocking on
+  locked doors: 401 unauthorised, 403 forbidden and 429 too many requests.
+  Looping through the file in Bash would work, but the file has 400,000 lines
+  and grep was invented for exactly this. She wants a tiny script that filters
+  the file she points it at.
+objective: |
+  Write solution.sh that takes one argument, the path of an access-log file,
+  and prints every line whose status field is 401, 403 or 429. In these logs
+  the status is the number between spaces right after the quoted request, like
+
+    203.0.113.7 - [07/Nov/2024:09:30:15] "GET /admin HTTP/1.1" 403 512
+
+  so look for a space, one of the three codes, and another space. Numbers
+  that merely contain such digits elsewhere (a size of 4011, a path like
+  /v429/) must not count. Print the matching lines unchanged and in their
+  original order.
+  When nothing matches, print nothing and exit with status 0 (plain grep exits
+  with 1, which would be a failure under set -e). If no argument is given, print
+  "usage: solution.sh LOGFILE" to stderr and exit with status 2.
+  Use grep -E with alternation.
+concepts:
+  - "grep -E uses extended regex: ( ) | + ? { }"
+  - "grep exits 1 when nothing matches"
+  - "alternation inside grep"
+required_patterns:
+  - pattern: 'grep\s+(-[A-Za-z]*E|--extended-regexp)'
+    message: "Use grep -E for extended regular expressions."
+  - pattern: '\([^)]*\|[^)]*\)'
+    message: "Use a group with alternation, for example (401|403|429)."
+forbidden_patterns:
+  - pattern: '\begrep\b|grep\s+-P|\bawk\b|\bsed\b'
+    message: "Use grep -E; no egrep, grep -P, awk or sed here."
+test_cases:
+  - name: finds the three status codes
+    files:
+      "access.log": |
+        203.0.113.7 - [07/Nov/2024:09:30:15] "GET /admin HTTP/1.1" 403 512
+        203.0.113.7 - [07/Nov/2024:09:30:16] "GET /index.html HTTP/1.1" 200 8120
+        198.51.100.4 - [07/Nov/2024:09:30:17] "POST /login HTTP/1.1" 401 77
+        192.0.2.9 - [07/Nov/2024:09:30:18] "GET /api/v2/items HTTP/1.1" 429 31
+        192.0.2.9 - [07/Nov/2024:09:30:19] "GET /api/v2/items HTTP/1.1" 500 0
+    args: [access.log]
+    expected_stdout: |-
+      203.0.113.7 - [07/Nov/2024:09:30:15] "GET /admin HTTP/1.1" 403 512
+      198.51.100.4 - [07/Nov/2024:09:30:17] "POST /login HTTP/1.1" 401 77
+      192.0.2.9 - [07/Nov/2024:09:30:18] "GET /api/v2/items HTTP/1.1" 429 31
+  - name: digits elsewhere do not count
+    files:
+      "tricky.log": |
+        10.0.0.1 - [08/Nov/2024:10:00:00] "GET /v429/status HTTP/1.1" 200 4011
+        10.0.0.1 - [08/Nov/2024:10:00:01] "GET /files/403.png HTTP/1.1" 200 1403
+        10.0.0.1 - [08/Nov/2024:10:00:02] "GET /x HTTP/1.1" 4290 5
+        10.0.0.1 - [08/Nov/2024:10:00:03] "GET /x HTTP/1.1" 401 5
+    args: [tricky.log]
+    expected_stdout: '10.0.0.1 - [08/Nov/2024:10:00:03] "GET /x HTTP/1.1" 401 5'
+  - name: nothing to report is still success
+    files:
+      "calm.log": |
+        10.0.0.1 - [09/Nov/2024:10:00:00] "GET / HTTP/1.1" 200 100
+        10.0.0.2 - [09/Nov/2024:10:00:01] "GET /about HTTP/1.1" 304 0
+    args: [calm.log]
+    expected_stdout: ""
+    expected_exit: 0
+  - name: empty file
+    files:
+      "empty.log": ""
+    args: [empty.log]
+    expected_stdout: ""
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh LOGFILE"
+    expected_exit: 2

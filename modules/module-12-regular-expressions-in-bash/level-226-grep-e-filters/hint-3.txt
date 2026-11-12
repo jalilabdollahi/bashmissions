@@ -1,0 +1,7 @@
+  if [[ $# -lt 1 ]]; then
+    echo "usage: solution.sh LOGFILE" >&2
+    exit 2
+  fi
+  grep -E ' (...|...|...) ' "$1" || true
+
+The group holds the three codes separated by | , with a space on each side of the group.

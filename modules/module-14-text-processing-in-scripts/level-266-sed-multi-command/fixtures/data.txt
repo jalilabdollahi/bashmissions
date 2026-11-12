@@ -1,3 +1,0 @@
-INFO ok
-error failed
-skip this

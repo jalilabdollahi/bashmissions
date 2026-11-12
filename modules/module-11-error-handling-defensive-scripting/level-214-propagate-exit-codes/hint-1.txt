@@ -1,1 +1,0 @@
-Use the defensive scripting concept from the curriculum: maintain exit code through functions.

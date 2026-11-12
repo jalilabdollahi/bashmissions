@@ -1,0 +1,5 @@
+In [[ ]], -r is true if you can read the path, -w if you can write it, -x if you can execute it (or enter it, for a directory). Start with a default of "-" and replace it when the test passes. Generic example:
+
+  flag="-"
+  if [[ -r "$file" ]]; then flag="r"; fi
+  echo "$flag"

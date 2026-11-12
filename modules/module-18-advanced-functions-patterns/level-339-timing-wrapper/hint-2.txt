@@ -1,0 +1,9 @@
+`$EPOCHREALTIME` looks like `1700000000.123456`. Removing the dot gives an integer number of microseconds that works in `$(( ))`:
+
+  t0=${EPOCHREALTIME/./}
+  some-command "$@" || rc=$?
+  t1=${EPOCHREALTIME/./}
+  ms=$(( (t1 - t0) / 1000 ))
+  printf '%d.%03d\n' $(( ms / 1000 )) $(( ms % 1000 ))   # e.g. 2.047
+
+`$SECONDS` only counts whole seconds, too coarse here. `"$*"` joins all arguments with single spaces.

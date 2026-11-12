@@ -1,1 +1,0 @@
-Modulo limits a random value to a range.

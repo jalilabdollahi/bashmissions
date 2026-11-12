@@ -1,1 +1,0 @@
-Keep stdout deterministic; send traces or diagnostics to a file when needed.

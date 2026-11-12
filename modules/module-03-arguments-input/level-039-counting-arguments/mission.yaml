@@ -1,0 +1,40 @@
+id: 39
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Counting Arguments
+difficulty: beginner
+xp: 60
+story: |
+  Priya is planning the Friday patch window. The wrapper she runs takes a list of
+  servers as arguments, and last month someone passed thirty and nobody noticed
+  until the load graphs went red. She wants a quick gate that says how big the
+  batch is before anything touches a machine.
+objective: |
+  Write solution.sh that accepts any number of server names as arguments
+  (including none) and prints exactly one line:
+    batch size: <N>
+  where N is how many arguments were passed. A name containing spaces, passed in
+  quotes, counts as one argument.
+concepts:
+  - "$# is the number of arguments"
+required_patterns:
+  - pattern: '\$#|\$\{#\}'
+    message: "Ask Bash for the argument count with $#."
+test_cases:
+  - name: four servers
+    args: [anchovy, barracuda, cuttlefish, dory]
+    expected_stdout: |-
+      batch size: 4
+  - name: no servers at all
+    args: []
+    expected_stdout: |-
+      batch size: 0
+  - name: one quoted name counts once
+    args: ["blue whale", eel]
+    expected_stdout: |-
+      batch size: 2
+  - name: a long list
+    args: [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11]
+    expected_stdout: |-
+      batch size: 11

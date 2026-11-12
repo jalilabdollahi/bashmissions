@@ -1,0 +1,4 @@
+`mkdir -p a/b/c` creates every missing level in one go and stays silent if the folder is already there. `touch file` creates an empty file, or if it exists only refreshes its timestamp. Both take several names at once, and names with spaces need quotes:
+
+  mkdir -p "$base/one" "$base/two"
+  touch "$base/one/notes.txt"

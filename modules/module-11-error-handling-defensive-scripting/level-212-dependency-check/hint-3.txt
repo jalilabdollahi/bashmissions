@@ -1,0 +1,11 @@
+Inside the loop, replace the message and exit by:
+
+  missing+=("$tool")
+
+with `missing=()` before the loop. After the loop:
+
+  if (( ${#missing[@]} > 0 )); then
+    echo "missing: ${missing[*]}" >&2
+    exit 1
+  fi
+  echo "all $# tools found"

@@ -1,0 +1,42 @@
+id: 57
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Your First if
+difficulty: beginner
+xp: 60
+story: |
+  Ollie watched Mara deploy last night and asked why she always pauses before
+  pressing Enter. "Because it was production," she said. "It should say so
+  out loud." Today you teach the deploy helper to shout a warning, but only
+  when the target really is production.
+objective: |
+  Write solution.sh that takes one argument: the name of the target environment.
+  If the argument is exactly `prod`, print this single line:
+    CAUTION: production - the two-person rule applies
+  For any other value (staging, an empty string, anything else) print nothing at all.
+  Use an `if [[ ... ]]; then ... fi` block.
+concepts:
+  - "if [[ ... ]]; then ... fi"
+  - "a test that is true or false"
+required_patterns:
+  - pattern: 'if\s+\[\['
+    message: "Start with if [[ ... ]]; then and close the block with fi."
+  - pattern: '\bfi\b'
+    message: "Every if needs a closing fi."
+test_cases:
+  - name: production gets the warning
+    args: [prod]
+    expected_stdout: "CAUTION: production - the two-person rule applies"
+  - name: staging stays quiet
+    args: [staging]
+    expected_stdout: ""
+  - name: only an exact match counts
+    args: [production]
+    expected_stdout: ""
+  - name: capital letters are different
+    args: [Prod]
+    expected_stdout: ""
+  - name: empty argument stays quiet
+    args: [""]
+    expected_stdout: ""

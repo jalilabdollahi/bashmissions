@@ -1,1 +1,0 @@
-Use [[ -z $value ]] to detect an empty string.

@@ -1,0 +1,7 @@
+An if can test any command: it takes the branch after "then" when the command succeeds and the branch after "else" when it fails. grep -q is a silent grep that succeeds only when it finds a match. Generic shape:
+
+  if grep -q 'needle' haystack.txt; then
+    echo "found"
+  else
+    echo "not found"
+  fi

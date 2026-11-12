@@ -1,0 +1,74 @@
+id: 319
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Parallel xargs
+difficulty: advanced
+xp: 245
+story: |
+  Tidewater Books sent two hundred cover images for their new shop, and the
+  intern's loop makes one thumbnail every half second. Ollie is about to write
+  an elaborate job pool with `wait -n`, when Mara walks past and says "xargs
+  already does that" and keeps walking. It does: with one flag it becomes a
+  small pool of workers, and you do not have to count anything yourself.
+objective: |
+  Write solution.sh that takes one argument, WORKERS, and reads image names
+  from standard input, one per line. With no argument print
+  `usage: solution.sh WORKERS` to stderr and exit with status 2.
+
+  Run `thumb NAME` once per image with at most WORKERS of them at the same
+  time, using `xargs` with `-n 1` (one name per call) and `-P` (parallel
+  workers). Each successful `thumb` prints `done NAME`. Because parallel jobs
+  finish in any order, pipe the combined output through `sort` so the lines
+  appear in alphabetical order.
+
+  If any `thumb` failed, exit with status 1 (xargs itself reports 123 in that
+  case). Otherwise exit with status 0. The sorted `done` lines must be
+  printed in both cases. With no names at all nothing is printed and the exit
+  status is 0.
+concepts:
+  - "xargs -n 1 -P N runs one command per item, N at a time"
+  - "xargs exits with 123 when a command failed"
+  - "sort the output of parallel jobs"
+required_patterns:
+  - pattern: 'xargs\b[^|\n]*\s-P\s*\"?\$?\{?[A-Za-z0-9_]+'
+    message: "Use xargs -P \"$workers\" -n 1 thumb to run the jobs in parallel."
+  - pattern: '\bsort\b'
+    message: "Pipe the output through sort so the order does not depend on timing."
+test_cases:
+  - name: eight images, four workers
+    args: [4]
+    stdin: "cover-h.png\ncover-b.png\ncover-g.png\ncover-a.png\ncover-f.png\ncover-c.png\ncover-e.png\ncover-d.png\n"
+    expected_stdout: |-
+      done cover-a.png
+      done cover-b.png
+      done cover-c.png
+      done cover-d.png
+      done cover-e.png
+      done cover-f.png
+      done cover-g.png
+      done cover-h.png
+  - name: two workers, one bad image
+    args: [2]
+    stdin: "map.png\nbad-logo.png\nmenu.png\nbanner.png\n"
+    expected_stdout: |-
+      done banner.png
+      done map.png
+      done menu.png
+    expected_exit: 1
+  - name: more workers than images
+    args: [8]
+    stdin: "z.png\ny.png\nx.png\n"
+    expected_stdout: |-
+      done x.png
+      done y.png
+      done z.png
+  - name: nothing to do
+    args: [3]
+    stdin: ""
+    expected_stdout: ""
+    expected_exit: 0
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh WORKERS"
+    expected_exit: 2

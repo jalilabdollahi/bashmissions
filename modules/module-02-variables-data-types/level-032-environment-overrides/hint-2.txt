@@ -1,0 +1,4 @@
+Use ${name:-default} for each setting, and store the result in a variable. The default of one fallback can itself be another fallback, because the text after :- is expanded too. Generic example:
+
+  colour=${THEME_COLOUR:-${COLOUR:-grey}}
+  echo "colour=$colour"

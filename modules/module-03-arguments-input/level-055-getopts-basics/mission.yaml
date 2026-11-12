@@ -2,33 +2,65 @@ id: 55
 module: 3
 module_name: arguments-input
 module_display: Arguments & Input
-title: Getopts Basics
-difficulty: beginner
-xp: 50
-objective: Use `getopts "ab:" opt` to parse `-a` as a boolean flag and `-b VALUE`
-  as an option with an argument. Print `a=<true|false> b=<value>`, defaulting to `a=false
-  b=none`.
-expected_script_name: solution.sh
-test_cases:
-- args:
-  - -a
-  - -b
-  - demo
-  expected_stdout: a=true b=demo
-  expected_exit: 0
-  comparison: exact
-- args:
-  - -b
-  - two words
-  expected_stdout: a=false b=two words
-  expected_exit: 0
-  comparison: exact
-- args: []
-  expected_stdout: a=false b=none
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+title: getopts Basics
+difficulty: intermediate
+xp: 130
+story: |
+  Ollie keeps tailing log excerpts into the team chat and always asks "how do I
+  get just the first few lines?". Mara decides he should have a tiny preview tool,
+  built the way classic Unix tools are: single-letter options like -n 5 and -v,
+  which people can even bundle as -vn 5. Bash ships a built-in parser for exactly
+  this, so there is no need to write the loop by hand.
+objective: |
+  Write solution.sh, a mini "head" that copies lines from stdin to stdout.
+  Options (parse them with getopts):
+    -n COUNT   how many lines to show (default 3)
+    -v         verbose: first print the line "showing first <COUNT> lines"
+  Then print the first COUNT lines of stdin (all of them, if there are fewer).
+  Options may be bundled, so -vn 2 means -v -n 2. You may assume the options are
+  valid; the next level deals with mistakes.
+  Use the head command for the copying, for example  head -n "$count".
 concepts:
-- '`getopts "ab:" opt`'
-scaffold: true
+  - 'getopts "vn:" opt'
+  - "$OPTARG holds the value of an option that takes one"
+  - "a colon after a letter means the option takes a value"
+required_patterns:
+  - pattern: '\bgetopts\s+["'']'
+    message: 'Parse the options with getopts, for example getopts "vn:" opt.'
+  - pattern: '\$OPTARG|\$\{OPTARG\}'
+    message: "The value after -n is in $OPTARG."
+forbidden_patterns:
+  - pattern: '--\w'
+    message: "No long options in this level; getopts handles single letters."
+test_cases:
+  - name: default is three lines
+    stdin: "one\ntwo\nthree\nfour\nfive\n"
+    expected_stdout: |-
+      one
+      two
+      three
+  - name: count with -n
+    args: [-n, "2"]
+    stdin: "alpha\nbeta\ngamma\n"
+    expected_stdout: |-
+      alpha
+      beta
+  - name: verbose header
+    args: [-v, -n, "1"]
+    stdin: "red\ngreen\nblue\n"
+    expected_stdout: |-
+      showing first 1 lines
+      red
+  - name: bundled options
+    args: [-vn, "2"]
+    stdin: "x1\nx2\nx3\nx4\n"
+    expected_stdout: |-
+      showing first 2 lines
+      x1
+      x2
+  - name: fewer lines than asked for
+    args: [-n, "10"]
+    stdin: "only\ntwo\n"
+    expected_stdout: |-
+      only
+      two

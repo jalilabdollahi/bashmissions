@@ -1,1 +1,0 @@
-Use printf to format the output as 'Name=<arg1>; Score=<arg2>'.

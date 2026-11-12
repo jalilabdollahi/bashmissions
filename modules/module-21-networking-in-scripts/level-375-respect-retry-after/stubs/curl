@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# curl stand-in for a rate-limited reports API.
+# Knows -s, -o FILE, -D FILE|-, -i and -w '%{http_code}'. Logs "GET <url>" to .calls.log.
+# FAKE_429_AFTERS="3 1" -> the first two calls answer 429 with Retry-After 3, then 1.
+#                          A word "-" means: 429 without a Retry-After header.
+# FAKE_HDR_CASE=lower     -> header names are sent in lowercase (HTTP/2 style).
+silent=0 out= dump= include=0 fmt= url=
+while (( $# )); do
+  case $1 in
+    -s|--silent) silent=1 ;;
+    -o) out=$2; shift ;;
+    -D|--dump-header) dump=$2; shift ;;
+    -i|--include) include=1 ;;
+    -w) fmt=$2; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2
+        echo "curl: try 'curl --help' or 'curl --manual' for more information" >&2
+        exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+n=$(grep -c '^GET' .calls.log 2>/dev/null || true)
+n=${n:-0}
+echo "GET $url" >> .calls.log
+read -ra afters <<< "${FAKE_429_AFTERS:-}"
+if [[ $url != https://reports.lanternfish.example/api/v1/monthly ]]; then
+  code=404 reason="Not Found" body="no such report"; extra=
+elif (( n < ${#afters[@]} )); then
+  code=429 reason="Too Many Requests" body="slow down"
+  extra=
+  if [[ ${afters[n]} != - ]]; then
+    name="Retry-After"; [[ ${FAKE_HDR_CASE:-} == lower ]] && name="retry-after"
+    extra="$name: ${afters[n]}"$'\r\n'
+  fi
+else
+  code=200 reason="OK" body="report 2026-10: total=1840.20"; extra=
+fi
+ctype="Content-Type"; [[ ${FAKE_HDR_CASE:-} == lower ]] && ctype="content-type"
+headers="HTTP/1.1 $code $reason"$'\r\n'"${extra}${ctype}: text/plain"$'\r\n\r\n'
+case $dump in
+  "") ;;
+  -) printf '%s' "$headers" ;;
+  *) printf '%s' "$headers" > "$dump" ;;
+esac
+(( include )) && printf '%s' "$headers"
+if [[ -n $out ]]; then echo "$body" > "$out"; else echo "$body"; fi
+if [[ -n $fmt ]]; then
+  fmt=${fmt//'%{http_code}'/$code}
+  printf '%s' "${fmt//\\n/$'\n'}"
+fi

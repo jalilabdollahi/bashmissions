@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Split drift into three kinds: files that exist only on one side, files whose settings or content differ, and files whose permissions are wrong. Start by building one sorted list of every relative path from both trees, so that each path can be classified in turn. The hard part is deciding what counts as a difference for a `.conf` file: normalise both sides first (drop comments, trim, strip quotes, ignore volatile keys) and only then compare, otherwise cosmetic edits will drown the real changes.

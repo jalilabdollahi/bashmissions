@@ -1,0 +1,13 @@
+soaktest &
+pid=$!
+sleep "$grace"
+
+if kill "$pid" 2>/dev/null; then
+  status=0
+  wait "$pid" 2>/dev/null || status=$?
+  echo "soaktest stopped (status $status)"
+else
+  ... same wait, other message ...
+fi
+
+Start with the usage check for the missing GRACE.

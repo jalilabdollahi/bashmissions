@@ -1,1 +1,16 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A want_mode; while read -r p m _; do want_mode[$p]=$m; done < "$golden/.modes"   # if the file exists
+  ignored=$(tr '\n' ' ' < "$golden/.ignore")
+
+  mode_octal() { m=$(ls -l "$1" | cut -c2-10); for i in 0 3 6; do n=0; [[ ${m:i:1} == r ]] && n=$((n+4)); ...; out+=$n; done; echo "$out"; }
+
+  conf_diff() { awk -v ignored="$ignored" '
+      function trim(s) {...}   function show(k, v) { return tolower(k) ~ /pass|secret|token|key/ ? "***" : v }
+      skip comments and lines without "=" ; k and v from index($0, "=") ; skip ignored keys
+      FNR == NR ? g[k] = v : l[k] = v ; keys[k] = 1
+      END { for (k in keys) print k "|  ~ " ... or "  + " ... or "  - " ... }' "$1" "$2" | sort -t'|' -k1,1 | cut -d'|' -f2-; }
+
+  for rel in the merged list: not in golden -> UNMANAGED; not in live -> MISSING;
+     else .conf -> conf_diff, other -> compare cksum < file; then the mode check; collect DRIFT detail or plan commands
+  print either the report + "files: ..." or "# remediation plan ..." + commands; exit 1 on any finding

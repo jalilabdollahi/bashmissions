@@ -1,1 +1,0 @@
-Match the required output exactly, including `Name=`, `; Score=`, spaces, and capitalization.

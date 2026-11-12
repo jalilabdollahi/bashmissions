@@ -1,0 +1,70 @@
+id: 186
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Here-Docs with Variables
+difficulty: intermediate
+xp: 130
+story: |
+  Every maintenance window, someone at Lanternfish writes the same
+  customer notice by hand and changes three words. Last month it went to
+  the Gull & Anchor Pub with the Harbour Bakery's name in it. Gus is not
+  amused. The notice should live in the script as a template, with the
+  blanks filled in by the script's own variables.
+objective: |
+  Write solution.sh that takes three arguments: CUSTOMER ($1), HOST ($2) and
+  START ($3, a time such as 02:00). Print exactly this notice, with the
+  values filled in:
+
+    Dear <CUSTOMER>,
+
+    We will update <HOST IN CAPITALS> starting at <START> UTC.
+    Please expect a restart of about 10 minutes.
+
+    Signed: <your login name from $USER>, Lanternfish Hosting
+
+  The line "We will update ..." must show the host name in capitals (use
+  a parameter expansion inside the here-document, e.g. ${host^^}).
+  The signature uses the USER environment variable.
+  Write the notice as a single here-document, not as several echo lines.
+concepts:
+  - "<<EOF here-document"
+  - "variables and ${...} expand inside an unquoted here-doc"
+required_patterns:
+  - pattern: '<<-?\s*[A-Za-z_]+\s*$'
+    message: "Use a here-document: cat <<EOF ... EOF (unquoted delimiter)."
+forbidden_patterns:
+  - pattern: '\becho\b'
+    message: "One here-document, not echo lines."
+  - pattern: "<<-?\\s*['\"\\\\]"
+    message: "Do not quote the delimiter here: you WANT the variables expanded."
+test_cases:
+  - name: bakery update
+    args: ["Harbour Bakery", cuttlefish, "02:00"]
+    expected_stdout: |-
+      Dear Harbour Bakery,
+
+      We will update CUTTLEFISH starting at 02:00 UTC.
+      Please expect a restart of about 10 minutes.
+
+      Signed: player, Lanternfish Hosting
+  - name: pub update with another login
+    args: ["Gull & Anchor Pub", halibut, "23:30"]
+    env:
+      USER: mara
+    expected_stdout: |-
+      Dear Gull & Anchor Pub,
+
+      We will update HALIBUT starting at 23:30 UTC.
+      Please expect a restart of about 10 minutes.
+
+      Signed: mara, Lanternfish Hosting
+  - name: mixed case host
+    args: ["North Pier Dental", "Eel-02", "04:15"]
+    expected_stdout: |-
+      Dear North Pier Dental,
+
+      We will update EEL-02 starting at 04:15 UTC.
+      Please expect a restart of about 10 minutes.
+
+      Signed: player, Lanternfish Hosting

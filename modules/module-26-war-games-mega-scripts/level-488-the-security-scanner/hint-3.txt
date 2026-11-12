@@ -1,1 +1,17 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  level=high; [[ ${1:-} == --fail-on ]] && { level=$2; shift 2; }     # validate: critical|high|medium
+  root=${1%/}; allowlist=${2:-}; check -d "$root", -r "$allowlist"
+
+  findings=()
+  add() { findings+=("$1 $2 $3: $4"); }                  # rank, severity, path, message
+  rel() { printf '%s' "${1#"$root"/}"; }
+
+  while IFS= read -r f; do add 2 HIGH "$(rel "$f")" "world-writable file"; done < <(find "$root" -type f -perm -0002)
+  # keys: find ... \( -name '*.key' -o -name id_rsa -o ... \) \( -perm -0040 -o ... six bits ... \)
+  # setuid: skip the paths listed in the allowlist (declare -A allowed; allowed[$p]=1)
+  # sshd:  declare -A seen; while read -r key val _; do key=${key,,}; [[ -n ${seen[$key]:-} ]] && continue; seen[$key]=${val,,}; done < "$sshd"
+  # creds: regex '^[[:space:]]*[a-z0-9_.-]*(password|passwd|secret|token|api_key)[a-z0-9_.-]*[[:space:]]*[:=][[:space:]]*(.*)$'
+
+  report: printf '%s\n' "${findings[@]}" | LC_ALL=C sort, count the ranks, print without the rank
+  summary, then exit by level:  high) (( crit + high == 0 )) ;;

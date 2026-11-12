@@ -1,0 +1,1 @@
+After a variable is expanded without quotes, the shell chops the result into words at every space and then treats any `*` or `?` in those words as a pattern for file names. One customer name can therefore turn into three arguments, or into the names of every ticket in the folder.

@@ -1,0 +1,3 @@
+Keep a "best so far" for every customer while you stream through the file: when a row arrives, compare its timestamp with the one you stored for that email, and replace the stored row only if the new one is at least as recent. Reading the file once is enough, and the order of the lines does not matter.
+
+Decide what "same customer" means before you start: is `Theo@x` the same as `theo@x`?

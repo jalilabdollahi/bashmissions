@@ -1,0 +1,6 @@
+Split a delimited string into an array with a one-off IFS:
+
+  IFS=, read -ra colours <<< "red,green,blue"
+  echo "${#colours[@]} colours; first is ${colours[0]}"
+
+Pairs come from nesting: `for a in "${xs[@]}"; do for b in "${ys[@]}"; do ... done; done`. `continue` jumps to the next inner iteration. To test "is this word in a space-separated list", pad both sides with spaces: `[[ " $list " == *" $word "* ]]`.

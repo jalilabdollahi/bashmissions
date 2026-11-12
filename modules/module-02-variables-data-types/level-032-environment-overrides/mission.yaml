@@ -1,0 +1,69 @@
+id: 32
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Environment Overrides
+difficulty: beginner
+xp: 80
+story: |
+  Lanternfish's web app runs in three places: Theo's laptop, the staging
+  box, and production. Each needs a slightly different port and worker count,
+  and nobody wants to edit the script to change them. The hosting platform
+  sets a generic PORT; a deployer may override it with the more specific
+  APP_PORT; and when neither is there the app needs to start anyway.
+  Mara calls this "layered settings", and says it is half of what makes a
+  script pleasant to operate.
+objective: |
+  Write solution.sh that works out the app's settings from the environment
+  and prints this exact block (one setting per line):
+
+    name=<APP_NAME, default lanternfish-web>
+    mode=<APP_MODE, default production>
+    port=<APP_PORT; if that is missing or empty then PORT; if that is also
+          missing or empty then 8080>
+    workers=<APP_WORKERS, default 2>
+    listen=<name>:<port>
+
+  "Missing or empty" counts the same everywhere. Compute each setting once
+  into a variable (name, mode, port, workers), then print using the
+  variables. For the port, nest one fallback inside another.
+concepts:
+  - "settings from the environment with fallbacks"
+  - "nested ${a:-${b:-c}} precedence"
+required_patterns:
+  - pattern: '\$\{APP_PORT:-\$\{PORT:-8080\}\}'
+    message: 'Chain the fallbacks for the port: ${APP_PORT:-${PORT:-8080}}.'
+  - pattern: '^\s*(name|mode|workers)=.*\$\{APP_(NAME|MODE|WORKERS):-'
+    message: "Read the other settings into variables with ${APP_NAME:-...} and friends."
+test_cases:
+  - name: nothing set
+    expected_stdout: |-
+      name=lanternfish-web
+      mode=production
+      port=8080
+      workers=2
+      listen=lanternfish-web:8080
+  - name: platform port only
+    env: {PORT: "3000"}
+    expected_stdout: |-
+      name=lanternfish-web
+      mode=production
+      port=3000
+      workers=2
+      listen=lanternfish-web:3000
+  - name: app port beats platform port
+    env: {APP_PORT: "9100", PORT: "3000", APP_NAME: dory-api, APP_MODE: staging, APP_WORKERS: "6"}
+    expected_stdout: |-
+      name=dory-api
+      mode=staging
+      port=9100
+      workers=6
+      listen=dory-api:9100
+  - name: empty app port falls through
+    env: {APP_PORT: "", PORT: "4040", APP_WORKERS: ""}
+    expected_stdout: |-
+      name=lanternfish-web
+      mode=production
+      port=4040
+      workers=2
+      listen=lanternfish-web:4040

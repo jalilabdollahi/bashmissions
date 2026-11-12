@@ -1,0 +1,1 @@
+Look at the two =~ lines in the loop. They are almost mirror images, but one of them has quotes around the pattern and one does not, and the quotes are on the wrong one. Bash treats the right-hand side of =~ differently depending on whether it is quoted. Think about which mode wants special characters to keep their power.

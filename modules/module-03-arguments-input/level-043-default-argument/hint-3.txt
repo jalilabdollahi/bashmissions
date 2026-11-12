@@ -1,4 +1,0 @@
-A compact solution can be shaped like this:
-
-name="${1:-guest}"
-echo "Hello, $name"

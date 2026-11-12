@@ -1,18 +1,97 @@
 id: 336
 module: 18
 module_name: advanced-functions-patterns
-module_display: Advanced Functions & Patterns
+module_display: Function Patterns
 title: Strategy Pattern
 difficulty: advanced
-xp: 205
-objective: Choose a strategy function at runtime.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: result=BASH
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 230
+story: |
+  Gus's invoice run turns amounts in cents into whole euros, and every
+  customer contract seems to round differently. Harbour Bakery pays the
+  nearest euro, Tidewater Books always rounds up ("it is in the contract,
+  page nine"), and the Gull & Anchor Pub negotiated rounding down. Theo's
+  script has the same `if` copied into four places. Mara pulls out a marker:
+  "One loop. One variable that says how to round. Change the variable, change
+  the behaviour."
+objective: |
+  Write solution.sh, called as `solution.sh STRATEGY`. STRATEGY is one of
+  nearest, up, down. Standard input has one amount in cents per line (a
+  whole number); blank lines are ignored.
+  Write three functions taking the amount as `$1` and printing whole euros:
+    round_nearest   half rounds up:     1249 -> 12,  1250 -> 13
+    round_up        any fraction up:    1201 -> 13,  1200 -> 12
+    round_down      fraction dropped:   1299 -> 12
+  Choose the function ONCE, before reading any input, and store its name in a
+  variable called `strategy`. The loop that processes lines must call
+  `"$strategy" "$cents"` and must not mention the three names.
+  For each amount print:  AMOUNTc -> EUROS EUR   (for example "1250c -> 13 EUR").
+  A line that is not a whole number prints "skip: 'LINE' is not an amount"
+  to stderr, the run continues, and the exit status is 1 at the end.
+  An unknown STRATEGY prints "unknown strategy: NAME" to stderr and exits 2;
+  with no argument print "usage: solution.sh nearest|up|down" to stderr and exit 2.
 concepts:
-- swap algorithm functions
-scaffold: true
+  - "a variable holding a function name: strategy=round_up"
+  - "choose the algorithm once, call it everywhere"
+  - "same interface (cents in, euros out), different behaviour"
+required_patterns:
+  - pattern: '\bstrategy='
+    message: "Store the chosen function name in a variable called strategy."
+  - pattern: '"\$strategy"'
+    message: "Call the chosen function as \"$strategy\" \"$cents\"."
+test_cases:
+  - name: nearest
+    args: [nearest]
+    stdin: |
+      1249
+      1250
+      99
+      0
+    expected_stdout: |-
+      1249c -> 12 EUR
+      1250c -> 13 EUR
+      99c -> 1 EUR
+      0c -> 0 EUR
+  - name: up
+    args: [up]
+    stdin: |
+      1200
+      1201
+      1
+
+      1299
+    expected_stdout: |-
+      1200c -> 12 EUR
+      1201c -> 13 EUR
+      1c -> 1 EUR
+      1299c -> 13 EUR
+  - name: down
+    args: [down]
+    stdin: |
+      1299
+      1200
+      99
+    expected_stdout: |-
+      1299c -> 12 EUR
+      1200c -> 12 EUR
+      99c -> 0 EUR
+  - name: junk lines are skipped and reported
+    args: [up]
+    stdin: |
+      1050
+      12.50
+      abc
+      2001
+    expected_stdout: |-
+      1050c -> 11 EUR
+      2001c -> 21 EUR
+    expected_stderr: |-
+      skip: '12.50' is not an amount
+      skip: 'abc' is not an amount
+    expected_exit: 1
+  - name: unknown strategy
+    args: [banker]
+    expected_stderr: "unknown strategy: banker"
+    expected_exit: 2
+  - name: no strategy
+    expected_stderr: "usage: solution.sh nearest|up|down"
+    expected_exit: 2

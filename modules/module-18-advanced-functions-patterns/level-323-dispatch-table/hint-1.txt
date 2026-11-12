@@ -1,1 +1,1 @@
-Use this curriculum concept: assoc array of function names.
+Instead of asking "is the command status? restart? backup?", keep a lookup: a list of pairs "command name -> function that handles it". Bash has exactly that kind of container. Fill it once, then every call is just "look up, call".

@@ -1,0 +1,1 @@
+Apply the layers weakest to strongest into two lookup tables: one for the winning value, one for the name of the layer that wrote it last. Printing is then a separate step: sort the names, work out the widest one, and format each line. The environment layer is the odd one, because you do not know its names in advance; you have to discover them.

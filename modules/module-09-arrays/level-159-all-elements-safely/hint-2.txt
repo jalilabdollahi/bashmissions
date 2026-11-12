@@ -1,0 +1,1 @@
+"${list[@]}" (the @ sign, inside double quotes) expands to one word per element, spaces intact. printf reuses its format for every extra word it is given: printf '- %s\n' "${list[@]}" prints one line per element. The other form, "${list[*]}", glues everything into a single string, which is not what you want here.

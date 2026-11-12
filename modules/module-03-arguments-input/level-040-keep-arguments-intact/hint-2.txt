@@ -1,0 +1,7 @@
+`$@` means "all the arguments". Its quoted form `"$@"` expands to each argument as its own properly quoted word:
+
+  ./wrapper.sh "a b" c     # two arguments
+  other-tool "$@"          # other-tool receives "a b" and c
+  other-tool $@            # other-tool receives a, b and c: three!
+
+Always use the quoted form when passing arguments on.

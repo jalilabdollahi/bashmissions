@@ -1,0 +1,1 @@
+You cannot know how many lines will arrive, so you need a loop whose condition is "was there another line?". The `read` command itself can be that condition, because it reports failure when the input has run out. Keep two running numbers while you loop. Think about the last line of the paste, which sometimes lacks the final Enter.

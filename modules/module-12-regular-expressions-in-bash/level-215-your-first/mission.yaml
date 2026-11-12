@@ -1,0 +1,60 @@
+id: 215
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Your First =~
+difficulty: intermediate
+xp: 120
+story: |
+  Priya has a theory: somebody is guessing passwords on the bastion host, and
+  the evidence is buried in thousands of sshd lines. She does not want a
+  clever tool yet. She wants a first filter she can read in ten seconds, one
+  that picks out the lines mentioning a failed password and leaves everything
+  else alone.
+objective: |
+  Write solution.sh that reads lines from standard input. For every line that
+  contains the text "Failed password" anywhere in it, print
+
+    ALERT: <the whole line>
+
+  Lines without that text are not printed at all. The match is case-sensitive,
+  so "failed password" in lowercase does not count. Test each line with the
+  regex operator inside double brackets: [[ $line =~ regex ]]. Do not use
+  grep, case or the == operator.
+concepts:
+  - "[[ string =~ regex ]] tests a string against a regular expression"
+  - "an unanchored regex matches anywhere inside the string"
+required_patterns:
+  - pattern: '\[\[[^]]*=~'
+    message: "Test each line with [[ $line =~ regex ]]."
+forbidden_patterns:
+  - pattern: '\b(grep|awk|sed|case)\b|==|\*Failed'
+    message: "This level is about the =~ operator, not grep, case or glob matching."
+test_cases:
+  - name: finds failures among normal lines
+    stdin: |
+      Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+      Nov  7 09:31:02 anchovy sshd[2214]: Accepted publickey for mara from 198.51.100.4 port 52114 ssh2
+      Nov  7 09:31:40 anchovy sshd[2220]: Failed password for deploy from 203.0.113.9 port 4031 ssh2
+    expected_stdout: |-
+      ALERT: Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+      ALERT: Nov  7 09:31:40 anchovy sshd[2220]: Failed password for deploy from 203.0.113.9 port 4031 ssh2
+  - name: match can be in the middle of the line
+    stdin: |
+      cron: job ended (note: Failed password prompt skipped)
+    expected_stdout: "ALERT: cron: job ended (note: Failed password prompt skipped)"
+  - name: case matters
+    stdin: |
+      the failed password counter was reset
+      FAILED PASSWORD
+      Failed Password for tom
+    expected_stdout: ""
+  - name: almost but not quite
+    stdin: |
+      Failed  password for ollie
+      Failed-password for ollie
+      Failed passwor
+    expected_stdout: ""
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

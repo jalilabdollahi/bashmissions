@@ -1,0 +1,11 @@
+A guard clause is a test that ends the function when something is wrong:
+
+  open_gate() {
+    if [[ -z $1 ]]; then
+      echo "error: no key" >&2
+      return 2
+    fi
+    echo "gate open"
+  }
+
+`>&2` sends the message to stderr. For "is a whole number" use  [[ $x =~ ^[0-9]+$ ]]  and negate it with  ! .

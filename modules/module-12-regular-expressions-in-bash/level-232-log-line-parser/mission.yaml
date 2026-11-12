@@ -1,0 +1,109 @@
+id: 232
+module: 12
+module_name: regular-expressions-in-bash
+module_display: Patterns & Regex
+title: Log Line Parser
+difficulty: expert
+xp: 250
+story: |
+  The bastion log from last night is 40,000 lines long, and Priya has one
+  question: who was brute-forcing us, and did any of them get in? She does not
+  want a graph. She wants a short list she can paste straight into the blocklist
+  ticket, with the worst offenders first spelled out and a loud line for any
+  address that got a successful login after hammering the door. This is the
+  moment all the regex pieces have to work together.
+objective: |
+  Write solution.sh that reads sshd log lines from standard input. Two kinds of
+  line matter; everything else (cron, other services, malformed lines) is ignored.
+
+    Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+    Nov  7 09:30:19 anchovy sshd[2212]: Failed password for invalid user admin from 203.0.113.9 port 4023 ssh2
+    Nov  7 09:31:02 anchovy sshd[2214]: Accepted publickey for mara from 198.51.100.4 port 52114 ssh2
+
+  The format is: month name, day (padded with spaces, one or more), HH:MM:SS,
+  hostname, "sshd[pid]:", then either "Failed password for [invalid user ]USER
+  from IP port N ssh2" or "Accepted (password|publickey) for USER from IP
+  port N ssh2". The whole line must fit (anchored). USER is one word and IP
+  is digits and dots.
+  Track, per IP address, the number of failed attempts, the user and time of its
+  most recent failure. A "Failed password for invalid user admin" attempt counts
+  with the user "admin".
+  After reading all input, for every IP with 3 or more failures, in plain
+  sort order of the IP text, print
+
+    BLOCK <ip> failures=<n> last-user=<user> last-seen=<HH:MM:SS>
+
+  and, directly below it, if that IP had an Accepted login at a moment when it
+  already had 3 or more failures:
+
+    ALERT <ip> logged in as <user> after 3+ failures
+
+  (use the user of the last such login). If nothing qualifies, print nothing.
+  Exit status 0. Use [[ =~ ]] with capture groups (an optional group is allowed)
+  and an associative array. No grep, sed, awk or cut.
+concepts:
+  - "anchored regex with several groups, including an optional one"
+  - "group numbering when a group is optional"
+  - "associative arrays keyed by an extracted field"
+  - "regex as parser: one pattern per line type"
+required_patterns:
+  - pattern: '=~'
+    message: "Parse each line with [[ $line =~ regex ]]."
+  - pattern: 'BASH_REMATCH\[4\]'
+    message: "Read all four groups (time, optional 'invalid user ', user, ip) from BASH_REMATCH."
+  - pattern: 'declare\s+-A'
+    message: "Keep the per-IP counters in an associative array (declare -A)."
+forbidden_patterns:
+  - pattern: '\b(grep|sed|awk|cut)\b'
+    message: "Parse with =~ and BASH_REMATCH; no external text tools."
+test_cases:
+  - name: one brute-forcer, nobody got in
+    stdin: |
+      Nov  7 09:30:15 anchovy sshd[2211]: Failed password for root from 203.0.113.9 port 4022 ssh2
+      Nov  7 09:30:19 anchovy sshd[2212]: Failed password for invalid user admin from 203.0.113.9 port 4023 ssh2
+      Nov  7 09:31:02 anchovy sshd[2214]: Accepted publickey for mara from 198.51.100.4 port 52114 ssh2
+      Nov  7 09:31:40 anchovy sshd[2220]: Failed password for deploy from 203.0.113.9 port 4031 ssh2
+      Nov  7 09:32:10 anchovy sshd[2224]: Failed password for ollie from 192.0.2.8 port 4040 ssh2
+    expected_stdout: "BLOCK 203.0.113.9 failures=3 last-user=deploy last-seen=09:31:40"
+  - name: login after the third failure raises an alert
+    stdin: |
+      Nov  8 02:10:01 barracuda sshd[301]: Failed password for root from 192.0.2.77 port 1001 ssh2
+      Nov  8 02:10:03 barracuda sshd[302]: Failed password for root from 192.0.2.77 port 1002 ssh2
+      Nov  8 02:10:05 barracuda sshd[303]: Failed password for invalid user test from 192.0.2.77 port 1003 ssh2
+      Nov  8 02:10:09 barracuda sshd[304]: Accepted password for tom from 192.0.2.77 port 1004 ssh2
+      Nov  8 02:10:20 barracuda sshd[305]: Failed password for root from 192.0.2.77 port 1005 ssh2
+    expected_stdout: |-
+      BLOCK 192.0.2.77 failures=4 last-user=root last-seen=02:10:20
+      ALERT 192.0.2.77 logged in as tom after 3+ failures
+  - name: an early login does not count, several IPs are sorted
+    stdin: |
+      Nov  9 11:00:00 cuttlefish sshd[1]: Accepted password for ollie from 198.51.100.50 port 22 ssh2
+      Nov  9 11:00:01 cuttlefish sshd[2]: Failed password for ollie from 198.51.100.50 port 23 ssh2
+      Nov  9 11:00:02 cuttlefish sshd[3]: Failed password for ollie from 198.51.100.50 port 24 ssh2
+      Nov  9 11:00:03 cuttlefish sshd[4]: Failed password for ollie from 198.51.100.50 port 25 ssh2
+      Nov  9 11:00:04 cuttlefish sshd[5]: Failed password for root from 10.0.0.4 port 26 ssh2
+      Nov  9 11:00:05 cuttlefish sshd[6]: Failed password for root from 10.0.0.4 port 27 ssh2
+      Nov  9 11:00:06 cuttlefish sshd[7]: Failed password for root from 10.0.0.4 port 28 ssh2
+    expected_stdout: |-
+      BLOCK 10.0.0.4 failures=3 last-user=root last-seen=11:00:06
+      BLOCK 198.51.100.50 failures=3 last-user=ollie last-seen=11:00:03
+  - name: two failures are not enough and noise is ignored
+    stdin: |
+      Nov  9 12:00:00 dory sshd[1]: Failed password for root from 10.1.1.1 port 1 ssh2
+      Nov  9 12:00:01 dory sshd[2]: Failed password for root from 10.1.1.1 port 2 ssh2
+      Nov  9 12:00:02 dory CRON[9]: pam_unix(cron:session): session opened for user root
+      Nov  9 12:00:03 dory sshd[3]: Connection closed by 10.1.1.1 port 3
+      garbage line
+    expected_stdout: ""
+  - name: malformed lines are ignored, single-digit days work
+    stdin: |
+      Dec 1 08:00:00 eel sshd[10]: Failed password for root from 172.16.0.9 port 1 ssh2
+      Dec 1 08:00:01 eel sshd[11]: Failed password for root from 172.16.0.9 port 2 ssh2
+      Dec 1 08:00:02 eel sshd[12]: Failed password for root from 172.16.0.9 port 3 ssh2 extra
+      Dec 1 08:00:03 eel sshd[13]: Failed password for root from 172.16.0.9 port 4 ssh2
+      xDec 1 08:00:04 eel sshd[14]: Failed password for root from 172.16.0.9 port 5 ssh2
+      Dec 1 08:00:05 eel sshd[15]: Failed password for  from 172.16.0.9 port 6 ssh2
+    expected_stdout: "BLOCK 172.16.0.9 failures=3 last-user=root last-seen=08:00:03"
+  - name: empty input
+    stdin: ""
+    expected_stdout: ""

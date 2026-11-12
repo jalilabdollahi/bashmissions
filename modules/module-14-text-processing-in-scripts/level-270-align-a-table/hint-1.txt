@@ -1,0 +1,1 @@
+Spaces in the output are the point of this level, and counting them by hand is hopeless. The print formatting you know from C and many other languages handles it: a format string describes each column's width and alignment, and the values follow. The header and the rows should share one format so they cannot drift apart.

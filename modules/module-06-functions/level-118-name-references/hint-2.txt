@@ -1,0 +1,11 @@
+`local -n alias=$1` turns `alias` into a name reference: using `alias` means using the variable whose name is stored in `$1`.
+
+  push_twice() {
+    local -n target=$1
+    target+=("$2" "$2")
+  }
+  stack=()
+  push_twice stack hello     # note: stack, not $stack
+  echo "${#stack[@]}"        # 2
+
+Loop over the elements with  for x in "${target[@]}".

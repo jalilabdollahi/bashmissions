@@ -1,1 +1,12 @@
-Keep the script safe and deterministic inside the mission workspace.
+Key an associative array with two parts:  to[$from|$event]=$dest   roles[$from|$event]=oncall,lead   req[$from|$event]=summary
+and keep, per state, the list of its events:  events[$from]+="$event "
+
+Reachability is a breadth-first search: a queue array starting with the initial state, a `seen` map, and for each popped state look at its events and enqueue unseen destinations.
+  dead end        = not final and no events
+  unreachable     = never put in `seen`
+
+Role check with a list stored as "a,b": wrap it in commas and glob-match:  case ",$list," in *",$role,"*) ok ;; esac
+To display a list nicely:  ${list//,/, }
+
+Sorted output of an associative array's keys:  printf '%s\n' "${!field[@]}" | LC_ALL=C sort
+A safe update: tmp=$(mktemp "$ticket.XXXXXX"); write the whole new content to it; mv -f "$tmp" "$ticket". Do this only after every check passed.

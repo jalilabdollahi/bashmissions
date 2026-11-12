@@ -1,0 +1,11 @@
+Three options do the work:
+
+  -t,          the separator is a comma
+  -k2,2n       key = field 2 only, numeric
+  -k2,2nr      same, but biggest first (r = reverse, for this key only)
+
+Several -k options are tried in order, so the second one breaks ties:
+
+  sort -t: -k4,4n -k1,1 /etc/example     # by field 4 as a number, then by field 1
+
+Write the end of the key (",2") or sort will compare from field 2 to the end of the line.

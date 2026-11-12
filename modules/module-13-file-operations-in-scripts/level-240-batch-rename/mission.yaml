@@ -1,0 +1,111 @@
+id: 240
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Batch Rename
+difficulty: intermediate
+xp: 135
+story: |
+  The Tidewater Books upload folder is a zoo: half the photos end in .jpeg,
+  half in .jpg, and their shop software only accepts one of them. Renaming
+  four hundred files by hand is how interns become ex-interns. Ollie asks,
+  very carefully, "Is there a way to say 'change every .jpeg to .jpg' once?"
+objective: |
+  Write solution.sh that takes a FOLDER, an old extension and a new
+  extension (both without the dot), for example:
+
+    ./solution.sh uploads jpeg jpg
+
+  Every regular file directly inside FOLDER whose name ends in `.OLD` gets
+  renamed so it ends in `.NEW` instead, keeping the rest of the name. Do
+  not look into sub-folders. Work in the order the shell lists the files
+  (plain `*.OLD` glob order), and cut the old extension off with a `%`
+  parameter expansion rather than with `sed` or `basename`.
+
+  For each file print one line with the names only (no folder):
+
+    renamed: photo1.jpeg -> photo1.jpg
+
+  If a file with the new name already exists, leave both files alone and
+  print `skipped: photo2.jpeg -> photo2.jpg already exists`.
+
+  At the end print a summary: `done: R renamed, S skipped`.
+  If FOLDER is not a directory print `no such folder: FOLDER` to stderr and
+  exit 1. With any other number of arguments than three print
+  `usage: solution.sh FOLDER OLD NEW` to stderr and exit 2.
+concepts:
+  - "${name%.ext} removes a suffix"
+  - "looping over a glob and renaming with mv"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*%'
+    message: "Remove the old extension with a suffix expansion like ${file%.jpeg}."
+  - pattern: '\bmv\b'
+    message: "Rename with mv."
+forbidden_patterns:
+  - pattern: '\b(sed|basename|rename)\b'
+    message: "Use the shell's own ${var%suffix} expansion for the new name."
+test_cases:
+  - name: jpeg to jpg
+    args: [uploads, jpeg, jpg]
+    files:
+      uploads/cover.jpeg: "c"
+      uploads/spine.jpeg: "s"
+      uploads/back.jpg: "b"
+      uploads/notes.txt: "n"
+    expected_stdout: |-
+      renamed: cover.jpeg -> cover.jpg
+      renamed: spine.jpeg -> spine.jpg
+      done: 2 renamed, 0 skipped
+    expected_files:
+      uploads/cover.jpg: "c"
+      uploads/spine.jpg: "s"
+      uploads/cover.jpeg: null
+      uploads/spine.jpeg: null
+      uploads/back.jpg: "b"
+      uploads/notes.txt: "n"
+  - name: existing target is never overwritten
+    args: [shots, htm, html]
+    files:
+      shots/about.htm: "old about"
+      shots/about.html: "NEW about"
+      shots/index.htm: "index"
+    expected_stdout: |-
+      skipped: about.htm -> about.html already exists
+      renamed: index.htm -> index.html
+      done: 1 renamed, 1 skipped
+    expected_files:
+      shots/about.htm: "old about"
+      shots/about.html: "NEW about"
+      shots/index.html: "index"
+      shots/index.htm: null
+  - name: spaces, tricky names and sub-folders
+    args: [Menu Cards, txt, md]
+    files:
+      "Menu Cards/summer menu.txt": "summer"
+      "Menu Cards/a.txt.txt": "double"
+      "Menu Cards/readme.txt.bak": "bak"
+      "Menu Cards/archive/old.txt": "deep"
+    expected_stdout: |-
+      renamed: a.txt.txt -> a.txt.md
+      renamed: summer menu.txt -> summer menu.md
+      done: 2 renamed, 0 skipped
+    expected_files:
+      "Menu Cards/summer menu.md": "summer"
+      "Menu Cards/a.txt.md": "double"
+      "Menu Cards/readme.txt.bak": "bak"
+      "Menu Cards/archive/old.txt": "deep"
+  - name: nothing matches
+    args: [empty-ish, log, txt]
+    files:
+      empty-ish/readme.md: "x"
+    expected_stdout: "done: 0 renamed, 0 skipped"
+    expected_files:
+      empty-ish/readme.md: "x"
+  - name: folder missing
+    args: [nope, a, b]
+    expected_stderr: "no such folder: nope"
+    expected_exit: 1
+  - name: wrong argument count
+    args: [uploads, jpeg]
+    expected_stderr: "usage: solution.sh FOLDER OLD NEW"
+    expected_exit: 2

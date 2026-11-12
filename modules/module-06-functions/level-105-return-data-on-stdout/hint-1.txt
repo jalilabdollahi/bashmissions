@@ -1,0 +1,1 @@
+A status code can only be a small number, so it cannot carry an address. The trick used all over shell scripting is for the function to simply print its answer, and for the caller to catch the printed text instead of letting it appear on screen.

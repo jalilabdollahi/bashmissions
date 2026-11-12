@@ -1,0 +1,48 @@
+id: 59
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: The elif Ladder
+difficulty: beginner
+xp: 80
+story: |
+  The uptime monitor at Lanternfish sends one number per check: the HTTP status
+  code the customer's site answered with. Each code has a different runbook line,
+  and Theo is tired of looking them up at 3 a.m. Teach the helper to translate
+  the code into the action a human should take.
+objective: |
+  Write solution.sh that takes one argument: an HTTP status code.
+  Print exactly one line, depending on the code:
+    200  ->  healthy: nothing to do
+    301  ->  moved: check the redirect
+    404  ->  not found: tell Noor
+    503  ->  backend down: page Mara
+    anything else  ->  unexpected status <code>: ask Theo
+  Compare the code as a string. Build the decision with if / elif / else.
+concepts:
+  - "if / elif / else ladder"
+  - "first matching branch wins"
+required_patterns:
+  - pattern: '\belif\b'
+    message: "Use elif for the in-between branches."
+  - pattern: '\belse\b'
+    message: "End the ladder with an else for unexpected codes."
+test_cases:
+  - name: healthy
+    args: ["200"]
+    expected_stdout: "healthy: nothing to do"
+  - name: redirect
+    args: ["301"]
+    expected_stdout: "moved: check the redirect"
+  - name: missing page
+    args: ["404"]
+    expected_stdout: "not found: tell Noor"
+  - name: backend down
+    args: ["503"]
+    expected_stdout: "backend down: page Mara"
+  - name: unknown code
+    args: ["418"]
+    expected_stdout: "unexpected status 418: ask Theo"
+  - name: lookalike is not a match
+    args: ["2000"]
+    expected_stdout: "unexpected status 2000: ask Theo"

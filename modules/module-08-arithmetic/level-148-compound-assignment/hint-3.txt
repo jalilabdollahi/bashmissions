@@ -1,1 +1,8 @@
-Then use `*= 2` to double it.
+steady="$start"
+doubling="$start"
+echo "start=$start"
+for (( month = 1; month <= months; month++ )); do
+  (( steady ... add ))       # compound addition
+  (( doubling ... 2 ))       # compound multiplication
+  echo "month $month: steady=$steady doubling=$doubling"
+done

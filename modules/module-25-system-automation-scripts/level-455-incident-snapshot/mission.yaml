@@ -1,0 +1,120 @@
+id: 455
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Incident Snapshot
+difficulty: expert
+xp: 440
+story: |
+  At 09:30 anchovy is at 97% disk, load average 8, and the customer-facing
+  nginx is eating a whole CPU. Mara's first instruction is not "fix it": it
+  is "collect evidence before you touch anything". Once somebody restarts
+  the service, the clues are gone. She wants a one-command snapshot of the
+  host, saved in a private folder, with checksums so nobody can later
+  claim the files were edited.
+objective: |
+  Write solution.sh HOST STAMP (STAMP is a label such as `20260301-0930`).
+  Create the evidence folder `incident-STAMP-HOST` (mode 700, so only you can
+  read it) and fill it with the output of four remote commands, each run as
+    ssh -n -o BatchMode=yes HOST COMMAND
+  with standard output and error both saved to the file:
+    uptime.txt   <- uptime
+    df.txt       <- df -P
+    ps.txt       <- ps -ef
+    ss.txt       <- ss -tan
+  Collect in that order. If a command exits non-zero (other than 255), keep
+  what it printed, append one more line `ERROR: exit N` to that file, count it
+  as failed and carry on: partial evidence is better than none.
+
+  If ssh exits with 255 (host unreachable) at any point, remove the folder
+  again, print `cannot reach HOST` to stderr and exit 1.
+
+  Then write `meta.txt` into the folder with exactly three lines
+    host=HOST
+    stamp=STAMP
+    collected_by=USER
+  (USER is the value of the \$USER environment variable). Finally write
+  `MANIFEST`: the output of \`cksum\` for the five files meta.txt, df.txt,
+  ps.txt, ss.txt and uptime.txt, sorted by file name, with bare file names
+  (run cksum from inside the folder). MANIFEST does not list itself.
+
+  Print three lines on stdout:
+    snapshot: incident-STAMP-HOST
+    collected: N files, F failed          (N counts the four command files)
+    manifest: incident-STAMP-HOST/MANIFEST
+  Evidence is never overwritten: if the folder already exists print
+  `evidence folder already exists: DIR` to stderr and exit 1 before doing
+  anything else. Wrong argument count: `usage: solution.sh HOST STAMP` on
+  stderr, exit 2.
+concepts:
+  - "mkdir -m 700 for private output"
+  - "collect first, tolerate failures, record them in the evidence"
+  - "cksum manifest taken after the files are final"
+required_patterns:
+  - pattern: 'mkdir\s+-[A-Za-z]*m|chmod\s+(0?700|u=rwx,go=)'
+    message: "Make the evidence folder private: mkdir -m 700 (or chmod 700)."
+  - pattern: '\bcksum\b'
+    message: "Write the manifest with cksum."
+test_cases:
+  - name: a healthy host
+    args: [anchovy, "20260301-0930"]
+    expected_stdout: |-
+      snapshot: incident-20260301-0930-anchovy
+      collected: 4 files, 0 failed
+      manifest: incident-20260301-0930-anchovy/MANIFEST
+    expected_files:
+      incident-20260301-0930-anchovy/MANIFEST: |
+        4114303469 123 df.txt
+        2287615428 53 meta.txt
+        729320401 164 ps.txt
+        3046840118 174 ss.txt
+        1958169301 71 uptime.txt
+      incident-20260301-0930-anchovy/meta.txt: |
+        host=anchovy
+        stamp=20260301-0930
+        collected_by=player
+      incident-20260301-0930-anchovy/uptime.txt: " 09:30:02 up 41 days,  3:12,  2 users,  load average: 7.92, 6.10, 4.31\n"
+      .calls.log: |
+        ssh anchovy uptime
+        ssh anchovy df -P
+        ssh anchovy ps -ef
+        ssh anchovy ss -tan
+  - name: one command is missing on the host
+    args: [cuttlefish, "20260301-0931"]
+    expected_stdout: |-
+      snapshot: incident-20260301-0931-cuttlefish
+      collected: 4 files, 1 failed
+      manifest: incident-20260301-0931-cuttlefish/MANIFEST
+    expected_files:
+      incident-20260301-0931-cuttlefish/ss.txt: |
+        bash: ss: command not found
+        ERROR: exit 127
+      incident-20260301-0931-cuttlefish/MANIFEST: |
+        3794641706 123 df.txt
+        235373680 56 meta.txt
+        265490290 93 ps.txt
+        540463806 44 ss.txt
+        2903656467 69 uptime.txt
+  - name: an unreachable host leaves nothing behind
+    args: [eel, "20260301-0932"]
+    expected_stdout: ""
+    expected_stderr: "cannot reach eel"
+    expected_exit: 1
+    expected_files:
+      incident-20260301-0932-eel/MANIFEST: null
+      incident-20260301-0932-eel/uptime.txt: null
+  - name: existing evidence is never overwritten
+    args: [anchovy, "20260301-0930"]
+    files:
+      incident-20260301-0930-anchovy/notes.txt: "first responder notes\n"
+    expected_stdout: ""
+    expected_stderr: "evidence folder already exists: incident-20260301-0930-anchovy"
+    expected_exit: 1
+    expected_files:
+      incident-20260301-0930-anchovy/notes.txt: "first responder notes\n"
+      incident-20260301-0930-anchovy/MANIFEST: null
+      .calls.log: null
+  - name: wrong number of arguments
+    args: [anchovy]
+    expected_stderr: "usage: solution.sh HOST STAMP"
+    expected_exit: 2

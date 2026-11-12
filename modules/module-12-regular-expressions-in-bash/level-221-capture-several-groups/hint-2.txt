@@ -1,0 +1,6 @@
+Every pair of parentheses is one group, numbered by its opening bracket from left to right. After a successful match they are ${BASH_REMATCH[1]}, ${BASH_REMATCH[2]}, and so on:
+
+  re='^([a-z]+)-([0-9]+)$'
+  [[ $s =~ $re ]] && echo "${BASH_REMATCH[2]} of ${BASH_REMATCH[1]}"
+
+A plain dot matches any character; to mean a real dot write \.

@@ -1,0 +1,1 @@
+The problem is the order of events: `cd` fails, but bash does not care and moves on to the next line. You need to say "if that failed, stop the whole script" right on the cd line itself.

@@ -1,0 +1,64 @@
+id: 135
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Split on a Delimiter
+difficulty: intermediate
+xp: 135
+story: |
+  Priya is auditing accounts on the servers. The classic account file, /etc/passwd,
+  stores each user as one colon-separated line: name, password marker, user id,
+  group id, comment, home directory, shell. She pastes lines into a ticket and
+  wants them turned into a readable summary. Some lines have empty fields, and
+  the home and shell must still come out right.
+objective: |
+  Write solution.sh that takes one argument, a passwd-style line with exactly 7
+  colon-separated fields, and prints:
+
+    user=<field 1>
+    uid=<field 3>
+    home=<field 6>
+    shell=<field 7>
+
+  Split the line into an array with  IFS=: read -ra  and pick the fields by
+  index (the first array element has index 0). Do not use cut, awk or sed.
+concepts:
+  - "IFS=: read -ra fields <<< \"$line\" splits into an array"
+  - "${fields[2]} is the third element: indexes start at 0"
+required_patterns:
+  - pattern: 'IFS=\S+\s+read\s+-[a-z]*a'
+    message: 'Split with IFS=: read -ra fields <<< "$line" (a puts the pieces in an array).'
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*\[[0-9]+\]\}'
+    message: 'Pick a field with ${fields[N]}, counting from 0.'
+forbidden_patterns:
+  - pattern: '\b(cut|awk|sed|tr)\b'
+    message: "Split with IFS and read -a, not with an external tool."
+test_cases:
+  - name: ordinary account
+    args: ["ollie:x:1002:1002:Ollie Quinn:/home/ollie:/bin/bash"]
+    expected_stdout: |-
+      user=ollie
+      uid=1002
+      home=/home/ollie
+      shell=/bin/bash
+  - name: service account without login
+    args: ["www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin"]
+    expected_stdout: |-
+      user=www-data
+      uid=33
+      home=/var/www
+      shell=/usr/sbin/nologin
+  - name: empty comment field keeps the positions
+    args: ["mara:x:1001:1001::/home/mara:/bin/zsh"]
+    expected_stdout: |-
+      user=mara
+      uid=1001
+      home=/home/mara
+      shell=/bin/zsh
+  - name: spaces inside a field
+    args: ["theo:x:1003:100:Theo B, Backend Team:/home/theo dev:/bin/bash"]
+    expected_stdout: |-
+      user=theo
+      uid=1003
+      home=/home/theo dev
+      shell=/bin/bash

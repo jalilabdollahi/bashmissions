@@ -1,0 +1,5 @@
+`cksum FILE...` prints one line per file: the CRC, the size in bytes and the name, identical on Linux and macOS (unlike md5sum/sha256sum, which differ).
+
+  cksum a.tar b.tar          # 123456 20 a.tar ...
+
+An unmatched glob stays literal unless `shopt -s nullglob` is on, in which case it expands to nothing; collect matches with `files=(dist/*.tar)`. Strip a directory with `${path##*/}`. Test a prefix with `[[ $base == "$prefix"* ]]`.

@@ -1,1 +1,0 @@
-Use `elif` when one more specific condition should be checked before the fallback.

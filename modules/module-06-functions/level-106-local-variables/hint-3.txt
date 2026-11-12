@@ -1,0 +1,12 @@
+Declare, then compute, then print:
+
+  line_total() {
+    local subtotal tax total
+    subtotal=$(( $1 * $2 ))
+    tax=...
+    total=...
+    echo "line total: $total"
+  }
+
+  line_total "$1" "$2"
+  echo "leaked total: ${total:-none}"

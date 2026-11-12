@@ -1,22 +1,305 @@
 id: 472
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Test Harness Builder
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Test Harness Builder` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Test Harness Builder
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 420
+story: |
+  Ollie wrote forty small helper scripts for the storm rota and trusts every one of them,
+  until one silently deleted the wrong file on Tuesday. "Where are the tests?" asked Mara.
+  There are none, because the team has no way to run shell tests without installing a
+  framework on a locked-down server. Her answer is typically Mara: "We have Bash. Build
+  the harness." It must discover tests, isolate them from each other, give them
+  assertions, survive crashes, and report in a way that makes failures obvious at 3 a.m.
+objective: |
+  Write solution.sh, a test runner:
+    `solution.sh [--filter TEXT] [--fail-fast] [--verbose] PATH...`
+  Each PATH is a test file or a directory (then its `*.test.sh` files, in name order). Errors on
+  stderr, exit 2: `usage: solution.sh [--filter TEXT] [--fail-fast] [--verbose] PATH...`,
+  `error: cannot read PATH`, and, when no test function was found in any file,
+  `error: no tests found`.
+
+  Discovery: a test is a function declared in the file as a line starting with
+  `test_NAME()` or `function test_NAME` (NAME is letters, digits and underscores; the line may
+  continue after the parentheses). Tests run in the order of appearance. `--filter TEXT` keeps only
+  tests whose full name contains TEXT.
+  Before running a file check it with `bash -n`; a file with a syntax error is not run, its report is
+  the single line `  ERROR syntax error` and it counts as a file error.
+
+  Running a test: in its own subshell, in its own fresh empty working directory (removed afterwards),
+  with `set -e` in force and the environment variable TEST_DIR set to the absolute path of the directory
+  that holds the test file. The test file is sourced in that subshell; then, if the file defined
+  `setup`, it runs; then the test; if it defined `teardown`, that always runs at the end, whether the test
+  passed or failed. The subshell's stdout and stderr are captured. Beware: errexit is switched off for any
+  command that is part of an `||` or `if` condition, which includes a subshell run that way; run the
+  subshell as a plain command.
+  The harness provides these functions to tests:
+    `fail MESSAGE`                         fail with that message
+    `skip REASON`                          skip the test (exit status 77 inside the subshell)
+    `assert_eq EXPECTED ACTUAL`            message `expected 'E' but got 'A'`
+    `assert_contains HAYSTACK NEEDLE`      message `'H' does not contain 'N'`
+    `assert_success COMMAND...`            runs it quietly; message `command failed (status N): COMMAND...`
+    `assert_status CODE COMMAND...`        message `expected status C but got N from: COMMAND...`
+  A message is passed from the subshell to the harness through a file. Outcome: status 0 is PASS; 77
+  is SKIP; anything else is FAIL, with the message if there is one, else `exited with status N`.
+
+  Report, on stdout: for each file its path as given, then for each test one line
+    `  PASS NAME`   `  FAIL NAME: MESSAGE` (first line of the message)   `  SKIP NAME (REASON)`
+  With `--verbose`, after a FAIL line print the test's captured output, each line prefixed by
+  `    | `. With `--fail-fast` stop running tests after the first failure (still print the summary).
+  Finish with `summary: T tests, P passed, F failed, S skipped`; when there were file errors also
+  `file errors: E`. Exit status 1 if anything failed or any file had an error, else 0.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "discovering functions by reading the file"
+  - "subshell isolation: fresh directory and clean state per test"
+  - "the set -e / || gotcha with subshells"
+  - "assertion helpers that report through a file and an exit status"
+  - "setup and teardown with trap EXIT"
+required_patterns:
+  - pattern: 'mktemp -d'
+    message: "Give each test its own fresh directory made with mktemp -d."
+  - pattern: 'bash -n'
+    message: "Check each test file with bash -n before running it."
+  - pattern: '\btrap\b'
+    message: "Use a trap so teardown runs even when the test fails."
+test_cases:
+  - name: a mixed suite
+    args:
+    - tests/math.test.sh
+    files:
+      tests/math.test.sh: |
+        #!/usr/bin/env bash
+        setup() { echo 40 > value.txt; echo "setup ran"; }
+        teardown() { echo done >> "$TEST_DIR/teardown.log"; }
+
+        test_reads_value() {
+          local v
+          v=$(cat value.txt)
+          assert_eq 40 "$v"
+        }
+        test_wrong_total() { assert_eq 41 "$(cat value.txt)"; }
+        function test_contains { assert_contains "harbour bakery" "bakery"; }
+        test_missing_word() { assert_contains "harbour bakery" "pub"; }
+        test_skipped() { skip "needs the ferry"; }
+        test_command_dies() {
+          echo "about to fail"
+          false
+          echo "never printed"
+        }
+        test_status() { assert_status 3 bash -c 'exit 3'; }
+        test_status_wrong() { assert_status 0 bash -c 'exit 4'; }
+        test_success_fails() { assert_success test -e nothing-here; }
+        helper_not_a_test() { :; }
+        test_manual_fail() { fail "manual failure
+        second line"; }
+    expected_stdout: |-
+      tests/math.test.sh
+        PASS test_reads_value
+        FAIL test_wrong_total: expected '41' but got '40'
+        PASS test_contains
+        FAIL test_missing_word: 'harbour bakery' does not contain 'pub'
+        SKIP test_skipped (needs the ferry)
+        FAIL test_command_dies: exited with status 1
+        PASS test_status
+        FAIL test_status_wrong: expected status 0 but got 4 from: bash -c exit 4
+        FAIL test_success_fails: command failed (status 1): test -e nothing-here
+        FAIL test_manual_fail: manual failure
+      summary: 10 tests, 3 passed, 6 failed, 1 skipped
+    expected_exit: 1
+    expected_files:
+      tests/teardown.log: |-
+        done
+        done
+        done
+        done
+        done
+        done
+        done
+        done
+        done
+        done
+  - name: verbose shows captured output of failures only
+    args:
+    - --verbose
+    - tests/math.test.sh
+    files:
+      tests/math.test.sh: |
+        #!/usr/bin/env bash
+        setup() { echo 40 > value.txt; echo "setup ran"; }
+        teardown() { echo done >> "$TEST_DIR/teardown.log"; }
+
+        test_reads_value() {
+          local v
+          v=$(cat value.txt)
+          assert_eq 40 "$v"
+        }
+        test_wrong_total() { assert_eq 41 "$(cat value.txt)"; }
+        function test_contains { assert_contains "harbour bakery" "bakery"; }
+        test_missing_word() { assert_contains "harbour bakery" "pub"; }
+        test_skipped() { skip "needs the ferry"; }
+        test_command_dies() {
+          echo "about to fail"
+          false
+          echo "never printed"
+        }
+        test_status() { assert_status 3 bash -c 'exit 3'; }
+        test_status_wrong() { assert_status 0 bash -c 'exit 4'; }
+        test_success_fails() { assert_success test -e nothing-here; }
+        helper_not_a_test() { :; }
+        test_manual_fail() { fail "manual failure
+        second line"; }
+    expected_stdout: |-
+      tests/math.test.sh
+        PASS test_reads_value
+        FAIL test_wrong_total: expected '41' but got '40'
+          | setup ran
+        PASS test_contains
+        FAIL test_missing_word: 'harbour bakery' does not contain 'pub'
+          | setup ran
+        SKIP test_skipped (needs the ferry)
+        FAIL test_command_dies: exited with status 1
+          | setup ran
+          | about to fail
+        PASS test_status
+        FAIL test_status_wrong: expected status 0 but got 4 from: bash -c exit 4
+          | setup ran
+        FAIL test_success_fails: command failed (status 1): test -e nothing-here
+          | setup ran
+        FAIL test_manual_fail: manual failure
+          | setup ran
+      summary: 10 tests, 3 passed, 6 failed, 1 skipped
+    expected_exit: 1
+  - name: filter picks tests by name
+    args:
+    - --filter
+    - status
+    - tests/math.test.sh
+    files:
+      tests/math.test.sh: |
+        #!/usr/bin/env bash
+        setup() { echo 40 > value.txt; echo "setup ran"; }
+        teardown() { echo done >> "$TEST_DIR/teardown.log"; }
+
+        test_reads_value() {
+          local v
+          v=$(cat value.txt)
+          assert_eq 40 "$v"
+        }
+        test_wrong_total() { assert_eq 41 "$(cat value.txt)"; }
+        function test_contains { assert_contains "harbour bakery" "bakery"; }
+        test_missing_word() { assert_contains "harbour bakery" "pub"; }
+        test_skipped() { skip "needs the ferry"; }
+        test_command_dies() {
+          echo "about to fail"
+          false
+          echo "never printed"
+        }
+        test_status() { assert_status 3 bash -c 'exit 3'; }
+        test_status_wrong() { assert_status 0 bash -c 'exit 4'; }
+        test_success_fails() { assert_success test -e nothing-here; }
+        helper_not_a_test() { :; }
+        test_manual_fail() { fail "manual failure
+        second line"; }
+    expected_stdout: |-
+      tests/math.test.sh
+        PASS test_status
+        FAIL test_status_wrong: expected status 0 but got 4 from: bash -c exit 4
+      summary: 2 tests, 1 passed, 1 failed, 0 skipped
+    expected_exit: 1
+  - name: fail-fast stops at the first failure
+    args:
+    - --fail-fast
+    - tests/math.test.sh
+    files:
+      tests/math.test.sh: |
+        #!/usr/bin/env bash
+        setup() { echo 40 > value.txt; echo "setup ran"; }
+        teardown() { echo done >> "$TEST_DIR/teardown.log"; }
+
+        test_reads_value() {
+          local v
+          v=$(cat value.txt)
+          assert_eq 40 "$v"
+        }
+        test_wrong_total() { assert_eq 41 "$(cat value.txt)"; }
+        function test_contains { assert_contains "harbour bakery" "bakery"; }
+        test_missing_word() { assert_contains "harbour bakery" "pub"; }
+        test_skipped() { skip "needs the ferry"; }
+        test_command_dies() {
+          echo "about to fail"
+          false
+          echo "never printed"
+        }
+        test_status() { assert_status 3 bash -c 'exit 3'; }
+        test_status_wrong() { assert_status 0 bash -c 'exit 4'; }
+        test_success_fails() { assert_success test -e nothing-here; }
+        helper_not_a_test() { :; }
+        test_manual_fail() { fail "manual failure
+        second line"; }
+    expected_stdout: |-
+      tests/math.test.sh
+        PASS test_reads_value
+        FAIL test_wrong_total: expected '41' but got '40'
+      summary: 2 tests, 1 passed, 1 failed, 0 skipped
+    expected_exit: 1
+    expected_files:
+      tests/teardown.log: |-
+        done
+        done
+  - name: tests cannot leak state into each other
+    args:
+    - tests
+    files:
+      tests/a.test.sh: |
+        test_writes_a_file() { echo secret > leak.txt; assert_success test -f leak.txt; }
+      tests/b.test.sh: |
+        test_starts_clean() { [[ ! -e leak.txt ]] || fail "state leaked from the previous test"; }
+        test_test_dir_is_absolute() { [[ $TEST_DIR == /* ]] || fail "TEST_DIR is $TEST_DIR"; assert_success test -f "$TEST_DIR/b.test.sh"; }
+    expected_stdout: |-
+      tests/a.test.sh
+        PASS test_writes_a_file
+      tests/b.test.sh
+        PASS test_starts_clean
+        PASS test_test_dir_is_absolute
+      summary: 3 tests, 3 passed, 0 failed, 0 skipped
+  - name: a broken file is reported and does not stop the others
+    args:
+    - tests
+    files:
+      tests/a.test.sh: |
+        test_fine() { :; }
+      tests/b.test.sh: |
+        test_oops() { echo "unclosed
+      tests/c.test.sh: |
+        test_also_fine() { assert_eq a a; }
+    expected_stdout: |-
+      tests/a.test.sh
+        PASS test_fine
+      tests/b.test.sh
+        ERROR syntax error
+      tests/c.test.sh
+        PASS test_also_fine
+      summary: 2 tests, 2 passed, 0 failed, 0 skipped
+      file errors: 1
+    expected_exit: 1
+  - name: an empty file means no tests
+    args:
+    - tests/none.test.sh
+    files:
+      tests/none.test.sh: |
+        echo no tests here
+    expected_stdout: ''
+    expected_stderr: 'error: no tests found'
+    expected_exit: 2
+  - name: unreadable path
+    args:
+    - tests/missing.test.sh
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read tests/missing.test.sh'
+    expected_exit: 2
+  - name: usage
+    args: []
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--filter TEXT] [--fail-fast] [--verbose] PATH...'
+    expected_exit: 2

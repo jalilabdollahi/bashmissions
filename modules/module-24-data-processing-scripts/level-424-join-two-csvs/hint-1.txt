@@ -1,1 +1,3 @@
-Use this data-processing concept: join on key.
+Joining is a lookup. One of the files is small and describes things (customers); the other is long and refers to them (invoices). Read the small one into memory as a dictionary first, then stream the long one past it, asking the dictionary at every line.
+
+The tool that comes to mind, `join`, has two annoying habits: it needs sorted input, and it discards non-matching rows. awk does neither.

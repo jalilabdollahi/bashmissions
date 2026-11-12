@@ -1,0 +1,12 @@
+Skeleton:
+
+  spikes=0
+  while read -r count day minute; do
+    if (( count >= limit )); then
+      echo "SPIKE $day $minute errors=$count"
+      spikes=$((spikes + 1))
+    fi
+  done < <( { grep -E '^[0-9-]+ [0-9:]+ ERROR ' "$log" || true; } | cut -c1-16 | sort | uniq -c )
+  # exit 1 if spikes, else print "no spikes"
+
+Validate the threshold with a regex and the log with [[ -r ]] before this.

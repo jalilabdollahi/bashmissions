@@ -1,0 +1,7 @@
+if (( parts == 0 )); then echo "parts must be at least 1" >&2; exit 2; fi
+floor=$(( amount / parts ))
+nearest=$(( (amount + parts / 2) / parts ))
+ceiling=$(( (amount + ... ) / parts ))      # parts minus one
+echo "floor=$floor"
+echo "nearest=$nearest"
+echo "ceiling=$ceiling"

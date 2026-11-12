@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Pass ids to a child without changing your own environment: put assignments in front of the command.
+  OBS_TRACE=$trace OBS_PARENT=$sid "$@" || status=$?
+and read them back with defaults:  ${OBS_TRACE:-}  ${OBS_PARENT:--}   (the second default is a literal "-").
+
+Atomic rewrite of a small state file (counters, ids, metrics):
+  tmp=$(mktemp "$file.XXXXXX"); ... > "$tmp"; mv -f "$tmp" "$file"
+Remove the temp file in a trap in case something fails in between. Keep metrics sorted:  | LC_ALL=C sort
+
+Rebuild the tree: read spans into associative arrays keyed by span id; for each span append its id to kids[$parent] (or to a per-trace root list when the parent is "-" or unknown); print recursively with a depth that sets the indent. To order children by their number, sort on the digits after the "s":  sort -t s -k2,2n
+
+Timing: start=$(date +%s) before, end=$(date +%s) after, duration=$((end - start)).

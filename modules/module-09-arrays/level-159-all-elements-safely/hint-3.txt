@@ -1,0 +1,3 @@
+customers=("$@")
+printf 'invoice: %s\n' "${customers[@]}"
+Run that with no arguments and look at what printf does with an empty list: it prints the format once with nothing in it. You need to skip the printf when the array has no elements. (Hint: the next level shows how to count them; for now ${#customers[@]} is that count.)

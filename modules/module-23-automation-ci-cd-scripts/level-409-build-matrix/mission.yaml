@@ -1,0 +1,98 @@
+id: 409
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Build Matrix
+difficulty: expert
+xp: 340
+story: |
+  The Lanternfish agent now has to run on Linux and macOS, against two or three
+  runtime versions each. Priya counts six combinations and refuses to
+  hand-write six pipeline lines that someone will forget to update. A matrix
+  is how every CI system solves this: list the operating systems, list the
+  versions, and build every pair.
+objective: |
+  Write solution.sh, called as `solution.sh OSES RUNTIMES [EXCLUDE...]`.
+  OSES and RUNTIMES are comma-separated lists (`linux,macos` and `3.11,3.12`).
+  Each EXCLUDE is a combination written `OS/VERSION` that must not be built.
+  For every OS (in list order) and, inside it, every runtime (in list order)
+  run the build job as
+    build-job --os OS --runtime VERSION
+  and print one line per combination:
+    [OS/VERSION] ok          the job exited 0
+    [OS/VERSION] FAILED      the job exited non-zero
+    [OS/VERSION] skipped     the combination is excluded (job not run)
+  A failing job must not stop the rest. Finish with
+    matrix: P/T passed
+  where T is the number of jobs actually run (skipped ones do not count) and P
+  how many of them passed. Exit 1 if any job failed, otherwise 0.
+  If either list is missing, empty, or has an empty item (`linux,,macos`,
+  `3.11,`), print `usage: solution.sh OSES RUNTIMES [OS/VERSION...]` to
+  stderr and exit 2 without running anything.
+concepts:
+  - "nested for loops: every pair from two lists"
+  - "IFS=, read -ra to split a list into an array"
+  - "skip with continue; count jobs run and passed"
+required_patterns:
+  - pattern: '(?s)\bfor\b.*\bfor\b'
+    message: "Use two nested for loops: one over the operating systems, one over the runtimes."
+  - pattern: 'read\s+-ra'
+    message: "Split the comma lists with IFS=, read -ra name <<< \"$list\"."
+test_cases:
+  - name: two by two, all green
+    args: ["linux,macos", "3.11,3.12"]
+    expected_stdout: |-
+      [linux/3.11] ok
+      [linux/3.12] ok
+      [macos/3.11] ok
+      [macos/3.12] ok
+      matrix: 4/4 passed
+    expected_files:
+      .calls.log: |
+        build-job --os linux --runtime 3.11
+        build-job --os linux --runtime 3.12
+        build-job --os macos --runtime 3.11
+        build-job --os macos --runtime 3.12
+  - name: one combination breaks, the rest still run
+    args: ["linux,macos", "3.11,3.12"]
+    env: {FAKE_FAIL_JOBS: "linux/3.12"}
+    expected_stdout: |-
+      [linux/3.11] ok
+      [linux/3.12] FAILED
+      [macos/3.11] ok
+      [macos/3.12] ok
+      matrix: 3/4 passed
+    expected_exit: 1
+  - name: an excluded combination is not built
+    args: ["linux,macos,freebsd", "3.12", "macos/3.12", "freebsd/3.12"]
+    expected_stdout: |-
+      [linux/3.12] ok
+      [macos/3.12] skipped
+      [freebsd/3.12] skipped
+      matrix: 1/1 passed
+    expected_files:
+      .calls.log: "build-job --os linux --runtime 3.12"
+  - name: single item lists
+    args: [linux, "3.13"]
+    env: {FAKE_FAIL_JOBS: "linux/3.13"}
+    expected_stdout: |-
+      [linux/3.13] FAILED
+      matrix: 0/1 passed
+    expected_exit: 1
+  - name: everything excluded
+    args: [linux, "3.12", "linux/3.12"]
+    expected_stdout: |-
+      [linux/3.12] skipped
+      matrix: 0/0 passed
+    expected_files:
+      .calls.log: null
+  - name: an empty item in a list
+    args: ["linux,,macos", "3.12"]
+    expected_stderr: "usage: solution.sh OSES RUNTIMES [OS/VERSION...]"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: missing runtimes
+    args: [linux]
+    expected_stderr: "usage: solution.sh OSES RUNTIMES [OS/VERSION...]"
+    expected_exit: 2

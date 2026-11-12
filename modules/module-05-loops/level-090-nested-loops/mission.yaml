@@ -4,23 +4,52 @@ module_name: loops
 module_display: Loops
 title: Nested Loops
 difficulty: beginner
-xp: 50
-objective: Use nested loops to print all row/column pairs for rows `A B` and columns
-  `1 2` in row-major order.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: 'A1
-
-    A2
-
-    B1
-
-    B2'
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+xp: 120
+story: |
+  Gus is drawing up the new price sheet for hosting plans. A server costs 12
+  euros per month, and customers keep asking "what if I rent two servers for
+  three months?" He wants one grid that answers every such question: rows for
+  the number of servers, columns for the number of months. Typing it by hand
+  in a spreadsheet is, as he puts it, "how mistakes are born".
+objective: |
+  Write solution.sh that takes two arguments: SERVERS and MONTHS (whole
+  numbers). Print one line for each number of servers from 1 to SERVERS. Each
+  line starts with "servers <n>:" and is followed by one cell for each month
+  from 1 to MONTHS. A cell is the price servers * months * 12, printed with
+  printf '%6d' (right-aligned in 6 characters, no separator):
+    servers 2:    24    48    72
+  If SERVERS or MONTHS is 0, print nothing. If fewer than two arguments are
+  given, print "usage: solution.sh SERVERS MONTHS" to stderr and exit 2.
+  Use an outer loop for the rows and an inner loop for the cells.
 concepts:
-- matrix iteration
-scaffold: true
+  - "a loop inside a loop: the inner one restarts on every outer round"
+  - "printf without newline for the cells, a bare newline after the inner loop"
+required_patterns:
+  - pattern: '(?s)\bfor\b.*\bfor\b'
+    message: "Use two loops, one nested in the other: rows outside, cells inside."
+test_cases:
+  - name: two servers three months
+    args: ["2", "3"]
+    expected_stdout: |-
+      servers 1:    12    24    36
+      servers 2:    24    48    72
+  - name: three servers four months
+    args: ["3", "4"]
+    expected_stdout: |-
+      servers 1:    12    24    36    48
+      servers 2:    24    48    72    96
+      servers 3:    36    72   108   144
+  - name: one month only
+    args: ["4", "1"]
+    expected_stdout: |-
+      servers 1:    12
+      servers 2:    24
+      servers 3:    36
+      servers 4:    48
+  - name: zero servers
+    args: ["0", "5"]
+    expected_stdout: ""
+  - name: missing months
+    args: ["3"]
+    expected_stderr: "usage: solution.sh SERVERS MONTHS"
+    expected_exit: 2

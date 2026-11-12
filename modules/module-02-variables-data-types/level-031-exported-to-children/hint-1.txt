@@ -1,0 +1,1 @@
+When your script starts another program, that program gets a copy of the "environment" only - not all your variables. Think about which variable you want to put into that copy, and which you do not.

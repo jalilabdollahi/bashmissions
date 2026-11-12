@@ -1,0 +1,6 @@
+Assign from a command with name=$(command). Anything the command prints becomes the value. Pipelines work inside, too. Generic example:
+
+  newest=$(ls -t reports | head -n 1)
+  echo "Newest report: $newest"
+
+To get names in alphabetical order, use sort; to pick one line from either end, head -n 1 or tail -n 1.

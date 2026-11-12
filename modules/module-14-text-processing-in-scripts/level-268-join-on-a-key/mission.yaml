@@ -1,0 +1,83 @@
+id: 268
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Join on a Key
+difficulty: advanced
+xp: 190
+story: |
+  Billing keeps customers in one file and invoices in another, linked only by a
+  customer code, and Gus wants "who owes what" with names, not codes. Both files
+  grew by people appending to them, so neither is in any order, and some codes
+  appear in one file but not the other. Noor has already tried joining them by
+  eye. It took her an afternoon and one cup of tea per page.
+objective: |
+  Write solution.sh that takes two arguments: a customers file and an invoices
+  file. Both are comma-separated, with the customer code in the first field and
+  are in no particular order:
+    customers:  <code>,<name>        e.g.  C02,Tidewater Books
+    invoices:   <code>,<amount>      e.g.  C02,340.50
+  Print one line per code that appears in BOTH files, in the order of the
+  codes (plain character order):
+    <code>,<name>,<amount>
+  Codes present in only one file are left out. Each code appears at most once
+  in each file. Use the join command with -t, and remember that join only
+  works on input sorted by the join field: sort both files first, with
+  sort -t, -k1,1, using process substitution <(...) so no temporary files are
+  needed.
+concepts:
+  - "join matches lines of two files on a key field"
+  - "both inputs must be sorted on the key, with the same collation"
+  - "join -t, sets the field separator"
+required_patterns:
+  - pattern: '\bjoin\b'
+    message: "Use join to match the two files on the code."
+  - pattern: 'join\s+.*-t\s*[,"'']'
+    message: "Tell join the separator with -t,."
+  - pattern: '\bsort\b'
+    message: "join needs sorted input: sort both files by the key first."
+test_cases:
+  - name: unsorted inputs, unmatched codes
+    args: [customers.csv, invoices.csv]
+    files:
+      customers.csv: |
+        C03,Gull & Anchor Pub
+        C01,Harbour Bakery
+        C02,Tidewater Books
+      invoices.csv: |
+        C02,340.50
+        C01,120.00
+        C09,55.00
+    expected_stdout: |-
+      C01,Harbour Bakery,120.00
+      C02,Tidewater Books,340.50
+  - name: codes that sort differently as numbers
+    args: [c.csv, i.csv]
+    files:
+      c.csv: |
+        C9,Salt & Sail
+        C10,Old Mill Cycles
+        C2,North Pier Dental
+      i.csv: |
+        C2,45.00
+        C10,19.99
+        C9,7.25
+    expected_stdout: |-
+      C10,Old Mill Cycles,19.99
+      C2,North Pier Dental,45.00
+      C9,Salt & Sail,7.25
+  - name: nothing in common
+    args: [a.csv, b.csv]
+    files:
+      a.csv: |
+        K1,Kelp Cafe
+      b.csv: |
+        K2,10.00
+    expected_stdout: ""
+  - name: an empty invoice file
+    args: [full.csv, empty.csv]
+    files:
+      full.csv: |
+        C01,Harbour Bakery
+      empty.csv: ""
+    expected_stdout: ""

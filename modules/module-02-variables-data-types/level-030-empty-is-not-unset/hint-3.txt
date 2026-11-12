@@ -1,0 +1,4 @@
+One of each form, inside the square brackets the output format asks for:
+
+  echo "note=[${NOTE-(no note on file)}]"        # no colon
+  echo "contact=[${CONTACT:-...}]"                # colon, support address

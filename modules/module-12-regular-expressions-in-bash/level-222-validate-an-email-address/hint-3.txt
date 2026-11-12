@@ -1,0 +1,10 @@
+  re='^[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}$'
+  while IFS= read -r addr || [[ -n $addr ]]; do
+    if [[ $addr =~ $re ]]; then
+      echo "OK $addr"
+    else
+      echo "BAD $addr"
+    fi
+  done
+
+If you wrote your own version, compare it part by part with this one: local, @, domain, dot, extension.

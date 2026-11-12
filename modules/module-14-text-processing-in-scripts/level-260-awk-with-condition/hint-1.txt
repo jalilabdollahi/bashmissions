@@ -1,1 +1,0 @@
-Use the curriculum concept for this level: `awk '$3 > 100'`.

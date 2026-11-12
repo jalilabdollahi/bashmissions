@@ -1,0 +1,1 @@
+Bash remembers one number about the command that just finished: 0 means success, anything else means failure. But it only remembers the *most recent* command, so you must grab the number before running anything else.

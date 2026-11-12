@@ -1,0 +1,8 @@
+Create, grow and run an array like this:
+
+  cmd=(ls -l)
+  cmd+=( "$file" )          # append one element, spaces and all
+  cmd+=( -a -h )            # append several
+  "${cmd[@]}"               # run it: every element becomes one word
+
+find's group parentheses must reach find as arguments, so quote them in the array: '(' and ')'. An empty array is fine to expand when nothing was added.

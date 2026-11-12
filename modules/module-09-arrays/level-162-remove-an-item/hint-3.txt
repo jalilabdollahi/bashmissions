@@ -1,0 +1,3 @@
+The loop is already there. Replace the ":" in the loop body with
+unset 'fleet[$i]'
+and run ./solution.sh 1 3 to see anchovy, cuttlefish and eel keep their old indexes.

@@ -1,0 +1,10 @@
+Parameter expansion has a fallback form: `${name:-fallback}` gives the value of `name`, or `fallback` if `name` is unset or empty. It works on positional parameters too:
+
+  greet() {
+    local who=${1:-friend}
+    echo "hello, $who"
+  }
+  greet          # hello, friend
+  greet Ollie    # hello, Ollie
+
+Write one such line per parameter.

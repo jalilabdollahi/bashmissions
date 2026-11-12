@@ -1,0 +1,1 @@
+TAP is a line protocol: each line tells you one thing. Decide, line by line, whether it is the plan, a result, or noise. Start your patterns at the beginning of the line so a comment that merely contains "ok" never counts.

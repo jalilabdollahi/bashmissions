@@ -1,0 +1,50 @@
+id: 66
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: Either Will Do
+difficulty: beginner
+xp: 100
+story: |
+  The Lanternfish on-call calendar has two rotas: weekdays, where Theo carries
+  the pager, and "weekend rota", where Mara does. Weekend rota also applies on
+  public holidays, because the harbour festival does not care what day of the
+  week it is. Whoever is looking at the clock at 6 a.m. needs the script to say
+  which rota is in force.
+objective: |
+  Write solution.sh that takes two arguments: a day (`mon` `tue` `wed` `thu`
+  `fri` `sat` `sun`, always lowercase) and a holiday flag (`yes` or `no`).
+  The weekend rota applies if the day is `sat` OR the day is `sun` OR the holiday
+  flag is `yes`. Print
+    weekend rota: Mara has the pager
+  in that case, otherwise
+    weekday rota: Theo has the pager
+  Put all three checks into one condition joined by `||`.
+concepts:
+  - "|| inside [[ ]]"
+  - "any one true condition is enough"
+required_patterns:
+  - pattern: '\|\|'
+    message: "Join the checks with || (\"or\")."
+forbidden_patterns:
+  - pattern: '\bcase\b'
+    message: "Use || in a single if for this level; case comes later."
+test_cases:
+  - name: saturday
+    args: [sat, "no"]
+    expected_stdout: "weekend rota: Mara has the pager"
+  - name: sunday
+    args: [sun, "no"]
+    expected_stdout: "weekend rota: Mara has the pager"
+  - name: ordinary monday
+    args: [mon, "no"]
+    expected_stdout: "weekday rota: Theo has the pager"
+  - name: holiday on a wednesday
+    args: [wed, "yes"]
+    expected_stdout: "weekend rota: Mara has the pager"
+  - name: weekend holiday still weekend
+    args: [sat, "yes"]
+    expected_stdout: "weekend rota: Mara has the pager"
+  - name: friday evening is still weekday
+    args: [fri, "no"]
+    expected_stdout: "weekday rota: Theo has the pager"

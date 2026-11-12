@@ -1,0 +1,54 @@
+id: 31
+module: 2
+module_name: variables-data-types
+module_display: Variables
+title: Exported to Children
+difficulty: beginner
+xp: 80
+story: |
+  Theo wrote a reporting tool (fixtures/child.sh) that prints the region it
+  was started for. He swears it prints an empty region "only when you run
+  it from your script". Priya's reaction: "Of course. It is a different
+  program. It sees what you hand to it, not everything you keep in your
+  pockets." She also insists the scratch folder path stays private to your
+  script, because the tool has no business knowing it.
+objective: |
+  The scheduler passes a setting called SITE (the site name, may contain
+  spaces). Write solution.sh that:
+
+    1. Sets a variable REGION to the value of SITE, in a way that makes it
+       visible to programs your script starts.
+    2. Sets a variable SCRATCH to /srv/scratch/<SITE>. This one must stay
+       private: do NOT export it.
+    3. Runs the reporting tool:  bash fixtures/child.sh
+    4. Then prints:  parent sees: REGION=[<REGION>] SCRATCH=[<SCRATCH>]
+
+  Expected output for SITE=north-pier:
+
+    child sees: REGION=[north-pier] SCRATCH=[]
+    parent sees: REGION=[north-pier] SCRATCH=[/srv/scratch/north-pier]
+concepts:
+  - "export makes a variable visible to child processes"
+  - "unexported variables stay private to the script"
+required_patterns:
+  - pattern: '\bexport\b'
+    message: "Make REGION visible to the child with export."
+forbidden_patterns:
+  - pattern: '\bexport\s+(-[a-zA-Z]+\s+)*SCRATCH\b'
+    message: "SCRATCH must stay private - do not export it."
+test_cases:
+  - name: north pier
+    env: {SITE: north-pier}
+    expected_stdout: |-
+      child sees: REGION=[north-pier] SCRATCH=[]
+      parent sees: REGION=[north-pier] SCRATCH=[/srv/scratch/north-pier]
+  - name: harbour east
+    env: {SITE: harbour-east}
+    expected_stdout: |-
+      child sees: REGION=[harbour-east] SCRATCH=[]
+      parent sees: REGION=[harbour-east] SCRATCH=[/srv/scratch/harbour-east]
+  - name: a site name with a space
+    env: {SITE: old quay}
+    expected_stdout: |-
+      child sees: REGION=[old quay] SCRATCH=[]
+      parent sees: REGION=[old quay] SCRATCH=[/srv/scratch/old quay]

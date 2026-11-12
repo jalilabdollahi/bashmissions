@@ -1,0 +1,10 @@
+umask lists the permission bits to take away from new files. 077 removes everything from group and others:
+
+  umask 077
+  touch private.txt     # mode 600
+  mkdir private.d       # mode 700
+
+A umask set inside ( ... ) only affects that subshell:
+
+  ( umask 077; touch only-this-one )
+  touch normal-one      # default permissions again

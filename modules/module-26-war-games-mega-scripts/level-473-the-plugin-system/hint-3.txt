@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  for f in "$dir"/*.plugin; do header=$(head -n 15 "$f"); name=...; prio=...; reqs=...; validate; file_of[$name]=$f; ...; names+=("$name"); done
+
+  remaining=("${names[@]}"); placed=()
+  while remaining not empty; do
+    best=
+    for n in "${remaining[@]}"; do
+      ready=1; for r in ${req_of[$n]}; do [[ -n ${file_of[$r]:-} && -z ${is_placed[$r]:-} ]] && ready=0; done
+      (( ready )) || continue;  pick the lower priority, then the lower name
+    done
+    [[ -n $best ]] || break;  placed+=("$best"); is_placed[$best]=1; remove it from remaining
+  done            # what is left in remaining is cyclic
+
+  for n in "${placed[@]}": status = disabled | missing dependency: r | dependency disabled: r | dependency not usable: r | ok
+
+  run:  host_log() { echo "[$current] $*"; }
+        for n in placed: not ok -> "skipped (...)"; a requirement in failed[] -> "skipped (needs X which failed)"
+          ( source "${file_of[$n]}"; declare -F "$fn" >/dev/null || exit 78; "$fn" "$@" ) > "$work/out" 2>&1 || rc=$?
+          78 -> "no hook"; else print the output and "ok" / "FAILED (status N)"

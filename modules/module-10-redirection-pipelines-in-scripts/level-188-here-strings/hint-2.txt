@@ -1,0 +1,6 @@
+`command <<< "some text"` hands the text (plus a newline) to the command's stdin. Generic example:
+
+  wc -c <<< "$name"
+  sort -u <<< "$list"
+
+Capture the result of a command with `$(...)`. For the macOS padding of `wc -w`, put it inside `$(( ... ))`.

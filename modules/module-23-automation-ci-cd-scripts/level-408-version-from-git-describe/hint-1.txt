@@ -1,0 +1,1 @@
+git already knows the version: `git describe` names the current commit relative to the nearest tag. Run it, read the answer as data, and rebuild it into the format asked for. Two situations need care: no tag at all (describe fails) and tag names that contain hyphens themselves.

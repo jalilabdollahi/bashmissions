@@ -1,0 +1,1 @@
+The body of a request is just bytes; the server needs to be told what they mean. That is the job of a header. Two things to get right: the JSON text itself (strings in quotes, numbers without) and the header that announces "this is JSON". Validate inputs before pasting them into JSON.

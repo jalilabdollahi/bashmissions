@@ -1,0 +1,1 @@
+You need a running total that survives from one line to the next, and a place to print the result only after the last line has been read. awk has both: variables that keep their value between lines, and a special block that runs at the very end. The count of lines is already kept for you.

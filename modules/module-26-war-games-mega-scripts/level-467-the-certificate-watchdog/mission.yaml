@@ -1,22 +1,304 @@
 id: 467
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Certificate Watchdog
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Certificate Watchdog` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Certificate Watchdog
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 400
+story: |
+  The ferry booking site went dark for four hours last spring because a TLS certificate
+  expired on a Sunday and nobody's calendar reminder fired. With a hurricane warning
+  driving ten times the usual traffic to the harbour status pages, Priya refuses to
+  gamble again. She wants a watchdog that looks at every certificate, tells the truth
+  about each one, renews the ones that are close to the edge (but never hammers the
+  certificate authority), and reloads the web server exactly once if anything changed.
+objective: |
+  Write solution.sh:
+    `solution.sh [--warn DAYS] [--crit DAYS] [--renew] [--max-renewals N] CERTDIR`
+
+  Options: `--warn` (default 30) and `--crit` (default 7) are whole numbers of days with
+  crit <= warn; `--max-renewals` (default 3) is a whole number >= 1. Errors go to stderr
+  with exit status 64: `usage: solution.sh [--warn DAYS] [--crit DAYS] [--renew] [--max-renewals N] CERTDIR`,
+  `error: --warn needs a whole number of days` (same for --crit and, with
+  "a positive whole number", --max-renewals), `error: --crit must not exceed --warn`,
+  `error: CERTDIR is not a directory` (with the directory as given),
+  `error: no certificates in CERTDIR`.
+
+  Certificates are the files `CERTDIR/*.pem`, handled in name order; the name is the file
+  name without `.pem`. Inspect them with openssl only:
+    openssl x509 -noout -enddate -in FILE       prints `notAfter=Nov 20 12:00:00 2026 GMT`, fails
+                                                for a file that is not a certificate
+    openssl x509 -noout -checkend SECONDS -in FILE   exit 0 if the certificate is still valid
+                                                SECONDS from now, 1 if not (it also exits 1 for
+                                                an unreadable certificate, so ask for -enddate first)
+  Status of a certificate:
+    INVALID  `-enddate` failed
+    EXPIRED  not valid now (-checkend 0 fails)
+    CRIT     not valid in crit days (crit*86400 seconds)
+    WARN     not valid in warn days
+    OK       otherwise
+  EXPIRES is the text after `notAfter=` (`-` for INVALID).
+
+  With `--renew`, every WARN, CRIT or EXPIRED certificate (not INVALID) is renewed, in order,
+  with `certbot renew --cert-name NAME --config-dir CERTDIR` (exit 0 = renewed). At most
+  N renewal attempts are made per run, successful or not; further candidates keep their status and
+  get the note `renew skipped`. After a successful renewal inspect the file again, the new status and
+  expiry replace the old ones, and the note is `renewed`; after a failed attempt the note is
+  `renew failed`. If at least one renewal succeeded, run `systemctl reload nginx` once at the end
+  (after the table); print `reload: nginx reloaded`, or on failure
+  `reload: nginx reload FAILED` (stdout) and `warning: nginx reload failed` (stderr).
+
+  Output: a header and one row per certificate with
+    printf '%-14s %-8s %-30s %s\n' NAME STATUS EXPIRES NOTE
+  (NOTE is the note, possibly empty; the format is applied even then, so such rows end
+  with a space.)
+  Then the reload line if any, then
+    summary: O ok, W warn, C crit, E expired, I invalid
+  Exit status: 2 if any certificate is CRIT, EXPIRED or INVALID, else 1 if any is WARN, else 0.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "openssl x509 -checkend instead of date arithmetic"
+  - "an exit status that is ambiguous: check the cheap, specific thing first"
+  - "rate limiting your own automation (max renewals)"
+  - "do the side effect once: reload after the loop"
+  - "re-inspect after changing something"
+required_patterns:
+  - pattern: 'checkend'
+    message: "Use openssl x509 -checkend to ask whether a certificate expires within a number of seconds."
+test_cases:
+  - name: report only
+    args:
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+      certs/ferry.pem: |
+        notAfter=Nov 15 12:00:00 2026 GMT
+        daysleft=3
+      certs/old.pem: |
+        notAfter=Nov 10 12:00:00 2026 GMT
+        daysleft=-2
+      certs/broken.pem: |
+        this is not a certificate
+    expected_stdout: "NAME           STATUS   EXPIRES                        NOTE\nbroken         INVALID  -                              \nferry          CRIT     Nov 15 12:00:00 2026 GMT       \nharbor\
+      \         OK       Jan 30 12:00:00 2027 GMT       \nold            EXPIRED  Nov 10 12:00:00 2026 GMT       \ntides          WARN     Dec  2 12:00:00 2026 GMT       \nsummary: 1 ok, 1 warn, 1 crit, 1\
+      \ expired, 1 invalid"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: renew fixes what it can, reloads once
+    args:
+    - --renew
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+      certs/ferry.pem: |
+        notAfter=Nov 15 12:00:00 2026 GMT
+        daysleft=3
+      certs/old.pem: |
+        notAfter=Nov 10 12:00:00 2026 GMT
+        daysleft=-2
+      certs/broken.pem: |
+        this is not a certificate
+    expected_stdout: "NAME           STATUS   EXPIRES                        NOTE\nbroken         INVALID  -                              \nferry          OK       Feb 18 12:00:00 2027 GMT       renewed\n\
+      harbor         OK       Jan 30 12:00:00 2027 GMT       \nold            OK       Feb 18 12:00:00 2027 GMT       renewed\ntides          OK       Feb 18 12:00:00 2027 GMT       renewed\nreload: nginx\
+      \ reloaded\nsummary: 4 ok, 0 warn, 0 crit, 0 expired, 1 invalid"
+    expected_exit: 2
+    expected_files:
+      .calls.log: |-
+        certbot renew ferry
+        certbot renew old
+        certbot renew tides
+        systemctl reload nginx
+      certs/ferry.pem: |-
+        notAfter=Feb 18 12:00:00 2027 GMT
+        daysleft=90
+  - name: renewal limit protects the CA
+    args:
+    - --renew
+    - --max-renewals
+    - '1'
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+      certs/ferry.pem: |
+        notAfter=Nov 15 12:00:00 2026 GMT
+        daysleft=3
+      certs/old.pem: |
+        notAfter=Nov 10 12:00:00 2026 GMT
+        daysleft=-2
+      certs/broken.pem: |
+        this is not a certificate
+    expected_stdout: "NAME           STATUS   EXPIRES                        NOTE\nbroken         INVALID  -                              \nferry          OK       Feb 18 12:00:00 2027 GMT       renewed\n\
+      harbor         OK       Jan 30 12:00:00 2027 GMT       \nold            EXPIRED  Nov 10 12:00:00 2026 GMT       renew skipped\ntides          WARN     Dec  2 12:00:00 2026 GMT       renew skipped\n\
+      reload: nginx reloaded\nsummary: 2 ok, 1 warn, 0 crit, 1 expired, 1 invalid"
+    expected_exit: 2
+    expected_files:
+      .calls.log: |-
+        certbot renew ferry
+        systemctl reload nginx
+  - name: a failed renewal is reported and does not trigger a reload
+    args:
+    - --renew
+    - certs
+    env:
+      FAKE_RENEW_FAIL: ferry old tides
+    files:
+      certs/ferry.pem: |
+        notAfter=Nov 15 12:00:00 2026 GMT
+        daysleft=3
+      certs/old.pem: |
+        notAfter=Nov 10 12:00:00 2026 GMT
+        daysleft=-2
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+    expected_stdout: |-
+      NAME           STATUS   EXPIRES                        NOTE
+      ferry          CRIT     Nov 15 12:00:00 2026 GMT       renew failed
+      old            EXPIRED  Nov 10 12:00:00 2026 GMT       renew failed
+      tides          WARN     Dec  2 12:00:00 2026 GMT       renew failed
+      summary: 0 ok, 1 warn, 1 crit, 1 expired, 0 invalid
+    expected_exit: 2
+    expected_files:
+      .calls.log: |-
+        certbot renew ferry
+        certbot renew old
+        certbot renew tides
+  - name: only a warning exits 1
+    args:
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+    expected_stdout: "NAME           STATUS   EXPIRES                        NOTE\nharbor         OK       Jan 30 12:00:00 2027 GMT       \ntides          WARN     Dec  2 12:00:00 2026 GMT       \nsummary:\
+      \ 1 ok, 1 warn, 0 crit, 0 expired, 0 invalid"
+    expected_exit: 1
+  - name: custom thresholds
+    args:
+    - --warn
+    - '90'
+    - --crit
+    - '30'
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+      certs/cdn.pem: |
+        notAfter=Aug  1 12:00:00 2027 GMT
+        daysleft=262
+    expected_stdout: "NAME           STATUS   EXPIRES                        NOTE\ncdn            OK       Aug  1 12:00:00 2027 GMT       \nharbor         WARN     Jan 30 12:00:00 2027 GMT       \ntides \
+      \         CRIT     Dec  2 12:00:00 2026 GMT       \nsummary: 1 ok, 1 warn, 1 crit, 0 expired, 0 invalid"
+    expected_exit: 2
+  - name: healthy fleet needs no reload
+    args:
+    - --renew
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+    expected_stdout: "NAME           STATUS   EXPIRES                        NOTE\nharbor         OK       Jan 30 12:00:00 2027 GMT       \nsummary: 1 ok, 0 warn, 0 crit, 0 expired, 0 invalid"
+    expected_files:
+      .calls.log: null
+  - name: reload failure is reported
+    args:
+    - --renew
+    - certs
+    env:
+      FAKE_RELOAD_FAIL: '1'
+    files:
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+    expected_stdout: |-
+      NAME           STATUS   EXPIRES                        NOTE
+      tides          OK       Feb 18 12:00:00 2027 GMT       renewed
+      reload: nginx reload FAILED
+      summary: 1 ok, 0 warn, 0 crit, 0 expired, 0 invalid
+    expected_stderr: 'warning: nginx reload failed'
+  - name: not a directory
+    args:
+    - nowhere
+    expected_stdout: ''
+    expected_stderr: 'error: nowhere is not a directory'
+    expected_exit: 64
+  - name: empty directory
+    args:
+    - certs
+    files:
+      certs/README: |
+        none here
+    expected_stdout: ''
+    expected_stderr: 'error: no certificates in certs'
+    expected_exit: 64
+  - name: crit above warn
+    args:
+    - --warn
+    - '5'
+    - --crit
+    - '9'
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+      certs/ferry.pem: |
+        notAfter=Nov 15 12:00:00 2026 GMT
+        daysleft=3
+      certs/old.pem: |
+        notAfter=Nov 10 12:00:00 2026 GMT
+        daysleft=-2
+      certs/broken.pem: |
+        this is not a certificate
+    expected_stdout: ''
+    expected_stderr: 'error: --crit must not exceed --warn'
+    expected_exit: 64
+  - name: bad max renewals
+    args:
+    - --renew
+    - --max-renewals
+    - '0'
+    - certs
+    files:
+      certs/harbor.pem: |
+        notAfter=Jan 30 12:00:00 2027 GMT
+        daysleft=85
+      certs/tides.pem: |
+        notAfter=Dec  2 12:00:00 2026 GMT
+        daysleft=20
+      certs/ferry.pem: |
+        notAfter=Nov 15 12:00:00 2026 GMT
+        daysleft=3
+      certs/old.pem: |
+        notAfter=Nov 10 12:00:00 2026 GMT
+        daysleft=-2
+      certs/broken.pem: |
+        this is not a certificate
+    expected_stdout: ''
+    expected_stderr: 'error: --max-renewals needs a positive whole number'
+    expected_exit: 64

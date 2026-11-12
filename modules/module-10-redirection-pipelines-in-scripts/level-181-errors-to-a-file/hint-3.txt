@@ -1,0 +1,5 @@
+Replace the bare call with:
+
+  nightly-backup "$site" 2> backup-errors.log
+
+Try it with `BACKUP_WARNINGS=2 ./solution.sh somesite` and then cat the log file.

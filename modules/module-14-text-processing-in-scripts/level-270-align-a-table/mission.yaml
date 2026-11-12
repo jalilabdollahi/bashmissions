@@ -1,0 +1,65 @@
+id: 270
+module: 14
+module_name: text-processing-in-scripts
+module_display: Text Processing
+title: Align a Table
+difficulty: advanced
+xp: 180
+story: |
+  Mara sends the weekly CPU report to the whole team by pasting it into chat,
+  where a monospaced block is the only thing standing between "readable" and
+  "a wall of commas". The data is a CSV; what she wants is a table whose
+  columns line up, with a header on top, so that the busy servers are obvious
+  at a glance.
+objective: |
+  Write solution.sh that takes one argument, a CSV file with three fields per
+  line and no header:
+    <host>,<role>,<cpu_percent>
+  Print a header line and then one formatted line per input line, using awk's
+  printf with the format "%-12s %-10s %5s\n":
+    HOST         ROLE        CPU%
+    anchovy      web           42
+  That is: host left-aligned in 12 columns, a space, role left-aligned in
+  10, a space, and the cpu value right-aligned in 5. The header uses the same
+  format with the words HOST, ROLE and CPU%. Print the header even when the
+  file is empty. Values are never longer than their column.
+concepts:
+  - "printf %-12s pads text on the right (left-aligned)"
+  - "printf %5s pads on the left (right-aligned)"
+  - "printf does not add a newline by itself"
+required_patterns:
+  - pattern: 'printf'
+    message: "Format the columns with printf."
+  - pattern: '%-\d+s'
+    message: "Left-align text columns with a width like %-12s."
+  - pattern: '%\d+s'
+    message: "Right-align the number column with a width like %5s."
+test_cases:
+  - name: three servers
+    args: [cpu.csv]
+    files:
+      cpu.csv: |
+        anchovy,web,42
+        barracuda,db,97
+        eel,cache,5
+    expected_stdout: |-
+      HOST         ROLE        CPU%
+      anchovy      web           42
+      barracuda    db            97
+      eel          cache          5
+  - name: widths at the limit
+    args: [wide.csv]
+    files:
+      wide.csv: |
+        octopus-east,load-bal,100
+        dory,db,0
+    expected_stdout: |-
+      HOST         ROLE        CPU%
+      octopus-east load-bal     100
+      dory         db             0
+  - name: header even when empty
+    args: [none.csv]
+    files:
+      none.csv: ""
+    expected_stdout: |-
+      HOST         ROLE        CPU%

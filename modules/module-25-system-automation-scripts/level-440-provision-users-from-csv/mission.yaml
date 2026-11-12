@@ -1,0 +1,97 @@
+id: 440
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Provision Users from CSV
+difficulty: expert
+xp: 300
+story: |
+  Three new hires start Monday, and HR sent their details as a spreadsheet
+  export. Last time, Theo typed the accounts by hand and one of them became
+  "Olie". Priya wants accounts created from the file itself, skipping people
+  who already exist, and rejecting names that break the naming rule instead of
+  trusting the spreadsheet.
+objective: |
+  Write solution.sh CSVFILE. The CSV has a header line and then one user per
+  line: `username,fullname,group,shell`. Existing accounts are listed in
+  `fixtures/etc/passwd` (standard passwd format, name before the first colon).
+
+  For every data line (skip the header, blank lines and a trailing carriage
+  return if present), in order:
+  - A valid username matches `^[a-z][a-z0-9_-]{2,15}$`. Otherwise print
+    `line N: invalid username 'NAME'` to stderr (N is the line number in the
+    CSV, header = line 1) and count it as failed.
+  - If the user already exists in fixtures/etc/passwd, print
+    `skipped NAME (exists)` and count it as skipped.
+  - Otherwise run `useradd -m -c "FULLNAME" -g GROUP -s SHELL NAME`. On success
+    print `created NAME`. If useradd fails, print
+    `line N: useradd failed for NAME` to stderr and count it as failed.
+  Never stop at the first problem (useradd's own error text may also show on
+  stderr between your messages; that is fine). At the end print
+    created C, skipped S, failed F
+  to stdout, and exit 1 if F is greater than 0 (else 0).
+
+  If the CSV file cannot be read, print `cannot read FILE` to stderr and exit 1.
+  With no argument print `usage: solution.sh CSVFILE` to stderr and exit 2.
+concepts:
+  - "IFS=, read -r splits CSV fields"
+  - "validate input with a regex before it reaches a system command"
+  - "idempotent provisioning: skip what already exists"
+  - "continue after a failure, report at the end"
+required_patterns:
+  - pattern: 'IFS=,'
+    message: "Split the CSV line with IFS=, read -r ... fields."
+  - pattern: '\buseradd\b'
+    message: "Create accounts with useradd."
+test_cases:
+  - name: three new hires, one already exists
+    args: [hires.csv]
+    files:
+      hires.csv: "username,fullname,group,shell\nollie,Ollie Park,staff,/bin/bash\nmara,Mara Quill,sre,/bin/bash\nnoor,Noor Haddad,support,/bin/sh\n"
+    expected_stdout: |-
+      created ollie
+      skipped mara (exists)
+      created noor
+      created 2, skipped 1, failed 0
+    expected_files:
+      .calls.log: |
+        useradd user=ollie comment=Ollie Park group=staff shell=/bin/bash home=yes
+        useradd user=noor comment=Noor Haddad group=support shell=/bin/sh home=yes
+  - name: bad names and a bad shell do not stop the run
+    args: [hires.csv]
+    files:
+      hires.csv: "username,fullname,group,shell\nBad Name!,Eve Hacker,staff,/bin/bash\n\nx,Too Short,staff,/bin/bash\nzed,Zed Frost,staff,/bin/zsh\nfinn,Finn Marsh,staff,/bin/bash\n"
+    expected_stdout: |-
+      created finn
+      created 1, skipped 0, failed 3
+    expected_stderr: "line 2: invalid username 'Bad Name!'\nline 4: invalid username 'x'\n(useradd: [^\\n]*\\n)?line 5: useradd failed for zed"
+    stderr_comparison: regex
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        useradd user=finn comment=Finn Marsh group=staff shell=/bin/bash home=yes
+  - name: windows line endings
+    args: [hires.csv]
+    files:
+      hires.csv: "username,fullname,group,shell\r\nrory,Rory Dale,staff,/bin/bash\r\n"
+    expected_stdout: |-
+      created rory
+      created 1, skipped 0, failed 0
+    expected_files:
+      .calls.log: |
+        useradd user=rory comment=Rory Dale group=staff shell=/bin/bash home=yes
+  - name: header only means nothing to do
+    args: [hires.csv]
+    files:
+      hires.csv: "username,fullname,group,shell\n"
+    expected_stdout: "created 0, skipped 0, failed 0"
+    expected_files:
+      .calls.log: null
+  - name: file does not exist
+    args: [missing.csv]
+    expected_stderr: "cannot read missing.csv"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh CSVFILE"
+    expected_exit: 2

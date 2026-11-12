@@ -1,1 +1,21 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  valid_date() { regex ^[0-9]{8}$; month 1..12; day 1..days-in-month (Feb: 29 on leap years) }
+  days_of()    { ... sets DAYS ... }
+  pretty()     { echo "${1:0:4}-${1:4:2}-${1:6:2}"; }
+
+  do_health FILE   # while read -r name url _; do curl ...; classify; printf '%-8s %s %s\n'; count h_ok/h_warn/h_down; done
+  do_backups TODAY DIR
+                   # newest[$name]=max date over valid *.bak files (none -> b_found=0)
+                   # for each name (sorted): age; status = CORRUPT | NOSUM | STALE (age > ${MAX_AGE:-7}) | ok
+                   # printf '%-10s %s age %dd %s\n' "$name" "$(pretty "$date")" "$age" "$status"
+  do_report TODAY  # header, -- services --, do_health, -- backups --, do_backups, -- verdict --
+                   # red: any DOWN / CORRUPT / STALE / no backups / unreadable services.conf
+                   # amber: any WARN or NOSUM;  else green.  Exit 0 / 1 / 3.
+
+  case $cmd in
+    version) ...  health) ...  backups) ...  report) ...
+    handover) do_report "$today" >/dev/null || true; [[ $verdict == GREEN ]] || refuse (exit 3)
+              same person? exit 1; else write oncall.txt, append handover.log, print the two lines ;;
+    *) usage ;;
+  esac

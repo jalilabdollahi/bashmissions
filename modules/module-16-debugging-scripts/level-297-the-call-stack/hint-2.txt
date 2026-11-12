@@ -1,0 +1,7 @@
+Inside a function, `FUNCNAME` is an array of function names, innermost first (index 0 is the current function), and `BASH_LINENO[i]` is the line from which `FUNCNAME[i]` was called. `${#FUNCNAME[@]}` is the length. Loop over the indexes:
+
+  for (( i = 1; i < ${#FUNCNAME[@]}; i++ )); do
+    echo "${FUNCNAME[i]} <- line ${BASH_LINENO[i]}"
+  done
+
+The very last element is always the pseudo-function `main` (the top level of the script); stop before it.

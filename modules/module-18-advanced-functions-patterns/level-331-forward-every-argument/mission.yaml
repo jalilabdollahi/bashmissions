@@ -1,0 +1,74 @@
+id: 331
+module: 18
+module_name: advanced-functions-patterns
+module_display: Function Patterns
+title: Forward Every Argument
+difficulty: advanced
+xp: 200
+story: |
+  Noor files tickets by hand with `tracker-cli new --source=cli "disk full"
+  urgent`, and always forgets the `--source` flag. Theo wrote a small `ticket`
+  function to add it, and it worked until a customer's ticket title had a space
+  in it, then until one was empty, then until one was a lone `*`. "A wrapper
+  that changes its arguments is not a wrapper," Mara says. "It is a bug with
+  good intentions."
+objective: |
+  Write solution.sh, called with any number of arguments (possibly zero,
+  possibly containing spaces, empty strings or glob characters).
+  Define a function `ticket` that runs
+    tracker-cli new --source=cli  <all the arguments of ticket, unchanged>
+  Then call `ticket` with all of solution.sh's own arguments.
+  `tracker-cli` (a stub) prints the number of arguments it received and each
+  argument in brackets, so you can see whether any were split, merged,
+  dropped or expanded.
+  Do not use `$*`, and do not leave `$@` unquoted.
+concepts:
+  - "\"$@\" expands to each argument as its own word"
+  - "\"$*\" joins, $@ and $* unquoted re-split and glob"
+  - "forwarding zero arguments, empty arguments and awkward ones"
+required_patterns:
+  - pattern: '"\$@"'
+    message: "Forward the arguments with \"$@\" (with the quotes)."
+forbidden_patterns:
+  - pattern: '\$\*'
+    message: "$* mashes the arguments together. Use \"$@\"."
+  - pattern: '(^|[^"{])\$@'
+    message: "An unquoted $@ re-splits the arguments. Write \"$@\"."
+test_cases:
+  - name: two plain words
+    args: [urgent, billing]
+    expected_stdout: |-
+      args=4
+      1=[new]
+      2=[--source=cli]
+      3=[urgent]
+      4=[billing]
+  - name: a title with spaces stays one argument
+    args: ["disk full on barracuda", urgent]
+    expected_stdout: |-
+      args=4
+      1=[new]
+      2=[--source=cli]
+      3=[disk full on barracuda]
+      4=[urgent]
+  - name: an empty argument is still an argument
+    args: ["", low]
+    expected_stdout: |-
+      args=4
+      1=[new]
+      2=[--source=cli]
+      3=[]
+      4=[low]
+  - name: a star must not become a file list
+    args: ["*", "two  spaces"]
+    expected_stdout: |-
+      args=4
+      1=[new]
+      2=[--source=cli]
+      3=[*]
+      4=[two  spaces]
+  - name: no arguments forwards nothing extra
+    expected_stdout: |-
+      args=2
+      1=[new]
+      2=[--source=cli]

@@ -1,0 +1,1 @@
+Ordinary xargs treats spaces, newlines and quote marks in its input as part of its own syntax, so a file name with a space becomes two names and an apostrophe starts a quote that never ends. There is exactly one byte that can never occur inside a file name. Make both tools use it as the separator.

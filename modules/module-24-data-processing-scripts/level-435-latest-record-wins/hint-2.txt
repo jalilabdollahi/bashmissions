@@ -1,0 +1,9 @@
+An array indexed by the normalised key can hold both the winning timestamp and the winning row:
+
+  awk -F, '{ k = tolower($1)
+             if (!(k in ts) || $2 >= ts[k]) { ts[k] = $2; row[k] = $0 } }
+           END { for (k in row) print row[k] }' file
+
+Because ISO timestamps compare correctly as text, `>=` on them is enough, and `>=` instead of `>` makes a later line win a tie. Since you print the lowercase email, rebuild the row: `k "," substr($0, length($1) + 2)`.
+
+To print the header without sorting it, read it yourself inside a group that shares one redirected file: `{ IFS= read -r header; ...; awk ... ; } < "$1"` leaves awk reading from line 2 onward. Then NR in awk is the file line number minus one. `sort -t, -k1,1` sorts by the first field only. An empty file: `read` fails and the variable stays empty.

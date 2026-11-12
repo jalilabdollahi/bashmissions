@@ -1,0 +1,83 @@
+id: 278
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Commands in Arrays
+difficulty: advanced
+xp: 180
+story: |
+  Ollie wrote a little file finder for the support desk: give it a folder and some
+  name patterns and it lists the matches. It builds the find command in a string,
+  which works until Noor searches for "Q3 *", at which point find receives broken
+  fragments and the shell helpfully expands the star against whatever folder it
+  happens to be in. Mara says: never build commands in strings. Build them in
+  arrays.
+objective: |
+  solution.sh takes a directory, followed by zero or more name patterns. It
+  runs find on that directory for regular files (-type f) whose name matches
+  ANY of the patterns, and prints the paths sorted with sort. With no
+  patterns, every regular file matches.
+
+  Build the find arguments in an array, one element per word, and run the
+  command with "${array[@]}". The patterns are plain arguments and may contain
+  spaces; they must reach find unexpanded, exactly as typed.
+  Example: solution.sh logs '*.log' 'Q3 *' lists logs/a.log, logs/c.log
+  and logs/Q3 sales.txt. Without any argument print
+  "usage: solution.sh DIR [PATTERN...]" to stderr and exit 2.
+  Do not use eval and do not build the command in a plain string variable.
+concepts:
+  - "arrays hold arguments: cmd=(find ...) then \"${cmd[@]}\""
+  - "append with cmd+=( ... )"
+  - "no eval, no command strings"
+required_patterns:
+  - pattern: '\+=\('
+    message: "Append to an array with name+=( ... ) as you collect the find arguments."
+  - pattern: '"\$\{[A-Za-z_]+\[@\]\}"'
+    message: "Expand the array with \"${name[@]}\" (quotes included) to keep each element a word."
+forbidden_patterns:
+  - pattern: '\beval\b'
+    message: "No eval here: an array carries the arguments safely without re-parsing them."
+test_cases:
+  - name: one pattern
+    args: [logs, "*.log"]
+    files:
+      logs/a.log: "a\n"
+      logs/c.log: "c\n"
+      logs/b.txt: "b\n"
+      "logs/Q3 sales.txt": "q3\n"
+    expected_stdout: |-
+      logs/a.log
+      logs/c.log
+  - name: pattern with a space and two patterns
+    args: [logs, "*.log", "Q3 *"]
+    files:
+      logs/a.log: "a\n"
+      logs/b.txt: "b\n"
+      "logs/Q3 sales.txt": "q3\n"
+    expected_stdout: |-
+      logs/Q3 sales.txt
+      logs/a.log
+  - name: no patterns lists everything
+    args: [logs]
+    files:
+      logs/a.log: "a\n"
+      "logs/Q3 sales.txt": "q3\n"
+      logs/deep/z.txt: "z\n"
+    expected_stdout: |-
+      logs/Q3 sales.txt
+      logs/a.log
+      logs/deep/z.txt
+  - name: the star must not be expanded by the shell
+    args: [logs, "*.txt"]
+    files:
+      logs/a.log: "a\n"
+      logs/b.txt: "b\n"
+      logs/notes.txt: "n\n"
+      zzz.txt: "this is in the current directory, not in logs\n"
+      yyy.txt: "same here\n"
+    expected_stdout: |-
+      logs/b.txt
+      logs/notes.txt
+  - name: missing directory argument
+    expected_stderr: "usage: solution.sh DIR [PATTERN...]"
+    expected_exit: 2

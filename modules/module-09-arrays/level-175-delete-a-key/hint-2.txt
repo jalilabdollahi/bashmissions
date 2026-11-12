@@ -1,0 +1,1 @@
+unset 'map[$key]' deletes one key and its value; write it in single quotes so the shell leaves the brackets alone. Before removing, ask [[ -v map[$key] ]]: if the key exists, remove it and add one to your counter; if not, do nothing. To print the survivors in order, sort the keys: printf '%s\n' "${!map[@]}" | sort, read back with while read.

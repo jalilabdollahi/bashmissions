@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Pretend orchestrator.
+#   deployctl apply NAME VERSION REPLICAS PORT
+#   deployctl remove NAME
+# FAKE_APPLY_FAIL=name1,name2 makes `apply` of those apps exit 4.
+# Calls are recorded in .calls.log.
+case ${1:-} in
+  apply)
+    [[ $# -eq 5 ]] || { echo "deployctl: apply needs NAME VERSION REPLICAS PORT" >&2; exit 2; }
+    echo "deployctl apply $2 $3 $4 $5" >> .calls.log
+    [[ ",${FAKE_APPLY_FAIL:-}," == *",$2,"* ]] && exit 4
+    exit 0 ;;
+  remove)
+    [[ $# -eq 2 ]] || { echo "deployctl: remove needs NAME" >&2; exit 2; }
+    echo "deployctl remove $2" >> .calls.log ;;
+  *)
+    echo "deployctl: unknown command '${1:-}'" >&2
+    exit 2 ;;
+esac

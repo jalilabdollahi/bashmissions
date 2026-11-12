@@ -1,0 +1,109 @@
+id: 413
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Roll Back on Failure
+difficulty: expert
+xp: 380
+story: |
+  Lanternfish servers keep every release in its own folder, and a symlink
+  called `current` says which one is live. On Tuesday Theo switched `current`
+  to a release that crashed on start, then spent six minutes remembering what
+  it had pointed at before. A deploy script should remember that for him: if
+  the new release fails its smoke test, put the old one back before anyone
+  notices.
+objective: |
+  Write solution.sh, called as `solution.sh VERSION`, run inside the server's
+  deploy directory. Releases are the directories `releases/<name>`; `current`
+  is a symlink such as `releases/v1`. (It may not exist on a first deploy.)
+  1. If `releases/VERSION` is not a directory print `no such release: VERSION`
+     to stderr and exit 2. Nothing is changed.
+  2. Remember where `current` pointed before (use `readlink current`; the
+     target text is e.g. `releases/v1`).
+  3. If `current` already points at `releases/VERSION`, print
+     `already on VERSION` and exit 0 without running anything else.
+  4. Point `current` at `releases/VERSION` (a symlink with the relative
+     target `releases/VERSION`; use `ln -sfn`).
+  5. Run `smoke-test`. If it passes, print `deployed VERSION`, then
+     `current -> releases/VERSION`, and exit 0.
+  6. If the smoke test fails: print `smoke test failed for VERSION` to stderr.
+       - With a previous target, point `current` back at exactly that text,
+         print `rolled back to <previous target without the releases/ part>`
+         and `current -> <previous target>`, and exit 1.
+       - With no previous target, remove `current`, print
+         `no previous release to roll back to` to stderr, and exit 1.
+concepts:
+  - "symlink switch: ln -sfn TARGET LINK, readlink LINK"
+  - "remember the old state before changing it, restore on failure"
+  - "failure handling around a verification step"
+required_patterns:
+  - pattern: 'ln\s+-[a-z]*s[a-z]*n|ln\s+-[a-z]*n[a-z]*s'
+    message: "Switch the link with `ln -sfn TARGET current` (-n so an existing directory link is replaced, not entered)."
+  - pattern: '\breadlink\b'
+    message: "Read the old target with readlink before you replace the link."
+test_cases:
+  - name: new release passes
+    args: [v2]
+    files:
+      releases/v1/.healthy: "ok\n"
+      releases/v2/.healthy: "ok\n"
+      current: {symlink: releases/v1}
+    expected_stdout: |-
+      deployed v2
+      current -> releases/v2
+    expected_files:
+      .calls.log: "smoke-test"
+      current/.healthy: true
+      releases/v1/.healthy: true
+  - name: new release fails and the old one comes back
+    args: [v3]
+    files:
+      releases/v2/.healthy: "ok\n"
+      releases/v3/app.bin: "crashes\n"
+      current: {symlink: releases/v2}
+    expected_stdout: |-
+      rolled back to v2
+      current -> releases/v2
+    expected_stderr: "smoke test failed for v3"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      current/.healthy: true
+      releases/v3/app.bin: true
+  - name: first deploy ever, and it fails
+    args: [v1]
+    files:
+      releases/v1/app.bin: "crashes\n"
+    expected_stderr: "no previous release to roll back to"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      current: null
+      releases/v1/app.bin: true
+  - name: first deploy ever, passes
+    args: [v1]
+    files:
+      releases/v1/.healthy: "ok\n"
+    expected_stdout: |-
+      deployed v1
+      current -> releases/v1
+    expected_files:
+      current/.healthy: true
+  - name: already on that release
+    args: [v2]
+    files:
+      releases/v2/.healthy: "ok\n"
+      current: {symlink: releases/v2}
+    expected_stdout: "already on v2"
+    expected_files:
+      .calls.log: null
+  - name: unknown release leaves things alone
+    args: [v9]
+    files:
+      releases/v1/.healthy: "ok\n"
+      current: {symlink: releases/v1}
+    expected_stderr: "no such release: v9"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+      current/.healthy: true

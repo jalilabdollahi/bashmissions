@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Fake reindex for BashMissions. Silent; runs for $REINDEX_SECONDS (default 3).
+# It lets go of stdout/stderr so a script that leaves it running does not
+# keep the caller's pipes open.
+exec >/dev/null 2>&1
+sleep "${REINDEX_SECONDS:-3}"

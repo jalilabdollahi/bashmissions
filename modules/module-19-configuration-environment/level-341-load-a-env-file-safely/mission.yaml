@@ -1,0 +1,113 @@
+id: 341
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Load a .env File Safely
+difficulty: advanced
+xp: 220
+story: |
+  Theo's new storefront reads its settings from a `.env` file, and his deploy
+  script loads it with `source .env`. Priya spotted it during the review and
+  went very quiet. "That file is edited by customers through the control panel,"
+  she says. "Anything they type after the equals sign runs on our server with
+  our permissions. Read it as data. Never run it."
+objective: |
+  Write solution.sh, called as `solution.sh ENV_FILE`. Read the file line by
+  line and export each setting into the environment, then print three lines:
+    name=<value of SITE_NAME>
+    port=<value of SITE_PORT>
+    motd=<value of SITE_MOTD>
+  A variable that was never set prints `(unset)` as its value.
+  Parsing rules:
+    - blank lines and lines whose first non-blank character is `#` are ignored
+    - a setting is `KEY=VALUE`; KEY is letters, digits and underscores and does
+      not start with a digit; blanks around KEY, around `=` and at the end of
+      the value are dropped
+    - the value is everything after the first `=` (it may contain more `=`)
+    - if the value is wrapped in a matching pair of "double" or 'single'
+      quotes, remove that pair
+    - nothing in the file is ever expanded or executed: `$(...)`, backticks and
+      `$VAR` stay literal text
+    - any other line is skipped with `skipped line N` on stderr (N counts from 1)
+    - if two lines set the same key, the last one wins; a setting in the file
+      replaces a variable already in the environment
+  If ENV_FILE cannot be read, print `cannot read ENV_FILE` to stderr and exit 1.
+  Do not use `source`, `.` or `eval`.
+concepts:
+  - "parse a config file as data, never execute it"
+  - "regex capture groups with BASH_REMATCH"
+  - "export \"$key=$value\" stores text without evaluating it"
+forbidden_patterns:
+  - pattern: '(?m)(^\s*|[;&|(]\s*)(source|eval|\.)\s+\S'
+    message: "Do not source, dot or eval the file: read it line by line and export the parsed values."
+test_cases:
+  - name: a tidy file
+    args: [site.env]
+    files:
+      site.env: |
+        # Harbour Bakery storefront
+        SITE_NAME=Harbour Bakery
+        SITE_PORT=8080
+
+        SITE_MOTD=Fresh bread at 6am
+    expected_stdout: |-
+      name=Harbour Bakery
+      port=8080
+      motd=Fresh bread at 6am
+  - name: quotes, blanks and equals signs in values
+    args: [site.env]
+    files:
+      site.env: |
+        SITE_NAME = "Tidewater Books"
+          SITE_PORT=  9090   
+        # SITE_PORT=1
+        SITE_MOTD='Open: Mon=Fri, 9=5'
+    expected_stdout: |-
+      name=Tidewater Books
+      port=9090
+      motd=Open: Mon=Fri, 9=5
+  - name: a customer tries to run code
+    args: [site.env]
+    files:
+      site.env: |
+        SITE_NAME=Gull & Anchor
+        SITE_PORT=$(touch pwned)
+        SITE_MOTD=`touch pwned`
+        X=$(touch pwned)
+        this line is not a setting
+        9LIVES=cat
+    expected_stdout: |-
+      name=Gull & Anchor
+      port=$(touch pwned)
+      motd=`touch pwned`
+    expected_stderr: |-
+      skipped line 5
+      skipped line 6
+    expected_files:
+      pwned: null
+  - name: unset keys, inherited values, last one wins
+    args: [site.env]
+    env:
+      SITE_MOTD: from the environment
+    files:
+      site.env: |
+        SITE_NAME=First
+        SITE_NAME="Second"
+    expected_stdout: |-
+      name=Second
+      port=(unset)
+      motd=from the environment
+  - name: the file replaces an existing variable
+    args: [site.env]
+    env:
+      SITE_PORT: "1111"
+    files:
+      site.env: "SITE_PORT=2222"
+    expected_stdout: |-
+      name=(unset)
+      port=2222
+      motd=(unset)
+  - name: unreadable file
+    args: [missing.env]
+    expected_stderr: "cannot read missing.env"
+    expected_exit: 1

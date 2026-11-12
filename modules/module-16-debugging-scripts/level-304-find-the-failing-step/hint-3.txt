@@ -1,0 +1,13 @@
+  if try-steps "$n" > /dev/null 2>&1; then
+    echo "all $n steps pass"; exit 0
+  fi
+  lo=1; hi=$n
+  while (( lo < hi )); do
+    mid=$(( (lo + hi) / 2 ))
+    if try-steps "$mid" > /dev/null 2>&1; then
+      lo=...      # passes: culprit is after mid
+    else
+      hi=...      # fails: culprit is at mid or before
+    fi
+  done
+  echo "first failing step: $lo ${steps[...]}"     # array index = position - 1

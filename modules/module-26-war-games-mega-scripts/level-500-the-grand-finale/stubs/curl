@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Pretend curl for the lantern health checks. Understands
+#   curl -s -o FILE -w '%{http_code}' URL
+# The status of each host comes from net.txt (lines: HOST CODE). A host that is
+# not listed does not resolve: prints 000 and exits 6, like the real curl.
+silent=0 out= fmt= url=
+while (( $# > 0 )); do
+  case $1 in
+    -s) silent=1 ;;
+    -o) out=${2:-}; shift ;;
+    -w) fmt=${2:-}; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2; exit 2 ;;
+    *)  url=$1 ;;
+  esac
+  shift
+done
+if [[ -z $url ]]; then
+  echo "curl: no URL specified" >&2
+  exit 2
+fi
+host=${url#*://}
+host=${host%%/*}
+host=${host%%:*}
+code=000
+if [[ -r net.txt ]]; then
+  while read -r h c; do
+    [[ $h == "$host" ]] && code=$c
+  done < net.txt
+fi
+[[ $fmt == '%{http_code}' ]] && printf '%s' "$code"
+[[ $code == 000 ]] && exit 6
+exit 0

@@ -1,0 +1,6 @@
+Put `&` at the end of a command line to run it in the background. Right afterwards, `$!` holds the process ID (PID) of that job:
+
+  sleep 5 &
+  echo "sleeper is process $!"
+
+`$!` always refers to the most recent background job, so read it before starting the next one. `echo "$!" >> file` adds a line to a file.

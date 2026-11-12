@@ -1,0 +1,10 @@
+printf pads with widths: %-8s pads on the right (left-aligned), %6s pads on the left (right-aligned). The width can come from a variable with a star:
+
+  w=12
+  printf '%-*s|%5s|\n' "$w" "name" "n"
+  printf -v bar '%*s' 20 ''     # 20 spaces into $bar
+  echo "${bar// /=}"            # ====================
+  read -r -a parts <<< "a b c"  # parts is an array; ${#parts[@]} is its length
+  ${#word}                      # length of a string
+
+Collect rows in arrays (hosts+=("$name")) during the first pass.

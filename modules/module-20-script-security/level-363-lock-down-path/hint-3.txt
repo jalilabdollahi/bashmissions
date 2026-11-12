@@ -1,0 +1,6 @@
+set -euo pipefail
+PATH=/usr/bin:/bin
+...usage check...
+entries=$(ls -1 "$dir" | wc -l | tr -d ' ')
+printf 'entries: %s\n' "$entries"
+cat "$dir/motd.txt"

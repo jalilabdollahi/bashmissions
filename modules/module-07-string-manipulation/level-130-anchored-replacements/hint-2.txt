@@ -1,0 +1,7 @@
+Put a hash or a percent sign right after the first slash of the replace expansion:
+
+  f="draft-notes-draft"
+  echo "${f/#draft/final}"     # final-notes-draft  (only at the start)
+  echo "${f/%draft/final}"     # draft-notes-final  (only at the end)
+
+Slashes inside the pattern or the replacement must be escaped with a backslash, or put the strings in variables first and use those.

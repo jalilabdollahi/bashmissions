@@ -1,0 +1,1 @@
+Think of it as a scorecard. Each control is a tiny yes/no question about one host, so write each as its own function that succeeds or fails, then let one loop ask every question of every host. Printing, scoring and the exit status all come from the same list of answers.

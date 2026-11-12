@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+This is five small detectors feeding one report. Give each finding a rank number (1 critical, 2 high, 3 medium) when you record it, and the final report is just "sort, then strip the rank". Three detectors are `find` with permission tests, one reads a config file the way the real daemon does, one greps config files for credentials. Keep the detectors independent: each one appends to the same findings list, and the counting and the exit status happen once at the end.

@@ -1,1 +1,0 @@
-This level simulates the waits instead of sleeping.

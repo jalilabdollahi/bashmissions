@@ -1,0 +1,1 @@
+Every extra bit in an address doubles how many addresses you can write: one bit gives 2, two bits give 4, three give 8. So the count is a number multiplied by itself as many times as there are host bits. Bash has an operator for repeated multiplication.

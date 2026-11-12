@@ -1,0 +1,10 @@
+  find "$folder" -type f -size +"${bytes}"c | sort | while IFS= read -r path; do
+    echo "big: $path"
+  done
+  find "$folder" -type f -size 0 | sort | while IFS= read -r path; do
+    echo "empty: $path"
+  done
+  dirs=$(( $(find "$folder" -type d | wc -l) - 1 ))
+  echo "folders: $dirs"
+
+The check of the two arguments (a number for BYTES, matched with =~ ^[0-9]+$) comes first.

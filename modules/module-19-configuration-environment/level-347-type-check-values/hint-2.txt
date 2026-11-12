@@ -1,0 +1,10 @@
+Integers: a regex proves it is only digits, and `10#` forces decimal in arithmetic:
+
+  if [[ $n =~ ^[0-9]+$ ]] && (( 10#$n >= 1 && 10#$n <= 9 )); then n=$(( 10#$n )); fi
+
+Without `10#`, `08` is an invalid octal number. Words: lowercase with `${v,,}` and let `case` match a list:
+
+  case ${v,,} in
+    yes|on) ... ;;
+    *) ... ;;
+  esac

@@ -1,0 +1,12 @@
+  abort() { echo "ABORT: ${hosts[$1]} $2; $(( ${#hosts[@]} - $1 - 1 )) hosts left untouched" >&2; exit 1; }
+  for i in "${!hosts[@]}"; do
+    host=${hosts[i]}; echo "restarting $host"
+    ssh -n -o BatchMode=yes "$host" systemctl restart "$service" || abort "$i" "restart failed"
+    healthy=0
+    for check in 1 2 3; do
+      state=$(ssh -n -o BatchMode=yes "$host" systemctl is-active "$service" 2>/dev/null) || true
+      ...if active: print "healthy after $check check(s)", healthy=1, break...
+    done
+    (( healthy )) || abort "$i" "did not recover (last state: $state)"
+  done
+Validate the service name with a regex first and print the final line when the loop ends.

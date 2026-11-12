@@ -1,0 +1,7 @@
+  file=$1
+  [[ -f $file && -r $file ]] || { echo "cannot read $file" >&2; exit 1; }
+  token=$(<"$file")
+  echo "length=${#token}"
+  echo "masked=${token:0:4}****"
+
+Add the usage check (exactly one argument, exit 2) in front.

@@ -1,0 +1,87 @@
+id: 366
+module: 20
+module_name: script-security
+module_display: Security
+title: Create Exclusively
+difficulty: expert
+xp: 210
+story: |
+  The on-call desk has a job board: whoever grabs `claims/JOB.owner` first owns
+  the job. Theo's script checks that the file does not exist and then writes it.
+  Last night two engineers ran it in the same second, both saw "free", and both
+  worked on the same incident. Priya adds a worse twist: an attacker pre-created
+  claim files as symlinks. "Checking and then acting is two steps," she says.
+  "Make it one."
+objective: |
+  Write solution.sh that claims a job. Arguments: JOB and OWNER. The folder
+  `claims` exists.
+
+  1. Fewer than two arguments: `usage: solution.sh JOB OWNER` to stderr,
+     exit 2.
+  2. Try to create `claims/JOB.owner` containing OWNER (one line) in a single
+     step that fails when the path already exists, whatever it is (a file, a
+     symlink to a file, or a dangling symlink). On success print
+     `claimed: JOB`.
+  3. If creation fails, print `claim failed: JOB is already taken` to stderr
+     and exit 1. Leave the existing path exactly as it was.
+
+  Use noclobber (`set -o noclobber` or `set -C`) so the shell itself refuses to
+  overwrite. Do not test with `[[ -e ... ]]`, `[[ -f ... ]]` or `[[ -L ... ]]`
+  before writing: that check-then-write gap is the bug being fixed.
+concepts:
+  - "set -o noclobber: > fails on an existing path"
+  - "check-then-create is a race (TOCTOU); create-or-fail is atomic"
+  - "a failed redirection is an ordinary failing command"
+required_patterns:
+  - pattern: 'set\s+(-[a-zA-Z]*C|-o\s+noclobber)'
+    message: "Turn on noclobber: set -o noclobber (or set -C)."
+forbidden_patterns:
+  - pattern: '\[\[?\s+!?\s*-[efLdrw]\s'
+    message: "Do not test the path first; let the noclobber redirection be the test."
+  - pattern: '>\|'
+    message: ">| overrides noclobber, which defeats the point."
+test_cases:
+  - name: free job is claimed
+    args: [4821, mara]
+    files:
+      "claims/": ""
+    expected_stdout: "claimed: 4821"
+    expected_files:
+      claims/4821.owner: "mara"
+  - name: already taken job keeps its owner
+    args: [17, theo]
+    files:
+      claims/17.owner: "ollie\n"
+    expected_stderr: "claim failed: 17 is already taken"
+    expected_exit: 1
+    expected_files:
+      claims/17.owner: "ollie"
+  - name: a pre-planted symlink to a real file is not followed
+    args: [18, theo]
+    files:
+      secret.txt: "do not overwrite"
+      claims/18.owner: {symlink: "../secret.txt"}
+    expected_stderr: "claim failed: 18 is already taken"
+    expected_exit: 1
+    expected_files:
+      secret.txt: "do not overwrite"
+  - name: a dangling symlink does not let the attacker create files
+    args: [19, theo]
+    files:
+      claims/19.owner: {symlink: "../outside.txt"}
+    expected_stderr: "claim failed: 19 is already taken"
+    expected_exit: 1
+    expected_files:
+      outside.txt: null
+  - name: owner text is data
+    args: [20, '$(touch pwned)']
+    files:
+      "claims/": ""
+    expected_stdout: "claimed: 20"
+    expected_files:
+      pwned: null
+      claims/20.owner: '$(touch pwned)'
+  - name: missing owner
+    args: [21]
+    expected_stderr: "usage: solution.sh JOB OWNER"
+    expected_exit: 2

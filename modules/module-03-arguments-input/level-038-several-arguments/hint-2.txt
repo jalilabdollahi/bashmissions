@@ -1,0 +1,4 @@
+Arguments are numbered from left to right: `$1`, `$2`, `$3`. The order of the output sentence does not have to match the order of the arguments, you can use them in any order:
+
+  ./pair.sh red blue      # $1=red  $2=blue
+  echo "$2 and $1"        # prints: blue and red

@@ -1,1 +1,5 @@
-Print only the expected result lines so the checker can compare stdout exactly.
+Two rules, one per kind of noise:
+
+  sed -e '/^[[:space:]]*;/d' -e '/^[[:space:]]*$/d' "$1"
+
+First: optional blanks then a semicolon. Second: optional blanks and then the end of the line. A record with an inline comment does not start with a semicolon, so it survives.

@@ -1,0 +1,9 @@
+  scratch=$(mktemp)
+  trap 'rm -f "$scratch"' EXIT
+  before=$(( $(sed '/^[[:space:]]*$/d' "$list" | wc -l) ))
+  tr 'A-Z' 'a-z' < "$list" | sed '/^[[:space:]]*$/d' | sort -u > "$scratch"
+  after=$(( $(wc -l < "$scratch") ))
+  cat "$scratch" > "$list"
+  echo "kept $after of $before addresses"
+
+Add the usage and "cannot read" checks before the mktemp.

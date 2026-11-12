@@ -1,0 +1,11 @@
+  dest=$folder/$(basename "$src")
+  [[ ! -e $dest ]] || { echo "refusing to overwrite $dest" >&2; exit 1; }
+  cp "$src" "$dest"
+  if ! cmp -s "$src" "$dest"; then
+    rm -f "$dest"
+    echo "copy of $src is corrupt, removed $dest" >&2
+    exit 3
+  fi
+  echo "copied $src -> $dest"
+
+Write the first two checks (readable source, existing folder) the same way as the third.

@@ -1,0 +1,6 @@
+Build each message out of the facts you already have in variables: the file name, the line number counter, the offending text. Use two `echo` lines per error, sending each to stderr with `>&2`:
+
+  echo "error: $file:$n: something is wrong with \"$text\"" >&2
+  echo "  fix: do this instead" >&2
+
+Escape inner double quotes with a backslash, or put the text in single-quoted pieces.

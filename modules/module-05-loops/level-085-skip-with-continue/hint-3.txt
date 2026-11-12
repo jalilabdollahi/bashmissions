@@ -1,0 +1,7 @@
+for code in "$@"; do
+  if [[ $code == TEST-* ]]; then
+    continue
+  fi
+  echo "billing $code"
+done
+Keep TEST-* unquoted on the right side of ==, otherwise the star is taken literally.

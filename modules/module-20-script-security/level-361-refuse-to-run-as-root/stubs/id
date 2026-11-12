@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Practice stand-in for id. Only "id -u" is supported; the answer comes from
+# FAKE_UID so a test can pretend to be root (0) or a normal user.
+if [[ ${1:-} == "-u" && $# -eq 1 ]]; then
+  printf '%s\n' "${FAKE_UID:-1000}"
+  exit 0
+fi
+echo "id (practice stub): only 'id -u' is supported" >&2
+exit 2

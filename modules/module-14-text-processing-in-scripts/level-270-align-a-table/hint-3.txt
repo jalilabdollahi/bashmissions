@@ -1,0 +1,8 @@
+Store the format once and use it twice:
+
+  awk -F, '
+    BEGIN { fmt = "%-12s %-10s %5s\n"; printf fmt, "HOST", "ROLE", "CPU%" }
+    { printf fmt, $1, $2, $3 }
+  ' "$1"
+
+Because the header goes in BEGIN, it prints even when the file has no lines.

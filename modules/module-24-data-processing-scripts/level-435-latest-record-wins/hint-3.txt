@@ -1,0 +1,22 @@
+  {
+    header=
+    if ! IFS= read -r header && [[ -z $header ]]; then exit 0; fi
+    printf '%s\n' "${header%$'\r'}"
+
+    awk -F, -v offset=1 '
+      { sub(/\r$/, "") }
+      $0 == "" { next }
+      # empty email or $2 not shaped like YYYY-MM-DDTHH:MM:SSZ:
+      #   printf "skipped line %d\n", NR + offset > "/dev/stderr"; next
+      {
+        key = tolower($1)
+        if (!(key in stamp) || $2 >= stamp[key]) {
+          stamp[key] = $2
+          row[key] = key "," substr($0, length($1) + 2)
+        }
+      }
+      END { for (k in row) print row[k] }
+    ' | sort -t, -k1,1
+  } < "$1"
+
+The awk call has no file argument on purpose: it reads the rest of the redirected input.

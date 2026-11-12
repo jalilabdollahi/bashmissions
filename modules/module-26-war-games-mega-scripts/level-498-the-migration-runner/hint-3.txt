@@ -1,1 +1,15 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A file_name file_sum have_down led_sum led_name
+  for f in "$dir"/*.up "$dir"/*.down; do ... regex ... down -> have_down[$id]=...; up -> duplicate check, file_name[$id], file_sum[$id] done
+  ledger: while read -r id sum name; do led_sum[$id]=$sum led_name[$id]=$name led_ids+=("$id"); done < "$ledger"
+
+  state() { in ledger? { no file -> MISSING; sums equal -> applied; else MODIFIED } : pending; }
+  status: for each id in all_ids: printf '%s %-14s %s\n' "$id" "$name" "$(state "$id")"
+
+  up:   parse flags and TARGET; unknown target -> exit 2
+        for id in ledger ids (sorted): MODIFIED -> "refusing ... modified" exit 3; MISSING -> exit 3
+        for id in all_ids with state pending: older than newest (unless --allow-out-of-order) -> exit 3; up to TARGET -> pending+=("$id")
+        none? "nothing to do".  dry run? list.  else for id in pending: run, failure -> stderr + exit 1; success -> ledger append, "applied ..."
+  down: for id in ledger ids newest first, up to N: need ${have_down[$id]}; run; rewrite ledger without id; "reverted ..."
+  verify: MISSING / MODIFIED lines, exit 3, or OK line

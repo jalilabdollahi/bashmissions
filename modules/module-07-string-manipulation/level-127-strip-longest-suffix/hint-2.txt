@@ -1,1 +1,0 @@
-For dotted names, this keeps only the part before the first dot.

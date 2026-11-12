@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake probe-host for BashMissions: chatty on both streams.
+# Hosts whose name starts with "down-" fail with exit status 1; otherwise 0.
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "usage: probe-host HOST" >&2
+  exit 2
+fi
+echo "PROBE $1: sending 3 packets"
+echo "PROBE $1: round trip min/avg/max = 0.4/0.6/0.9 ms"
+echo "probe-host: note: ICMP rate limiting is active" >&2
+if [[ $1 == down-* ]]; then
+  echo "probe-host: $1: no route to host" >&2
+  exit 1
+fi
+exit 0

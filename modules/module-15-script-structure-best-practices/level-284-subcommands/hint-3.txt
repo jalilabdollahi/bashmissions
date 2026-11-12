@@ -1,0 +1,9 @@
+cmd_add()    { [ "$#" -ge 1 ] || usage; local text="$*"; printf '%s\n' "$text" >> "$NOTES"; echo "added: $text"; }
+
+cmd_remove() {
+  # n=$1; count lines; reject if not ^[1-9][0-9]*$ or n > count (stderr, exit 1)
+  # echo "removed: $(sed -n "${n}p" "$NOTES")"
+  # sed "${n}d" "$NOTES" > "$NOTES.tmp" && mv ...
+}
+
+main: check "$#", shift, then case add) list) remove) *).

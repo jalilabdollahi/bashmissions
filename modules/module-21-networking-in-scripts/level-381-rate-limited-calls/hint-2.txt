@@ -1,0 +1,6 @@
+Keep a counter and use the remainder operator to find "every second one":
+
+  n=$((n + 1))
+  if (( n % 2 == 0 )); then sleep 1; fi
+
+`$#` is the number of arguments you started with, so `remaining=$#` and subtracting one per round tells you how many are still waiting. A request that fails still used up part of the quota: handle it with `if body=$(curl ...); then ...; else ...; fi` so it is counted either way.

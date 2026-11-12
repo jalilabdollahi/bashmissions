@@ -1,21 +1,61 @@
 id: 264
 module: 14
 module_name: text-processing-in-scripts
-module_display: Text Processing in Scripts
+module_display: Text Processing
 title: sed Delete Lines
-difficulty: intermediate
-xp: 155
-objective: Use sed to delete DEBUG lines.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    INFO start
-    WARN disk
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+difficulty: advanced
+xp: 160
+story: |
+  Priya is migrating the DNS zone for harbourbakery.example to the new
+  provider, whose importer panics at the sight of a comment. The old zone file
+  is full of explanations, indented notes and blank lines that people added
+  over the years. The records themselves are fine; the decoration has to go.
+objective: |
+  Write solution.sh that takes one argument, a DNS zone file, and prints the
+  file without:
+    - comment lines: lines whose first non-blank character is `;`
+    - blank lines, including lines that contain only spaces or tabs
+  All other lines are printed exactly as they are. A comment that follows a
+  record on the same line (`www IN A 192.0.2.10 ; web`) is part of a record
+  line and must be left alone. Use sed with the d command and an address
+  pattern: sed '/pattern/d'.
 concepts:
-- '`sed ''/pattern/d''`'
-scaffold: true
+  - "sed '/pattern/d' deletes the lines that match"
+  - "several -e commands in one sed"
+  - "[[:space:]]* for optional leading blanks"
+required_patterns:
+  - pattern: '\bsed\b'
+    message: "Use sed to drop the lines."
+  - pattern: '/d'
+    message: "Delete matching lines with the d command: sed '/pattern/d'."
+test_cases:
+  - name: comments and blank lines
+    args: [bakery.zone]
+    files:
+      bakery.zone: "; zone for harbourbakery.example\n$TTL 3600\n\n@ IN SOA ns1 hostmaster 1 7200 3600 1209600 3600\n; name servers\n@ IN NS ns1\n\nwww IN A 192.0.2.10 ; keep this note\n"
+    expected_stdout: |-
+      $TTL 3600
+      @ IN SOA ns1 hostmaster 1 7200 3600 1209600 3600
+      @ IN NS ns1
+      www IN A 192.0.2.10 ; keep this note
+  - name: indented comments and whitespace-only lines
+    args: [indented.zone]
+    files:
+      indented.zone: "  ; indented comment\nmail IN MX 10 mx1\n   \n\t\n\t; tab comment\nftp IN CNAME www\n"
+    expected_stdout: |-
+      mail IN MX 10 mx1
+      ftp IN CNAME www
+  - name: nothing to delete
+    args: [clean.zone]
+    files:
+      clean.zone: |
+        a IN A 192.0.2.1
+        b IN A 192.0.2.2
+    expected_stdout: |-
+      a IN A 192.0.2.1
+      b IN A 192.0.2.2
+  - name: only noise
+    args: [noise.zone]
+    files:
+      noise.zone: "; just a comment\n\n;another\n"
+    expected_stdout: ""

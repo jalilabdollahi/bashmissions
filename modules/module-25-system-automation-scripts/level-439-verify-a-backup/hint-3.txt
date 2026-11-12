@@ -1,0 +1,8 @@
+  listed=" "
+  while read -r crc size name; do
+    listed+="$name "
+    [[ -f $dir/$name ]] || { echo "MISSING $name"; ...; continue; }
+    if [[ $(cksum < "$dir/$name") == "$crc $size" ]]; then ...OK... else ...FAILED...; fi
+  done < "$manifest"
+  for path in "$dir"/*; do  # skip MANIFEST, skip names found in $listed  -> UNLISTED
+Finish with the summary line and make the last command's status say whether it all passed: (( failed == 0 && missing == 0 )).

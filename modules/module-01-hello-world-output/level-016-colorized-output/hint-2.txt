@@ -1,1 +1,0 @@
-`printf` interprets `\033` as the escape byte automatically. With `echo`, you'd need `echo -e` or the bytes won't be expanded.

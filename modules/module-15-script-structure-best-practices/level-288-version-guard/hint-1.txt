@@ -1,0 +1,1 @@
+Bash tells you its own version in two forms: a human sentence and an array of separate numbers. Sentences are bad to compare ("10" sorts before "9" as text). Split the requirement into major and minor numbers, and compare major first, and minor only when the majors are equal.

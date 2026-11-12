@@ -1,0 +1,5 @@
+Go from oldest to newest: `rm -f` the last one, then `mv` the second-to-last onto the last place, and so on. A small loop with arithmetic in the name keeps it short, and `[[ -e path ]]` guards a step that may have nothing to move:
+
+  for n in 2 1; do
+    [[ -e "$f.$n" ]] && mv "$f.$n" "$f.$((n + 1))"
+  done

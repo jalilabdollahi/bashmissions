@@ -1,0 +1,1 @@
+You cannot write $LIMIT_bakery in the script, because you do not know the customer in advance. Instead, build the *name* of the variable as text first, then ask Bash to read the variable that has that name.

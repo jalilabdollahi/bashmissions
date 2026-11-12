@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# useradd stand-in: supports -m, -c COMMENT, -g GROUP, -s SHELL and a login name.
+# Every successful call is logged to .calls.log; nothing is really created.
+# Reads fixtures/etc/passwd (existing users) and fixtures/etc/shells (valid shells).
+home=no comment= group= shell= user=
+while (( $# )); do
+  case $1 in
+    -m) home=yes ;;
+    -c) comment=$2; shift ;;
+    -g) group=$2; shift ;;
+    -s) shell=$2; shift ;;
+    -*) echo "useradd: invalid option -- '${1#-}'" >&2; exit 2 ;;
+    *)  user=$1 ;;
+  esac
+  shift
+done
+[[ -n $user ]] || { echo "useradd: no login name given" >&2; exit 2; }
+if grep -q "^$user:" fixtures/etc/passwd; then
+  echo "useradd: user '$user' already exists" >&2; exit 9
+fi
+if [[ -n $shell ]] && ! grep -qx -- "$shell" fixtures/etc/shells; then
+  echo "useradd: invalid shell '$shell'" >&2; exit 3
+fi
+echo "useradd user=$user comment=$comment group=$group shell=$shell home=$home" >> .calls.log

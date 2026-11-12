@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fake ps. Only "ps -p PID -o comm=" is understood: prints the command name of
+# that process, or nothing and exit 1 if it is not running.
+# FAKE_PS lists running processes as "pid:name" pairs separated by spaces.
+if [[ ${1:-} != -p || ${3:-} != -o || ${4:-} != comm= || $# -ne 4 ]]; then
+  echo "ps: this stub only understands: ps -p PID -o comm=" >&2
+  exit 2
+fi
+for entry in ${FAKE_PS:-}; do
+  if [[ ${entry%%:*} == "$2" ]]; then
+    echo "${entry#*:}"
+    exit 0
+  fi
+done
+exit 1

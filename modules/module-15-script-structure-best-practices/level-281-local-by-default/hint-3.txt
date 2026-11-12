@@ -1,0 +1,8 @@
+format_row() {
+  local name=${1^^}
+  local count=$2
+  local pad=$(( 10 - ${#name} ))
+  printf '%s%*s %s\n' "$name" "$pad" "" "$count"
+}
+
+In main, adding `name count` to the `local` line keeps the loop variables from leaking out of main as well.

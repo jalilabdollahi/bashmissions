@@ -1,1 +1,0 @@
-You can't use `:=` on positional parameters (`$1`, `$2`, …) — only on regular variables. Copy `$1` into a named variable first.

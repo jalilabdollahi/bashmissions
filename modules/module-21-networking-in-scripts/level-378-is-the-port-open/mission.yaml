@@ -1,0 +1,65 @@
+id: 378
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Is the Port Open?
+difficulty: advanced
+xp: 220
+story: |
+  "The mail server is up," says Theo. "Then why does nothing arrive?" asks
+  Noor. A server can be alive and still have a door bolted: the service
+  listening on a port may have crashed. Mara wants a script that knocks on
+  doors, just checks whether anything answers, and reports back.
+objective: |
+  Write solution.sh. The first argument is a HOST, the rest are one or more
+  PORTs. For every port, in order, test whether a TCP connection is accepted
+  using netcat in scan mode:  `nc -z -w 2 HOST PORT`
+  (`-z` means "connect, send nothing, hang up", `-w 2` gives up after two
+  seconds so a filtered port cannot hang the script).
+
+  Print one line per port:
+    HOST:PORT open
+    HOST:PORT closed
+  nc exits 0 when the connection succeeded and non-zero otherwise. Exit with
+  status 1 if at least one port was closed, otherwise 0.
+
+  With fewer than two arguments print `usage: solution.sh HOST PORT...` to
+  stderr and exit 2.
+concepts:
+  - "nc -z tests a port without sending data"
+  - "-w sets a timeout so the check cannot hang"
+  - "the exit status of nc is the answer"
+required_patterns:
+  - pattern: '\bnc\b.*-[A-Za-z]*z'
+    message: "Use nc -z to test the port without sending data."
+  - pattern: '\bnc\b.*-w\s*[0-9]'
+    message: "Add -w 2 so an unresponsive port cannot block the script."
+test_cases:
+  - name: mail ports, one of them is closed
+    args: [mail.lanternfish.example, "25", "587", "993"]
+    expected_stdout: |-
+      mail.lanternfish.example:25 open
+      mail.lanternfish.example:587 open
+      mail.lanternfish.example:993 closed
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        nc mail.lanternfish.example 25 timeout=2
+        nc mail.lanternfish.example 587 timeout=2
+        nc mail.lanternfish.example 993 timeout=2
+  - name: everything open
+    args: [www.lanternfish.example, "80", "443"]
+    expected_stdout: |-
+      www.lanternfish.example:80 open
+      www.lanternfish.example:443 open
+  - name: a host that drops packets
+    args: [blackhole.lanternfish.example, "22"]
+    expected_stdout: "blackhole.lanternfish.example:22 closed"
+    expected_exit: 1
+  - name: database port only
+    args: [db.lanternfish.example, "5432"]
+    expected_stdout: "db.lanternfish.example:5432 open"
+  - name: no ports
+    args: [db.lanternfish.example]
+    expected_stderr: "usage: solution.sh HOST PORT..."
+    expected_exit: 2

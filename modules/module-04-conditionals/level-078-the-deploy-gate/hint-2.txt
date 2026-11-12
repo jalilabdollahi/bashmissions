@@ -1,0 +1,11 @@
+An if can sit inside the then-branch or else-branch of another if; indent each level so you can see the tree. Check the argument count with $# first. Numbers are compared with (( a < b )) and files with [[ -e name ]]. Generic example:
+
+  if [[ $door == open ]]; then
+    if [[ -e ticket.txt ]]; then
+      echo "come in"
+    else
+      echo "buy a ticket"
+    fi
+  else
+    echo "closed"
+  fi

@@ -1,0 +1,1 @@
+You need a pipe that exists as a name, so that two separate commands can open it independently: one writes, one reads. Opening such a pipe waits for the partner, so the two sides cannot both be in the foreground of one script. Which side belongs in the background?

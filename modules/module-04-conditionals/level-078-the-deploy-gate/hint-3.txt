@@ -1,0 +1,16 @@
+# after the usage check and the unknown-environment check:
+if [[ $tests != pass ]]; then
+  echo "BLOCKED: tests are not passing"
+else
+  if [[ $env_name == staging ]]; then
+    echo "DEPLOY: staging"
+  else
+    if [[ -e freeze.flag ]]; then
+      echo "BLOCKED: change freeze is active"
+    elif (( approvals < 2 )); then
+      echo "..."   # needs-approvals line, include $approvals
+    else
+      echo "DEPLOY: prod"
+    fi
+  fi
+fi

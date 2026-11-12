@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+mktemp does exactly that. Give it a template ending in X characters; they are replaced by random letters and digits, and the path is printed:
+
+  tmpfile=$(mktemp "$TMPDIR/name.XXXXXX")
+
+To delete the file however the script ends, register the cleanup once, right after creating it:
+
+  trap 'rm -f "$tmpfile"' EXIT
+
+Single quotes keep $tmpfile unexpanded until the trap fires.

@@ -1,0 +1,1 @@
+Arguments are typed after the script name. This time the text comes in through the pipe instead, which Bash can read with a built-in command that waits for a line and stores it in a variable of your choice. Look out for what happens to backslashes.

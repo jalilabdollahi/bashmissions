@@ -1,0 +1,8 @@
+wc -c < file prints a file's size in bytes (read it from stdin so no file name is printed). Some systems pad the number with spaces; arithmetic expansion cleans that up:
+
+  size=$(( $(wc -c < data.txt) ))
+  if (( size > 1000 )); then echo big; fi
+  for (( i = 5; i >= 1; i-- )); do echo "step $i"; done
+  : > file        # create an empty file / empty an existing one
+
+mv old new renames; rm -f never complains about a missing file.

@@ -1,22 +1,222 @@
 id: 457
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Deployment Pipeline
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Deployment Pipeline` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Deployment Pipeline
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 350
+story: |
+  The first named storm of the season, Hurricane Hilda, is two days out, and Theo
+  wants the new `shrimp-api` release live before the harbour loses its uplink.
+  Last year a "quick manual deploy" went out untested and took the ferry booking
+  site down for six hours. Mara's rule for storm season: nobody deploys by hand.
+  Tonight you write the pipeline that builds, tests, ships, checks, and undoes its
+  own work when the check fails.
+objective: |
+  Write solution.sh, a deployment pipeline: `solution.sh APP VERSION`.
+
+  The company tools are on PATH (they print nothing useful, only their exit
+  status matters; exit 0 means success):
+    harbor-build  APP VERSION     build the release
+    harbor-test   APP             run the test suite
+    harbor-deploy APP VERSION     put a version live
+    harbor-health APP             0 = healthy
+
+  Rules:
+  - Exactly two arguments, otherwise print `usage: solution.sh APP VERSION` to
+    stderr and exit 2. VERSION must look like `1.2.3` (three numbers with dots);
+    otherwise print `error: bad version 'X'` to stderr and exit 2.
+  - State lives in `state/`. `state/APP.version` holds the version currently live
+    (the file may not exist yet; then the previous version is `none`).
+  - Lock: if `state/APP.lock` exists, print `error: pipeline already running for APP`
+    to stderr and exit 7 without touching the lock. Otherwise create it and
+    guarantee it is removed when the script ends, however it ends (use a trap).
+  - Run the stages in order build, test, deploy, verify. After each stage print
+    `stage NAME: ok` or `stage NAME: FAILED` on stdout, and append the line
+    `APP VERSION NAME ok` (or `fail`) to `state/pipeline.log`.
+    The verify stage calls `harbor-health APP` up to 3 times; between failed
+    attempts it runs `sleep 5`. Its success line is `stage verify: ok (attempt N)`.
+  - A failed build stops everything: stderr `pipeline failed at build: nothing was deployed`,
+    exit 3. A failed test stage: same message with `test`, exit 4.
+  - If deploy or verify fails, roll back: if there is a previous version, run
+    `harbor-deploy APP PREVIOUS`, print `rolled back to PREVIOUS` on stdout, then
+    print `pipeline failed: APP VERSION was rolled back` to stderr and exit 5.
+    With no previous version print `error: no previous version to roll back to`
+    to stderr and exit 6.
+  - On success write the new version to `state/APP.version` and print
+    `deployed APP VERSION (previous: PREVIOUS)`.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "stages as functions with one failure policy"
+  - "trap EXIT for a lock file"
+  - "retry loop with a pause"
+  - "rollback to the recorded previous state"
+  - "exit codes that name the failure"
+required_patterns:
+  - pattern: '\btrap\b'
+    message: "Remove the lock with a trap so every exit path cleans up."
+test_cases:
+  - name: clean release replaces 2.3.9
+    args:
+    - shrimp-api
+    - 2.4.0
+    files:
+      state/shrimp-api.version: |
+        2.3.9
+    expected_stdout: |-
+      stage build: ok
+      stage test: ok
+      stage deploy: ok
+      stage verify: ok (attempt 1)
+      deployed shrimp-api 2.4.0 (previous: 2.3.9)
+    expected_files:
+      state/shrimp-api.version: 2.4.0
+      state/pipeline.log: |-
+        shrimp-api 2.4.0 build ok
+        shrimp-api 2.4.0 test ok
+        shrimp-api 2.4.0 deploy ok
+        shrimp-api 2.4.0 verify ok
+      .calls.log: |-
+        harbor-build shrimp-api 2.4.0
+        harbor-test shrimp-api
+        harbor-deploy shrimp-api 2.4.0
+        harbor-health shrimp-api
+      state/shrimp-api.lock: null
+  - name: build failure stops before anything ships
+    args:
+    - shrimp-api
+    - 2.4.0
+    env:
+      FAKE_FAIL: build
+    files:
+      state/shrimp-api.version: |
+        2.3.9
+    expected_stdout: 'stage build: FAILED'
+    expected_stderr: 'pipeline failed at build: nothing was deployed'
+    expected_exit: 3
+    expected_files:
+      state/shrimp-api.version: 2.3.9
+      .calls.log: harbor-build shrimp-api 2.4.0
+      state/shrimp-api.lock: null
+  - name: failing tests stop before deploy
+    args:
+    - shrimp-api
+    - 2.4.0
+    env:
+      FAKE_FAIL: test
+    files:
+      state/shrimp-api.version: |
+        2.3.9
+    expected_stdout: |-
+      stage build: ok
+      stage test: FAILED
+    expected_stderr: 'pipeline failed at test: nothing was deployed'
+    expected_exit: 4
+    expected_files:
+      .calls.log: |-
+        harbor-build shrimp-api 2.4.0
+        harbor-test shrimp-api
+      state/pipeline.log: |-
+        shrimp-api 2.4.0 build ok
+        shrimp-api 2.4.0 test fail
+  - name: flaky health check recovers on attempt 3
+    args:
+    - ferry-web
+    - 1.0.1
+    env:
+      FAKE_HEALTH_FAILS: '2'
+    files:
+      state/ferry-web.version: |
+        1.0.0
+    expected_stdout: |-
+      stage build: ok
+      stage test: ok
+      stage deploy: ok
+      stage verify: ok (attempt 3)
+      deployed ferry-web 1.0.1 (previous: 1.0.0)
+    expected_files:
+      .calls.log: |-
+        harbor-build ferry-web 1.0.1
+        harbor-test ferry-web
+        harbor-deploy ferry-web 1.0.1
+        harbor-health ferry-web
+        sleep 5
+        harbor-health ferry-web
+        sleep 5
+        harbor-health ferry-web
+      state/ferry-web.version: 1.0.1
+  - name: dead release is rolled back
+    args:
+    - shrimp-api
+    - 2.4.0
+    env:
+      FAKE_HEALTH_FAILS: '9'
+    files:
+      state/shrimp-api.version: |
+        2.3.9
+    expected_stdout: |-
+      stage build: ok
+      stage test: ok
+      stage deploy: ok
+      stage verify: FAILED
+      rolled back to 2.3.9
+    expected_stderr: 'pipeline failed: shrimp-api 2.4.0 was rolled back'
+    expected_exit: 5
+    expected_files:
+      .calls.log: |-
+        harbor-build shrimp-api 2.4.0
+        harbor-test shrimp-api
+        harbor-deploy shrimp-api 2.4.0
+        harbor-health shrimp-api
+        sleep 5
+        harbor-health shrimp-api
+        sleep 5
+        harbor-health shrimp-api
+        harbor-deploy shrimp-api 2.3.9
+      state/shrimp-api.version: 2.3.9
+      state/pipeline.log: |-
+        shrimp-api 2.4.0 build ok
+        shrimp-api 2.4.0 test ok
+        shrimp-api 2.4.0 deploy ok
+        shrimp-api 2.4.0 verify fail
+        shrimp-api 2.4.0 rollback ok
+      state/shrimp-api.lock: null
+  - name: first ever deploy cannot roll back
+    args:
+    - tide-board
+    - 0.1.0
+    env:
+      FAKE_FAIL: deploy
+    expected_stdout: |-
+      stage build: ok
+      stage test: ok
+      stage deploy: FAILED
+    expected_stderr: 'error: no previous version to roll back to'
+    expected_exit: 6
+    expected_files:
+      state/tide-board.version: null
+      state/tide-board.lock: null
+  - name: a running pipeline holds the lock
+    args:
+    - shrimp-api
+    - 2.4.0
+    files:
+      state/shrimp-api.lock: ''
+    expected_stdout: ''
+    expected_stderr: 'error: pipeline already running for shrimp-api'
+    expected_exit: 7
+    expected_files:
+      state/shrimp-api.lock: ''
+      .calls.log: null
+  - name: bad version is rejected
+    args:
+    - shrimp-api
+    - v2.4
+    expected_stdout: ''
+    expected_stderr: 'error: bad version ''v2.4'''
+    expected_exit: 2
+  - name: missing version argument
+    args:
+    - shrimp-api
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh APP VERSION'
+    expected_exit: 2

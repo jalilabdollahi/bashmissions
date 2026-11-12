@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Let the file system be the database: a job's state is simply the directory its file lives in, and moving a file between directories is how its state changes. A worker pool needs exactly one guarantee, that no job is taken by two workers, and `mkdir` gives it for free because creating a directory either succeeds or fails, atomically. Keep a worker as a small function that walks the same list of IDs as every other worker and skips whatever it cannot claim; then start several in the background and `wait`.

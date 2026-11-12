@@ -1,0 +1,2 @@
+UID   PID  PPID  C STIME TTY      TIME CMD
+root    1     0  0 Feb27 ?    00:00:02 /sbin/init

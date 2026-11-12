@@ -1,1 +1,0 @@
-Without braces, `$name_suffix` is read as the variable named `name_suffix`, which is unset.

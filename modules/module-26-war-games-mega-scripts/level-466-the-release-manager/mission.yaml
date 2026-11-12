@@ -1,22 +1,503 @@
 id: 466
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Release Manager
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The Release Manager` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Release Manager
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 400
+story: |
+  Theo has been cutting releases by hand: guess a version number, write the changelog
+  from memory, tar something up, tag it, and remember to tell the channel. During last
+  night's storm he shipped `v1.5.0` containing a breaking change, and a customer's
+  integration broke at breakfast. Mara wants versioning to stop being a matter of mood.
+  The commit messages already say what changed, so a script can decide the version,
+  write the changelog, package the artifacts, tag the release and announce it, all
+  or nothing.
+objective: |
+  Write solution.sh: `solution.sh [--dry-run] [--notify URL] APP`
+  Usage error (exit 2): `usage: solution.sh [--dry-run] [--notify URL] APP`.
+
+  Tools on PATH: `git` and `curl`. Use exactly these git commands:
+    git status --porcelain                       (any output means a dirty tree)
+    git describe --tags --abbrev=0               (latest tag; fails when there is none)
+    git log --pretty=format:%s RANGE             (one commit subject per line)
+    git tag -a vX.Y.Z -m "APP X.Y.Z"
+  Steps, in this order (any failure stops the release; exit codes below):
+  1. A dirty tree: `error: working tree is not clean` on stderr, exit 3.
+  2. Last tag: if there is one it must be `vMAJOR.MINOR.PATCH`, else
+     `error: last tag 'T' is not vMAJOR.MINOR.PATCH`, exit 3. With no tag the base is
+     v0.0.0 and RANGE is `HEAD`; otherwise RANGE is `TAG..HEAD`.
+  3. No commits in RANGE: `nothing to release since TAG` on stderr (with no tag: `nothing to release`),
+     exit 4.
+  4. Classify every subject. A conventional subject looks like `type(scope)!: text`
+     (scope and `!` optional, type lowercase letters). `!` means breaking; type `feat` is a
+     feature; `fix` a fix; every other type, and any subject that is not conventional,
+     is `other`. Breaking commits are listed only under Breaking.
+  5. Next version: any breaking commit raises MAJOR (MINOR and PATCH reset to 0), else any feature
+     raises MINOR (PATCH reset), else PATCH is raised.
+  6. `dist/` must contain at least one file, else `error: dist/ is empty - build first`, exit 3.
+  7. In `--dry-run` mode print `would release APP vNEXT (was vOLD)` and then the changelog
+     section (below) to stdout, change nothing, and exit 0. Check steps 1 to 6 first.
+  8. Write `releases/APP-NEXT.tar.gz` (`tar -czf ... -C dist .`) and
+     `releases/APP-NEXT.sums`: one line `CRC SIZE PATH` per file of dist (sorted by path, relative
+     path, the two numbers `cksum` prints for the file).
+  9. Build the new CHANGELOG.md (do not touch the real one yet): its first two lines are
+     `# Changelog` and an empty line (created if the file does not exist), then the new section,
+     an empty line, then the rest of the old file after its first two lines. The section is
+       ## vNEXT - DATE
+       (empty line)
+       ### Breaking changes | ### Features | ### Fixes | ### Other   (only non-empty ones,
+       in that order, each followed by `- ITEM` lines in commit order and an empty line)
+     DATE is `date +%Y-%m-%d`, or the value of RELEASE_DATE when that variable is set. ITEM is the
+     text after the colon, prefixed with `(scope) ` when there was a scope; `other` items from
+     non-conventional or other-type subjects are the full subject.
+  10. Create the tag. If `git tag` fails: delete the two files from step 8 and the new changelog,
+      print `error: could not create tag vNEXT` on stderr and exit 5. Otherwise move the new
+      changelog into place.
+  11. With `--notify URL`: `curl -sS --fail --max-time 5 -X POST -H 'Content-Type: application/json'
+      -d BODY URL` where BODY is {"text":"APP vNEXT released: B breaking, F features, X fixes, O other"}.
+      If it fails print `warning: notification failed` on stderr but the release stands.
+  Final stdout (real release): `released APP vNEXT (was vOLD): B breaking, F features, X fixes, O other`
+  then `artifact: releases/APP-NEXT.tar.gz`; with --notify also `notified: URL`. For a first release
+  OLD is `v0.0.0`.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "conventional commit subjects decide the semantic version"
+  - "regex capture groups with BASH_REMATCH"
+  - "build everything first, commit the irreversible step last, undo on failure"
+  - "prepending to a file without sed -i"
+  - "release notes grouped by category"
+required_patterns:
+  - pattern: 'BASH_REMATCH'
+    message: "Parse the commit subjects with =~ and BASH_REMATCH."
+  - pattern: 'git tag'
+    message: "Create the tag with git tag."
+test_cases:
+  - name: features and fixes make a minor release
+    args:
+    - --notify
+    - https://hooks.lanternfish.example/releases
+    - shrimp-api
+    env:
+      RELEASE_DATE: '2026-11-12'
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        feat(ferry): add tide table
+        fix: stop double booking
+        docs: update runbook
+        Merge branch 'storm-prep'
+        feat: webcam archive
+        chore(deps): bump libs
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: |-
+      released shrimp-api v1.5.0 (was v1.4.2): 0 breaking, 2 features, 1 fixes, 3 other
+      artifact: releases/shrimp-api-1.5.0.tar.gz
+      notified: https://hooks.lanternfish.example/releases
+    expected_files:
+      CHANGELOG.md: |-
+        # Changelog
+
+        ## v1.5.0 - 2026-11-12
+
+        ### Features
+        - (ferry) add tide table
+        - webcam archive
+
+        ### Fixes
+        - stop double booking
+
+        ### Other
+        - docs: update runbook
+        - Merge branch 'storm-prep'
+        - chore(deps): bump libs
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      releases/shrimp-api-1.5.0.sums: |-
+        15319675 10 conf/defaults.ini
+        1373499990 10 shrimp.jar
+      git-tags.txt: |-
+        v1.3.0
+        v1.4.2
+        v1.5.0
+      .notify.log: '{"text":"shrimp-api v1.5.0 released: 0 breaking, 2 features, 1 fixes, 3 other"}'
+      .calls.log: |-
+        git status --porcelain
+        git describe --tags --abbrev=0
+        git log --pretty=format:%s v1.4.2..HEAD
+        git tag -a v1.5.0 -m shrimp-api 1.5.0
+  - name: a breaking change makes a major release
+    args:
+    - shrimp-api
+    env:
+      RELEASE_DATE: '2026-11-12'
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        feat(api)!: drop the v1 booking endpoint
+        fix: null pointer in invoices
+        feat: add health route
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: |-
+      released shrimp-api v2.0.0 (was v1.4.2): 1 breaking, 1 features, 1 fixes, 0 other
+      artifact: releases/shrimp-api-2.0.0.tar.gz
+    expected_files:
+      CHANGELOG.md: |-
+        # Changelog
+
+        ## v2.0.0 - 2026-11-12
+
+        ### Breaking changes
+        - (api) drop the v1 booking endpoint
+
+        ### Features
+        - add health route
+
+        ### Fixes
+        - null pointer in invoices
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      git-tags.txt: |-
+        v1.3.0
+        v1.4.2
+        v2.0.0
+      releases/shrimp-api-2.0.0.tar.gz: true
+  - name: only fixes make a patch release
+    args:
+    - shrimp-api
+    env:
+      RELEASE_DATE: '2026-11-12'
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        fix(db): reconnect after storm outage
+        docs: add FAQ
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: |-
+      released shrimp-api v1.4.3 (was v1.4.2): 0 breaking, 0 features, 1 fixes, 1 other
+      artifact: releases/shrimp-api-1.4.3.tar.gz
+    expected_files:
+      CHANGELOG.md: |-
+        # Changelog
+
+        ## v1.4.3 - 2026-11-12
+
+        ### Fixes
+        - (db) reconnect after storm outage
+
+        ### Other
+        - docs: add FAQ
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      git-tags.txt: |-
+        v1.3.0
+        v1.4.2
+        v1.4.3
+  - name: the very first release creates the changelog
+    args:
+    - tide-board
+    env:
+      RELEASE_DATE: '2026-11-12'
+    files:
+      git-log.txt: |
+        feat: first public version
+      dist/board.html: |
+        <html></html>
+    expected_stdout: |-
+      released tide-board v0.1.0 (was v0.0.0): 0 breaking, 1 features, 0 fixes, 0 other
+      artifact: releases/tide-board-0.1.0.tar.gz
+    expected_files:
+      CHANGELOG.md: |-
+        # Changelog
+
+        ## v0.1.0 - 2026-11-12
+
+        ### Features
+        - first public version
+      git-tags.txt: v0.1.0
+      releases/tide-board-0.1.0.sums: 2453357702 14 board.html
+  - name: dry run changes nothing
+    args:
+    - --dry-run
+    - shrimp-api
+    env:
+      RELEASE_DATE: '2026-11-12'
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        feat(ferry): add tide table
+        fix: stop double booking
+        docs: update runbook
+        Merge branch 'storm-prep'
+        feat: webcam archive
+        chore(deps): bump libs
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: |-
+      would release shrimp-api v1.5.0 (was v1.4.2)
+      ## v1.5.0 - 2026-11-12
+
+      ### Features
+      - (ferry) add tide table
+      - webcam archive
+
+      ### Fixes
+      - stop double booking
+
+      ### Other
+      - docs: update runbook
+      - Merge branch 'storm-prep'
+      - chore(deps): bump libs
+    expected_files:
+      CHANGELOG.md: |-
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      git-tags.txt: |-
+        v1.3.0
+        v1.4.2
+      releases/shrimp-api-1.5.0.tar.gz: null
+      .calls.log: |-
+        git status --porcelain
+        git describe --tags --abbrev=0
+        git log --pretty=format:%s v1.4.2..HEAD
+  - name: dirty tree stops the release
+    args:
+    - shrimp-api
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        feat(ferry): add tide table
+        fix: stop double booking
+        docs: update runbook
+        Merge branch 'storm-prep'
+        feat: webcam archive
+        chore(deps): bump libs
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      git-dirty.txt: |2
+         M src/app.sh
+    expected_stdout: ''
+    expected_stderr: 'error: working tree is not clean'
+    expected_exit: 3
+    expected_files:
+      git-tags.txt: |-
+        v1.3.0
+        v1.4.2
+      releases/shrimp-api-1.5.0.tar.gz: null
+  - name: tag race is rolled back
+    args:
+    - shrimp-api
+    env:
+      RELEASE_DATE: '2026-11-12'
+      FAKE_TAG_FAILS: '1'
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        feat(ferry): add tide table
+        fix: stop double booking
+        docs: update runbook
+        Merge branch 'storm-prep'
+        feat: webcam archive
+        chore(deps): bump libs
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: ''
+    expected_stderr: 'error: could not create tag v1.5.0'
+    expected_exit: 5
+    expected_files:
+      CHANGELOG.md: |-
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      releases/shrimp-api-1.5.0.tar.gz: null
+      releases/shrimp-api-1.5.0.sums: null
+  - name: a failed announcement does not undo the release
+    args:
+    - --notify
+    - https://hooks.lanternfish.example/releases
+    - shrimp-api
+    env:
+      RELEASE_DATE: '2026-11-12'
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: |
+        feat(ferry): add tide table
+        fix: stop double booking
+        docs: update runbook
+        Merge branch 'storm-prep'
+        feat: webcam archive
+        chore(deps): bump libs
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+      notify.fail: ''
+    expected_stdout: |-
+      released shrimp-api v1.5.0 (was v1.4.2): 0 breaking, 2 features, 1 fixes, 3 other
+      artifact: releases/shrimp-api-1.5.0.tar.gz
+    expected_stderr: 'warning: notification failed'
+    expected_files:
+      git-tags.txt: |-
+        v1.3.0
+        v1.4.2
+        v1.5.0
+      releases/shrimp-api-1.5.0.tar.gz: true
+  - name: nothing new since the last tag
+    args:
+    - shrimp-api
+    files:
+      git-tags.txt: |
+        v1.3.0
+        v1.4.2
+      git-log.txt: ''
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: ''
+    expected_stderr: nothing to release since v1.4.2
+    expected_exit: 4
+  - name: empty dist
+    args:
+    - shrimp-api
+    files:
+      git-tags.txt: |
+        v1.4.2
+      git-log.txt: |
+        fix: x
+      dist/: ''
+    expected_stdout: ''
+    expected_stderr: 'error: dist/ is empty - build first'
+    expected_exit: 3
+  - name: odd tag names are rejected
+    args:
+    - shrimp-api
+    files:
+      git-tags.txt: |
+        release-2026
+      git-log.txt: |
+        feat(ferry): add tide table
+        fix: stop double booking
+        docs: update runbook
+        Merge branch 'storm-prep'
+        feat: webcam archive
+        chore(deps): bump libs
+      dist/shrimp.jar: |
+        JAR-BYTES
+      dist/conf/defaults.ini: |
+        port=8080
+      CHANGELOG.md: |
+        # Changelog
+
+        ## v1.4.2 - 2026-10-01
+
+        ### Fixes
+        - fix typo
+    expected_stdout: ''
+    expected_stderr: 'error: last tag ''release-2026'' is not vMAJOR.MINOR.PATCH'
+    expected_exit: 3
+  - name: usage
+    args: []
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--dry-run] [--notify URL] APP'
+    expected_exit: 2

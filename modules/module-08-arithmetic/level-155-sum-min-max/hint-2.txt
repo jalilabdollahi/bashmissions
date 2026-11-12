@@ -1,0 +1,7 @@
+Use while read -r to take lines one at a time. For the first line, set min and max to that value; for later lines compare and replace when the new value beats the record. Generic example, tracking the longest word:
+
+  longest=0
+  while read -r word; do
+    if (( ${#word} > longest )); then longest=${#word}; fi
+  done
+  echo "$longest"

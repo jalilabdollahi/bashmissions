@@ -1,1 +1,24 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  is_posint() { [[ $1 =~ ^[1-9][0-9]*$ ]]; }
+
+  load_holder() {            # sets holder, expires; return 1 when damaged
+    holder=unknown; expires=
+    [[ -r $1/owner ]]   && holder=$(< "$1/owner")
+    [[ -r $1/expires ]] && expires=$(< "$1/expires")
+    [[ -r $1/owner && $expires =~ ^[0-9]+$ ]]
+  }
+
+  acquire() {
+    local lock=$1 owner=$2 ttl=$3 now=$4 until=$((now + ttl))
+    if mkdir "$lock" 2>/dev/null; then ...write files, "acquired ..."; return; fi
+    [[ -d $lock ]] || { echo "cannot create $lock" >&2; exit 2; }
+    load_holder "$lock" || { busy unknown; exit 1; }
+    if (( expires > now )); then
+      same owner -> renew, otherwise busy with expires-now seconds, exit 1
+    fi
+    stale: print "reclaimed ...", rm the files, rmdir, mkdir again, write, "acquired ..."
+  }
+
+release checks the holder against OWNER (exit 3 on mismatch) before rm -f owner expires; rmdir. status prints one of three lines.
+Finish with a case "$1" in acquire|release|status) ... *) usage.

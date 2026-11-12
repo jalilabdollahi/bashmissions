@@ -1,0 +1,1 @@
+Instead of wrapping the real work in layers of if/else, check for each kind of bad input first. The moment one check fails, report it and leave the function. What is left at the bottom is only the good case.

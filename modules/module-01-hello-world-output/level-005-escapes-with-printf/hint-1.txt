@@ -1,0 +1,1 @@
+Unlike echo, printf never adds a line break by itself, and it translates a few backslash codes into real characters. Think about which codes stand for a tab and a line break.

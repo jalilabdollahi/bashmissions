@@ -1,0 +1,21 @@
+Skeleton:
+
+  prev=""; have_prev=0; repeats=0
+  flush() {
+    if (( repeats == 1 )); then echo "last message repeated 1 time"
+    elif (( repeats > 1 )); then echo "last message repeated $repeats times"
+    fi
+    repeats=0
+  }
+  while IFS= read -r line; do
+    msg=${line#* }
+    if (( have_prev )) && [[ $msg == "$prev" ]]; then
+      # one more copy: count it and move to the next line
+    fi
+    flush
+    printf '%s\n' "$line"
+    prev=$msg; have_prev=1
+  done
+  flush      # do not forget the run that is still open
+
+A line with no space at all needs a little care (see the objective).

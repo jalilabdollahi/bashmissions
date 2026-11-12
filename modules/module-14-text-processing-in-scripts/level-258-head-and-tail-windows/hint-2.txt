@@ -1,0 +1,9 @@
+Two tools, both counting lines:
+
+  head -n 5 file       # the first 5 lines
+  tail -n 3 file       # the LAST 3 lines
+  tail -n +4 file      # everything from line 4 on (the plus sign changes the meaning)
+
+Combine them in a pipeline:
+
+  head -n 20 file | tail -n +15      # lines 15 to 20

@@ -1,0 +1,5 @@
+`read -s` reads without echo; combine it with `-r` and the prompt option, like `read -rsp "Prompt: " var`. The length of a variable's value is `${#var}`:
+
+  read -rsp "Token: " token
+  echo >&2                 # silent mode leaves the cursor on the prompt line
+  echo "${#token} chars"

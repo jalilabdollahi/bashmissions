@@ -1,1 +1,23 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A plan count; services=()
+  # parse: IFS=, read -ra list <<< "$actions"; validate each action; plan[$svc]=${actions//,/ }
+
+  mkdir lock (fail -> message, exit 1); trap 'rm -rf "$lock"' EXIT
+  # load counters from "$state"
+
+  used=0
+  for svc in "${services[@]}"; do
+    rc=0; svcctl status "$svc" >/dev/null 2>&1 || rc=$?
+    rc 0: print healthy, count=0, n_healthy++, continue
+    rc 3: print unknown service, n_failed++, continue
+    count >= flap_limit: print flapping message, pagerctl notify ..., n_failed++, continue
+    attempts=0 healed=0 skipped=0
+    for action in ${plan[$svc]}; do
+      (( used >= max_actions )) && { skipped=1; break; }
+      svcctl "$action" "$svc"; used++; attempts++; sleep "$grace"
+      if svcctl status "$svc" >/dev/null 2>&1; then healed=1; print "healed by $action (attempt $attempts)"; break; fi
+    done
+    healed -> count++ ; skipped -> "skipped (action budget exhausted)" ; else UNHEALED + pagerctl notify
+  done
+  write the state sorted; summary; finish with  (( n_failed == 0 ))

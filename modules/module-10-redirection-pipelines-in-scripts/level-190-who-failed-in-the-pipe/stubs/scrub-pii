@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Fake scrub-pii for BashMissions: hides IP addresses and user names, exits with SCRUB_RC.
+sed -E -e 's/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/x.x.x.x/' -e 's/user=[a-z]+/user=*/'
+exit "${SCRUB_RC:-0}"

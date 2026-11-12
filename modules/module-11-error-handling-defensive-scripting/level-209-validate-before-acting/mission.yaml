@@ -1,0 +1,79 @@
+id: 209
+module: 11
+module_name: error-handling-defensive-scripting
+module_display: Failing Safely
+title: Validate Before Acting
+difficulty: advanced
+xp: 170
+story: |
+  Theo's "retire old reports" script takes a list of files and moves each one into
+  the archive. On Friday the third file in the list had a typo. The first two were
+  already moved, the script died, and nobody could tell which half of the reports
+  was where. Mara's rule for anything that changes the world: look at everything
+  first, touch nothing until every input checks out.
+objective: |
+  Write solution.sh. It takes one or more file names. With no arguments print
+    usage: solution.sh FILE...
+  to stderr and exit 2.
+  Phase 1, validate: go through ALL the arguments before changing anything. Every
+  argument that is not an existing regular file (`[[ -f ... ]]`) gets one line on
+  stderr, in argument order:
+    missing: NAME
+  If at least one argument was bad, exit 1 after reporting all of them. Nothing may
+  have been moved, and the archive folder must not even have been created.
+  Phase 2, act (only when every argument is fine): create the folder `archive`
+  and move each file into it, renamed with an .old suffix (report.txt becomes
+  archive/report.txt.old). Then print
+    archived N files
+  where N is the number of files (use "1 files" style as is, no pluralising).
+  Names may contain spaces.
+concepts:
+  - "validate every input first, act second"
+  - "collect all problems, then report them together"
+  - "a failure halfway leaves a half-changed world"
+required_patterns:
+  - pattern: '\[\[\s+(!\s+)?-f\s'
+    message: "Test each argument with [[ -f \"$f\" ]]."
+test_cases:
+  - name: all files are fine
+    args: [jan.txt, feb.txt, "price list.txt"]
+    files:
+      jan.txt: "j\n"
+      feb.txt: "f\n"
+      "price list.txt": "p\n"
+    expected_stdout: "archived 3 files"
+    expected_files:
+      archive/jan.txt.old: "j\n"
+      archive/feb.txt.old: "f\n"
+      "archive/price list.txt.old": "p\n"
+      jan.txt: null
+      feb.txt: null
+  - name: one bad name in the middle moves nothing
+    args: [jan.txt, fbe.txt, mar.txt]
+    files:
+      jan.txt: "j\n"
+      mar.txt: "m\n"
+    expected_stdout: ""
+    expected_stderr: "missing: fbe.txt"
+    expected_exit: 1
+    expected_files:
+      jan.txt: true
+      mar.txt: true
+      archive/jan.txt.old: null
+  - name: every bad name is reported, a folder counts as bad
+    args: [nope.txt, jan.txt, reports, gone.txt]
+    files:
+      jan.txt: "j\n"
+      reports/inner.txt: "x\n"
+    expected_stdout: ""
+    expected_stderr: |-
+      missing: nope.txt
+      missing: reports
+      missing: gone.txt
+    expected_exit: 1
+    expected_files:
+      jan.txt: true
+      archive/jan.txt.old: null
+  - name: no arguments
+    expected_stderr: "usage: solution.sh FILE..."
+    expected_exit: 2

@@ -1,0 +1,62 @@
+id: 136
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Join with a Separator
+difficulty: intermediate
+xp: 135
+story: |
+  Theo's web app reads its list of allowed hosts from one environment line, but
+  different deployment tools want different separators: commas for one, " | "
+  for another, a plain colon for a third. He needs a small helper that takes a
+  separator and a list of hosts and returns a single joined line, with no extra
+  separator at either end.
+objective: |
+  Write solution.sh. Its first argument is the separator (it can be several
+  characters long, or even empty); all remaining arguments are host names.
+  Print the host names joined by the separator, with the separator only BETWEEN
+  items:
+
+    ./solution.sh ", " anchovy barracuda dory     prints  anchovy, barracuda, dory
+
+  One host prints just that host. No hosts prints an empty line. Collect the
+  hosts into an array and build the result by looping over it (the loop must
+  work for separators longer than one character).
+concepts:
+  - "hosts=(\"$@\") copies the arguments into an array"
+  - "\"${hosts[@]}\" expands to every element"
+  - "${joined:+$sep} adds the separator only when something is already there"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*\[@\]\}'
+    message: 'Loop over the array with "${hosts[@]}".'
+forbidden_patterns:
+  - pattern: '\b(paste|tr|sed|awk)\b'
+    message: "Build the joined string in Bash with a loop; no paste, tr, sed or awk."
+test_cases:
+  - name: comma and space
+    args: [", ", anchovy, barracuda, dory]
+    expected_stdout: |-
+      anchovy, barracuda, dory
+  - name: single character separator
+    args: [":", eel, flounder, grouper, halibut]
+    expected_stdout: |-
+      eel:flounder:grouper:halibut
+  - name: pipe with spaces around it
+    args: [" | ", marlin, octopus]
+    expected_stdout: |-
+      marlin | octopus
+  - name: one item has no separator
+    args: [",", marlin]
+    expected_stdout: |-
+      marlin
+  - name: no hosts at all
+    args: [","]
+    expected_stdout: ""
+  - name: empty separator glues them together
+    args: ["", a, b, c]
+    expected_stdout: |-
+      abc
+  - name: host with a space stays whole
+    args: [";", "gull anchor", dory]
+    expected_stdout: |-
+      gull anchor;dory

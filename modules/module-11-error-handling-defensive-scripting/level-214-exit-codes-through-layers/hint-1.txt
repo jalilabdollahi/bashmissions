@@ -1,0 +1,1 @@
+Follow the number from the bottom to the top. lanternci exits with N; the pipe to tee has to let that N out; the function has to return it; and the main part has to exit with it. Any one of these four links can swallow the value. Fix them one at a time.

@@ -1,0 +1,1 @@
+Two jobs, two tools: one makes folders, the other makes empty files. Think about what each should do when the thing already exists, because the script has to survive a second run and a missing "sites" parent folder.

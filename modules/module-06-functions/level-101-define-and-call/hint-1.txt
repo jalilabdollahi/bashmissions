@@ -1,0 +1,1 @@
+You are typing the same ruler line three times. Bash lets you give a block of commands a name, define it once, and then use the name wherever you need those commands. Think of it as inventing your own command.

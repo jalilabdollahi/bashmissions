@@ -1,0 +1,9 @@
+Inside (( )), x++ adds one to x and x-- subtracts one. No $ and no result to capture: the variable itself changes. Generic example:
+
+  seen=0
+  for word in a b c; do
+    (( seen++ ))
+  done
+  echo "$seen"     # 3
+
+Read stdin with:  while read -r first rest; do ... done

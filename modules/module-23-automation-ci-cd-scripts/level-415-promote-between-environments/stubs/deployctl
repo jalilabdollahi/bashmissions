@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Fake deploy tool: deployctl deploy --env ENV --version VERSION
+# FAKE_DEPLOY_FAIL=ENV makes deploys to that environment fail. Calls are logged.
+echo "deployctl $*" >> .calls.log
+[[ ${1:-} == deploy ]] || { echo "deployctl: only 'deploy' is implemented" >&2; exit 2; }
+shift
+env="" ver=""
+while (( $# )); do
+  case $1 in
+    --env)     [[ $# -ge 2 ]] || { echo "deployctl: --env needs a value" >&2; exit 2; }; env=$2; shift 2 ;;
+    --version) [[ $# -ge 2 ]] || { echo "deployctl: --version needs a value" >&2; exit 2; }; ver=$2; shift 2 ;;
+    *) echo "deployctl: unknown option '$1'" >&2; exit 2 ;;
+  esac
+done
+[[ -n $env && -n $ver ]] || { echo "deployctl: need --env and --version" >&2; exit 2; }
+case $env in dev|staging|prod) ;; *) echo "deployctl: unknown environment '$env'" >&2; exit 2 ;; esac
+if [[ ${FAKE_DEPLOY_FAIL:-} == "$env" ]]; then
+  echo "deployctl: $env rejected version $ver" >&2
+  exit 1
+fi

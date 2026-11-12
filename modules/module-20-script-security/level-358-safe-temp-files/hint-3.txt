@@ -1,1 +1,6 @@
-Print only the expected result lines; redirect or stub external side effects.
+work=$(mktemp "$TMPDIR/invoices.XXXXXX")
+trap 'rm -f "$work"' EXIT
+cat > "$work"
+sort -rn "$work" | head -n 3
+
+Create first, trap immediately, then use the file.

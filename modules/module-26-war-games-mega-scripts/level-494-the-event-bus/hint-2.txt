@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+Numbering: the next number is the highest file name in the spool plus one; file names are zero padded (printf '%06d'). Beware that 000008 looks octal: use $((10#$n)).
+
+Claiming a number safely when two publishers race: with noclobber, `>` fails if the file already exists.
+  until ( set -C; printf '%s\n%s\n' "$topic" "$text" > "$spool/$(printf '%06d' "$n")" ) 2>/dev/null; do n=$((n+1)); done
+(the subshell keeps noclobber from leaking into the rest of the script).
+
+Pattern matching with a glob stored in a variable: leave the right-hand side UNQUOTED:  [[ $topic == $pattern ]]
+
+Reading two lines from a file: { read -r first; read -r second; } < file
+Calling a handler whose exit status you want to inspect without set -e killing you:  if "$handler" "$topic" "$seq" "$msg"; then ... else ... fi
+The tries file holds "SEQ COUNT"; the count only applies if SEQ is the message you are looking at now.

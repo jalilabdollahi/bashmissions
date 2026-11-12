@@ -1,0 +1,58 @@
+id: 94
+module: 5
+module_name: loops
+module_display: Loops
+title: The Pipe Subshell Trap
+difficulty: intermediate
+xp: 130
+story: |
+  Theo wrote a quick status script and swears it works: it reads the fleet
+  file, counts the machines that are down, and prints the number. It always
+  prints 0, even on the morning when half the harbour was offline. He has
+  stared at it for an hour. The starter below is his script. The loop is
+  doing its job, yet the count never survives it. Find out why.
+objective: |
+  Fix solution.sh. It takes one argument, the path of a fleet file whose lines
+  look like "<host> <state>" (state is "up" or "down"). After reading the whole
+  file it must print exactly one line:
+    down: <number of hosts in state down> of <number of hosts>
+  An empty file gives "down: 0 of 0". If no argument is given, print
+  "usage: solution.sh FLEETFILE" to stderr and exit with status 2.
+  The counters must be set inside a while read loop and still be right after
+  it. Do not pipe into the loop (no `cmd | while ...`): feed the file with
+  `< "$file"` instead.
+concepts:
+  - "each part of a pipeline runs in a subshell"
+  - "variables set in a subshell vanish when it ends"
+  - "feed a loop with a redirect, not a pipe"
+required_patterns:
+  - pattern: 'done\s*<'
+    message: 'Attach the file to the loop with a redirect: done < "$file"'
+forbidden_patterns:
+  - pattern: '\|\s*while\b'
+    message: "Piping into while runs the loop in a subshell and the counters are lost. Use done < file."
+test_cases:
+  - name: two of five are down
+    files:
+      "fleet.txt": "anchovy up\nbarracuda down\ncuttlefish up\ndory down\neel up\n"
+    args: ["fleet.txt"]
+    expected_stdout: "down: 2 of 5"
+  - name: everything is up
+    files:
+      "calm.txt": "marlin up\noctopus up\n"
+    args: ["calm.txt"]
+    expected_stdout: "down: 0 of 2"
+  - name: everything is down
+    files:
+      "storm.txt": "grouper down\nhalibut down\nflounder down\n"
+    args: ["storm.txt"]
+    expected_stdout: "down: 3 of 3"
+  - name: empty file
+    files:
+      "none.txt": ""
+    args: ["none.txt"]
+    expected_stdout: "down: 0 of 0"
+  - name: missing argument
+    args: []
+    expected_stderr: "usage: solution.sh FLEETFILE"
+    expected_exit: 2

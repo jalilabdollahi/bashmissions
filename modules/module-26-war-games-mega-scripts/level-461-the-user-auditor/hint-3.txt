@@ -1,1 +1,17 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  add() { local sev; case $1 in 1) sev=CRIT;; 2) sev=WARN;; *) sev=INFO;; esac; findings+=("$1|$2|$3|$sev|$4"); }
+
+  while IFS=: read -r user _ uid _ _ home shell; do
+    skip blanks and comments
+    if [[ $home == /home/* ]]; then dir=home/${home#/home/}; homedirs[$dir]=1; else dir=; fi
+    [[ -z ${skip[$user]:-} ]] || continue
+    uid 0 but not root           -> add 1 UID0 ...
+    uid already in uid_owner     -> add 2 DUPUID ... else remember the owner
+    (( uid >= 1000 )) || continue
+    login shell?                 -> NOPASS (hash set but empty), STALE (never / days > stale)
+    [[ -n $dir ]]                -> NOHOME, or check .ssh/id_rsa, .netrc, .ssh/authorized_keys with ls -l
+  done < "$passwd"
+
+  for d in home/*/; do ... [[ -n ${homedirs[${d%/}]:-} ]] || add 3 ORPHAN ...; done
+  header, sorted rows, "findings: ..." line, and exit 1 when there is at least one.

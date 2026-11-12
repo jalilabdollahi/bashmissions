@@ -1,0 +1,6 @@
+workers=$1
+if ! xargs -n 1 -P "$workers" thumb | sort; then
+  exit 1
+fi
+
+with `set -euo pipefail` at the top and the usage check for a missing WORKERS before this. The names arrive on the script's own standard input, which xargs inherits.

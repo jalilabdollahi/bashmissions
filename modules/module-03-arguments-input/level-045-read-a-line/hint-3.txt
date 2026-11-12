@@ -1,0 +1,6 @@
+Read first, print second:
+
+  read -r title
+  echo "paging on-call about: $title"
+
+Do not use a loop, one `read` takes only the first line.

@@ -1,0 +1,8 @@
+`"$@"` (in double quotes) becomes one word per argument, preserving spaces and empty ones, and becomes nothing when there are no arguments. `$*`, or `$@` without quotes, split on spaces and expand globs. Compare:
+
+  show() { printf '[%s]\n' "$@"; }
+  set -- "a b" "" "*"
+  show "$@"      # [a b] [] [*]
+  show $@        # [a] [b] then the file names
+
+Put your fixed words before `"$@"`, and call the function with `"$@"` too.

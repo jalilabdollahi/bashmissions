@@ -1,0 +1,68 @@
+id: 280
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Don't Parse ls
+difficulty: advanced
+xp: 170
+story: |
+  The disk-usage report Theo wrote for Gus loops over the output of ls. It was
+  fine until North Pier Dental dropped a file called "x-ray scan 1.txt" in the
+  upload folder: the report listed "x-ray", "scan" and "1.txt" as three items,
+  and two of them did not exist. Mara's rule is short: ls is for humans, globs are
+  for scripts.
+objective: |
+  solution.sh takes one argument, a directory. For every regular file directly
+  inside it (not directories, not hidden files) print
+    <name>: <bytes> bytes
+  where <name> is the file name without the directory part and <bytes> its size
+  in bytes, listed in the order the shell's glob gives. Subdirectories are
+  skipped. If there are no such files print "empty".
+  Loop over a glob like "$1"/* and test each entry with [ -f ]. The word ls
+  must not appear in your script, and do not use find or stat.
+concepts:
+  - "for f in \"$dir\"/* instead of $(ls)"
+  - "[ -f ] to keep regular files only"
+  - "${f##*/} to strip the directory"
+required_patterns:
+  - pattern: '"\$\{?[A-Za-z_0-9]+\}?"/\*'
+    message: "Loop over a glob such as \"$1\"/* instead of the output of a command."
+forbidden_patterns:
+  - pattern: '\bls\b'
+    message: "Do not use ls in a script; let the shell expand a glob."
+  - pattern: '\b(find|stat)\b'
+    message: "Use a plain glob loop and a file test, not find or stat."
+test_cases:
+  - name: ordinary files
+    args: [uploads]
+    files:
+      uploads/a.txt: "12345"
+      uploads/b.txt: "1234567890"
+    expected_stdout: |-
+      a.txt: 5 bytes
+      b.txt: 10 bytes
+  - name: spaces and a leading dash
+    args: [uploads]
+    files:
+      "uploads/x-ray scan 1.txt": "abc"
+      uploads/-rf: "xy"
+    expected_stdout: |-
+      -rf: 2 bytes
+      x-ray scan 1.txt: 3 bytes
+  - name: directories and hidden files are skipped
+    args: [uploads]
+    files:
+      uploads/sub/inner.txt: "inner"
+      uploads/.hidden: "secret"
+      uploads/keep.txt: "k"
+    expected_stdout: "keep.txt: 1 bytes"
+  - name: directory name with a space, brackets in a file name
+    args: [Dental Uploads]
+    files:
+      "Dental Uploads/[draft] notes.txt": "hello\n"
+    expected_stdout: "[draft] notes.txt: 6 bytes"
+  - name: nothing to report
+    args: [uploads]
+    files:
+      uploads/sub/inner.txt: "inner"
+    expected_stdout: "empty"

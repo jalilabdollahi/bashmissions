@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  submit: n=$(< queue/.next) or 1; printf -v id '%04d' "$n"; write queue/.tmp-$id; mv it to queue/pending/$id.job; echo $((n + 1)) > queue/.next
+
+  work:
+    mkdir queue/work.lock || { echo "error: another work run is active" >&2; exit 4; }
+    trap 'rmdir queue/work.lock; [[ -z $work ]] || rm -rf "$work"' EXIT
+    for each claims/ID with pending/ID.job: rm -rf the claim; echo "recovered job $ID"
+    selected=( first K pending ids in ascending order );  none -> "queue is empty"
+    worker() { for id in "${selected[@]}"; do
+        mkdir "queue/claims/$id" 2>/dev/null || continue
+        [[ -f queue/pending/$id.job ]] || { rmdir "queue/claims/$id"; continue; }   # finished by someone else already
+        name / command from the job file (sed -n 's/^name=//p');   attempts loop with sleep 1
+        mv output and job into done/ or failed/; rmdir the claim; write "$work/$id.result"
+      done; }
+    for (( w = 0; w < workers; w++ )); do worker & done; wait
+    print per-job lines from the result files in id order; "worked: D done, F failed"; exit 1 if any failed
+
+  status: count by directory (a pending job with a claim is running), then the sorted table
+  retry: mv failed -> pending, drop the .out;   log: cat the .out from done/ or failed/

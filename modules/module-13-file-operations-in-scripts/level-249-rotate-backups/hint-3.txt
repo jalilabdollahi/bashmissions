@@ -1,0 +1,8 @@
+  rm -f "$file.3"
+  for n in 2 1; do
+    if [[ -e $file.$n ]]; then
+      mv "$file.$n" "$file.$((n + 1))"
+    fi
+  done
+  cp "$file" "$file.1"
+  # count how many of $file.1 $file.2 $file.3 exist, then print the summary

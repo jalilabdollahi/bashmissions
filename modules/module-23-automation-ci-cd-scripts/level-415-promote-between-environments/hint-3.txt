@@ -1,0 +1,11 @@
+stages=(dev staging prod)
+# index_of NAME: loop over "${!stages[@]}", echo the index; fail if not found
+# version_gt A B: split both with IFS=. read -r, compare part by part
+
+from=${1:-} to=${2:-}
+# unknown names -> usage, exit 2;  (( to_i != from_i + 1 )) -> "cannot promote", exit 2
+# version from versions/$from must match ^[0-9]+\.[0-9]+\.[0-9]+$ else "nothing deployable"
+# current from versions/$to if it exists: same -> "already runs"; newer -> refuse to downgrade
+# [[ $to == prod && ! -f approvals/$version ]] -> not approved
+# if ! deployctl deploy --env "$to" --version "$version"; then ... fi
+# only then write versions/$to (temp file + mv) and print the promoted line

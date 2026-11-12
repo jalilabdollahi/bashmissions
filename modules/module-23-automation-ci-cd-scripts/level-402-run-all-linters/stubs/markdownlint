@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fake markdownlint for the docs check. Accepts: markdownlint -q FILE...
+# Exit status comes from FAKE_RC_MARKDOWNLINT (default 0). Every call is logged.
+if [[ ${1:-} != -q ]]; then
+  echo "markdownlint: unsupported option '${1:-}' (only -q is implemented)" >&2
+  exit 2
+fi
+shift
+if (( $# == 0 )); then
+  echo "markdownlint: no files given" >&2
+  exit 2
+fi
+echo "markdownlint -q $*" >> .calls.log
+exit "${FAKE_RC_MARKDOWNLINT:-0}"

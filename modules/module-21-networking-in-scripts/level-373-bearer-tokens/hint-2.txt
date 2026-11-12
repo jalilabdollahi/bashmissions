@@ -1,0 +1,9 @@
+Environment variables are available as ordinary shell variables. Test for unset-or-empty safely with `${NAME:-}`:
+
+  if [[ -z ${API_KEY:-} ]]; then ...; fi
+
+The bearer format is the word `Bearer`, a space, and the token:
+
+  curl -s -H "Authorization: Bearer $API_KEY" URL
+
+Use double quotes so the variable expands. To see the status and the body separately, write the body with `-o FILE` and the code with `-w '%{http_code}'`.

@@ -1,1 +1,15 @@
-Print only the expected result lines so stdout comparison stays exact.
+  round_nearest() { echo $(( ($1 + 50) / 100 )); }
+  round_up()      { echo $(( ($1 + 99) / 100 )); }
+  round_down()    { echo $(( $1 / 100 )); }
+
+  case $1 in
+    nearest) strategy=round_nearest ;;
+    up)      # ...
+    down)    # ...
+    *)       # unknown: message, exit 2
+  esac
+
+  while read -r cents; do
+    # blank: continue; not digits: message + remember + continue
+    echo "${cents}c -> $("$strategy" "$cents") EUR"
+  done

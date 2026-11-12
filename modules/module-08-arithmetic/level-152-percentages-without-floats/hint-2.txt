@@ -1,0 +1,4 @@
+Integer division discards the fraction, so multiply first. A value in tenths can be split with / 10 (the part before the point) and % 10 (the digit after it). Generic example for the number 4.7 stored as 47:
+
+  v=47
+  echo "$(( v / 10 )).$(( v % 10 ))"     # 4.7

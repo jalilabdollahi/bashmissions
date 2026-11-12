@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake pager client for BashMissions. Only "notify page-oncall" is understood.
+# Set FAKE_NOTIFY_FAIL=1 to make the pager service unreachable.
+if [[ ${1:-} != page-oncall ]]; then
+  echo "notify: unknown target '${1:-}' (try: notify page-oncall)" >&2
+  exit 2
+fi
+if [[ ${FAKE_NOTIFY_FAIL:-0} == 1 ]]; then
+  echo "notify: connection refused" >&2
+  exit 1
+fi
+echo "paged on-call"

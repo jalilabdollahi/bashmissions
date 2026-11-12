@@ -1,1 +1,0 @@
-Use the first argument (`$1`) and print it with the prefix `Message:`.

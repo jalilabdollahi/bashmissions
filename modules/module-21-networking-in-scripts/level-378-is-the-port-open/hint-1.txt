@@ -1,0 +1,1 @@
+Checking a port does not need any HTTP at all: you only need to know whether a TCP connection can be made. A small tool called netcat (`nc`) can connect and hang up again, and it reports the result through its exit status. Think about what could go wrong if the other side never answers.

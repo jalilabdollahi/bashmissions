@@ -1,0 +1,53 @@
+id: 17
+module: 1
+module_name: hello-world-output
+module_display: Hello, Terminal
+title: A Boxed Banner
+difficulty: beginner
+xp: 110
+story: |
+  Gus has discovered that people read a report faster when its title sits in
+  a box. He wants one for the Monday numbers, and for the week after, and for
+  the quarterly one, each with a different title (the report tool sets TITLE).
+  Mara looks at the border of equals signs and says, "Do not type thirty of
+  those by hand. Teach printf to repeat itself."
+objective: |
+  Write solution.sh so that it prints a box 30 characters wide, three lines:
+    ==============================
+    | <TITLE, padded to 26>      |
+    ==============================
+  The border lines are 30 equals signs. The middle line is "| ", then $TITLE
+  left-aligned in a 26-character field (%-26s), then " |".
+  Do not type the equals signs yourself: build the border by repeating one
+  character 30 times with printf, for example with printf '=%.0s' {1..30}.
+concepts:
+  - "printf reuses its format for every extra argument"
+  - "%.0s prints nothing but lets the format's own characters repeat"
+  - "brace expansion {1..30} produces 30 arguments"
+required_patterns:
+  - pattern: '\bprintf\b'
+    message: "Build the box with printf."
+  - pattern: '%\.0s|%\*s|seq|\bfor\b|\bwhile\b'
+    message: "Repeat a character to build the border, e.g. printf '=%.0s' {1..30}."
+forbidden_patterns:
+  - pattern: '={6,}'
+    message: "Do not type the border by hand; make printf repeat the character."
+test_cases:
+  - name: short title
+    env: {TITLE: "Lanternfish"}
+    expected_stdout: |-
+      ==============================
+      | Lanternfish                |
+      ==============================
+  - name: longer title
+    env: {TITLE: "Monday Numbers - Week 42"}
+    expected_stdout: |-
+      ==============================
+      | Monday Numbers - Week 42   |
+      ==============================
+  - name: empty title
+    env: {TITLE: ""}
+    expected_stdout: |-
+      ==============================
+      |                            |
+      ==============================

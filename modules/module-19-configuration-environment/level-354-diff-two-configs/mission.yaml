@@ -1,0 +1,119 @@
+id: 354
+module: 19
+module_name: configuration-environment
+module_display: Configuration
+title: Diff Two Configs
+difficulty: expert
+xp: 300
+story: |
+  A customer swears nothing changed on the pier-side proxy, yet it started
+  rejecting logins on Thursday. Support has Wednesday's backup of the config and
+  today's file, and plain `diff` shows forty lines of noise: someone re-ordered
+  the settings, re-indented them and added comments. Mara wants the opposite of
+  noise: a short report of what really changed, setting by setting, that she can
+  read at a glance during the incident call.
+objective: |
+  Write solution.sh, called as `solution.sh OLD_FILE NEW_FILE`. Both files hold
+  `name=value` lines. Ignore blank lines, `#` comments and blanks around names and
+  values; a value may contain `=`; for a repeated name the last line counts. A
+  setting may have an empty value, which is still a value.
+  Compare the two files as sets of settings and print one line for every
+  difference, sorted by name (plain `sort`, the tests run in the C locale), mixed
+  together regardless of kind:
+    + name=value          the name exists only in NEW_FILE
+    - name=value          the name exists only in OLD_FILE
+    ~ name: old -> new    the name exists in both with different values
+  An empty value is shown as '' (two single quotes) in all three forms.
+  If there is at least one difference, finish with a line
+    summary: A added, R removed, C changed
+  and exit with status 1 (like `diff`). If the files hold the same settings,
+  print `no differences` and exit 0. The order of lines in the files, comments
+  and spacing never count as differences.
+  Anything other than exactly two arguments prints `usage: solution.sh OLD_FILE
+  NEW_FILE` to stderr and exits 2; an unreadable file prints `cannot read FILE`
+  and exits 2.
+concepts:
+  - "compare configs as key/value sets, not as text"
+  - "union of keys with sort -u; added, removed, changed"
+  - "exit status that reports whether differences exist"
+test_cases:
+  - name: one of each kind
+    args: [old.conf, new.conf]
+    files:
+      old.conf: |
+        host=db.harbour.example
+        port=80
+        tls=off
+        debug=1
+      new.conf: |
+        host=db.harbour.example
+        port=8080
+        tls=off
+        mail=on
+    expected_stdout: |-
+      - debug=1
+      + mail=on
+      ~ port: 80 -> 8080
+      summary: 1 added, 1 removed, 1 changed
+    expected_exit: 1
+  - name: reordered, re-indented and commented, nothing changed
+    args: [old.conf, new.conf]
+    files:
+      old.conf: |
+        # Wednesday
+        alpha=1
+        beta = two words
+        gamma=a=b
+      new.conf: |
+        # Thursday, tidied up by Theo
+
+          gamma = a=b
+        beta=two words
+        alpha =1
+    expected_stdout: "no differences"
+  - name: empty values and repeated names
+    args: [old.conf, new.conf]
+    files:
+      old.conf: |
+        motd=hello
+        retries=3
+        retries=5
+        zone=eu
+      new.conf: |
+        motd=
+        retries=5
+        extra=
+        Zone=eu
+    expected_stdout: |-
+      + Zone=eu
+      + extra=''
+      ~ motd: hello -> ''
+      - zone=eu
+      summary: 2 added, 1 removed, 1 changed
+    expected_exit: 1
+  - name: everything added
+    args: [empty.conf, new.conf]
+    files:
+      empty.conf: "# nothing yet\n"
+      new.conf: "a=1\nb=2\n"
+    expected_stdout: |-
+      + a=1
+      + b=2
+      summary: 2 added, 0 removed, 0 changed
+    expected_exit: 1
+  - name: both empty
+    args: [a.conf, b.conf]
+    files:
+      a.conf: ""
+      b.conf: ""
+    expected_stdout: "no differences"
+  - name: unreadable file
+    args: [old.conf, ghost.conf]
+    files:
+      old.conf: "a=1\n"
+    expected_stderr: "cannot read ghost.conf"
+    expected_exit: 2
+  - name: wrong arguments
+    args: [old.conf]
+    expected_stderr: "usage: solution.sh OLD_FILE NEW_FILE"
+    expected_exit: 2

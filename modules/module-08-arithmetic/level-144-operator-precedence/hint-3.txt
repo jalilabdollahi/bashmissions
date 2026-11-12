@@ -1,0 +1,3 @@
+servers="$1"; base="$2"; gb="$3"; rate="$4"
+echo "per_server=$(( base + gb * rate ))"       # * is already stronger than +
+echo "total=$(( (...) * servers ))"             # put the per-server price in parentheses

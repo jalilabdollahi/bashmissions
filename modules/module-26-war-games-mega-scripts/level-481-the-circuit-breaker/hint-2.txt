@@ -1,1 +1,12 @@
-Keep the script safe and deterministic inside the mission workspace.
+Three techniques:
+
+1. Reading key=value lines:   while IFS='=' read -r key val; do case $key in state) ... ;; esac; done < "$file"
+2. Running the command without letting set -e kill you, and keeping its status:
+     status=0
+     "$@" || status=$?
+   After shift 2 (or however many words precede it) "$@" is the command and its arguments exactly as typed.
+3. Atomic save: write to a temp file in the same directory, then rename it. A rename never shows a half-written file:
+     tmp=$(mktemp "$state_file.XXXXXX"); printf ... > "$tmp"; mv -f "$tmp" "$state_file"
+   Remove the temp file in a trap in case something fails before the mv.
+
+An elapsed `open` is simply half-open: change the variable and fall into the same branch.

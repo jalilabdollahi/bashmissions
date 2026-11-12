@@ -1,0 +1,1 @@
+Think of the username as a string Bash is holding in a variable. Bash can tell you how many characters that value has without running any other program. Once you have the number, it is an ordinary comparison, like the ones you wrote in the conditionals module.

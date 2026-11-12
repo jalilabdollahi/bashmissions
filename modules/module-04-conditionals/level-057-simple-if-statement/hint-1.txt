@@ -1,1 +1,0 @@
-A simple `if` can run a command only when a test succeeds.

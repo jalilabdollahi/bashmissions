@@ -1,0 +1,8 @@
+`read` can split a line into several variables at once, and the last variable takes the rest of the line:
+
+  while read -r a b c rest; do echo "$c"; done <<< "one two three four five"
+  pct=${pct%\%}                 # remove a trailing percent sign
+  [[ $dev == /dev/* ]] || continue
+  table=$(some-command) || { echo "failed" >&2; exit 3; }
+
+Reading the header away first: put a lone `read -r skip` before the loop, inside the same { } group.

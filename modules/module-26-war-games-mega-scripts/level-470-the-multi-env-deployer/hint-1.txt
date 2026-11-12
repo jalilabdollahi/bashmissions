@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Make the pipeline data, not code: one file says which environments exist and in what order, and which gates guard each one. The script then reads it once and everything else is generic. For a promotion, decide the version from the source environment's recorded state (never from the command line), run *all* the gates and report each, and only then touch anything. Writing the state files is the very last step, after the health check, so a failed deploy leaves no trace of having succeeded.

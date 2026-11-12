@@ -1,0 +1,6 @@
+The skeleton is four lines:
+
+  server=...        # the text anchovy
+  rack=...          # the value of $RACK
+  echo "server: $server"
+  echo "rack: ..."  # same idea, with your rack variable

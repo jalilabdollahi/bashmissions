@@ -1,0 +1,9 @@
+Two pieces. `exec N>file` opens descriptor N on a file for the rest of the script, and the special variable `BASH_XTRACEFD` holds the descriptor number Bash writes its trace to:
+
+  exec 4>debug.out
+  BASH_XTRACEFD=4
+  set -x
+  ls
+  set +x
+
+After that, `debug.out` contains the trace and stderr stays quiet.

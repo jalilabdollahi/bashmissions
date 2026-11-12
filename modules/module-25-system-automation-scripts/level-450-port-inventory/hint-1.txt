@@ -1,0 +1,1 @@
+For every host you need two facts per port: is it open, and should it be? Load the "should" side into a table first (host to list of ports), then probe and compare. Decide the order of everything up front: the scan order is also the report order.

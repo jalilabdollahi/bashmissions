@@ -1,1 +1,22 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  extract() {   # FILE INDEX
+    awk -v idx="$2" -v year="$year" -v from="$from" -v to="$to" -v stats="$work/stats" '
+      BEGIN { month table, rank table, reA / reB / reC built from [0-9] }
+      /^[ \t]*$/ { next }
+      { read++
+        if ($0 ~ reA)      { ts = ...; svc = ...; lvl = ...; msg = ... }
+        else if ($0 ~ reB) { split($0, p, "|"); ... }
+        else if ($0 ~ reC) { month name -> number, day padded with 0, level in [BRACKETS] or INFO }
+        else { bad++; next }
+        lvl = norm(lvl)
+        if (ts < from || ts > to) next
+        inwin++
+        if (rank[lvl] >= 2) { kept++; print ts "|" idx "|" NR "|" svc "|" lvl "|" msg }
+      }
+      END { printf "%d %d %d %d\n", read, bad, inwin, kept >> stats }' "$1"
+  }
+
+Loop over "$@" with a counter, append every extract to $work/events, then sort, print with
+awk -F'|' (rebuild the message from fields 6..NF), compute the summary lines from the sorted file,
+and exit 1 if any LEVEL field is CRIT.

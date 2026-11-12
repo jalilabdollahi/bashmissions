@@ -1,0 +1,1 @@
+Bash has an older command, let, that does arithmetic and stores the result in a variable, and a newer notation with double parentheses that does the same. You need one of each here. Pay attention to what the shell reports about success after an arithmetic command: it is not what you might expect.

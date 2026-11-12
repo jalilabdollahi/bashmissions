@@ -1,0 +1,11 @@
+`"$@" || rc=$?` runs the command and stores a failure. `printf -v var '%q ' "$@"` formats the words so spaces and special characters are visibly escaped, with a trailing space you can trim using `${var% }`. Append with `>>`:
+
+  note() {
+    local rc=0 shown
+    "$@" || rc=$?
+    printf -v shown '%q ' "$@"
+    printf '%s: %s status=%d\n' "$USER" "${shown% }" "$rc" >> "${NOTE_LOG:-note.log}"
+    return "$rc"
+  }
+
+`read -ra words` splits a line into an array without expanding `*`; call `note "${words[@]}"`.

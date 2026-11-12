@@ -1,0 +1,10 @@
+A case statement matches a value against several glob patterns separated by |:
+
+  case $value in
+    "")        echo empty ;;
+    /*)        echo starts with a slash ;;
+    *.tmp)     echo ends with .tmp ;;
+    *)         echo something else ;;
+  esac
+
+A `..` component can sit alone, at the start (`../x`), in the middle (`x/../y`) or at the end (`x/..`). Write one pattern for each position. Patterns are not quoted, but the variable after `case` does not need quotes.

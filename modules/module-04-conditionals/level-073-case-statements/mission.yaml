@@ -1,0 +1,60 @@
+id: 73
+module: 4
+module_name: conditionals
+module_display: Making Decisions
+title: case Statements
+difficulty: beginner
+xp: 130
+story: |
+  Lanternfish's in-house service wrapper, `lanternctl`, is mostly a menu: say
+  "start", "stop", "restart" or "status" and it does the right thing. So far it
+  is a thicket of elif lines that Mara describes as "a tree I keep walking into".
+  Rewrite its front end as a tidy command dispatcher.
+objective: |
+  Write solution.sh that takes one argument: an action. Print one line:
+    start    ->  lanternd: starting
+    stop     ->  lanternd: stopping
+    restart  ->  lanternd: restarting
+    status   ->  lanternd: running (pid 4242)
+  For any other action, or no argument at all, print to stderr
+    usage: solution.sh start|stop|restart|status
+  and exit with status 2. Matching is case-sensitive.
+  Write the dispatcher with a `case ... esac` statement.
+concepts:
+  - "case WORD in pattern) ... ;; esac"
+  - "*) as the default branch"
+required_patterns:
+  - pattern: '\bcase\b'
+    message: "Dispatch with case ... in ... esac."
+  - pattern: '\besac\b'
+    message: "A case statement ends with esac (case backwards)."
+  - pattern: '\*\)'
+    message: "Add a *) branch to catch every other action."
+test_cases:
+  - name: start
+    args: [start]
+    expected_stdout: "lanternd: starting"
+  - name: stop
+    args: [stop]
+    expected_stdout: "lanternd: stopping"
+  - name: restart
+    args: [restart]
+    expected_stdout: "lanternd: restarting"
+  - name: status
+    args: [status]
+    expected_stdout: "lanternd: running (pid 4242)"
+  - name: unknown action
+    args: [reload]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh start|stop|restart|status"
+    expected_exit: 2
+  - name: capital letters are unknown
+    args: [START]
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh start|stop|restart|status"
+    expected_exit: 2
+  - name: no argument
+    args: []
+    expected_stdout: ""
+    expected_stderr: "usage: solution.sh start|stop|restart|status"
+    expected_exit: 2

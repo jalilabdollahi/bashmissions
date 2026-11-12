@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Declare first, code second. Put everything that distinguishes the commands into data: their names in order, a description, the word for the argument, how many arguments they take, and one line per option. Then write the generic machinery once: a help printer that reads the data, a parser that reads the data, and a "did you mean" helper. Each command handler can then assume its arguments are already parsed and validated and only has to do the work.

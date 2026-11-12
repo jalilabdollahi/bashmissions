@@ -1,0 +1,8 @@
+awk runs your code once per line, with the line split into fields:
+
+  awk '{ print $2 }' file        # second word of every line
+  awk '{ print $1, $3 }' file    # fields 1 and 3, joined by one space
+  awk '{ print NF }' file        # how many fields each line has
+  awk '{ print $NF }' file       # the last field, whatever NF is
+
+The code goes in single quotes, and the part in braces is the action.

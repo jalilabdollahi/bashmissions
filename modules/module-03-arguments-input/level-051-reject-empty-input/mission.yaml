@@ -1,0 +1,48 @@
+id: 51
+module: 3
+module_name: arguments-input
+module_display: Arguments & Input
+title: Reject Empty Input
+difficulty: beginner
+xp: 100
+story: |
+  The billing import asks the desk for a customer code on each run. Last Friday
+  someone just hit Enter, the script carried on with an empty code, and the
+  invoice went out addressed to nobody. Gus is not amused; Mara wants an empty
+  answer to be refused, the same way whether the person pressed Enter or the
+  input ended without any line at all.
+objective: |
+  Write solution.sh that reads one line from stdin into a variable called code.
+  - If the line is empty, or there is no input at all (end of file), print nothing
+    to stdout, print  error: customer code is empty  to stderr and exit 1.
+  - Otherwise print  code accepted: <code>  and exit 0.
+  Use the -z test for emptiness. Codes with spaces inside, such as "NP D 7", are
+  accepted as typed.
+  Careful: when stdin has no line, read returns a failure status, and under
+  set -e that would end the script silently. Make the read tolerant with || true.
+concepts:
+  - "[[ -z $var ]] is true when the value is empty"
+  - "read at end of file fails; || true keeps set -e calm"
+required_patterns:
+  - pattern: '-z\b'
+    message: "Test for emptiness with [[ -z $code ]]."
+  - pattern: '\|\|\s*true'
+    message: "End the read with || true so a missing line does not stop the script under set -e."
+test_cases:
+  - name: normal code
+    stdin: "HB-042\n"
+    expected_stdout: |-
+      code accepted: HB-042
+  - name: code with spaces inside
+    stdin: "NP D 7\n"
+    expected_stdout: |-
+      code accepted: NP D 7
+  - name: user just pressed Enter
+    stdin: "\n"
+    expected_stdout: ""
+    expected_stderr: "error: customer code is empty"
+    expected_exit: 1
+  - name: no input at all
+    expected_stdout: ""
+    expected_stderr: "error: customer code is empty"
+    expected_exit: 1

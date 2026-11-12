@@ -1,1 +1,21 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A target first last bad run outages longest seen
+  # SLO:  while read -r name tgt extra; do ...pct_to_milli..., names+=("$name"), zero the counters; done < "$slo"
+
+  close_run() { if (( run[$1] > 0 )); then outages[$1]+1; longest = max; run[$1]=0; fi; return 0; }
+
+  while read -r epoch svc state extra; do
+    validate -> "line N: bad probe";  unknown service -> "line N: no SLO for NAME"
+    minute=$((epoch / 60)); seen and minute <= last -> "line N: out of order"
+    first probe: first=minute.  later probes: gap=$((minute - last - 1)); gap>0 -> run += gap, bad += gap
+    last=minute
+    down (or degraded with --strict): run++, bad++      else: close_run
+  done < "$probes"
+
+  for svc in "${names[@]}"; do
+    not seen -> "no data" line;  close_run; total=last-first+1; uptime=(total-bad)*100000/total
+    allowed=total*(100000-target)/100000
+    breached if bad*100000 > total*(100000-target); at risk if bad>0 and bad*100 >= allowed*80
+    print the line
+  done; exit 1 if any breached

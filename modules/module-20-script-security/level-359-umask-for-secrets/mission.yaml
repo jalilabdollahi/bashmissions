@@ -1,0 +1,67 @@
+id: 359
+module: 20
+module_name: script-security
+module_display: Security
+title: umask for Secrets
+difficulty: advanced
+xp: 180
+story: |
+  The deploy script stores each customer's API key in `secrets/NAME.key`. Theo
+  writes the file and then runs `chmod 600` on it, and he is proud of that.
+  Priya asks him how long the key sits readable by everyone between those two
+  commands. Theo goes quiet. "The file should be born private," she says,
+  "not tidied up afterwards."
+objective: |
+  Write solution.sh that takes NAME and KEY (a customer name and an API key).
+
+  1. With fewer than two arguments print `usage: solution.sh NAME KEY` to
+     stderr and exit 2.
+  2. Create the folder `secrets` if needed and write KEY (one line) to
+     `secrets/NAME.key`. The key file must have mode 600 and the folder mode 700
+     (when the script created it), from the very first moment, so do not use
+     chmod at all. Set a umask for this.
+  3. Append NAME as a line to `index.txt` in the current folder. The index is
+     not secret: it must keep the normal, default permissions, so the umask
+     must apply only to the secret part (use a subshell).
+  4. Print `stored: secrets/NAME.key`.
+concepts:
+  - "umask 077 makes new files 600 and new folders 700"
+  - "( umask 077; ... ) limits the umask to a subshell"
+  - "chmod after writing leaves a window"
+required_patterns:
+  - pattern: '\bumask\s+0?077\b'
+    message: "Use umask 077 so new files are created private."
+forbidden_patterns:
+  - pattern: '\bchmod\b'
+    message: "No chmod: a file fixed afterwards was readable for a moment. Use umask before creating it."
+test_cases:
+  - name: first key for a customer
+    args: [harbour, k-81f2a]
+    expected_stdout: "stored: secrets/harbour.key"
+    expected_files:
+      secrets/harbour.key: "k-81f2a"
+      index.txt: "harbour"
+  - name: second key, existing index
+    args: [tidewater, "pk_live 77"]
+    files:
+      index.txt: "harbour\n"
+    expected_stdout: "stored: secrets/tidewater.key"
+    expected_files:
+      secrets/tidewater.key: "pk_live 77"
+      index.txt: |-
+        harbour
+        tidewater
+  - name: secrets folder already exists
+    args: [pier, "x%sy"]
+    files:
+      "secrets/": ""
+    expected_stdout: "stored: secrets/pier.key"
+    expected_files:
+      secrets/pier.key: "x%sy"
+  - name: missing key
+    args: [lonely]
+    expected_stderr: "usage: solution.sh NAME KEY"
+    expected_exit: 2
+    expected_files:
+      secrets: null
+      index.txt: null

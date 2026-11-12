@@ -1,18 +1,75 @@
 id: 337
 module: 18
 module_name: advanced-functions-patterns
-module_display: Advanced Functions & Patterns
+module_display: Function Patterns
 title: Middleware Chain
-difficulty: advanced
-xp: 215
-objective: Pass a value through a chain of functions.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: '[ab]'
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+difficulty: expert
+xp: 250
+story: |
+  Noor's support desk copies customer messages into the archive, and every
+  message needs tidying first: some need their padding trimmed, some should be
+  lowercased, the ones that mention card numbers need the digits hidden.
+  Different mailboxes need different combinations. "Make each tidy-up its own
+  small function," Mara says, "and let the caller choose which ones, and in
+  what order, like pipes with names."
+objective: |
+  Write solution.sh, called as `solution.sh STEP...` (zero or more steps).
+  Standard input holds messages, one per line. Read each line exactly as it
+  is, keeping leading and trailing spaces. Pass each line through every STEP,
+  in the order given: the output of one step is the input of the next.
+  Print the final text of each line between square brackets: [text]
+  Each step NAME is implemented by a function `mw_NAME` that takes the text as
+  `$1` and prints the changed text. Write these five:
+    mw_trim      remove leading and trailing spaces
+    mw_lower     lowercase everything
+    mw_squeeze   collapse each run of spaces into one space
+    mw_mask      replace every digit with #
+    mw_clip      keep only the first 12 characters
+  Before reading any input, check that every STEP names an existing function
+  (use `declare -F`); if not, print "unknown middleware: NAME" to stderr and
+  exit 2 without printing anything else. With no steps, lines are printed
+  unchanged (still in brackets).
 concepts:
-- pipeline of functions
-scaffold: true
+  - "an array of function names as a pipeline"
+  - "value=$(\"mw_$step\" \"$value\"): each output feeds the next input"
+  - "the order of the chain changes the result"
+  - "IFS= read -r keeps the line exactly as is"
+required_patterns:
+  - pattern: 'declare\s+-F\b'
+    message: "Validate each step with declare -F \"mw_$step\"."
+  - pattern: '\bIFS=\s+read\b|\bIFS=\s*read\b|IFS=\s*;?\s*read'
+    message: "Read lines with IFS= read -r so padding is not stripped before the steps run."
+test_cases:
+  - name: trim and lowercase
+    args: [trim, lower]
+    stdin: "   Harbour Bakery  \nSEAWEED Spa\n"
+    expected_stdout: |-
+      [harbour bakery]
+      [seaweed spa]
+  - name: squeeze, then mask digits
+    args: [squeeze, mask]
+    stdin: "card   4929  1234  on file\nplain text\n"
+    expected_stdout: |-
+      [card #### #### on file]
+      [plain text]
+  - name: order matters, trim then clip
+    args: [trim, clip]
+    stdin: "   Harbour Bakery wants a refund\n"
+    expected_stdout: "[Harbour Bake]"
+  - name: order matters, clip then trim
+    args: [clip, trim]
+    stdin: "   Harbour Bakery wants a refund\n"
+    expected_stdout: "[Harbour B]"
+  - name: no steps
+    stdin: "  keep me  \n"
+    expected_stdout: "[  keep me  ]"
+  - name: an unknown step stops before any output
+    args: [trim, shout, lower]
+    stdin: "hello\n"
+    expected_stderr: "unknown middleware: shout"
+    expected_exit: 2
+    expected_stdout: ""
+  - name: all five in a row
+    args: [trim, squeeze, lower, mask, clip]
+    stdin: "  Order  1234  FOR   Tidewater Books  \n"
+    expected_stdout: "[order #### f]"

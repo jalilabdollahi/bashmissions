@@ -1,0 +1,1 @@
+Do not scatter `if dry_run` around every command. Give the script one gate that all risky commands pass through: a helper that either runs the command it receives or just describes it. Then the commands themselves hardly change.

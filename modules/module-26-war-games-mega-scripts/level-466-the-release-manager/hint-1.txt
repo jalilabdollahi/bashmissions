@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Order the steps by how hard they are to undo. Reading things (tags, commits) and computing the version are free. Writing files into `releases/` and building a new changelog beside the old one is cheap to undo. Creating the git tag is the step other people will see, so it goes after everything that can fail, and the announcement goes after the tag. Preflight checks come first so the script refuses to start from a dirty tree or an unparseable tag.

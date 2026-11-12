@@ -1,0 +1,1 @@
+Capitalising a whole string at once cannot work, because only the first letter of each word should be big and the other letters must be small. So you will need to handle the words one by one: split, fix each word, then put them back together with single spaces.

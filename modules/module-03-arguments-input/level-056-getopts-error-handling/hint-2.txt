@@ -1,0 +1,10 @@
+Start the option string with a colon. Two extra branches appear in your `case`; in both, `$OPTARG` holds the option letter that caused trouble:
+
+  while getopts ":a:b" opt; do
+    case $opt in
+      a) alpha=$OPTARG ;;
+      b) beta=yes ;;
+      \?) echo "unknown: -$OPTARG" >&2; exit 2 ;;   # bad letter
+      :)  echo "-$OPTARG needs a value" >&2; exit 2 ;;  # value missing
+    esac
+  done

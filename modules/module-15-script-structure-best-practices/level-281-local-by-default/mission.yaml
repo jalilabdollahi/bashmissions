@@ -1,0 +1,65 @@
+id: 281
+module: 15
+module_name: script-structure-best-practices
+module_display: Script Craft
+title: Local by Default
+difficulty: advanced
+xp: 180
+story: |
+  The stock-check script that feeds Gus's weekly sheet prints each fish tank's
+  stock in a tidy aligned row. Last Friday somebody added a log line after each
+  row, and suddenly the log showed ANCHOVY in capitals and the wrong counts. A
+  helper function had been quietly reusing the caller's variable names. In bash,
+  every variable is global unless you say otherwise, so say otherwise.
+objective: |
+  solution.sh reads lines from stdin, each  NAME COUNT  (two words). For every
+  line it must print two lines:
+    <NAME in upper case padded to 10 characters> <COUNT>
+    logged <name exactly as read>
+  for example  "ANCHOVY    12"  followed by  "logged anchovy". After the last
+  line print  rows: <number of lines processed>  and  total: <sum of counts>.
+  The helper function format_row must declare every variable it uses with
+  local, so it cannot change the variables of its caller. Use these two
+  functions, which the starter already defines: format_row (prints the padded
+  row) and main (the loop). Blank lines are skipped and not counted. Empty
+  input prints  rows: 0  and  total: 0.
+concepts:
+  - "local var inside functions"
+  - "functions share the caller's variables by default"
+  - "local name=$(command) pitfalls are avoided by declaring first"
+required_patterns:
+  - pattern: '\blocal\s+[A-Za-z_]'
+    message: "Declare the helper's own variables with local inside format_row."
+test_cases:
+  - name: three tanks
+    stdin: "anchovy 12\nbarracuda 7\ncuttlefish 30\n"
+    expected_stdout: |-
+      ANCHOVY    12
+      logged anchovy
+      BARRACUDA  7
+      logged barracuda
+      CUTTLEFISH 30
+      logged cuttlefish
+      rows: 3
+      total: 49
+  - name: blank lines are skipped
+    stdin: "dory 5\n\neel 2\n"
+    expected_stdout: |-
+      DORY       5
+      logged dory
+      EEL        2
+      logged eel
+      rows: 2
+      total: 7
+  - name: the loop variables survive the helper
+    stdin: "Flounder 1\n"
+    expected_stdout: |-
+      FLOUNDER   1
+      logged Flounder
+      rows: 1
+      total: 1
+  - name: empty input
+    stdin: ""
+    expected_stdout: |-
+      rows: 0
+      total: 0

@@ -1,0 +1,17 @@
+  up=0; down=0
+  while read -r kind name a b; do
+    case $kind in ''|'#'*) continue ;; esac
+    case $kind in
+      http)
+        code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "$a") || true
+        # 000 -> no connection, 2xx/3xx -> up, anything else -> HTTP $code
+        ;;
+      tcp)
+        if nc -z -w 2 "$a" "$b"; then ... else ... fi
+        ;;
+      *) ... "unknown type $kind" ;;
+    esac
+  done < "$file"
+  echo "summary: $up up, $down down"
+
+Small functions for "report up" and "report down" keep the counters and the printing in one place.

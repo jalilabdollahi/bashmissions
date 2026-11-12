@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Work in two layers. The outer layer decides *which* backups to look at: list the archives, split each name into SET and DATE, sort so that each set's newest come first, and take the first N per set. The inner layer, one function, answers "is this single backup good?" by running a sequence of checks from cheapest to most expensive and returning the first reason it finds. Keep the restore directory in one scratch location that a trap deletes, and never extract an archive you have not listed first.

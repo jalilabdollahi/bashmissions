@@ -1,0 +1,14 @@
+Shape of the script:
+
+  threshold=${1:-}; report=${2:-}
+  # validate both, exit 2 with the messages from the objective
+  paths=() covs=() tots=()
+  while IFS= read -r line || [[ -n $line ]]; do
+    lineno=$(( lineno + 1 ))
+    # skip blank/comment lines, parse "path cov tot" with a regex, check cov <= tot
+    # push onto the arrays and add to sum_cov / sum_tot
+  done < "$report"
+  # sum_tot == 0 -> "no measurable lines"
+  # print coverage=..., loop "${!paths[@]}" for low: lines, then the gate
+
+Use a small function `percent_text COVERED TOTAL` for the one-decimal text.

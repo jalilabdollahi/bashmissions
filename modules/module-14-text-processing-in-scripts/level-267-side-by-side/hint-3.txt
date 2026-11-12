@@ -1,0 +1,5 @@
+Hand the three argument files to paste in the order of the columns:
+
+  paste -d, "$1" "$2" "$3"
+
+Quote the arguments in case a path has spaces.

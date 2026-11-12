@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fake shellcheck for the scripts check. Accepts: shellcheck -q FILE...
+# Exit status comes from FAKE_RC_SHELLCHECK (default 0). Every call is logged.
+if [[ ${1:-} != -q ]]; then
+  echo "shellcheck: unsupported option '${1:-}' (only -q is implemented)" >&2
+  exit 2
+fi
+shift
+if (( $# == 0 )); then
+  echo "shellcheck: no files given" >&2
+  exit 2
+fi
+echo "shellcheck -q $*" >> .calls.log
+exit "${FAKE_RC_SHELLCHECK:-0}"

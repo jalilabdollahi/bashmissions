@@ -1,1 +1,0 @@
-The robust file-reading pattern is while IFS= read -r line; do ...; done < "$file".

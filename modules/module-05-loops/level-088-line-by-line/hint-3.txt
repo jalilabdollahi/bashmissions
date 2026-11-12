@@ -1,0 +1,4 @@
+Top: if [[ $# -ne 1 ]] -> usage to stderr, exit 2. Then file=$1 and if [[ ! -r $file ]] -> "cannot read $file" to stderr, exit 1.
+while IFS= read -r line; do
+  echo "|$line|"
+done < "$file"

@@ -1,0 +1,65 @@
+id: 181
+module: 10
+module_name: redirection-pipelines-in-scripts
+module_display: Streams & Redirection
+title: Errors to a File
+difficulty: beginner
+xp: 110
+story: |
+  The nightly backup of the Harbour Bakery site "works", says Theo, right up
+  until the morning someone notices a folder is missing. The tool did print a
+  warning at 3 a.m., into a terminal nobody was watching. Noor wants the
+  progress messages to stay visible in the cron mail, but the warnings must
+  be saved in a file she can grep.
+objective: |
+  Write solution.sh that takes one argument, a SITE name, and runs
+  `nightly-backup SITE`.
+
+  The tool writes progress lines to standard output and warnings to
+  standard error. Keep it that way for the progress: it must still appear on
+  the screen (stdout). Warnings must NOT appear on the screen; they must go
+  into the file `backup-errors.log` instead. The file is created even when
+  there are no warnings (it is then empty).
+concepts:
+  - "2> redirects stderr (file descriptor 2)"
+  - "stdout and stderr are separate streams"
+required_patterns:
+  - pattern: '\b2>\s*"?backup-errors\.log'
+    message: "Send file descriptor 2 (stderr) to backup-errors.log with 2>."
+forbidden_patterns:
+  - pattern: '&>|2>&1|1>'
+    message: "Only stderr should be redirected; leave stdout on the screen."
+test_cases:
+  - name: clean run
+    args: [harbour-bakery]
+    expected_stdout: |-
+      backup of harbour-bakery started
+      backup of harbour-bakery finished, 12 files copied
+    expected_stderr: ""
+    expected_files:
+      backup-errors.log: ""
+  - name: two warnings are caught
+    args: [tidewater-books]
+    env:
+      BACKUP_WARNINGS: "2"
+    expected_stdout: |-
+      backup of tidewater-books started
+      backup of tidewater-books finished, 10 files copied
+    expected_stderr: ""
+    expected_files:
+      backup-errors.log: |-
+        warning: tidewater-books: skipped locked file #1
+        warning: tidewater-books: skipped locked file #2
+  - name: old warnings are replaced
+    args: [gull-and-anchor]
+    env:
+      BACKUP_WARNINGS: "1"
+    files:
+      backup-errors.log: |
+        warning: yesterday's problem
+    expected_stdout: |-
+      backup of gull-and-anchor started
+      backup of gull-and-anchor finished, 11 files copied
+    expected_stderr: ""
+    expected_files:
+      backup-errors.log: "warning: gull-and-anchor: skipped locked file #1"

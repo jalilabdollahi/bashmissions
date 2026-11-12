@@ -1,1 +1,3 @@
-Use this data-processing concept: awk condition.
+Filtering is a yes/no question asked of every row. Write the question down in words first, with all of its parts joined by "and", and only then translate it into code.
+
+One part is a trap: the traffic column does not always contain a number, and numbers and text are compared by different rules.

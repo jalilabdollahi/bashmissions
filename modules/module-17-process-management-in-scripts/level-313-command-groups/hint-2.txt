@@ -1,0 +1,7 @@
+Curly braces group commands in the *current* shell. The opening `{` needs a space after it, and the last command inside needs a `;` or a newline before the closing `}`:
+
+  { echo one; echo two; } > out.txt
+
+  [[ -r "$f" ]] || { echo "no $f" >&2; exit 1; }
+
+Because it is not a subshell, the `exit` leaves the whole script. `awk 'NF' file` prints only the non-blank lines.

@@ -1,0 +1,15 @@
+  file=$1; shift
+  declare -A value
+  while IFS='=' read -r key rest || [[ -n $key ]]; do
+    # trim key and rest; skip empty keys and "#" comments
+    value[$key]=$rest
+  done < "$file"
+  missing=0
+  for key in "$@"; do
+    if [[ -z ${value[$key]:-} ]]; then
+      echo "missing: $key" >&2
+      missing=$(( missing + 1 ))
+    fi
+  done
+  # if missing > 0: print "config invalid: $missing of $# ..." to stderr, exit 1
+  # otherwise print "config ok: $# required keys present"

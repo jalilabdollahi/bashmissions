@@ -1,0 +1,1 @@
+This is the search from level 168 sitting inside the loop over the input. Use a flag variable (seen=0, set to 1 and break when found) and after the inner loop do if (( seen == 0 )); then keep+=("$x"); fi. The number of repeats is the number of inputs minus the number kept: $# minus ${#keep[@]}.

@@ -1,0 +1,1 @@
+You cannot know a run has ended until the next different line arrives, so keep a little memory between lines: the previous message and how many extra copies you have seen. Decide what to do in each case: same message again, different message, and end of input.

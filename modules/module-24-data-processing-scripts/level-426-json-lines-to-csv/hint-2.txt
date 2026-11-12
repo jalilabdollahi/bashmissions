@@ -1,0 +1,11 @@
+awk can define functions; extra parameters after the real ones are local variables.
+
+  function get(line, key,    pat, p, rest) {
+    pat = "\"" key "\":"            # the characters  "key":
+    p = index(line, pat)            # 0 when absent, else the position
+    if (p == 0) return ""
+    rest = substr(line, p + length(pat))
+    ...
+  }
+
+`sub(/^ +/, "", rest)` removes leading spaces. For a string value walk `rest` with `substr(rest, i, 1)` from position 2 until you meet a quote; a backslash means "take the next character literally". For a bare value, `match(rest, /^[^,} ]*/)` sets RLENGTH. For CSV output: `gsub(/"/, "\"\"", v)` doubles quotes. Header: a BEGIN block.

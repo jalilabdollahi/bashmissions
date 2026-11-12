@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-# TODO: solve the mission
+# For each logs/*.log print "<name>: <line count>". Empty folder: print nothing.
+# TODO: turn on nullglob, loop over the glob, count lines with wc -l.
+wc -l logs/web.log

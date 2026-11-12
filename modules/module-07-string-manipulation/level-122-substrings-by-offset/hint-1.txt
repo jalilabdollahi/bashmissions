@@ -1,0 +1,1 @@
+Every stamp has the same layout, so the year is always the first four characters, the month the next two, and so on. You do not need to search for anything: you only need to say "start here, take this many characters". Draw the stamp on paper and number the characters from 0.

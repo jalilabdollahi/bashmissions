@@ -1,0 +1,6 @@
+[[ -s file ]] is true when the file exists and its size is greater than zero. Put ! in front of it to catch the bad case. To count lines: wc -l < "$file" (use the redirect so wc does not print the name), and wrap it in $(( )) so the number is clean. Generic example:
+
+  if [[ ! -s "$f" ]]; then
+    echo "nothing in $f" >&2
+    exit 1
+  fi

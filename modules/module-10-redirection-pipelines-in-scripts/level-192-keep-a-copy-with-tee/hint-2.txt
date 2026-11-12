@@ -1,0 +1,5 @@
+`tee FILE` reads stdin, writes it to FILE and also prints it. `tee -a` appends instead of truncating. Generic example:
+
+  build-tool 2>&1 | tee -a build.log
+
+The `2>&1` before the pipe merges the errors into what travels through the pipe (a pipe only carries stdout). Because the last stage is `tee`, the pipeline's status would be tee's (0) unless you enable `set -o pipefail`.

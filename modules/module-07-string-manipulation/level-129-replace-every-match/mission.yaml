@@ -1,0 +1,52 @@
+id: 129
+module: 7
+module_name: string-manipulation
+module_display: String Surgery
+title: Replace Every Match
+difficulty: intermediate
+xp: 120
+story: |
+  Customers upload documents with names like "Tidewater Books / Q3 report.pdf".
+  The storage service rejects spaces and slashes, and Noor is tired of renaming
+  files by hand. The rule agreed with Priya: every space becomes an underscore
+  and every slash becomes a dash, so nothing can sneak into a different folder.
+objective: |
+  Write solution.sh that takes one argument, an uploaded file name, and prints a
+  safe version of it:
+    - every space becomes "_"
+    - every "/" becomes "-"
+  All other characters stay as they are. The whole name may be empty. Use
+  ${var//old/new} replacements; do not use tr, sed or awk.
+concepts:
+  - "${var//old/new} replaces every match"
+  - "a slash inside the pattern needs a backslash"
+required_patterns:
+  - pattern: '\$\{[A-Za-z_][A-Za-z0-9_]*//'
+    message: 'Replace every occurrence with a double slash: ${name//old/new}.'
+forbidden_patterns:
+  - pattern: '\b(tr|sed|awk)\b'
+    message: "Use ${name//old/new} instead of an external tool."
+test_cases:
+  - name: spaces and a slash
+    args: ["Tidewater Books / Q3 report.pdf"]
+    expected_stdout: |-
+      Tidewater_Books_-_Q3_report.pdf
+  - name: nothing to change
+    args: [menu.pdf]
+    expected_stdout: |-
+      menu.pdf
+  - name: repeated spaces all change
+    args: ["north  pier   dental.txt"]
+    expected_stdout: |-
+      north__pier___dental.txt
+  - name: only slashes
+    args: ["2024/11/07/invoice.pdf"]
+    expected_stdout: |-
+      2024-11-07-invoice.pdf
+  - name: leading and trailing spaces
+    args: ["  gull anchor "]
+    expected_stdout: |-
+      __gull_anchor_
+  - name: empty name
+    args: [""]
+    expected_stdout: ""

@@ -1,0 +1,89 @@
+id: 380
+module: 21
+module_name: networking-in-scripts
+module_display: Talking to the Network
+title: Download and Verify
+difficulty: advanced
+xp: 240
+story: |
+  Priya has one rule about software that arrives over the network: "Trust
+  it when you have checked it, not when it has arrived." Last month a
+  half-downloaded monitoring agent was installed on `marlin` and nobody
+  noticed until it crashed. The release server publishes a checksum file
+  next to every release, and Priya wants it used, every time.
+objective: |
+  Write solution.sh. It takes one argument, a release NAME such as
+  `lfagent-2.4.tar`, and downloads
+    https://downloads.lanternfish.example/releases/NAME
+  into the current directory, but only keeps it if it is intact.
+
+  The server also publishes the expected values at
+    https://downloads.lanternfish.example/releases/NAME.cksum
+  as one line `CRC SIZE NAME` (the output format of `cksum FILE`).
+
+  1. Download the release into a temporary file (use `mktemp`, not the
+     final name) with `curl -sS --fail -o`.
+  2. Download the checksum line.
+  3. Compute `cksum` of the downloaded file and compare its CRC and SIZE
+     (the first two fields) with the published ones.
+  4. Match: move the temporary file to NAME in the current directory, print
+     `verified: NAME`, exit 0.
+  5. Mismatch: print `checksum mismatch for NAME` to stderr, exit 1.
+  Downloading the release fails: print `download failed: NAME`, exit 1.
+  Downloading the checksum fails: print `no checksum published for NAME`,
+  exit 1. After any failure, nothing may be left in the directory (remove
+  your temporary files, for example with a `trap`). With no argument print
+  `usage: solution.sh NAME` to stderr and exit 2.
+concepts:
+  - "download to a temporary name, publish only after verification"
+  - "cksum prints CRC and size; compare both"
+  - "curl --fail -o FILE for downloads"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Verify the download with cksum."
+  - pattern: '\bmktemp\b'
+    message: "Download into a temporary file first (mktemp), and rename it once verified."
+  - pattern: '(--fail\b|\s-[A-Za-z]*f[A-Za-z]*\s)'
+    message: "Use --fail so a 404 page does not get saved as the release."
+test_cases:
+  - name: an intact download is kept
+    args: [lfagent-2.4.tar]
+    expected_stdout: "verified: lfagent-2.4.tar"
+    expected_files:
+      lfagent-2.4.tar: |
+        LFAGENT 2.4 archive
+        binary: lfagent
+        config: agent.conf
+        built on the dock
+  - name: corrupted contents are rejected
+    args: [lfagent-2.3.tar]
+    expected_stdout: ""
+    expected_stderr: "checksum mismatch for lfagent-2.3.tar"
+    expected_exit: 1
+    expected_files:
+      lfagent-2.3.tar: null
+  - name: a truncated download is rejected
+    args: [lfagent-2.5.tar]
+    expected_stdout: ""
+    expected_stderr: "checksum mismatch for lfagent-2.5.tar"
+    expected_exit: 1
+    expected_files:
+      lfagent-2.5.tar: null
+  - name: no checksum published
+    args: [lfagent-2.6.tar]
+    expected_stdout: ""
+    expected_stderr: "no checksum published for lfagent-2.6.tar"
+    expected_exit: 1
+    expected_files:
+      lfagent-2.6.tar: null
+  - name: the release does not exist
+    args: [lfagent-9.9.tar]
+    expected_stdout: ""
+    expected_stderr: "download failed: lfagent-9.9.tar"
+    expected_exit: 1
+    expected_files:
+      lfagent-9.9.tar: null
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh NAME"
+    expected_exit: 2

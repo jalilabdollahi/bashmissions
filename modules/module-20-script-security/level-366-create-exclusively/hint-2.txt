@@ -1,0 +1,9 @@
+Noclobber makes > refuse to overwrite anything that already exists:
+
+  set -o noclobber
+  echo one > f      # creates f
+  echo two > f      # fails: cannot overwrite existing file
+
+A failed redirection is just a failing command, so you can use it as the condition of an if. Wrap it in braces to silence the shell's own message:
+
+  if { echo hi > f; } 2>/dev/null; then ...

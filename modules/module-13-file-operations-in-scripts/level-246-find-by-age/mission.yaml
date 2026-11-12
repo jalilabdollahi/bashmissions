@@ -1,0 +1,114 @@
+id: 246
+module: 13
+module_name: file-operations-in-scripts
+module_display: Working with Files
+title: Find by Age
+difficulty: intermediate
+xp: 150
+story: |
+  Two different questions keep landing on the support desk. Noor asks, "Which
+  of these customer uploads are older than a month, so we can ask whether
+  they still need them?" And Mara asks, "Which files changed since the last
+  backup ran?" The backup job leaves an empty marker file called
+  `.last-backup` in the folder, and its timestamp is the moment it finished.
+  Both questions are about time, and `find` can answer both.
+objective: |
+  Write solution.sh that takes a FOLDER and a number of DAYS (a whole number
+  of 1 or more). FOLDER contains a marker file `.last-backup` (the marker
+  itself is never listed).
+
+  Using `find` on all regular files below FOLDER (`-type f`), print:
+
+  1. `old: PATH` for every file last modified more than DAYS days ago
+     (`-mtime +DAYS`), sorted;
+  2. `changed: PATH` for every file modified after the marker was written
+     (`-newer` the marker), sorted;
+  3. a final line `summary: A old, B changed`.
+
+  A file can be in both lists. If the marker does not exist print
+  `no marker: FOLDER/.last-backup` to stderr and exit 1. If DAYS is not a
+  whole number of at least 1 or the number of arguments is not two, print
+  `usage: solution.sh FOLDER DAYS` to stderr and exit 2.
+concepts:
+  - "find -mtime +N (older than N days)"
+  - "find -newer FILE (modified after FILE)"
+required_patterns:
+  - pattern: '-mtime\s+\+'
+    message: "Find files older than N days with -mtime +N."
+  - pattern: '-newer\b'
+    message: "Find files changed after the marker with -newer \"$folder/.last-backup\"."
+test_cases:
+  - name: old and changed overlap
+    args: [uploads, "30"]
+    files:
+      uploads/.last-backup:
+        content: ""
+        mtime: 1700000000
+      uploads/ancient.log:
+        content: "a"
+        mtime: 1600000000
+      uploads/mid.log:
+        content: "m"
+        mtime: 1650000000
+      uploads/after.log:
+        content: "p"
+        mtime: 1700500000
+      uploads/fresh.txt: "f"
+    expected_stdout: |-
+      old: uploads/after.log
+      old: uploads/ancient.log
+      old: uploads/mid.log
+      changed: uploads/after.log
+      changed: uploads/fresh.txt
+      summary: 3 old, 2 changed
+  - name: nothing is older than a huge limit
+    args: [shared/books, "100000"]
+    files:
+      shared/books/.last-backup:
+        content: ""
+        mtime: 1700000000
+      shared/books/old.csv:
+        content: "o"
+        mtime: 1500000000
+      shared/books/new.csv: "n"
+      shared/books/sub/newer.csv: "n2"
+    expected_stdout: |-
+      changed: shared/books/new.csv
+      changed: shared/books/sub/newer.csv
+      summary: 0 old, 2 changed
+  - name: names with spaces, everything stale
+    args: ["Old Uploads", "7"]
+    files:
+      "Old Uploads/.last-backup":
+        content: ""
+        mtime: 1700000000
+      "Old Uploads/sub dir/Q4 report.csv":
+        content: "q"
+        mtime: 1710000000
+      "Old Uploads/menu card.pdf":
+        content: "m"
+        mtime: 1690000000
+    expected_stdout: |-
+      old: Old Uploads/menu card.pdf
+      old: Old Uploads/sub dir/Q4 report.csv
+      changed: Old Uploads/sub dir/Q4 report.csv
+      summary: 2 old, 1 changed
+  - name: empty folder except the marker
+    args: [quiet, "5"]
+    files:
+      quiet/.last-backup:
+        content: ""
+        mtime: 1700000000
+    expected_stdout: "summary: 0 old, 0 changed"
+  - name: no marker
+    args: [uploads, "30"]
+    files:
+      uploads/a.log: "a"
+    expected_stderr: "no marker: uploads/.last-backup"
+    expected_exit: 1
+  - name: days must be a positive number
+    args: [uploads, "0"]
+    files:
+      uploads/.last-backup: ""
+    expected_stderr: "usage: solution.sh FOLDER DAYS"
+    expected_exit: 2

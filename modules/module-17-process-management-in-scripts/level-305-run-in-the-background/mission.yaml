@@ -1,0 +1,51 @@
+id: 305
+module: 17
+module_name: process-management-in-scripts
+module_display: Processes & Signals
+title: Run in the Background
+difficulty: advanced
+xp: 170
+story: |
+  The nightly snapshots at Lanternfish run one server after another, and every
+  `snapshot` takes a while. Mara looked at the clock last night and counted
+  five servers sitting in a queue while the machine did almost nothing. "They
+  do not depend on each other," she says. "Start them all at once, but keep a
+  note of which process is which."
+objective: |
+  Write solution.sh. Every argument is a server name; with no arguments print
+  `usage: solution.sh SERVER...` to stderr and exit with status 2.
+
+  For each SERVER, in the order given:
+    1. start `snapshot SERVER` in the background with `&`, so the loop moves
+       on at once (no waiting between servers);
+    2. append the new process's ID (the special variable `$!`) to the file
+       `pids.txt`, one ID per line.
+
+  When every snapshot has been started, print exactly
+    started N snapshots
+  where N is the number of servers, then wait for all of them to finish
+  (a plain `wait` is enough) and exit with status 0.
+
+  The `snapshot` command prints nothing; it takes about half a second.
+concepts:
+  - "cmd & starts a command in the background"
+  - "$! is the PID of the most recent background job"
+required_patterns:
+  - pattern: 'snapshot\b[^\n]*&\s*$'
+    message: "Put & at the end of the snapshot line so it runs in the background."
+  - pattern: '\$!'
+    message: "Read the new job's process ID from $! right after starting it."
+test_cases:
+  - name: three servers
+    args: [anchovy, barracuda, cuttlefish]
+    expected_stdout: "started 3 snapshots"
+  - name: a single server
+    args: [dory]
+    expected_stdout: "started 1 snapshots"
+  - name: five servers at once
+    args: [eel, flounder, grouper, halibut, marlin]
+    expected_stdout: "started 5 snapshots"
+  - name: no servers
+    args: []
+    expected_stderr: "usage: solution.sh SERVER..."
+    expected_exit: 2

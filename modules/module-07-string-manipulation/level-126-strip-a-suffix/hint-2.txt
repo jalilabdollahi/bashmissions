@@ -1,0 +1,7 @@
+A percent sign in a parameter expansion trims from the END. A single % removes the shortest suffix that fits the pattern:
+
+  img="holiday.photo.jpeg"
+  echo "${img%.*}"      # holiday.photo   (shortest ".anything" at the end)
+  echo "${img%.jpeg}"   # holiday.photo   (a literal suffix works too)
+
+The shortest suffix beginning with a dot is the final extension.

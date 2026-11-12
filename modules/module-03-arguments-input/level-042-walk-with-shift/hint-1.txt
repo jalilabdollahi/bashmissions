@@ -1,0 +1,1 @@
+You need the first argument for one purpose and the rest for another. Bash has a command that removes the first argument from the list and slides all the others one place to the left. Remember the first value before you remove it, or it is gone.

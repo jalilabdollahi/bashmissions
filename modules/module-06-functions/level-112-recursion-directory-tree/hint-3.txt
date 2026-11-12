@@ -1,0 +1,15 @@
+  walk() {
+    local dir=$1 indent=$2 entry name
+    for entry in "$dir"/*; do
+      [[ -e $entry ]] || continue
+      name=${entry##*/}
+      if [[ -d $entry ]]; then
+        echo "$indent$name/"
+        walk ... ...
+      else
+        echo "$indent$name"
+      fi
+    done
+  }
+
+Main part: check -d on the argument, print "$root/", then  walk "$root" "  ".

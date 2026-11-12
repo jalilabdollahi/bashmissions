@@ -1,0 +1,14 @@
+  inside=0; found=0; result=
+  while IFS= read -r line || [[ -n $line ]]; do
+    line=$(trim "$line")
+    [[ -z $line || $line == \#* || $line == \;* ]] && continue
+    if [[ $line =~ ^\[(.*)\]$ ]]; then
+      if [[ ${BASH_REMATCH[1]} == "$section" ]]; then inside=1; else inside=0; fi
+      continue
+    fi
+    if (( inside )) && [[ $line == *=* ]]; then
+      key=$(trim "${line%%=*}"); value=$(trim "${line#*=}")
+      # when key equals the wanted key: found=1; result=$value
+    fi
+  done < "$file"
+  # not found -> message and exit 1; else echo "$result"

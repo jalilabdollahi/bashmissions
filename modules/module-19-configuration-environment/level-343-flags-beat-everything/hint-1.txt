@@ -1,0 +1,1 @@
+Collect the four layers first, decide afterwards. Parsing the command line has to happen before you read the file (the file's name is itself a flag), so keep the flags in a separate place instead of resolving them on the spot. Then, for each setting, test the layers from strongest to weakest and stop at the first that has a value.

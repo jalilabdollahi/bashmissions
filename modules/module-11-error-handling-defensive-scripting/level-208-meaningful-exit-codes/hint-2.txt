@@ -1,0 +1,8 @@
+Each check is the same shape: test, message to stderr, `exit N`.
+
+  if [[ ! -r $file ]]; then
+    echo "cannot read $file" >&2
+    exit 3
+  fi
+
+To pull a value out of a config line: `grep '^port=' "$f" | head -n 1 | cut -d= -f2`. To test that it is all digits: `[[ $port =~ ^[0-9]+$ ]]`. A command can be tested directly: `if ! probe "$port" 2>/dev/null; then` (the redirect hides the tool's own message).

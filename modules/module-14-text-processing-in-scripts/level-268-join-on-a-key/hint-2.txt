@@ -1,0 +1,10 @@
+join matches lines with equal first fields:
+
+  join -t, left.csv right.csv            # separator is a comma, key = field 1
+  join -t, -1 2 -2 1 a.csv b.csv         # key = field 2 of a, field 1 of b
+
+Both files must be sorted on the key. To sort on the fly without temporary files, use process substitution:
+
+  join -t, <(sort -t, -k1,1 a.csv) <(sort -t, -k1,1 b.csv)
+
+<(cmd) runs cmd and gives join a path to its output.

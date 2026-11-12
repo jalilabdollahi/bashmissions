@@ -1,0 +1,1 @@
+JSON is just text, and for a small flat object you can cut a value out with a pattern: find the quoted key, skip the colon and the optional opening quote, and keep everything up to the next quote, comma or brace. The hard part is matching the key precisely enough that a longer key containing the same letters does not fool you.

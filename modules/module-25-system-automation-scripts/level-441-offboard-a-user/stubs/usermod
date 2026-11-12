@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# usermod stand-in: supports -L (lock password) and -s SHELL, then a login name.
+# Logs each call to .calls.log; refuses unknown users and unknown flags.
+lock=no shell=- user=
+while (( $# )); do
+  case $1 in
+    -L) lock=yes ;;
+    -s) shell=$2; shift ;;
+    -*) echo "usermod: invalid option -- '${1#-}'" >&2; exit 2 ;;
+    *)  user=$1 ;;
+  esac
+  shift
+done
+[[ -n $user ]] || { echo "usermod: no login name given" >&2; exit 2; }
+grep -q "^$user:" fixtures/etc/passwd || { echo "usermod: user '$user' does not exist" >&2; exit 6; }
+echo "usermod user=$user lock=$lock shell=$shell" >> .calls.log

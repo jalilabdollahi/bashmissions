@@ -1,1 +1,0 @@
-`${!name}` reads the variable whose **name** is the value of `name`. If `name="COLOR_RED"` and `COLOR_RED="red"`, then `${!name}` is `red`.

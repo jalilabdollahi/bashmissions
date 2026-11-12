@@ -1,0 +1,8 @@
+uname -s prints the kernel name, for example Linux or Darwin. Capture it with $( ... ) and compare it with == in an if/elif ladder (a case statement works too). Generic example:
+
+  kernel="$(uname -s)"
+  if [[ $kernel == Linux ]]; then
+    echo "penguin"
+  else
+    echo "not a penguin: $kernel"
+  fi

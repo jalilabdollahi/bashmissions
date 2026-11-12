@@ -1,22 +1,415 @@
 id: 461
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The User Auditor
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The User Auditor` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The User Auditor
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 370
+story: |
+  During the storm emergency Lanternfish handed out accounts like lifejackets:
+  contractors to rewire the dock network, a volunteer to watch the webcams, a
+  "temporary" developer who was never removed. Now the insurer's auditor is coming,
+  and Priya has one sentence for you: "Tell me everything on these servers that
+  should not be there, before they do." She wants orphans, stale accounts, sloppy
+  key permissions and any account that quietly shares root's powers, in one report.
+objective: |
+  Write solution.sh:
+    `solution.sh [--stale-days N] [--ignore USER]... PASSWD SHADOW LASTLOG`
+
+  Inputs (all must be readable, else `error: cannot read FILE` on stderr, exit 2):
+  - PASSWD: standard `user:x:uid:gid:comment:home:shell` lines.
+  - SHADOW: `user:hash:...`; only the first two fields matter. An empty hash means
+    no password; `!` or `*` means locked.
+  - LASTLOG: `user|days` where days is the number of days since the last login, or
+    the word `never`. A user missing from LASTLOG counts as `never`.
+  - Home directories are looked up relative to the current directory: a passwd home
+    of `/home/anna` is `home/anna`. Homes outside `/home/` are never inspected.
+  Blank lines and `#` lines in the three files are ignored. `--ignore USER` (repeatable)
+  silences every finding about that user, but its home directory still counts as owned.
+  `--stale-days N` (whole number, default 90; otherwise `error: --stale-days needs a
+  whole number`, exit 2). Other usage mistakes: `usage: solution.sh [--stale-days N]
+  [--ignore USER]... PASSWD SHADOW LASTLOG`, exit 2.
+
+  Findings (severity, kind, user, detail):
+  - CRIT UID0: uid 0 but the name is not `root` -> `uid 0 but not root`
+  - CRIT NOPASS: uid >= 1000, login shell, SHADOW hash empty -> `no password set`
+  - WARN DUPUID: any account whose uid is already used by an earlier PASSWD line
+    -> `uid N shared with FIRSTUSER`
+  - For uid >= 1000 with a login shell (a shell not ending in `nologin` or `false`):
+    WARN STALE `never logged in`, or `last login N days ago` when N > stale-days
+  - For uid >= 1000 with a home under /home/: WARN NOHOME `home /home/x missing`
+    when the directory does not exist; otherwise inspect, inside the home:
+    CRIT BADPERM `.ssh/id_rsa is MODE` and `.netrc is MODE` if the file exists and
+    group or others have any permission (MODE is the first 10 characters of `ls -l`);
+    WARN BADPERM `.ssh/authorized_keys is MODE` if group or others can write it.
+  - INFO ORPHAN: a directory directly inside `home/` that no PASSWD line points to
+    -> user column is the directory name, detail `home directory has no account`
+
+  Output: a header `printf '%-5s %-8s %-10s %s\n' SEV KIND USER DETAIL`, then one row per
+  finding in the same format, ordered CRIT, WARN, INFO, then by kind, then by user.
+  Last line: `findings: C crit, W warn, I info`. Exit 0 when there are no findings, 1
+  when there is at least one.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "associative arrays as lookup tables for several files"
+  - "IFS-split loops over passwd-style files"
+  - "reading permissions from ls -l without stat"
+  - "an allow-list option that can repeat"
+  - "ranked findings sorted at the end"
+required_patterns:
+  - pattern: 'declare -A'
+    message: "Use associative arrays to look users up across the three files."
+  - pattern: 'ls -l'
+    message: "Read permissions from `ls -l` (stat differs between macOS and Linux)."
+test_cases:
+  - name: the full audit
+    args:
+    - passwd
+    - shadow
+    - lastlog
+    files:
+      passwd: |
+        root:x:0:0:root:/root:/bin/bash
+        daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+        toor:x:0:0:backdoor:/root:/bin/sh
+        anna:x:1001:1001:Anna:/home/anna:/bin/bash
+        ben:x:1002:1002:Ben:/home/ben:/bin/bash
+        cara:x:1003:1003:Cara:/home/cara:/bin/bash
+        dev2:x:1001:1004:Dev Two:/home/dev2:/bin/bash
+        eli:x:1005:1005:Eli:/home/eli:/usr/sbin/nologin
+        deploy:x:1006:1006:deploy bot:/var/lib/deploy:/bin/bash
+      shadow: |
+        root:$6$abc:19000::
+        toor:$6$abc
+        anna:$6$x
+        ben:
+        cara:$6$y
+        dev2:!
+        eli:!
+        deploy:*
+      lastlog: |
+        # user|days
+        anna|3
+        ben|12
+        cara|214
+        dev2|never
+      home/anna/.ssh/id_rsa:
+        content: |
+          key
+        mode: '0644'
+      home/anna/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 AAA
+        mode: '0600'
+      home/cara/.netrc:
+        content: |
+          machine x
+        mode: '0600'
+      home/cara/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 BBB
+        mode: '0664'
+      home/dev2/notes.txt: |
+        hi
+      home/eli/notes.txt: |
+        hi
+      home/ghost/notes.txt: |
+        left behind
+    expected_stdout: |-
+      SEV   KIND     USER       DETAIL
+      CRIT  BADPERM  anna       .ssh/id_rsa is -rw-r--r--
+      CRIT  NOPASS   ben        no password set
+      CRIT  UID0     toor       uid 0 but not root
+      WARN  BADPERM  cara       .ssh/authorized_keys is -rw-rw-r--
+      WARN  DUPUID   dev2       uid 1001 shared with anna
+      WARN  DUPUID   toor       uid 0 shared with root
+      WARN  NOHOME   ben        home /home/ben missing
+      WARN  STALE    cara       last login 214 days ago
+      WARN  STALE    deploy     never logged in
+      WARN  STALE    dev2       never logged in
+      INFO  ORPHAN   ghost      home directory has no account
+      findings: 3 crit, 7 warn, 1 info
+    expected_exit: 1
+  - name: allow-list and a longer stale limit
+    args:
+    - --ignore
+    - deploy
+    - --ignore
+    - toor
+    - --stale-days
+    - '400'
+    - passwd
+    - shadow
+    - lastlog
+    files:
+      passwd: |
+        root:x:0:0:root:/root:/bin/bash
+        daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+        toor:x:0:0:backdoor:/root:/bin/sh
+        anna:x:1001:1001:Anna:/home/anna:/bin/bash
+        ben:x:1002:1002:Ben:/home/ben:/bin/bash
+        cara:x:1003:1003:Cara:/home/cara:/bin/bash
+        dev2:x:1001:1004:Dev Two:/home/dev2:/bin/bash
+        eli:x:1005:1005:Eli:/home/eli:/usr/sbin/nologin
+        deploy:x:1006:1006:deploy bot:/var/lib/deploy:/bin/bash
+      shadow: |
+        root:$6$abc:19000::
+        toor:$6$abc
+        anna:$6$x
+        ben:
+        cara:$6$y
+        dev2:!
+        eli:!
+        deploy:*
+      lastlog: |
+        # user|days
+        anna|3
+        ben|12
+        cara|214
+        dev2|never
+      home/anna/.ssh/id_rsa:
+        content: |
+          key
+        mode: '0644'
+      home/anna/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 AAA
+        mode: '0600'
+      home/cara/.netrc:
+        content: |
+          machine x
+        mode: '0600'
+      home/cara/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 BBB
+        mode: '0664'
+      home/dev2/notes.txt: |
+        hi
+      home/eli/notes.txt: |
+        hi
+      home/ghost/notes.txt: |
+        left behind
+    expected_stdout: |-
+      SEV   KIND     USER       DETAIL
+      CRIT  BADPERM  anna       .ssh/id_rsa is -rw-r--r--
+      CRIT  NOPASS   ben        no password set
+      WARN  BADPERM  cara       .ssh/authorized_keys is -rw-rw-r--
+      WARN  DUPUID   dev2       uid 1001 shared with anna
+      WARN  NOHOME   ben        home /home/ben missing
+      WARN  STALE    dev2       never logged in
+      INFO  ORPHAN   ghost      home directory has no account
+      findings: 2 crit, 4 warn, 1 info
+    expected_exit: 1
+  - name: a clean system exits 0
+    args:
+    - passwd
+    - shadow
+    - lastlog
+    files:
+      passwd: |
+        root:x:0:0:root:/root:/bin/bash
+        anna:x:1001:1001:Anna:/home/anna:/bin/bash
+      shadow: |
+        root:$6$abc
+        anna:$6$x
+      lastlog: |
+        anna|7
+      home/anna/.ssh/id_rsa:
+        content: |
+          key
+        mode: '0600'
+      home/anna/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 AAA
+        mode: '0600'
+    expected_stdout: |-
+      SEV   KIND     USER       DETAIL
+      findings: 0 crit, 0 warn, 0 info
+  - name: users missing from lastlog count as never
+    args:
+    - passwd
+    - shadow
+    - lastlog
+    files:
+      passwd: |
+        volunteer:x:1010:1010:Webcam:/home/volunteer:/bin/bash
+      shadow: |
+        volunteer:$6$q
+      lastlog: ''
+      home/volunteer/cam.conf: |
+        x
+    expected_stdout: |-
+      SEV   KIND     USER       DETAIL
+      WARN  STALE    volunteer  never logged in
+      findings: 0 crit, 1 warn, 0 info
+    expected_exit: 1
+  - name: unknown option
+    args:
+    - --verbose
+    - passwd
+    - shadow
+    - lastlog
+    files:
+      passwd: |
+        root:x:0:0:root:/root:/bin/bash
+        daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+        toor:x:0:0:backdoor:/root:/bin/sh
+        anna:x:1001:1001:Anna:/home/anna:/bin/bash
+        ben:x:1002:1002:Ben:/home/ben:/bin/bash
+        cara:x:1003:1003:Cara:/home/cara:/bin/bash
+        dev2:x:1001:1004:Dev Two:/home/dev2:/bin/bash
+        eli:x:1005:1005:Eli:/home/eli:/usr/sbin/nologin
+        deploy:x:1006:1006:deploy bot:/var/lib/deploy:/bin/bash
+      shadow: |
+        root:$6$abc:19000::
+        toor:$6$abc
+        anna:$6$x
+        ben:
+        cara:$6$y
+        dev2:!
+        eli:!
+        deploy:*
+      lastlog: |
+        # user|days
+        anna|3
+        ben|12
+        cara|214
+        dev2|never
+      home/anna/.ssh/id_rsa:
+        content: |
+          key
+        mode: '0644'
+      home/anna/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 AAA
+        mode: '0600'
+      home/cara/.netrc:
+        content: |
+          machine x
+        mode: '0600'
+      home/cara/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 BBB
+        mode: '0664'
+      home/dev2/notes.txt: |
+        hi
+      home/eli/notes.txt: |
+        hi
+      home/ghost/notes.txt: |
+        left behind
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--stale-days N] [--ignore USER]... PASSWD SHADOW LASTLOG'
+    expected_exit: 2
+  - name: stale-days must be numeric
+    args:
+    - --stale-days
+    - many
+    - passwd
+    - shadow
+    - lastlog
+    files:
+      passwd: |
+        root:x:0:0:root:/root:/bin/bash
+        daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+        toor:x:0:0:backdoor:/root:/bin/sh
+        anna:x:1001:1001:Anna:/home/anna:/bin/bash
+        ben:x:1002:1002:Ben:/home/ben:/bin/bash
+        cara:x:1003:1003:Cara:/home/cara:/bin/bash
+        dev2:x:1001:1004:Dev Two:/home/dev2:/bin/bash
+        eli:x:1005:1005:Eli:/home/eli:/usr/sbin/nologin
+        deploy:x:1006:1006:deploy bot:/var/lib/deploy:/bin/bash
+      shadow: |
+        root:$6$abc:19000::
+        toor:$6$abc
+        anna:$6$x
+        ben:
+        cara:$6$y
+        dev2:!
+        eli:!
+        deploy:*
+      lastlog: |
+        # user|days
+        anna|3
+        ben|12
+        cara|214
+        dev2|never
+      home/anna/.ssh/id_rsa:
+        content: |
+          key
+        mode: '0644'
+      home/anna/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 AAA
+        mode: '0600'
+      home/cara/.netrc:
+        content: |
+          machine x
+        mode: '0600'
+      home/cara/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 BBB
+        mode: '0664'
+      home/dev2/notes.txt: |
+        hi
+      home/eli/notes.txt: |
+        hi
+      home/ghost/notes.txt: |
+        left behind
+    expected_stdout: ''
+    expected_stderr: 'error: --stale-days needs a whole number'
+    expected_exit: 2
+  - name: unreadable lastlog
+    args:
+    - passwd
+    - shadow
+    - lastlog.txt
+    files:
+      passwd: |
+        root:x:0:0:root:/root:/bin/bash
+        daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+        toor:x:0:0:backdoor:/root:/bin/sh
+        anna:x:1001:1001:Anna:/home/anna:/bin/bash
+        ben:x:1002:1002:Ben:/home/ben:/bin/bash
+        cara:x:1003:1003:Cara:/home/cara:/bin/bash
+        dev2:x:1001:1004:Dev Two:/home/dev2:/bin/bash
+        eli:x:1005:1005:Eli:/home/eli:/usr/sbin/nologin
+        deploy:x:1006:1006:deploy bot:/var/lib/deploy:/bin/bash
+      shadow: |
+        root:$6$abc:19000::
+        toor:$6$abc
+        anna:$6$x
+        ben:
+        cara:$6$y
+        dev2:!
+        eli:!
+        deploy:*
+      lastlog: |
+        # user|days
+        anna|3
+        ben|12
+        cara|214
+        dev2|never
+      home/anna/.ssh/id_rsa:
+        content: |
+          key
+        mode: '0644'
+      home/anna/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 AAA
+        mode: '0600'
+      home/cara/.netrc:
+        content: |
+          machine x
+        mode: '0600'
+      home/cara/.ssh/authorized_keys:
+        content: |
+          ssh-ed25519 BBB
+        mode: '0664'
+      home/dev2/notes.txt: |
+        hi
+      home/eli/notes.txt: |
+        hi
+      home/ghost/notes.txt: |
+        left behind
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read lastlog.txt'
+    expected_exit: 2

@@ -1,0 +1,1 @@
+An `if` never looks at true or false as such; it runs a command and checks whether that command succeeded. A function you wrote is a command too, so `if` can run it directly, and "succeeded" means it returned 0.

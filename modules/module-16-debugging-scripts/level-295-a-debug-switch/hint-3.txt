@@ -1,0 +1,15 @@
+The function:
+
+  debug() {
+    if [[ ${DEBUG:-} == 1 ]]; then
+      echo "debug: $*" >&2
+    fi
+  }
+
+Define it before use. Then the main part is:
+
+  debug "sites=$2"
+  first=8000
+  last=$(( first + 2 * $2 - 1 ))
+  debug ...        # report last
+  echo "$1 uses ports $first-$last"

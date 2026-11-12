@@ -1,0 +1,19 @@
+mkfifo feed.pipe
+tailfeed "$src" feed.pipe &
+pid=$!
+
+errors=0
+while IFS= read -r line; do
+  if [[ $line == *ERROR* ]]; then
+    echo "!! $line"
+    errors=$((errors + 1))
+  fi
+done < feed.pipe
+
+echo "errors=$errors"
+status=0
+wait "$pid" || status=$?
+rm feed.pipe
+exit "$status"
+
+Usage check first, as always.

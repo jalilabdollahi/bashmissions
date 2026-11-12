@@ -1,0 +1,12 @@
+The skeleton is:
+
+  rule() {
+    echo "========================"
+  }
+
+  rule
+  echo "Nightly report: $TITLE"
+  rule
+  ... status line, then rule once more
+
+Count the equals signs: there should be 24.

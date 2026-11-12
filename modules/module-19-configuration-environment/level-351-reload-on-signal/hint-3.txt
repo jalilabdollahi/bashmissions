@@ -1,0 +1,18 @@
+  read_level() {
+    # loop over "$config": trimmed key/value, remember the value of the last "level" line
+    case $found in
+      debug|info|warn|error) printf '%s' "$found" ;;
+      *) return 1 ;;
+    esac
+  }
+  if ! level=$(read_level); then echo "no valid level in $config" >&2; exit 1; fi
+  echo "loaded: level=$level"
+  reload() {
+    local fresh
+    if fresh=$(read_level); then level=$fresh; echo "reloaded: level=$level"
+    else echo "reload rejected: keeping level=$level" >&2; fi
+  }
+  trap reload HUP
+  printf 'level=%s\n' "$newlevel" >> "$config"
+  kill -HUP $$
+  echo "done: level=$level"

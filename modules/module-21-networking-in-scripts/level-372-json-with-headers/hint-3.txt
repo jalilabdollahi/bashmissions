@@ -1,0 +1,8 @@
+  customer=$1
+  amount=$2
+  # validate: amount matches ^[0-9]+(\.[0-9]+)?$ ; customer has no " in it
+  json="{\"customer\":\"$customer\",\"amount\":$amount}"
+  reply=$(curl -s -H '...' -d "$json" https://billing.lanternfish.example/api/v1/invoices)
+  printf 'reply: %s\n' "$reply"
+
+Quote "$json" when you pass it, or a customer name with a space is split into two arguments.

@@ -1,0 +1,14 @@
+action="${1:-}"
+case "$action" in
+  start)
+    echo "lanternd: starting"
+    ;;
+  stop)
+    echo "lanternd: stopping"
+    ;;
+  # ... restart) and status) branches ...
+  *)
+    echo "usage: solution.sh start|stop|restart|status" >&2
+    exit 2
+    ;;
+esac

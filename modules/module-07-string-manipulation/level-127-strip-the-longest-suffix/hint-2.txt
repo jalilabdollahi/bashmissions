@@ -1,0 +1,7 @@
+A single percent removes the shortest matching suffix; a double percent removes the longest:
+
+  host="a.b.c.d"
+  echo "${host%.*}"      # a.b.c   (shortest: just ".d")
+  echo "${host%%.*}"     # a       (longest: from the first dot on)
+
+To read stdin line by line use:  while IFS= read -r name; do ... done

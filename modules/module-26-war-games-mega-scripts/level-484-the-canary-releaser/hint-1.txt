@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Think of a loop over the plan with a very short body: move traffic, wait, look at the numbers, decide "continue" or "abort". Everything dangerous happens inside that decision, so prepare it carefully: validate the plan and settings before the first call to the load balancer, load the metrics into a lookup table, and write one abort function that always does the same three things (traffic back to zero, say why, exit 1). The comparison needs no decimals if you work in permille.
