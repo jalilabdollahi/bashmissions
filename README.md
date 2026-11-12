@@ -104,31 +104,36 @@ This means a learner never has to get permanently stuck on a level.
 
 ## Learning Path
 
-The game covers 26 modules, including:
+| # | Module | Levels | Focus |
+|---|--------|--------|-------|
+| 1 | Hello, Terminal | 18 | shebang, `echo` and `printf`, quoting, stderr, comments |
+| 2 | Variables | 18 | assignment, braces, quoting, command substitution, read-only, defaults |
+| 3 | Arguments & Input | 20 | `$1`, `$@` and `$#`, `shift`, required and optional arguments, `read` |
+| 4 | Making Decisions | 22 | `if`/`elif`, string, number and file tests, `&&` and `\|\|`, `case` |
+| 5 | Loops | 22 | `for`, brace ranges, `while`/`until`, `break`/`continue`, reading files line by line |
+| 6 | Functions | 20 | arguments, return status, returning data, `local`, sourcing a library |
+| 7 | String Surgery | 22 | length, substrings, prefix/suffix stripping, replacement, case changes |
+| 8 | Arithmetic | 14 | `$(( ))`, precedence, division and remainder, `let`, decimals with `awk` |
+| 9 | Arrays & Maps | 22 | indexed arrays, slices, `mapfile`, associative arrays |
+| 10 | Streams & Redirection | 18 | redirects, merging streams, here-docs and here-strings, pipelines, `tee`, file descriptors |
+| 11 | Failing Safely | 18 | exit status, strict mode, `pipefail`, traps, cleanup and graceful shutdown |
+| 12 | Patterns & Regex | 18 | `=~`, anchors, classes, quantifiers, capture groups, input validation |
+| 13 | Working with Files | 18 | creating, appending, copying, renaming and deleting safely, temp files |
+| 14 | Text Processing | 22 | `cut`, `sort`, `uniq`, `tr`, `awk` fields and filters, `sed` |
+| 15 | Script Craft | 18 | headers, `--help`, `main()`, constants, safe filenames, small functions |
+| 16 | Debugging | 14 | `set -x`, `PS4`, `LINENO`, call stacks, ERR traps, dry-run mode |
+| 17 | Processes & Signals | 18 | background jobs, `wait`, worker limits, subshells, signals |
+| 18 | Function Patterns | 18 | dispatch tables, plugins, hooks, memoizing, decorators, dynamic calls |
+| 19 | Configuration | 14 | `.env` files, layered defaults, flags, required keys, secrets, INI sections |
+| 20 | Security | 14 | injection, replacing `eval`, allow-lists, safe temp files, `umask`, path traversal |
+| 21 | Talking to the Network | 14 | `curl`, status codes, JSON and tokens, retries, pagination, port checks |
+| 22 | Logging & Monitoring | 18 | timestamped and structured logs, rotation, disk/load/memory checks, heartbeats |
+| 23 | Build & Deploy | 18 | step runners, test and coverage gates, semver, changelogs, release tags |
+| 24 | Data Wrangling | 18 | CSV parsing and validation, joins, statistics, CSV↔JSON, access logs |
+| 25 | Running the Fleet | 20 | backups and retention, user provisioning, fleet commands, cert expiry, cleanup |
+| 26 | Storm Season: War Games | 44 | large multi-part incident scripts combining every earlier module |
 
-- Hello World and output
-- Variables and data types
-- Arguments and input
-- Conditionals
-- Loops
-- Functions
-- Strings
-- Arithmetic
-- Arrays
-- Redirection and pipelines
-- Error handling
-- Regular expressions
-- File operations
-- Text processing
-- Debugging
-- Process management
-- Environment and configuration
-- Security
-- Networking
-- Logging and monitoring
-- Automation and CI/CD
-- Data processing
-- War-game style advanced scripting
+The full level-by-level plan is in [CURRICULUM.md](CURRICULUM.md).
 
 ---
 
