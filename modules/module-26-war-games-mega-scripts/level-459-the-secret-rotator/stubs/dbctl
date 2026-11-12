@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# dbctl set-password USER SECRET | dbctl check USER SECRET
+# The "database" is db/USER.pass. FAKE_DB_REFUSE=USER makes set-password fail for
+# that user; FAKE_DB_BAD_CHECK=USER makes check fail for that user.
+case ${1:-} in
+  set-password)
+    [[ $# -eq 3 ]] || { echo "dbctl: usage: dbctl set-password USER SECRET" >&2; exit 2; }
+    if [[ ${FAKE_DB_REFUSE:-} == "$2" ]]; then echo "dbctl: access denied" >&2; exit 1; fi
+    mkdir -p db
+    printf '%s\n' "$3" > "db/$2.pass"
+    ;;
+  check)
+    [[ $# -eq 3 ]] || { echo "dbctl: usage: dbctl check USER SECRET" >&2; exit 2; }
+    if [[ ${FAKE_DB_BAD_CHECK:-} == "$2" ]]; then echo "dbctl: login failed" >&2; exit 1; fi
+    [[ -f db/$2.pass && $(<"db/$2.pass") == "$3" ]]
+    ;;
+  *)
+    echo "dbctl: unknown command '${1:-}'" >&2
+    exit 2
+    ;;
+esac

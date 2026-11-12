@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- The entry checksum: `read -r sum _ < <(printf '%s' "$prev|$seq|$ts|$actor|$action|$detail" | cksum)`. `printf '%s'` adds no newline.
+- Parsing a line whose last field may contain the separator: `IFS='|' read -r seq sum ts actor action detail`; the last variable receives the rest of the line.
+- Carry state across files: keep `prev` and `expect` outside the per-file loop, so segment 2 continues exactly where segment 1 ended. List files with `for f in "$dir"/seg-*.log` (sorted by name because the numbers are zero padded), then `current.log`.
+- The anchor: `echo "$last_seq $last_sum" > anchor.new; mv anchor.new anchor`. To check it, find the log's SUM for the anchored SEQ with `awk -F'|' -v s="$a_seq" '$1 + 0 == s { print $2; exit }' files...`.
+- Lock: `mkdir "$dir/lock" 2>/dev/null || { echo "..." >&2; exit 4; }` followed by `trap 'rmdir "$dir/lock"' EXIT`; only writers lock.
+- Next free segment name: count existing `seg-*.log` files and use `printf -v name 'seg-%04d.log' "$((count + 1))"`.

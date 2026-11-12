@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# df -P stand-in (FAKE_FAIL_COLLECTOR=df makes it fail)
+[[ ${1:-} == -P && $# -eq 1 ]] || { echo "df: this stand-in supports only: df -P" >&2; exit 2; }
+[[ ${FAKE_FAIL_COLLECTOR:-} == df ]] && { echo "df: cannot read mount table" >&2; exit 1; }
+cat <<'OUT'
+Filesystem 1024-blocks Used Available Capacity Mounted on
+/dev/vol0 1000000 710000 290000 71% /
+/dev/vol1 5000000 4500000 500000 90% /data
+OUT

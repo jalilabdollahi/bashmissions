@@ -1,1 +1,6 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Map file: `declare -A cfg_of key_of user_of` and `while IFS='|' read -r name cfg key user; do ... done < rotation.map`. Keep a normal array `order+=("$name")` as well, because associative arrays have no order.
+- Atomic config rewrite: `tmp=$(mktemp "$cfg.XXXXXX"); cp -p "$cfg" "$tmp"` (this copies the mode onto the temp file), then `awk ... "$cfg" > "$tmp"` (redirecting keeps that mode), then `mv "$tmp" "$cfg"`.
+- Secret via environment: `NEWVALUE=$new awk -F= -v k="$key" '$1 == k { print k "=" ENVIRON["NEWVALUE"]; next } { print }'`.
+- A function that reports why it failed: set a global `reason` and `return 1`, and call it as `if rotate_one "$name"; then ...`, which also keeps `set -e` quiet.

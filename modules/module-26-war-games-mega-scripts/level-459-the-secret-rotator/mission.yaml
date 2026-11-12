@@ -1,22 +1,426 @@
 id: 459
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Secret Rotator
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Secret Rotator` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Secret Rotator
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 360
+story: |
+  At 2 a.m., mid-storm, Theo pasted the bakery database password into a public
+  support ticket "just so Noor could see the error". Priya noticed at 6 a.m. and has
+  been awake ever since. Every credential that ever touched that ticket must change
+  today, without taking a single site down. A secret that is rotated badly is worse
+  than one that is leaked: a half-changed password locks everybody out. You are
+  writing the rotator that changes it everywhere, proves it works, and puts
+  everything back if it does not.
+objective: |
+  Write solution.sh: `solution.sh [--dry-run] [NAME...]`
+
+  `rotation.map` lists what can be rotated, one per line, fields separated by `|`:
+    NAME|CONFIG_FILE|KEY|DBUSER
+  (blank lines and lines starting with `#` are ignored). Each secret's current
+  value is the single line in `secrets/NAME.secret`. If `rotation.map` cannot be
+  read: `error: cannot read rotation.map` on stderr, exit 2.
+
+  With no NAME, rotate every entry in map order, otherwise the names given, in the
+  order given. An unknown name prints `error: unknown secret NAME` to stderr and
+  exits 2 before anything is changed.
+
+  Tools on PATH:
+    vault-gen NAME                    prints a fresh secret
+    dbctl set-password USER SECRET    change the database password (exit 0 = done)
+    dbctl check USER SECRET           exit 0 if SECRET is the current password
+
+  Rotating one NAME, in this order:
+    1. `secrets/NAME.secret` must be readable, else FAILED (no current secret on disk).
+    2. CONFIG_FILE must contain a line starting with `KEY=`, else FAILED (config has no KEY).
+    3. new=$(vault-gen NAME); `dbctl set-password DBUSER new`; on error FAILED
+       (database refused the new password), nothing else has changed.
+    4. Rewrite the `KEY=` line of CONFIG_FILE with the new value, keeping every other
+       line and the file's permissions. Never leave a half-written config: build the new
+       file next to the old one and `mv` it over. Keep the old config as
+       `CONFIG_FILE.rotate-bak` until step 5 has finished.
+    5. `dbctl check DBUSER new`. If it fails: restore the old config from the backup,
+       set the old password back with `dbctl set-password`, FAILED (verification failed,
+       old secret restored).
+    6. On success delete the backup and write the new secret to `secrets/NAME.secret`
+       with mode 600.
+  The new secret must never appear on stdout, stderr or in the log, and must not be
+  passed to awk as a command-line argument (it would show up in `ps`): hand it over
+  through the environment (ENVIRON) instead.
+
+  Output: per name `rotate NAME: ok` or `rotate NAME: FAILED (reason)` and one line
+  appended to `rotation.log`: `NAME ok` or `NAME failed: reason`. A failure does not
+  stop the other names. At the end print `rotated: a b` and `failed: c` (names
+  separated by spaces, `none` when empty). Exit 1 if anything failed, else 0.
+
+  `--dry-run` changes nothing, writes no log, and prints per name
+  `would rotate NAME: CONFIG_FILE KEY (db user DBUSER)`, then exits 0.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "associative arrays loaded from a map file"
+  - "write-new-then-mv: atomic config updates"
+  - "verify, and roll back to the saved copy"
+  - "secrets via environment, not argv, and never in logs"
+  - "file permissions preserved and enforced"
+required_patterns:
+  - pattern: 'ENVIRON'
+    message: "Pass the secret to awk through ENVIRON, not on the command line."
+  - pattern: '\bmv\b'
+    message: "Replace the config atomically with mv."
+test_cases:
+  - name: rotate everything in the map
+    args: []
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_PASS=old-books
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: |-
+      rotate bakery-db: ok
+      rotate books-db: ok
+      rotated: bakery-db books-db
+      failed: none
+    expected_files:
+      conf/bakery.conf: |-
+        site=harbour-bakery
+        db_user=bakery
+        db_password=rot-bakery-db-k7
+        cache=on
+      conf/books.conf: |-
+        DB_PASS=rot-books-db-k7
+        DB_HOST=dory
+      secrets/bakery-db.secret: rot-bakery-db-k7
+      secrets/books-db.secret: rot-books-db-k7
+      db/bakery.pass: rot-bakery-db-k7
+      db/books.pass: rot-books-db-k7
+      rotation.log: |-
+        bakery-db ok
+        books-db ok
+      conf/bakery.conf.rotate-bak: null
+  - name: only the named secret changes
+    args:
+    - books-db
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_PASS=old-books
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: |-
+      rotate books-db: ok
+      rotated: books-db
+      failed: none
+    expected_files:
+      conf/bakery.conf: |-
+        site=harbour-bakery
+        db_user=bakery
+        db_password=old-bakery
+        cache=on
+      conf/books.conf: |-
+        DB_PASS=rot-books-db-k7
+        DB_HOST=dory
+      secrets/books-db.secret: rot-books-db-k7
+      db/books.pass: rot-books-db-k7
+      rotation.log: books-db ok
+  - name: database refuses one password, the rest carry on
+    args: []
+    env:
+      FAKE_DB_REFUSE: bakery
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_PASS=old-books
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: |-
+      rotate bakery-db: FAILED (database refused the new password)
+      rotate books-db: ok
+      rotated: books-db
+      failed: bakery-db
+    expected_exit: 1
+    expected_files:
+      conf/bakery.conf: |-
+        site=harbour-bakery
+        db_user=bakery
+        db_password=old-bakery
+        cache=on
+      secrets/bakery-db.secret: old-bakery
+      db/bakery.pass: old-bakery
+      conf/books.conf: |-
+        DB_PASS=rot-books-db-k7
+        DB_HOST=dory
+      db/books.pass: rot-books-db-k7
+      rotation.log: |-
+        bakery-db failed: database refused the new password
+        books-db ok
+  - name: failed verification restores config and password
+    args:
+    - books-db
+    - bakery-db
+    env:
+      FAKE_DB_BAD_CHECK: books
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_PASS=old-books
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: |-
+      rotate books-db: FAILED (verification failed, old secret restored)
+      rotate bakery-db: ok
+      rotated: bakery-db
+      failed: books-db
+    expected_exit: 1
+    expected_files:
+      conf/books.conf: |-
+        DB_PASS=old-books
+        DB_HOST=dory
+      secrets/books-db.secret: old-books
+      db/books.pass: old-books
+      conf/books.conf.rotate-bak: null
+      conf/bakery.conf: |-
+        site=harbour-bakery
+        db_user=bakery
+        db_password=rot-bakery-db-k7
+        cache=on
+      rotation.log: |-
+        books-db failed: verification failed, old secret restored
+        bakery-db ok
+  - name: config without the key is caught before the database is touched
+    args:
+    - books-db
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: |-
+      rotate books-db: FAILED (config has no DB_PASS)
+      rotated: none
+      failed: books-db
+    expected_exit: 1
+    expected_files:
+      db/books.pass: old-books
+      conf/books.conf: DB_HOST=dory
+      rotation.log: 'books-db failed: config has no DB_PASS'
+  - name: dry run touches nothing
+    args:
+    - --dry-run
+    - bakery-db
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_PASS=old-books
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: 'would rotate bakery-db: conf/bakery.conf db_password (db user bakery)'
+    expected_files:
+      conf/bakery.conf: |-
+        site=harbour-bakery
+        db_user=bakery
+        db_password=old-bakery
+        cache=on
+      db/bakery.pass: old-bakery
+      secrets/bakery-db.secret: old-bakery
+      rotation.log: null
+  - name: unknown name is refused up front
+    args:
+    - bakery-db
+    - nonsense-db
+    files:
+      rotation.map:
+        content: |
+          # name|config|key|dbuser
+          bakery-db|conf/bakery.conf|db_password|bakery
+
+          books-db|conf/books.conf|DB_PASS|books
+      conf/bakery.conf:
+        content: |
+          site=harbour-bakery
+          db_user=bakery
+          db_password=old-bakery
+          cache=on
+        mode: '0640'
+      conf/books.conf:
+        content: |
+          DB_PASS=old-books
+          DB_HOST=dory
+        mode: '0640'
+      secrets/bakery-db.secret:
+        content: |
+          old-bakery
+        mode: '0600'
+      secrets/books-db.secret:
+        content: |
+          old-books
+        mode: '0600'
+      db/bakery.pass: |
+        old-bakery
+      db/books.pass: |
+        old-books
+    expected_stdout: ''
+    expected_stderr: 'error: unknown secret nonsense-db'
+    expected_exit: 2
+    expected_files:
+      conf/bakery.conf: |-
+        site=harbour-bakery
+        db_user=bakery
+        db_password=old-bakery
+        cache=on
+      rotation.log: null
+  - name: missing map
+    args: []
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read rotation.map'
+    expected_exit: 2

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# df -P DIR : POSIX format, the used percentage comes from df.table ("DIR PCT" lines)
+[[ ${1:-} == -P && $# -eq 2 ]] || { echo "df: this stand-in supports only: df -P DIR" >&2; exit 2; }
+pct=$(awk -v d="$2" '$1 == d { print $2 }' df.table 2> /dev/null)
+[[ -n $pct ]] || { echo "df: $2: No such file or directory" >&2; exit 1; }
+echo "Filesystem 1024-blocks Used Available Capacity Mounted on"
+echo "/dev/vol0 1000000 $((pct * 10000)) $(((100 - pct) * 10000)) ${pct}% $2"

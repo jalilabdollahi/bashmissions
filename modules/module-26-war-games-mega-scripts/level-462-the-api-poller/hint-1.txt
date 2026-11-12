@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Each endpoint is a tiny state machine whose state lives in a file: what we have confirmed, what we are currently suspicious of, and how many times in a row we have seen it. Every run reads the state, takes one new reading, applies the rules, and writes the state back. Keep the webhook delivery separate from the rules: one function that tries to post and, when that fails, parks the message in an outbox that the next run empties first.

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# deployctl push APP VERSION ENV | deployctl health ENV APP
+# FAKE_PUSH_FAIL=ENV / FAKE_HEALTH_FAIL=ENV make the call fail for that environment.
+echo "deployctl $*" >> .calls.log
+case ${1:-} in
+  push)
+    [[ $# -eq 4 ]] || { echo "deployctl: usage: deployctl push APP VERSION ENV" >&2; exit 2; }
+    if [[ ${FAKE_PUSH_FAIL:-} == "$4" ]]; then echo "deployctl: push to $4 refused" >&2; exit 1; fi
+    ;;
+  health)
+    [[ $# -eq 3 ]] || { echo "deployctl: usage: deployctl health ENV APP" >&2; exit 2; }
+    if [[ ${FAKE_HEALTH_FAIL:-} == "$2" ]]; then echo "deployctl: $3 is unhealthy in $2" >&2; exit 1; fi
+    ;;
+  *)
+    echo "deployctl: unknown command '${1:-}'" >&2
+    exit 2
+    ;;
+esac

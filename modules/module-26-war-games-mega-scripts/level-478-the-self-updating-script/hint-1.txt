@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Treat the download as hostile until proven otherwise. The order of the update is a sequence of gates: can I reach the server, is what it says sane, is it actually newer, did the download arrive intact, is it valid Bash, and does it identify itself as the version it claims to be. Only if every gate passes do you touch the installed script, and then in a way that cannot leave a half-written file. Do all the downloading and checking in a scratch directory so a failed update leaves nothing behind.

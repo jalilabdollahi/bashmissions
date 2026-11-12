@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Think of it as three small systems that meet in one loop. A rule evaluator (is this metric over its line, numerically?), a cooldown (has this rule already fired recently, according to a timestamp file?) and a snapshot writer (gather evidence without ever leaving a half-written snapshot behind). Validate all rules before evaluating the first one, so a typo cannot cause half a run. Keep the clock injectable through the `NOW` variable so the script can be tested.

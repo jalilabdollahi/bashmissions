@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Header fields: `header=$(head -n 15 "$f")` then `printf '%s\n' "$header" | sed -n -E 's/^# *name: *([^ ]*) *$/\1/p' | head -n 1`. Validate the name with `[[ $name =~ ^[a-z][a-z0-9-]*$ ]]`.
+- Associative arrays keyed by plugin name (`file_of`, `prio_of`, `req_of`, `status`), plus an ordinary array `placed` for the order.
+- Kahn's algorithm with a tie-break: loop over `remaining`, keep `best` among the ready ones (`prio_of[$n] < prio_of[$best]`, or equal and `[[ $n < $best ]]`); if nothing is ready the rest is cyclic.
+- Hook function name: `fn=${n//-/_}__$hook`. Check it inside the subshell with `declare -F "$fn" >/dev/null || exit 78`.
+- Isolation boundary: `( source "$file"; declare -F ... || exit 78; "$fn" "$@" ) > "$work/out" 2>&1 || rc=$?`. The host function `host_log` is defined in the host and inherited by the subshell.
+- Propagating failures: remember `failed[$n]=1` and check each plugin's requirements against it.

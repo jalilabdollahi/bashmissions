@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# vault-gen NAME : print a fresh secret (deterministic for the tests).
+[[ $# -eq 1 ]] || { echo "vault-gen: usage: vault-gen NAME" >&2; exit 2; }
+echo "rot-$1-k7"

@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Separate collecting from showing. First read and validate the whole config into parallel arrays (group, name, type, target, arg). Then start every check at the same time, each one writing its single result line into its own file, and `wait` for all of them. Only when the work is finished do you print, reading the result files in config order, so the screen never depends on which check was fastest. Make each check type a small function with the same output shape, `STATE|detail`.

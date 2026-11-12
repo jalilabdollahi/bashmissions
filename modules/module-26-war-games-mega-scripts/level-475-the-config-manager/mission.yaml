@@ -1,22 +1,629 @@
 id: 475
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Config Manager
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Config Manager` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Config Manager
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 440
+story: |
+  During the storm the booking service was started with a "temporary" port from a shell
+  alias, a log level from an old environment variable, and a database host from a file
+  nobody remembered. It ran for three days before anyone could say which setting came from
+  where. Priya wants every setting to have a type, a default and a *source*, secrets that never
+  print themselves, and errors that are all reported at once rather than one per attempt.
+  You are writing the config manager that sits between the files, the environment, the
+  command line and the program that finally reads them.
+objective: |
+  Write solution.sh:
+    `solution.sh [--layer FILE]... [--set KEY=VALUE]... [--prefix P] [--reveal] SCHEMA COMMAND [ARG]`
+  Commands: `validate`, `show`, `get KEY`, `export env|json|shell`. Anything else, a missing command or
+  a missing/extra argument: `usage: solution.sh [--layer FILE]... [--set KEY=VALUE]... [--prefix P] [--reveal] SCHEMA COMMAND [ARG]`
+  on stderr, exit 2. An unreadable SCHEMA or layer file: `error: cannot read FILE`, exit 2. `--prefix`
+  defaults to `APP`.
+
+  SCHEMA lines (blank and `#` lines ignored): `KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION`. TYPE is `string`, `int`,
+  `bool`, `port` or `enum:a,b,c`. FLAGS is `-` or a comma list of `required` and `secret`. DEFAULT may be empty.
+  Key order in the schema is the order of every output.
+
+  Layers, lowest to highest priority: the DEFAULT of the schema (source `default`); each `--layer FILE` in the order
+  given (source: the file's base name); environment variables (source `env`): for key `db.port` and prefix `APP`
+  the variable `APP_DB_PORT` (upper case, dots become underscores), only when it is set; then each `--set KEY=VALUE` in
+  order (source `--set`). The highest layer that provides a key wins.
+  Layer files have lines `key = value` (blank and `#` lines ignored; spaces around key and value trimmed; one pair
+  of surrounding single or double quotes removed from the value).
+
+  Problems are collected and ALL printed to stderr, then exit 1, before any normal output; one line each,
+  starting with `config error: `, in this order: problems while reading layers (layer order, then line order:
+  `unknown key 'K' in FILE:LINE` for a key not in the schema, `bad line in FILE:LINE: expected key = value`; a --set with an
+  unknown key is `unknown key 'K' in --set`, one without `=` is `bad --set 'X': expected KEY=VALUE`), then validation in
+  schema order:
+    `KEY: required but not set`            (a required key whose final value is empty)
+    `KEY: 'V' is not an integer`           (int: optional minus sign and digits)
+    `KEY: 'V' is not a valid port (1-65535)`
+    `KEY: 'V' is not a boolean`            (bool accepts true/false/yes/no/on/off/1/0 in any case, normalised to true/false)
+    `KEY: 'V' is not one of a, b, c`
+  Empty values of non-required keys are accepted (and not validated).
+
+  `validate` prints `config ok (N keys)` (N = number of schema keys). `show` prints
+  `printf '%-14s %-20s %s\n' KEY VALUE SOURCE` as a header and one row per key; a non-empty secret value shows as
+  `********` unless --reveal is given. `get KEY` prints the value (masked like show; unknown key:
+  `error: unknown key 'KEY'` on stderr, exit 2).
+  `export env` prints `PREFIX_KEY=value` lines, `export shell` prints `export PREFIX_KEY='value'` (a single quote in a
+  value becomes `'\''`), `export json` a JSON object, one key per line, 2-space indent, keys as written in the schema,
+  int and port values as numbers, bool as true/false, everything else as a string with backslash and double quote escaped.
+  Secrets are left out of all three exports unless --reveal is given. Use only Bash and standard tools (no jq).
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "layered configuration with explicit precedence and provenance"
+  - "schema-driven validation that reports every problem at once"
+  - "indirect expansion for reading environment variables by computed name"
+  - "output encodings: env, shell quoting, JSON escaping"
+  - "secrets masked by default"
+required_patterns:
+  - pattern: 'declare -A'
+    message: "Keep values and their sources in associative arrays."
+test_cases:
+  - name: show with every layer
+    args:
+    - --layer
+    - conf/defaults.conf
+    - --layer
+    - conf/prod.conf
+    - --layer
+    - conf/local.conf
+    - --set
+    - workers=8
+    - schema.txt
+    - show
+    env:
+      APP_DB_PORT: '6543'
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: |-
+      KEY            VALUE                SOURCE
+      app.name       Lantern "Harbour"    local.conf
+      db.host        dory.lanternfish.example prod.conf
+      db.port        6543                 env
+      db.password    ********             local.conf
+      log.level      warn                 prod.conf
+      cache.enabled  false                prod.conf
+      workers        8                    --set
+  - name: reveal shows the secret
+    args:
+    - --reveal
+    - --layer
+    - conf/defaults.conf
+    - --layer
+    - conf/local.conf
+    - schema.txt
+    - show
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: |-
+      KEY            VALUE                SOURCE
+      app.name       Lantern "Harbour"    local.conf
+      db.host        localhost            defaults.conf
+      db.port        5432                 default
+      db.password    it's-a-secret        local.conf
+      log.level      info                 default
+      cache.enabled  true                 default
+      workers        2                    defaults.conf
+  - name: get a plain value and a secret
+    args:
+    - --layer
+    - conf/defaults.conf
+    - --layer
+    - conf/prod.conf
+    - schema.txt
+    - get
+    - db.password
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: '********'
+  - name: get honours the environment
+    args:
+    - --layer
+    - conf/defaults.conf
+    - schema.txt
+    - get
+    - db.port
+    env:
+      APP_DB_PORT: '6543'
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: '6543'
+  - name: env export leaves out secrets
+    args:
+    - --layer
+    - conf/defaults.conf
+    - --layer
+    - conf/prod.conf
+    - schema.txt
+    - export
+    - env
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: |-
+      APP_APP_NAME=lantern
+      APP_DB_HOST=dory.lanternfish.example
+      APP_DB_PORT=5433
+      APP_LOG_LEVEL=warn
+      APP_CACHE_ENABLED=false
+      APP_WORKERS=2
+  - name: shell export quotes values
+    args:
+    - --layer
+    - conf/defaults.conf
+    - --layer
+    - conf/local.conf
+    - --reveal
+    - schema.txt
+    - export
+    - shell
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: |-
+      export APP_APP_NAME='Lantern "Harbour"'
+      export APP_DB_HOST='localhost'
+      export APP_DB_PORT='5432'
+      export APP_DB_PASSWORD='it'\''s-a-secret'
+      export APP_LOG_LEVEL='info'
+      export APP_CACHE_ENABLED='true'
+      export APP_WORKERS='2'
+  - name: json export types and escapes
+    args:
+    - --layer
+    - conf/defaults.conf
+    - --layer
+    - conf/local.conf
+    - schema.txt
+    - export
+    - json
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: |-
+      {
+        "app.name": "Lantern \"Harbour\"",
+        "db.host": "localhost",
+        "db.port": 5432,
+        "log.level": "info",
+        "cache.enabled": true,
+        "workers": 2
+      }
+  - name: a custom prefix, a prefixed variable and the revealed secret
+    args:
+    - --prefix
+    - STORM
+    - --layer
+    - conf/defaults.conf
+    - --reveal
+    - schema.txt
+    - export
+    - env
+    env:
+      STORM_WORKERS: '16'
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: |-
+      STORM_APP_NAME=lantern
+      STORM_DB_HOST=localhost
+      STORM_DB_PORT=5432
+      STORM_DB_PASSWORD=changeme
+      STORM_LOG_LEVEL=info
+      STORM_CACHE_ENABLED=true
+      STORM_WORKERS=16
+  - name: validation reports every problem at once
+    args:
+    - --layer
+    - conf/bad.conf
+    - --set
+    - log.level=LOUD
+    - schema.txt
+    - validate
+    env:
+      APP_CACHE_ENABLED: maybe
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+      conf/bad.conf: |
+        db.port = 70000
+        workers = lots
+        db.host =
+    expected_stdout: ''
+    expected_stderr: |-
+      config error: db.host: required but not set
+      config error: db.port: '70000' is not a valid port (1-65535)
+      config error: db.password: required but not set
+      config error: log.level: 'LOUD' is not one of debug, info, warn
+      config error: cache.enabled: 'maybe' is not a boolean
+      config error: workers: 'lots' is not an integer
+    expected_exit: 1
+  - name: valid config
+    args:
+    - --layer
+    - conf/defaults.conf
+    - schema.txt
+    - validate
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: config ok (7 keys)
+  - name: bad keys and bad lines come before validation errors
+    args:
+    - --layer
+    - conf/typo.conf
+    - --set
+    - colour=blue
+    - --set
+    - novalue
+    - schema.txt
+    - show
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+      conf/typo.conf: |
+        db.hots = dory
+        this line is wrong
+        db.host = dory
+        db.password = x
+    expected_stdout: ''
+    expected_stderr: |-
+      config error: unknown key 'db.hots' in conf/typo.conf:1
+      config error: bad line in conf/typo.conf:2: expected key = value
+      config error: unknown key 'colour' in --set
+      config error: bad --set 'novalue': expected KEY=VALUE
+    expected_exit: 1
+  - name: yes and 1 are booleans
+    args:
+    - --layer
+    - conf/defaults.conf
+    - --set
+    - cache.enabled=Yes
+    - schema.txt
+    - get
+    - cache.enabled
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: 'true'
+  - name: unknown key in get
+    args:
+    - --layer
+    - conf/defaults.conf
+    - schema.txt
+    - get
+    - nope
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: ''
+    expected_stderr: 'error: unknown key ''nope'''
+    expected_exit: 2
+  - name: unreadable layer
+    args:
+    - --layer
+    - conf/missing.conf
+    - schema.txt
+    - validate
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read conf/missing.conf'
+    expected_exit: 2
+  - name: usage
+    args:
+    - schema.txt
+    files:
+      schema.txt: |
+        # KEY|TYPE|DEFAULT|FLAGS|DESCRIPTION
+        app.name|string|lantern|-|Application name
+        db.host|string||required|Database host
+        db.port|port|5432|-|Database port
+        db.password|string||secret,required|Database password
+        log.level|enum:debug,info,warn|info|-|Log level
+        cache.enabled|bool|true|-|Use the cache
+        workers|int|4|-|Worker processes
+      conf/defaults.conf: |
+        db.host = localhost
+        db.password = "changeme"
+        workers = 2
+      conf/prod.conf: |
+        # production
+        db.host = dory.lanternfish.example
+        log.level = warn
+        db.port = 5433
+        cache.enabled = No
+      conf/local.conf: |
+        db.password = it's-a-secret
+        app.name = Lantern "Harbour"
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--layer FILE]... [--set KEY=VALUE]... [--prefix P] [--reveal] SCHEMA COMMAND [ARG]'
+    expected_exit: 2

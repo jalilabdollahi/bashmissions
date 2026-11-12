@@ -1,22 +1,474 @@
 id: 474
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The CLI Framework
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The CLI Framework` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The CLI Framework
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 430
+story: |
+  The storm rota lives in a spreadsheet that three people edit at once, and on Thursday it
+  told two pilots to fly the same shift. Theo offers to "knock up a tiny CLI" and shows a
+  600-line `case` statement with hand-written usage text that already disagrees with itself.
+  Mara asks for something better: a small command-line *framework*. Commands are declared as
+  data, and the parser, the help screens, the version flag and the "did you mean" hints are
+  generated from that data, so adding a command never means copying a parser. The roster tool
+  `lantern` is the first customer.
+objective: |
+  Write solution.sh: the `lantern` roster tool, built around a command registry.
+    `lantern [--db FILE] [-h|--help] [-V|--version] [--] COMMAND [OPTIONS] [ARGS]`
+  The script is called solution.sh but must always call itself `lantern` in messages.
+  The roster file is, in order of precedence, `--db FILE`, the environment variable LANTERN_DB, or
+  `crew.db`. Each line is `NAME|ROLE|SHIFT`.
+
+  Commands, in this order, with their descriptions, argument words and options (the framework must
+  produce every help text from this data):
+    add     "Add a crew member"        arg NAME     -r --role ROLE "Role: pilot, engineer or cook (default: engineer)"
+                                                      -s --shift SHIFT "Shift: day or night (default: day)"
+    list    "List crew members"        no args      -r --role ROLE "Only this role"
+                                                      -f --format FORMAT "table or csv (default: table)"
+    remove  "Remove a crew member"     arg NAME     -f --force "Remove without asking"
+    show    "Show one crew member"     arg NAME
+    help    "Show help for a command"  arg [COMMAND]
+    version "Print the version"
+  Allowed values: role = pilot engineer cook; shift = day night; format = table csv.
+  Version string: `lantern 1.4.0`.
+
+  Help screens (stdout, exit 0). Overall (`lantern`, `--help`, `-h`, `help`; with no COMMAND at all the
+  overall help goes to stderr and the exit status is 64):
+    lantern 1.4.0 - crew roster for the storm shift
+    (blank)
+    Usage: lantern [--db FILE] COMMAND [OPTIONS] [ARGS]
+    (blank)
+    Commands:
+      NAME<padding>DESCRIPTION             (printf '  %-8s %s\n')
+    (blank)
+    Run 'lantern help COMMAND' for details.
+  Per command (`lantern help CMD`, `lantern CMD --help`, `lantern CMD -h`):
+    Usage: lantern CMD [OPTIONS] ARGWORDS    (`[OPTIONS]` only if the command has options; ARGWORDS only if it has
+    (blank)                                   an argument word)
+    DESCRIPTION
+    (blank)
+    Options:                                 (only if it has options)
+      LABEL<padding>TEXT                     (printf '  %-20s %s\n'; LABEL is `-r, --role ROLE`, or `-f, --force`
+                                              for an option without a value)
+  Option syntax: `--role pilot`, `--role=pilot`, `-r pilot`; options may appear before or after the arguments;
+  `--` ends option parsing. `lantern -V` / `--version` and `lantern version` print the version.
+
+  Usage errors exit 64, print `lantern: MESSAGE` (or `lantern CMD: MESSAGE` inside a command) on stderr and then
+  `Run 'lantern help' for usage.` (or `Run 'lantern help CMD' for usage.`). Messages:
+    unknown command 'X'                       (global: also for `help X`)
+    unknown option 'X'                        (global, before the command)
+    unknown option 'X'                        (inside a command)
+    option 'X' needs a value                  (X as typed, e.g. --role)
+    invalid value 'V' for --role (expected pilot, engineer or cook)   (allowed values joined with ', ' and ' or ')
+    missing NAME                              (the command's argument word; `help` needs none)
+    unexpected argument 'X'                   (the first extra positional)
+  An unknown command or option adds ` (did you mean 'Y'?)` when the typed word (without leading dashes, at least
+  two letters) is a subsequence of a known command / option name of that scope (first match in registry order)
+  and is not equal to it; for options use the long names.
+
+  Behaviour (runtime errors are `lantern: MESSAGE` on stderr, exit 1, no usage hint):
+  - add: NAME must match letters and dashes starting with a letter (else `lantern: 'NAME' is not a valid name`); a name
+    already on the roster, compared case-insensitively: `lantern: 'NAME' is already on the roster`.
+    Appends `NAME|ROLE|SHIFT`, prints `added NAME (ROLE, SHIFT)`.
+  - list: rows sorted by name. `table` prints `printf '%-12s %-10s %s\n' NAME ROLE SHIFT` header and rows, or the single
+    line `(no crew)` when there are no rows (after filtering); `csv` prints `name,role,shift` and the rows with commas.
+  - remove: without --force `lantern: refusing to remove 'NAME' without --force`; an unknown (case-insensitive)
+    name `lantern: no such crew member 'NAME'`; else rewrites the roster without that line and prints `removed NAME`
+    (NAME as stored).
+  - show: prints three lines `Name:  NAME`, `Role:  ROLE`, `Shift: SHIFT` or the no-such-member error.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "a command registry: commands and options as data, parsers and help generated"
+  - "generic option parsing: --opt value, --opt=value, short aliases, --"
+  - "did-you-mean via a subsequence test"
+  - "exit codes: 64 for usage, 1 for runtime errors"
+  - "precedence: flag, environment variable, default"
+required_patterns:
+  - pattern: 'declare -A'
+    message: "Keep the registry in associative arrays so help and parsing come from one source."
+test_cases:
+  - name: overall help
+    args:
+    - help
+    expected_stdout: |-
+      lantern 1.4.0 - crew roster for the storm shift
+
+      Usage: lantern [--db FILE] COMMAND [OPTIONS] [ARGS]
+
+      Commands:
+        add      Add a crew member
+        list     List crew members
+        remove   Remove a crew member
+        show     Show one crew member
+        help     Show help for a command
+        version  Print the version
+
+      Run 'lantern help COMMAND' for details.
+  - name: help as a flag
+    args:
+    - --help
+    expected_stdout: |-
+      lantern 1.4.0 - crew roster for the storm shift
+
+      Usage: lantern [--db FILE] COMMAND [OPTIONS] [ARGS]
+
+      Commands:
+        add      Add a crew member
+        list     List crew members
+        remove   Remove a crew member
+        show     Show one crew member
+        help     Show help for a command
+        version  Print the version
+
+      Run 'lantern help COMMAND' for details.
+  - name: command help with options
+    args:
+    - help
+    - add
+    expected_stdout: |-
+      Usage: lantern add [OPTIONS] NAME
+
+      Add a crew member
+
+      Options:
+        -r, --role ROLE      Role: pilot, engineer or cook (default: engineer)
+        -s, --shift SHIFT    Shift: day or night (default: day)
+  - name: command help via the flag
+    args:
+    - list
+    - --help
+    expected_stdout: |-
+      Usage: lantern list [OPTIONS]
+
+      List crew members
+
+      Options:
+        -r, --role ROLE      Only this role
+        -f, --format FORMAT  table or csv (default: table)
+  - name: command help without options
+    args:
+    - show
+    - -h
+    expected_stdout: |-
+      Usage: lantern show NAME
+
+      Show one crew member
+  - name: version as a short flag
+    args:
+    - -V
+    expected_stdout: lantern 1.4.0
+  - name: version as a long flag
+    args:
+    - --version
+    expected_stdout: lantern 1.4.0
+  - name: version as a command
+    args:
+    - version
+    expected_stdout: lantern 1.4.0
+  - name: add with options in every syntax
+    args:
+    - add
+    - Mara
+    - --role=pilot
+    - -s
+    - night
+    expected_stdout: added Mara (pilot, night)
+    expected_files:
+      crew.db: Mara|pilot|night
+  - name: add with defaults and options after the name
+    args:
+    - add
+    - Ollie
+    - --shift
+    - day
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: added Ollie (engineer, day)
+    expected_files:
+      crew.db: |-
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+        Ollie|engineer|day
+  - name: duplicate names are caught case-insensitively
+    args:
+    - add
+    - mara
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: ''
+    expected_stderr: 'lantern: ''mara'' is already on the roster'
+    expected_exit: 1
+  - name: invalid name
+    args:
+    - add
+    - 9lives
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: ''
+    expected_stderr: 'lantern: ''9lives'' is not a valid name'
+    expected_exit: 1
+  - name: list as a table
+    args:
+    - list
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: |-
+      NAME         ROLE       SHIFT
+      Mara         pilot      night
+      Noor         cook       day
+      Theo         engineer   day
+  - name: list as csv filtered by role
+    args:
+    - list
+    - --format
+    - csv
+    - -r
+    - cook
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: |-
+      name,role,shift
+      Noor,cook,day
+  - name: empty list
+    args:
+    - list
+    - --role
+    - pilot
+    files:
+      crew.db: |
+        Theo|engineer|day
+    expected_stdout: (no crew)
+  - name: remove needs force
+    args:
+    - remove
+    - theo
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: ''
+    expected_stderr: 'lantern: refusing to remove ''theo'' without --force'
+    expected_exit: 1
+    expected_files:
+      crew.db: |-
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+  - name: remove with force
+    args:
+    - remove
+    - theo
+    - --force
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: removed Theo
+    expected_files:
+      crew.db: |-
+        Mara|pilot|night
+        Noor|cook|day
+  - name: remove an unknown member
+    args:
+    - remove
+    - Zed
+    - -f
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: ''
+    expected_stderr: 'lantern: no such crew member ''Zed'''
+    expected_exit: 1
+  - name: show a member
+    args:
+    - show
+    - NOOR
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: |-
+      Name:  Noor
+      Role:  cook
+      Shift: day
+  - name: db from the environment and from the flag
+    args:
+    - --db
+    - other.db
+    - list
+    env:
+      LANTERN_DB: env.db
+    files:
+      env.db: |
+        FromEnv|cook|day
+      other.db: |
+        FromFlag|pilot|night
+    expected_stdout: |-
+      NAME         ROLE       SHIFT
+      FromFlag     pilot      night
+  - name: db from the environment
+    args:
+    - list
+    env:
+      LANTERN_DB: env.db
+    files:
+      env.db: |
+        FromEnv|cook|day
+    expected_stdout: |-
+      NAME         ROLE       SHIFT
+      FromEnv      cook       day
+  - name: typo in a command gets a hint
+    args:
+    - lst
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern: unknown command 'lst' (did you mean 'list'?)
+      Run 'lantern help' for usage.
+    expected_exit: 64
+  - name: typo in an option gets a hint
+    args:
+    - add
+    - Bob
+    - --rol
+    - cook
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern add: unknown option '--rol' (did you mean '--role'?)
+      Run 'lantern help add' for usage.
+    expected_exit: 64
+  - name: unknown command with no hint
+    args:
+    - fly
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern: unknown command 'fly'
+      Run 'lantern help' for usage.
+    expected_exit: 64
+  - name: option without its value
+    args:
+    - add
+    - Bob
+    - --role
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern add: option '--role' needs a value
+      Run 'lantern help add' for usage.
+    expected_exit: 64
+  - name: bad option value
+    args:
+    - add
+    - Bob
+    - --role
+    - captain
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern add: invalid value 'captain' for --role (expected pilot, engineer or cook)
+      Run 'lantern help add' for usage.
+    expected_exit: 64
+  - name: bad format value
+    args:
+    - list
+    - --format=xml
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern list: invalid value 'xml' for --format (expected table or csv)
+      Run 'lantern help list' for usage.
+    expected_exit: 64
+  - name: missing argument
+    args:
+    - show
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern show: missing NAME
+      Run 'lantern help show' for usage.
+    expected_exit: 64
+  - name: extra argument
+    args:
+    - list
+    - everything
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern list: unexpected argument 'everything'
+      Run 'lantern help list' for usage.
+    expected_exit: 64
+  - name: unknown global option
+    args:
+    - --verbose
+    - list
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern: unknown option '--verbose'
+      Run 'lantern help' for usage.
+    expected_exit: 64
+  - name: nothing at all
+    args: []
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern 1.4.0 - crew roster for the storm shift
+
+      Usage: lantern [--db FILE] COMMAND [OPTIONS] [ARGS]
+
+      Commands:
+        add      Add a crew member
+        list     List crew members
+        remove   Remove a crew member
+        show     Show one crew member
+        help     Show help for a command
+        version  Print the version
+
+      Run 'lantern help COMMAND' for details.
+    expected_exit: 64
+  - name: help for an unknown command
+    args:
+    - help
+    - nope
+    expected_stdout: ''
+    expected_stderr: |-
+      lantern: unknown command 'nope'
+      Run 'lantern help' for usage.
+    expected_exit: 64
+  - name: double dash ends the options
+    args:
+    - show
+    - --
+    - Mara
+    files:
+      crew.db: |
+        Mara|pilot|night
+        Theo|engineer|day
+        Noor|cook|day
+    expected_stdout: |-
+      Name:  Mara
+      Role:  pilot
+      Shift: night

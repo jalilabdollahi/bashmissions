@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Discovery without running the file: `sed -n -E -e 's/^function +(test_[A-Za-z0-9_]+).*/\1/p' -e 's/^(test_[A-Za-z0-9_]+) *\(\).*/\1/p' "$file"` prints names in file order (one expression per declaration style).
+- Assertions report by writing a message and exiting the subshell: `fail() { printf '%s\n' "$*" > "$msg_file"; exit 1; }`, `skip()` exits 77 (a convention from automake's test driver).
+- Run each test as `( set -e; cd "$tmp"; export TEST_DIR=...; source "$file"; ...; "$name" ) > out.txt 2>&1`, but NOT as `( ... ) || status=$?`: inside a `||` or `if` condition errexit is disabled even for commands in the subshell. Use `set +e; ( ... ); status=$?; set -e`.
+- Teardown that always runs: after sourcing, `declare -F teardown >/dev/null && trap teardown EXIT`.
+- A fresh directory per test: `tmp=$(mktemp -d "$work/t.XXXXXX")`; remove it afterwards.
+- `bash -n file` checks syntax without executing anything.

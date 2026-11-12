@@ -1,1 +1,19 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  cmds=(add list remove show help version)
+  declare -A desc argword minargs maxargs opts allowed
+  desc[add]="Add a crew member" ...   opts[add]='r|role|ROLE|Role: ...
+  s|shift|SHIFT|Shift: ...'          allowed[role]="pilot engineer cook" ...
+
+  overall_help() { header; usage; "Commands:"; for c in "${cmds[@]}"; do printf '  %-8s %s\n' "$c" "${desc[$c]}"; done; footer; }
+  command_help() { build "Usage: lantern CMD [OPTIONS] ARGWORD" from the registry; description; options with '  %-20s %s'; }
+  usage_error()  { message (+ "Run 'lantern help CMD' for usage."), exit 64; }
+  subseq() { for (( j = 0; j < ${#hay} && i < ${#needle}; j++ )); do [[ ${hay:j:1} == "${needle:i:1}" ]] && i=$((i + 1)); done; (( i == ${#needle} )); }
+
+  parse_args() { while (( $# )); do case $1 in
+      --) rest are positional ;;  -h|--help) command_help; exit 0 ;;
+      -?*) long/short lookup; unknown -> usage_error with suggest; flag -> opt[long]=1;
+           value option -> inline after = or the next argument; check allowed values ;;
+      *) pos+=("$1") ;; esac; shift; done; }
+
+  global loop (-h -V --db --db= --), command lookup, parse_args "$@", min/max argument counts, "cmd_$cmd"

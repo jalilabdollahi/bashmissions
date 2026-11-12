@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- State in one line: `read -r confirmed cand count < "state/$name.state"`, written back with `echo "$confirmed $cand $count" > ...`. Use a literal `-` for "no candidate" so `read` always finds three fields.
+- Status from JSON without jq: join the lines and capture the group, e.g. `printf '%s' "$body" | tr -d '\n' | sed -n -E 's/.*"status"[[:space:]]*:[[:space:]]*"([a-z]+)".*/\1/p'`.
+- A failing command inside `$(...)` assigned in an `if`: `if ! body=$(curl ... 2>/dev/null); then ...` keeps `set -e` quiet and gives you a branch for "unreachable".
+- Retrying the outbox: write the lines that fail again to a new file and `mv` it over the old one, so a crash cannot lose alerts.
+- Build the body with printf so the JSON is byte-for-byte what the objective shows.

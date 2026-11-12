@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Treat configuration as a stack of layers that you read bottom to top, remembering for every key which layer last set it: that memory (the "source") is what makes the result debuggable. Load the schema first, because it decides which keys exist; apply the layers in order; then validate the *final* values rather than each layer's. Collect all complaints in an array and print them together at the end, so the user fixes everything in one go. Only after validation succeeds do you print anything normal.

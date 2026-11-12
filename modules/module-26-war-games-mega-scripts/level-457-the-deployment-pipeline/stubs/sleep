@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# sleep stand-in: records the request instead of waiting.
+echo "sleep $*" >> .calls.log

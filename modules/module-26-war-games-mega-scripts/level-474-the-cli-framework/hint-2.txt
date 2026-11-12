@@ -1,1 +1,8 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Registry in associative arrays: `declare -A desc argword opts allowed`, with `opts[add]` holding one `SHORT|LONG|VALUENAME|TEXT` line per option; read it with `while IFS='|' read -r short long val text; do ... done <<< "${opts[$cmd]}"`. A single array `cmds=(...)` keeps the order.
+- Help from data: `printf '  %-8s %s\n' "$c" "${desc[$c]}"` for commands, `printf '  %-20s %s\n' "$label" "$text"` for options.
+- The parser is a `while (( $# > 0 ))` with a `case`: `--`, `-h|--help`, anything starting with `-`, otherwise positional. For `--name=value` split with `${name#*=}` and `${name%%=*}`; otherwise take `$2` and `shift`.
+- Did-you-mean: a function that walks the candidate with an index into the typed word: if the characters of `typed` appear in order inside the candidate, it is a subsequence.
+- Exit codes: a `usage_error` function that prints both lines and does `exit 64`; runtime problems print one line and `exit 1`.
+- Dispatch: `"cmd_$cmd"` calls the handler named after the command.

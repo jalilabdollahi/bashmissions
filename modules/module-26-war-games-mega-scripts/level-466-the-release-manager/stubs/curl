@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# curl stand-in for a webhook: -sS --fail --max-time N -X POST -H HDR -d BODY URL
+# Appends BODY to .notify.log; a file named notify.fail makes it exit 22.
+method=GET body="" url=""
+while (( $# )); do
+  case $1 in
+    -s|-S|-sS|-f|--fail) ;;
+    --max-time|-H) shift ;;
+    -X) method=$2; shift ;;
+    -d) body=$2; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2; exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ $method == POST && -n $url ]] || { echo "curl: this stand-in only does POST" >&2; exit 2; }
+if [[ -f notify.fail ]]; then echo "curl: (22) The requested URL returned error: 500" >&2; exit 22; fi
+echo "$body" >> .notify.log

@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Name parsing: `[[ $base =~ ^(.+)-([0-9]{4}-[0-9]{2}-[0-9]{2})$ ]]` gives `${BASH_REMATCH[1]}` (the set, even if it contains dashes) and `${BASH_REMATCH[2]}` (the date). Print `set|date|base` and `sort -t'|' -k1,1 -k2,2r`.
+- A listing check before extraction: `entries=$(tar -tzf "$archive")` fails for a corrupt file; `printf '%s\n' "$entries" | grep -E '^/|(^|/)\.\.(/|$)'` finds absolute and `..` entries.
+- `cksum < file` prints only `CRC SIZE`, exactly the manifest format, so `read -r c s _ < <(cksum < "$f")` can be compared field by field.
+- `local -A listed` and `local -a missing=()` keep each verification independent.
+- Per-set bookkeeping in a `while read` loop: when the set name changes, close the previous one (print its line) and reset the counters.

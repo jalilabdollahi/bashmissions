@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# git stand-in driven by files in the current directory:
+#   git-dirty.txt  non-empty => `status --porcelain` prints it
+#   git-tags.txt   one tag per line, newest last
+#   git-log.txt    commit subjects, newest first (printed for any `log`)
+# FAKE_TAG_FAILS=1 makes `tag` fail as if the tag already existed.
+echo "git $*" >> .calls.log
+case ${1:-} in
+  status)
+    [[ ${2:-} == --porcelain ]] || { echo "git: status: only --porcelain is supported here" >&2; exit 2; }
+    [[ -f git-dirty.txt ]] && cat git-dirty.txt
+    exit 0
+    ;;
+  describe)
+    [[ ${2:-} == --tags && ${3:-} == --abbrev=0 ]] || { echo "git: describe: use --tags --abbrev=0" >&2; exit 2; }
+    if [[ -s git-tags.txt ]]; then tail -n 1 git-tags.txt; exit 0; fi
+    echo "fatal: No names found, cannot describe anything." >&2
+    exit 128
+    ;;
+  log)
+    [[ ${2:-} == --pretty=format:%s && $# -eq 3 ]] || { echo "git: log: use --pretty=format:%s RANGE" >&2; exit 2; }
+    [[ -s git-log.txt ]] && cat git-log.txt
+    exit 0
+    ;;
+  tag)
+    [[ ${2:-} == -a && ${4:-} == -m && $# -eq 5 ]] || { echo "git: tag: use -a NAME -m MESSAGE" >&2; exit 2; }
+    if [[ ${FAKE_TAG_FAILS:-} == 1 ]] || grep -qx -- "$3" git-tags.txt 2> /dev/null; then
+      echo "fatal: tag '$3' already exists" >&2
+      exit 128
+    fi
+    echo "$3" >> git-tags.txt
+    exit 0
+    ;;
+  *)
+    echo "git: '${1:-}' is not supported by this stand-in" >&2
+    exit 2
+    ;;
+esac

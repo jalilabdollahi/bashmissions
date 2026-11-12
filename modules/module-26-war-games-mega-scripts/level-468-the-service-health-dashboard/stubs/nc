@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# nc -z -w SECONDS HOST PORT : succeeds when "HOST:PORT" is listed in ports.open
+zflag=0 host="" port=""
+while (( $# )); do
+  case $1 in
+    -z) zflag=1 ;;
+    -w) shift ;;
+    -*) echo "nc: unknown option $1" >&2; exit 2 ;;
+    *) if [[ -z $host ]]; then host=$1; else port=$1; fi ;;
+  esac
+  shift
+done
+(( zflag )) && [[ -n $host && -n $port ]] || { echo "usage: nc -z -w SECONDS HOST PORT" >&2; exit 2; }
+grep -qx "$host:$port" ports.open 2> /dev/null

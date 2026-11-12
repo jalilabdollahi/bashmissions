@@ -1,22 +1,390 @@
 id: 476
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Job Queue
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The Job Queue` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Job Queue
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 440
+story: |
+  Storm season means a flood of small chores: regenerate the tide tables, resend the
+  ferry notices, re-index the photo uploads. Theo launches them all with `&` from a terminal
+  and loses track of which ones finished; last Wednesday two copies of the same invoice
+  job ran side by side and customers were billed twice. Mara wants a real queue: jobs
+  go in as files, a small pool of workers takes them in order, a job is never run twice,
+  failures are retried and then parked where someone can look at them, and a crashed
+  run does not strand work.
+objective: |
+  Write solution.sh, a file-based FIFO job queue rooted in `queue/` (pending/, done/, failed/, claims/):
+    `solution.sh submit [--name NAME] COMMAND...`
+    `solution.sh work [--workers N] [--max-tries T] [--limit K]`
+    `solution.sh status`
+    `solution.sh retry ID`
+    `solution.sh log ID`
+  Anything else, bad numbers (`--workers`, `--max-tries`, `--limit` must be positive whole numbers) or a
+  missing COMMAND: `usage: solution.sh submit [--name NAME] COMMAND... | work [--workers N] [--max-tries T] [--limit K] | status | retry ID | log ID`
+  on stderr, exit 2.
+
+  Jobs: `queue/pending/ID.job` with exactly two lines, `name=NAME` and `cmd=COMMAND` (COMMAND is the
+  arguments joined by single spaces). IDs are four digits, `0001`, `0002`, ..., taken from the counter
+  file `queue/.next` (missing means 1; it is updated after each submit). NAME defaults to the base name of
+  the first word of COMMAND. The job file must appear in pending/ atomically (write it elsewhere, then `mv`).
+  `submit` prints `submitted ID (NAME)`.
+
+  `work`: first take the lock by creating the directory `queue/work.lock` (if it exists:
+  `error: another work run is active` on stderr, exit 4); a trap removes it however the run ends. Then recover
+  orphans: every `queue/claims/ID` directory whose job is still in pending/ is a leftover of a crashed run; remove
+  the claim and print `recovered job ID` (ascending). Select the pending jobs in ascending ID order, only the
+  first K with --limit. If none: print `queue is empty` and exit 0.
+  Run the selected jobs with W workers (default 2) running at the same time as background jobs. A worker
+  walks the selected IDs in order and claims a job by creating `queue/claims/ID` with `mkdir`; if mkdir fails another
+  worker has it, so skip it. Right after claiming, check that the job file is still in pending/ (a slow worker may
+  win mkdir for a job somebody else has just finished and released); if it is gone, remove the claim and skip it.
+  A claimed job is run with `bash -c COMMAND` with stdout and stderr captured; up to
+  T attempts (default 2) are made, running `sleep 1` between attempts. Success: the job file and its output (as
+  `ID.out`) move to done/; after the last failed attempt they move to failed/. Then the claim is removed.
+  After `wait`, print one line per job in ID order: `ID STATE NAME (attempts: A, exit: E)` with STATE `done` or
+  `failed` and E the exit status of the last attempt; then `worked: D done, F failed`. Exit 1 if any job failed, else 0.
+
+  `status` prints `pending: N`, `running: N`, `done: N`, `failed: N` (running = a pending job that has a claim) and then
+  `printf '%-6s %-8s %s\n' ID STATE NAME` with one row per job in ID order (states pending, running, done, failed).
+  `retry ID` moves a failed job back to pending (dropping its output) and prints `requeued ID`; if ID is not in failed/:
+  `error: no failed job ID` on stderr, exit 3. `log ID` prints the captured output of a done or failed job, or
+  `error: no output for job ID` on stderr, exit 3.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "directories as queues: state is where the file lives"
+  - "mkdir as an atomic claim between concurrent workers"
+  - "background worker pool with wait"
+  - "retry with a pause, then park the failure"
+  - "crash recovery and a run lock released by trap"
+required_patterns:
+  - pattern: 'mkdir "?\$'
+    message: "Claim a job with mkdir: it either creates the directory or fails, atomically."
+  - pattern: '\bwait\b'
+    message: "Start the workers in the background and wait for them."
+test_cases:
+  - name: submit gives sequential ids
+    args:
+    - submit
+    - --name
+    - tide-tables
+    - echo
+    - regenerate
+    files:
+      queue/.next: |
+        3
+    expected_stdout: submitted 0003 (tide-tables)
+    expected_files:
+      queue/.next: '4'
+      queue/pending/0003.job: |-
+        name=tide-tables
+        cmd=echo regenerate
+  - name: submit with the default name
+    args:
+    - submit
+    - /usr/local/bin/resend-notices
+    - --all
+    expected_stdout: submitted 0001 (resend-notices)
+    expected_files:
+      queue/.next: '2'
+      queue/pending/0001.job: |-
+        name=resend-notices
+        cmd=/usr/local/bin/resend-notices --all
+  - name: a pool works through the queue
+    args:
+    - work
+    - --workers
+    - '3'
+    files:
+      queue/.next: |
+        7
+      queue/pending/0001.job: |
+        name=tides
+        cmd=echo syncing tides; echo 0001 >> ran.log
+      queue/pending/0002.job: |
+        name=notices
+        cmd=echo sending; echo 0002 >> ran.log
+      queue/pending/0003.job: |
+        name=broken
+        cmd=echo boom >&2; exit 3
+      queue/pending/0004.job: |
+        name=flaky
+        cmd=if [ -f flaky.mark ]; then echo 0004 >> ran.log; echo recovered; else touch flaky.mark; echo first try >&2; exit 1; fi
+      queue/pending/0005.job: |
+        name=photos
+        cmd=echo indexing; echo 0005 >> ran.log
+      queue/pending/0006.job: |
+        name=report
+        cmd=echo report; echo 0006 >> ran.log
+    expected_stdout: |-
+      0001 done tides (attempts: 1, exit: 0)
+      0002 done notices (attempts: 1, exit: 0)
+      0003 failed broken (attempts: 2, exit: 3)
+      0004 done flaky (attempts: 2, exit: 0)
+      0005 done photos (attempts: 1, exit: 0)
+      0006 done report (attempts: 1, exit: 0)
+      worked: 5 done, 1 failed
+    expected_exit: 1
+    expected_files:
+      queue/done/0001.out: syncing tides
+      queue/failed/0003.out: boom
+      queue/failed/0003.job: |-
+        name=broken
+        cmd=echo boom >&2; exit 3
+      queue/done/0004.out: recovered
+      queue/pending/0003.job: null
+      queue/work.lock: null
+      .calls.log: |-
+        sleep 1
+        sleep 1
+  - name: limit and a single worker keep strict order
+    args:
+    - work
+    - --workers
+    - '1'
+    - --limit
+    - '2'
+    files:
+      queue/.next: |
+        7
+      queue/pending/0001.job: |
+        name=tides
+        cmd=echo syncing tides; echo 0001 >> ran.log
+      queue/pending/0002.job: |
+        name=notices
+        cmd=echo sending; echo 0002 >> ran.log
+      queue/pending/0003.job: |
+        name=broken
+        cmd=echo boom >&2; exit 3
+      queue/pending/0004.job: |
+        name=flaky
+        cmd=if [ -f flaky.mark ]; then echo 0004 >> ran.log; echo recovered; else touch flaky.mark; echo first try >&2; exit 1; fi
+      queue/pending/0005.job: |
+        name=photos
+        cmd=echo indexing; echo 0005 >> ran.log
+      queue/pending/0006.job: |
+        name=report
+        cmd=echo report; echo 0006 >> ran.log
+    expected_stdout: |-
+      0001 done tides (attempts: 1, exit: 0)
+      0002 done notices (attempts: 1, exit: 0)
+      worked: 2 done, 0 failed
+    expected_files:
+      queue/done/0001.job: |-
+        name=tides
+        cmd=echo syncing tides; echo 0001 >> ran.log
+      queue/done/0002.job: |-
+        name=notices
+        cmd=echo sending; echo 0002 >> ran.log
+      queue/pending/0003.job: |-
+        name=broken
+        cmd=echo boom >&2; exit 3
+      ran.log: |-
+        0001
+        0002
+  - name: more tries for the flaky one
+    args:
+    - work
+    - --limit
+    - '4'
+    - --max-tries
+    - '3'
+    - --workers
+    - '1'
+    files:
+      queue/.next: |
+        7
+      queue/pending/0001.job: |
+        name=tides
+        cmd=echo syncing tides; echo 0001 >> ran.log
+      queue/pending/0002.job: |
+        name=notices
+        cmd=echo sending; echo 0002 >> ran.log
+      queue/pending/0003.job: |
+        name=broken
+        cmd=echo boom >&2; exit 3
+      queue/pending/0004.job: |
+        name=flaky
+        cmd=if [ -f flaky.mark ]; then echo 0004 >> ran.log; echo recovered; else touch flaky.mark; echo first try >&2; exit 1; fi
+      queue/pending/0005.job: |
+        name=photos
+        cmd=echo indexing; echo 0005 >> ran.log
+      queue/pending/0006.job: |
+        name=report
+        cmd=echo report; echo 0006 >> ran.log
+    expected_stdout: |-
+      0001 done tides (attempts: 1, exit: 0)
+      0002 done notices (attempts: 1, exit: 0)
+      0003 failed broken (attempts: 3, exit: 3)
+      0004 done flaky (attempts: 2, exit: 0)
+      worked: 3 done, 1 failed
+    expected_exit: 1
+    expected_files:
+      .calls.log: |-
+        sleep 1
+        sleep 1
+        sleep 1
+      queue/failed/0003.out: boom
+  - name: a crashed run is recovered
+    args:
+    - work
+    - --workers
+    - '1'
+    files:
+      queue/pending/0001.job: |
+        name=tides
+        cmd=echo again; echo 0001 >> ran.log
+      queue/pending/0002.job: |
+        name=notices
+        cmd=echo again; echo 0002 >> ran.log
+      queue/claims/0002/.keep: ''
+      queue/done/0000.job: |
+        name=old
+        cmd=true
+    expected_stdout: |-
+      recovered job 0002
+      0001 done tides (attempts: 1, exit: 0)
+      0002 done notices (attempts: 1, exit: 0)
+      worked: 2 done, 0 failed
+    expected_files:
+      queue/claims/0002/.keep: null
+      queue/done/0002.job: |-
+        name=notices
+        cmd=echo again; echo 0002 >> ran.log
+      ran.log: |-
+        0001
+        0002
+  - name: another worker run is active
+    args:
+    - work
+    files:
+      queue/.next: |
+        7
+      queue/pending/0001.job: |
+        name=tides
+        cmd=echo syncing tides; echo 0001 >> ran.log
+      queue/pending/0002.job: |
+        name=notices
+        cmd=echo sending; echo 0002 >> ran.log
+      queue/pending/0003.job: |
+        name=broken
+        cmd=echo boom >&2; exit 3
+      queue/pending/0004.job: |
+        name=flaky
+        cmd=if [ -f flaky.mark ]; then echo 0004 >> ran.log; echo recovered; else touch flaky.mark; echo first try >&2; exit 1; fi
+      queue/pending/0005.job: |
+        name=photos
+        cmd=echo indexing; echo 0005 >> ran.log
+      queue/pending/0006.job: |
+        name=report
+        cmd=echo report; echo 0006 >> ran.log
+      queue/work.lock/.keep: ''
+    expected_stdout: ''
+    expected_stderr: 'error: another work run is active'
+    expected_exit: 4
+    expected_files:
+      queue/work.lock/.keep: ''
+      queue/pending/0001.job: |-
+        name=tides
+        cmd=echo syncing tides; echo 0001 >> ran.log
+      ran.log: null
+  - name: nothing to do
+    args:
+    - work
+    files:
+      queue/done/0001.job: |
+        name=x
+        cmd=true
+    expected_stdout: queue is empty
+    expected_files:
+      queue/work.lock: null
+  - name: status shows every state
+    args:
+    - status
+    files:
+      queue/pending/0003.job: |
+        name=later
+        cmd=true
+      queue/pending/0004.job: |
+        name=in-flight
+        cmd=true
+      queue/claims/0004/.keep: ''
+      queue/done/0001.job: |
+        name=first
+        cmd=true
+      queue/failed/0002.job: |
+        name=oops
+        cmd=false
+    expected_stdout: |-
+      pending: 1
+      running: 1
+      done: 1
+      failed: 1
+      ID     STATE    NAME
+      0001   done     first
+      0002   failed   oops
+      0003   pending  later
+      0004   running  in-flight
+  - name: retry puts a failed job back
+    args:
+    - retry
+    - '0002'
+    files:
+      queue/failed/0002.job: |
+        name=oops
+        cmd=false
+      queue/failed/0002.out: |
+        it broke
+    expected_stdout: requeued 0002
+    expected_files:
+      queue/pending/0002.job: |-
+        name=oops
+        cmd=false
+      queue/failed/0002.job: null
+      queue/failed/0002.out: null
+  - name: retry of something that did not fail
+    args:
+    - retry
+    - 0009
+    expected_stdout: ''
+    expected_stderr: 'error: no failed job 0009'
+    expected_exit: 3
+  - name: log shows the captured output
+    args:
+    - log
+    - '0003'
+    files:
+      queue/failed/0003.job: |
+        name=broken
+        cmd=false
+      queue/failed/0003.out: |
+        boom
+        second line
+    expected_stdout: |-
+      boom
+      second line
+  - name: log without output
+    args:
+    - log
+    - '0001'
+    files:
+      queue/pending/0001.job: |
+        name=x
+        cmd=true
+    expected_stdout: ''
+    expected_stderr: 'error: no output for job 0001'
+    expected_exit: 3
+  - name: bad worker count
+    args:
+    - work
+    - --workers
+    - '0'
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh submit [--name NAME] COMMAND... | work [--workers N] [--max-tries T] [--limit K] | status | retry ID | log ID'
+    expected_exit: 2
+  - name: unknown command
+    args:
+    - cancel
+    - '0001'
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh submit [--name NAME] COMMAND... | work [--workers N] [--max-tries T] [--limit K] | status | retry ID | log ID'
+    expected_exit: 2

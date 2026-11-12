@@ -1,1 +1,16 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  load config -> order=(dev staging prod), gate_envs/gate_names/gate_args
+  read_state() { [[ -f state/$app/$1.$2 ]] && cat "state/$app/$1.$2" || true; }
+
+  status: header; for each env: version=$(read_state "$e" version); since=$(read_state "$e" since); age=$(( (now - since) / 60 ))
+
+  promote:
+    positions of from/to in order; to must be right after from  -> die ... 3
+    version=$(read_state "$from" version) (die if empty); previous=$(read_state "$to" version); same -> "already runs"
+    echo "promote $app $version: $from -> $to"
+    for each gate of $to: case $gate in soak) ...;; tests) smoke-test ...;; approval) ...;; freeze) [[ -e FREEZE ]] ...;; esac
+         print "gate LABEL: PASS|FAIL (detail)"; count failures
+    failed? print "gates failed: N - not promoting"; exit 1      dry run? print and exit 0
+    deployctl push ... || push failed (exit 4);  deployctl health "$to" "$app" || rollback (5 or 6)
+    only now: write $to.version, $to.since, history.log; print "promoted ..."

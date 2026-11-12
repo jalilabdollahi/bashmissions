@@ -1,22 +1,177 @@
 id: 463
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Backup Verifier
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Backup Verifier` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Backup Verifier
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 380
+story: |
+  Before the storm reaches the harbour, Gus wants one question answered: "If the
+  server room floods tonight, can we actually get our data back?" Everyone says the
+  nightly backups run. Nobody has restored one since March. Mara's creed is that a
+  backup you have not restored is a rumour, so you are building the verifier that
+  restores the newest backups of every set into a scratch directory, compares every
+  file with its recorded checksum, and refuses archives that try to write outside it.
+objective: |
+  Write solution.sh: `solution.sh [--keep-last N] [--set NAME] BACKUP_DIR`
+
+  BACKUP_DIR holds backups named `SET-YYYY-MM-DD.tar.gz` (SET may itself contain
+  dashes) with a manifest `SET-YYYY-MM-DD.sums` next to each one. A manifest line is
+  `CRC SIZE PATH`: the two numbers `cksum` prints for the file, and its path inside
+  the archive (no spaces). Other files in the directory are ignored.
+
+  Options: `--keep-last N` (positive whole number, default 2): verify only the N newest
+  backups of each set (newest = latest date in the name). `--set NAME`: only that set.
+  Errors go to stderr with exit 3: `usage: solution.sh [--keep-last N] [--set NAME] BACKUP_DIR`;
+  `error: --keep-last needs a positive whole number`; `error: cannot read BACKUP_DIR`
+  (not a directory); `error: no backups found` (nothing matched, including a --set with no
+  backups).
+
+  Verify each selected backup in this order, stopping at the first problem type:
+  1. no manifest: `no sums file`
+  2. `tar -tzf` must succeed, else `corrupt archive`
+  3. any listed entry that is absolute or contains a `..` path component:
+     `unsafe path in archive: ENTRY` (first one) - nothing is extracted
+  4. extract into a scratch directory (`mktemp -d`, always deleted by a trap, even on
+     errors); if extraction fails, `corrupt archive`
+  5. compare with the manifest. Collect, in this order, `missing: P...` (listed but not
+     restored), `mismatch: P...` (restored but cksum CRC or size differ) and
+     `unlisted: P...` (restored files not in the manifest, sorted), paths separated by single
+     spaces, groups joined with `; `. Any group means failure. An empty manifest is
+     `empty manifest`.
+  A good backup has the detail `N files restored, checksums match`.
+
+  Output: a header `printf '%-6s %-22s %s\n' STATUS BACKUP DETAIL`, then per set
+  (alphabetical) its selected backups, newest first, status `OK` or `FAIL`, BACKUP is the
+  name without `.tar.gz`; after each set's rows the line `set NAME: K of M ok`. Finish with
+  `verified: V ok, F failed`. Exit status: 2 if some set has no good backup among those
+  checked, else 1 if any backup failed, else 0.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "restore into a scratch directory and always clean it up"
+  - "cksum on stdin gives name-free CRC and size"
+  - "list the archive before extracting it: refuse path traversal"
+  - "group by a name prefix and keep the newest N"
+  - "layered failure reasons and an exit status for the whole run"
+required_patterns:
+  - pattern: 'tar\s+-t'
+    message: "List the archive with tar -tzf before extracting anything."
+  - pattern: '\btrap\b'
+    message: "Clean up the scratch directory with a trap."
+  - pattern: 'mktemp -d'
+    message: "Restore into a directory made with mktemp -d."
+test_cases:
+  - name: newest shrimp backup is bad and keep-last 1 sees nothing else
+    args:
+    - --keep-last
+    - '1'
+    - --set
+    - shrimp
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      FAIL   shrimp-2026-11-10      missing: data/orders.csv; mismatch: conf/app.ini
+      set shrimp: 0 of 1 ok
+      verified: 0 ok, 1 failed
+    expected_exit: 2
+  - name: older shrimp backups include a corrupt one and a good one
+    args:
+    - --keep-last
+    - '3'
+    - --set
+    - shrimp
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      FAIL   shrimp-2026-11-10      missing: data/orders.csv; mismatch: conf/app.ini
+      FAIL   shrimp-2026-11-09      corrupt archive
+      OK     shrimp-2026-11-08      3 files restored, checksums match
+      set shrimp: 1 of 3 ok
+      verified: 1 ok, 2 failed
+    expected_exit: 1
+  - name: missing manifest on the newest, good one before it
+    args:
+    - --set
+    - ledger
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      FAIL   ledger-2026-11-10      no sums file
+      OK     ledger-2026-11-09      2 files restored, checksums match
+      set ledger: 1 of 2 ok
+      verified: 1 ok, 1 failed
+    expected_exit: 1
+  - name: path traversal is refused before extraction
+    args:
+    - --set
+    - harbor
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      FAIL   harbor-2026-11-10      unsafe path in archive: ../evil.txt
+      set harbor: 0 of 1 ok
+      verified: 0 ok, 1 failed
+    expected_exit: 2
+  - name: a healthy set
+    args:
+    - --set
+    - tidal
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      OK     tidal-2026-11-10       1 files restored, checksums match
+      OK     tidal-2026-11-09       1 files restored, checksums match
+      set tidal: 2 of 2 ok
+      verified: 2 ok, 0 failed
+  - name: extra files in a restore are suspicious
+    args:
+    - --set
+    - gull
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      FAIL   gull-2026-11-10        unlisted: debug.log
+      set gull: 0 of 1 ok
+      verified: 0 ok, 1 failed
+    expected_exit: 2
+  - name: every set at once
+    args:
+    - fixtures/backups
+    expected_stdout: |-
+      STATUS BACKUP                 DETAIL
+      FAIL   gull-2026-11-10        unlisted: debug.log
+      set gull: 0 of 1 ok
+      FAIL   harbor-2026-11-10      unsafe path in archive: ../evil.txt
+      set harbor: 0 of 1 ok
+      FAIL   ledger-2026-11-10      no sums file
+      OK     ledger-2026-11-09      2 files restored, checksums match
+      set ledger: 1 of 2 ok
+      FAIL   shrimp-2026-11-10      missing: data/orders.csv; mismatch: conf/app.ini
+      FAIL   shrimp-2026-11-09      corrupt archive
+      set shrimp: 0 of 2 ok
+      OK     tidal-2026-11-10       1 files restored, checksums match
+      OK     tidal-2026-11-09       1 files restored, checksums match
+      set tidal: 2 of 2 ok
+      verified: 3 ok, 5 failed
+    expected_exit: 2
+  - name: unknown set
+    args:
+    - --set
+    - nope
+    - fixtures/backups
+    expected_stdout: ''
+    expected_stderr: 'error: no backups found'
+    expected_exit: 3
+  - name: keep-last must be positive
+    args:
+    - --keep-last
+    - '0'
+    - fixtures/backups
+    expected_stdout: ''
+    expected_stderr: 'error: --keep-last needs a positive whole number'
+    expected_exit: 3
+  - name: not a directory
+    args:
+    - fixtures/missing
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read fixtures/missing'
+    expected_exit: 3

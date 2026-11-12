@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# curl stand-in for health checks: -s -S -sS -o FILE -w FORMAT --max-time N URL
+# The status code is read from http/<host><path>.code (default 404). A file
+# http/<host><path>.fail (or http/<host>/.fail) means connection failure: prints 000, exit 7.
+fmt="" url=""
+while (( $# )); do
+  case $1 in
+    -s|-S|-sS) ;;
+    -o|--max-time) shift ;;
+    -w) fmt=$2; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2; exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+rest=${url#*://}; host=${rest%%/*}; path=/${rest#*/}
+[[ $path == "/$rest" ]] && path=/
+base=http/$host${path%/}
+if [[ -f http/$host/.fail || -f $base.fail ]]; then
+  [[ $fmt == *http_code* ]] && printf '000'
+  echo "curl: (7) Failed to connect to $host" >&2
+  exit 7
+fi
+code=404
+[[ -f $base.code ]] && code=$(tr -d '[:space:]' < "$base.code")
+[[ $fmt == '%{http_code}' ]] && printf '%s' "$code"
+exit 0

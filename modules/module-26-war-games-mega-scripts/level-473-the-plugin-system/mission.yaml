@@ -1,22 +1,501 @@
 id: 473
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Plugin System
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Plugin System` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Plugin System
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 430
+story: |
+  Every team at Lanternfish now wants to hook into the storm deploy: the weather desk
+  wants a tide sync, Noor wants a customer notice, Priya wants an audit step, Ollie wants
+  "something with the webcams". Theo's answer so far was one 600-line script that nobody
+  dares to edit. Mara proposes the grown-up fix: a tiny host that discovers plugin files, works
+  out the order from their declared dependencies, runs each plugin in isolation so that one
+  bad plugin cannot take down the rest, and says exactly why anything was skipped.
+objective: |
+  Write solution.sh, the plugin host:
+    `solution.sh [--plugins DIR] [--disable NAME]... list`
+    `solution.sh [--plugins DIR] [--disable NAME]... run HOOK [ARG...]`
+  DIR defaults to `plugins`. Errors on stderr: exit 2 for
+  `usage: solution.sh [--plugins DIR] [--disable NAME]... list | run HOOK [ARG...]` and for a HOOK that is not
+  lowercase letters and underscores (`error: bad hook name 'X'`); exit 3 for
+  `error: cannot read DIR` (not a directory).
+
+  A plugin is a file `DIR/*.plugin`. Only its header is read for discovery (the first 15 lines;
+  nothing is executed): `# name: NAME` (required; lowercase letters, digits and dashes, starting with
+  a letter), `# requires: NAME NAME...` (optional) and `# priority: N` (optional whole number, default 50).
+  A file without a valid name is `bad header (no name)`; a name already taken by an earlier file (files in
+  name order) is `bad header (duplicate name)`. Plugins named by `--disable` or listed one per line in
+  `DIR/disabled.list` are disabled.
+
+  Order: dependencies first (a plugin comes after everything it requires); among plugins that are ready at
+  the same time the lowest priority number comes first, ties by name. Requirements that name a missing
+  plugin do not influence the order. Plugins that can never become ready (they are in a dependency cycle, or
+  depend on one) are `cyclic dependency` and have no position.
+  Status of each ordered plugin, decided in that order: `disabled`; else for its requirements in the
+  order written: `missing dependency: X` (no such plugin), `dependency disabled: X`, `dependency not usable: X`
+  (X has any other non-ok status); else `ok`.
+
+  `list` prints `printf '%-5s %-10s %4s  %s\n' ORDER NAME PRIO STATUS` as a header, then one row per plugin:
+  ordered plugins with ORDER 1, 2, ..., then cyclic ones (ORDER `-`, name order), then bad headers with
+  NAME = the file name and PRIO `-`. Exit 0 when every plugin is ok, else 1.
+
+  `run HOOK ARG...` prints `== hook HOOK ==`, then walks the ordered plugins. A plugin that is not ok prints
+  `NAME: skipped (STATUS)`. A plugin that requires a plugin that FAILED during this run prints
+  `NAME: skipped (needs X which failed)`. Otherwise it is run in an isolated subshell: the plugin file is
+  sourced, and if it defines the function `NAME__HOOK` (dashes in NAME become underscores) that function is called
+  with the ARGs; if not, the plugin prints `NAME: no hook`. The plugin's output (stdout and stderr) is shown
+  line by line before its result line. A plugin can call the host function `host_log MESSAGE...`, which prints
+  `[NAME] MESSAGE...`. Status 0 prints `NAME: ok`; any other status `NAME: FAILED (status N)`. A plugin that calls
+  `exit`, crashes or changes variables must not affect the host or the other plugins. Finish with
+  `ran: R, failed: F, skipped: S, no hook: H` (R counts ok plugins) and exit 1 if F > 0, else 0.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "discovering plugins by reading headers, never by executing them"
+  - "topological ordering with a priority tie-break (Kahn's algorithm)"
+  - "isolation: one subshell per plugin, status as the only channel back"
+  - "dependency failure propagation"
+  - "host API functions inherited by the subshell"
+required_patterns:
+  - pattern: 'source |\. '
+    message: "Load the plugin with source inside its own subshell."
+test_cases:
+  - name: ordering by dependency and priority
+    args:
+    - list
+    files:
+      plugins/core.plugin: |
+        # name: core
+        # priority: 10
+        core__pre_deploy() { host_log "checking disk"; }
+        core__post_deploy() { host_log "core post"; }
+      plugins/tides.plugin: |
+        # name: tides
+        # requires: core
+        tides__pre_deploy() { host_log "syncing tides"; return 3; }
+      plugins/webcam.plugin: |
+        # name: webcam
+        # requires: tides
+        # priority: 5
+        webcam__pre_deploy() { host_log "snapping cameras"; }
+      plugins/pager.plugin: |
+        # name: pager
+        # requires: core
+        # priority: 20
+        pager__pre_deploy() { PAGER_STATE=dirty; echo "paging"; exit 9; }
+        pager__post_deploy() { echo "pager post, state=${PAGER_STATE:-clean}"; }
+      plugins/metrics.plugin: |
+        # name: metrics
+        # priority: 5
+        metrics__post_deploy() { host_log "pushed $1 metrics to $2"; }
+      plugins/shout-out.plugin: |
+        # name: shout-out
+        # requires: metrics
+        shout_out__post_deploy() { host_log "all done" ; echo "to stderr" >&2; }
+      plugins/orphan.plugin: |
+        # name: orphan
+        # requires: ghost core
+      plugins/loop-a.plugin: |
+        # name: loop-a
+        # requires: loop-b
+      plugins/loop-b.plugin: |
+        # name: loop-b
+        # requires: loop-a
+      plugins/zz-after-loop.plugin: |
+        # name: zz-after-loop
+        # requires: loop-a core
+      plugins/bad.plugin: |
+        echo "no header here"
+      plugins/dupe.plugin: |
+        # name: core
+      plugins/disabled.list: |
+        shout-out
+    expected_stdout: |-
+      ORDER NAME       PRIO  STATUS
+      1     metrics       5  ok
+      2     core         10  ok
+      3     pager        20  ok
+      4     orphan       50  missing dependency: ghost
+      5     shout-out    50  disabled
+      6     tides        50  ok
+      7     webcam        5  ok
+      -     loop-a       50  cyclic dependency
+      -     loop-b       50  cyclic dependency
+      -     zz-after-loop   50  cyclic dependency
+      -     bad.plugin    -  bad header (no name)
+      -     dupe.plugin    -  bad header (duplicate name)
+    expected_exit: 1
+  - name: a hook runs in order, failures propagate, crashes stay contained
+    args:
+    - run
+    - pre_deploy
+    files:
+      plugins/core.plugin: |
+        # name: core
+        # priority: 10
+        core__pre_deploy() { host_log "checking disk"; }
+        core__post_deploy() { host_log "core post"; }
+      plugins/tides.plugin: |
+        # name: tides
+        # requires: core
+        tides__pre_deploy() { host_log "syncing tides"; return 3; }
+      plugins/webcam.plugin: |
+        # name: webcam
+        # requires: tides
+        # priority: 5
+        webcam__pre_deploy() { host_log "snapping cameras"; }
+      plugins/pager.plugin: |
+        # name: pager
+        # requires: core
+        # priority: 20
+        pager__pre_deploy() { PAGER_STATE=dirty; echo "paging"; exit 9; }
+        pager__post_deploy() { echo "pager post, state=${PAGER_STATE:-clean}"; }
+      plugins/metrics.plugin: |
+        # name: metrics
+        # priority: 5
+        metrics__post_deploy() { host_log "pushed $1 metrics to $2"; }
+      plugins/shout-out.plugin: |
+        # name: shout-out
+        # requires: metrics
+        shout_out__post_deploy() { host_log "all done" ; echo "to stderr" >&2; }
+      plugins/orphan.plugin: |
+        # name: orphan
+        # requires: ghost core
+      plugins/loop-a.plugin: |
+        # name: loop-a
+        # requires: loop-b
+      plugins/loop-b.plugin: |
+        # name: loop-b
+        # requires: loop-a
+      plugins/zz-after-loop.plugin: |
+        # name: zz-after-loop
+        # requires: loop-a core
+      plugins/bad.plugin: |
+        echo "no header here"
+      plugins/dupe.plugin: |
+        # name: core
+      plugins/disabled.list: |
+        shout-out
+    expected_stdout: |-
+      == hook pre_deploy ==
+      metrics: no hook
+      [core] checking disk
+      core: ok
+      paging
+      pager: FAILED (status 9)
+      orphan: skipped (missing dependency: ghost)
+      shout-out: skipped (disabled)
+      [tides] syncing tides
+      tides: FAILED (status 3)
+      webcam: skipped (needs tides which failed)
+      ran: 1, failed: 2, skipped: 3, no hook: 1
+    expected_exit: 1
+  - name: arguments reach the plugins and nothing leaks between them
+    args:
+    - run
+    - post_deploy
+    - 42
+    - storm-board
+    files:
+      plugins/core.plugin: |
+        # name: core
+        # priority: 10
+        core__pre_deploy() { host_log "checking disk"; }
+        core__post_deploy() { host_log "core post"; }
+      plugins/tides.plugin: |
+        # name: tides
+        # requires: core
+        tides__pre_deploy() { host_log "syncing tides"; return 3; }
+      plugins/webcam.plugin: |
+        # name: webcam
+        # requires: tides
+        # priority: 5
+        webcam__pre_deploy() { host_log "snapping cameras"; }
+      plugins/pager.plugin: |
+        # name: pager
+        # requires: core
+        # priority: 20
+        pager__pre_deploy() { PAGER_STATE=dirty; echo "paging"; exit 9; }
+        pager__post_deploy() { echo "pager post, state=${PAGER_STATE:-clean}"; }
+      plugins/metrics.plugin: |
+        # name: metrics
+        # priority: 5
+        metrics__post_deploy() { host_log "pushed $1 metrics to $2"; }
+      plugins/shout-out.plugin: |
+        # name: shout-out
+        # requires: metrics
+        shout_out__post_deploy() { host_log "all done" ; echo "to stderr" >&2; }
+      plugins/orphan.plugin: |
+        # name: orphan
+        # requires: ghost core
+      plugins/loop-a.plugin: |
+        # name: loop-a
+        # requires: loop-b
+      plugins/loop-b.plugin: |
+        # name: loop-b
+        # requires: loop-a
+      plugins/zz-after-loop.plugin: |
+        # name: zz-after-loop
+        # requires: loop-a core
+      plugins/bad.plugin: |
+        echo "no header here"
+      plugins/dupe.plugin: |
+        # name: core
+      plugins/disabled.list: |
+        shout-out
+    expected_stdout: |-
+      == hook post_deploy ==
+      [metrics] pushed 42 metrics to storm-board
+      metrics: ok
+      [core] core post
+      core: ok
+      pager post, state=clean
+      pager: ok
+      orphan: skipped (missing dependency: ghost)
+      shout-out: skipped (disabled)
+      tides: no hook
+      webcam: no hook
+      ran: 3, failed: 0, skipped: 2, no hook: 2
+  - name: disable flags
+    args:
+    - --disable
+    - tides
+    - --disable
+    - metrics
+    - list
+    files:
+      plugins/core.plugin: |
+        # name: core
+        # priority: 10
+        core__pre_deploy() { host_log "checking disk"; }
+        core__post_deploy() { host_log "core post"; }
+      plugins/tides.plugin: |
+        # name: tides
+        # requires: core
+        tides__pre_deploy() { host_log "syncing tides"; return 3; }
+      plugins/webcam.plugin: |
+        # name: webcam
+        # requires: tides
+        # priority: 5
+        webcam__pre_deploy() { host_log "snapping cameras"; }
+      plugins/pager.plugin: |
+        # name: pager
+        # requires: core
+        # priority: 20
+        pager__pre_deploy() { PAGER_STATE=dirty; echo "paging"; exit 9; }
+        pager__post_deploy() { echo "pager post, state=${PAGER_STATE:-clean}"; }
+      plugins/metrics.plugin: |
+        # name: metrics
+        # priority: 5
+        metrics__post_deploy() { host_log "pushed $1 metrics to $2"; }
+      plugins/shout-out.plugin: |
+        # name: shout-out
+        # requires: metrics
+        shout_out__post_deploy() { host_log "all done" ; echo "to stderr" >&2; }
+      plugins/orphan.plugin: |
+        # name: orphan
+        # requires: ghost core
+      plugins/loop-a.plugin: |
+        # name: loop-a
+        # requires: loop-b
+      plugins/loop-b.plugin: |
+        # name: loop-b
+        # requires: loop-a
+      plugins/zz-after-loop.plugin: |
+        # name: zz-after-loop
+        # requires: loop-a core
+      plugins/bad.plugin: |
+        echo "no header here"
+      plugins/dupe.plugin: |
+        # name: core
+      plugins/disabled.list: |
+        shout-out
+    expected_stdout: |-
+      ORDER NAME       PRIO  STATUS
+      1     metrics       5  disabled
+      2     core         10  ok
+      3     pager        20  ok
+      4     orphan       50  missing dependency: ghost
+      5     shout-out    50  disabled
+      6     tides        50  disabled
+      7     webcam        5  dependency disabled: tides
+      -     loop-a       50  cyclic dependency
+      -     loop-b       50  cyclic dependency
+      -     zz-after-loop   50  cyclic dependency
+      -     bad.plugin    -  bad header (no name)
+      -     dupe.plugin    -  bad header (duplicate name)
+    expected_exit: 1
+  - name: a plugin of a disabled dependency is skipped
+    args:
+    - --disable
+    - tides
+    - run
+    - pre_deploy
+    files:
+      plugins/core.plugin: |
+        # name: core
+        # priority: 10
+        core__pre_deploy() { host_log "checking disk"; }
+        core__post_deploy() { host_log "core post"; }
+      plugins/tides.plugin: |
+        # name: tides
+        # requires: core
+        tides__pre_deploy() { host_log "syncing tides"; return 3; }
+      plugins/webcam.plugin: |
+        # name: webcam
+        # requires: tides
+        # priority: 5
+        webcam__pre_deploy() { host_log "snapping cameras"; }
+      plugins/pager.plugin: |
+        # name: pager
+        # requires: core
+        # priority: 20
+        pager__pre_deploy() { PAGER_STATE=dirty; echo "paging"; exit 9; }
+        pager__post_deploy() { echo "pager post, state=${PAGER_STATE:-clean}"; }
+      plugins/metrics.plugin: |
+        # name: metrics
+        # priority: 5
+        metrics__post_deploy() { host_log "pushed $1 metrics to $2"; }
+      plugins/shout-out.plugin: |
+        # name: shout-out
+        # requires: metrics
+        shout_out__post_deploy() { host_log "all done" ; echo "to stderr" >&2; }
+      plugins/orphan.plugin: |
+        # name: orphan
+        # requires: ghost core
+      plugins/loop-a.plugin: |
+        # name: loop-a
+        # requires: loop-b
+      plugins/loop-b.plugin: |
+        # name: loop-b
+        # requires: loop-a
+      plugins/zz-after-loop.plugin: |
+        # name: zz-after-loop
+        # requires: loop-a core
+      plugins/bad.plugin: |
+        echo "no header here"
+      plugins/dupe.plugin: |
+        # name: core
+      plugins/disabled.list: |
+        shout-out
+    expected_stdout: |-
+      == hook pre_deploy ==
+      metrics: no hook
+      [core] checking disk
+      core: ok
+      paging
+      pager: FAILED (status 9)
+      orphan: skipped (missing dependency: ghost)
+      shout-out: skipped (disabled)
+      tides: skipped (disabled)
+      webcam: skipped (dependency disabled: tides)
+      ran: 1, failed: 1, skipped: 4, no hook: 1
+    expected_exit: 1
+  - name: custom plugin directory with one calm plugin
+    args:
+    - --plugins
+    - extras
+    - run
+    - pre_deploy
+    files:
+      extras/hello.plugin: |
+        # name: hello
+        hello__pre_deploy() { host_log "hello from extras"; }
+    expected_stdout: |-
+      == hook pre_deploy ==
+      [hello] hello from extras
+      hello: ok
+      ran: 1, failed: 0, skipped: 0, no hook: 0
+  - name: plugin side effects are isolated
+    args:
+    - run
+    - pre_deploy
+    files:
+      plugins/one.plugin: |
+        # name: one
+        one__pre_deploy() { cd "$TMPDIR"; MARKER=one; echo "$MARKER" > marker.txt; echo "one wrote the marker"; }
+      plugins/two.plugin: |
+        # name: two
+        # requires: one
+        two__pre_deploy() {
+          [[ $PWD == "$TMPDIR" ]] && echo "cwd leaked" || echo "cwd is clean"
+          echo "marker variable: ${MARKER:-unset}"
+          test -f "$TMPDIR/marker.txt" && echo "marker file visible"
+          return 0
+        }
+    expected_stdout: |-
+      == hook pre_deploy ==
+      one wrote the marker
+      one: ok
+      cwd is clean
+      marker variable: unset
+      marker file visible
+      two: ok
+      ran: 2, failed: 0, skipped: 0, no hook: 0
+  - name: bad hook name
+    args:
+    - run
+    - Pre-Deploy
+    files:
+      plugins/core.plugin: |
+        # name: core
+        # priority: 10
+        core__pre_deploy() { host_log "checking disk"; }
+        core__post_deploy() { host_log "core post"; }
+      plugins/tides.plugin: |
+        # name: tides
+        # requires: core
+        tides__pre_deploy() { host_log "syncing tides"; return 3; }
+      plugins/webcam.plugin: |
+        # name: webcam
+        # requires: tides
+        # priority: 5
+        webcam__pre_deploy() { host_log "snapping cameras"; }
+      plugins/pager.plugin: |
+        # name: pager
+        # requires: core
+        # priority: 20
+        pager__pre_deploy() { PAGER_STATE=dirty; echo "paging"; exit 9; }
+        pager__post_deploy() { echo "pager post, state=${PAGER_STATE:-clean}"; }
+      plugins/metrics.plugin: |
+        # name: metrics
+        # priority: 5
+        metrics__post_deploy() { host_log "pushed $1 metrics to $2"; }
+      plugins/shout-out.plugin: |
+        # name: shout-out
+        # requires: metrics
+        shout_out__post_deploy() { host_log "all done" ; echo "to stderr" >&2; }
+      plugins/orphan.plugin: |
+        # name: orphan
+        # requires: ghost core
+      plugins/loop-a.plugin: |
+        # name: loop-a
+        # requires: loop-b
+      plugins/loop-b.plugin: |
+        # name: loop-b
+        # requires: loop-a
+      plugins/zz-after-loop.plugin: |
+        # name: zz-after-loop
+        # requires: loop-a core
+      plugins/bad.plugin: |
+        echo "no header here"
+      plugins/dupe.plugin: |
+        # name: core
+      plugins/disabled.list: |
+        shout-out
+    expected_stdout: ''
+    expected_stderr: 'error: bad hook name ''Pre-Deploy'''
+    expected_exit: 2
+  - name: no such directory
+    args:
+    - --plugins
+    - nowhere
+    - list
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read nowhere'
+    expected_exit: 3
+  - name: usage
+    args:
+    - start
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--plugins DIR] [--disable NAME]... list | run HOOK [ARG...]'
+    expected_exit: 2

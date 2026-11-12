@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Path list: `{ (cd "$golden" && find . -type f | sed 's|^\./||'); (cd "$live" && find . -type f | sed 's|^\./||'); } | sort -u`. Remove `.modes` and `.ignore` from the golden side.
+- Comparing two settings files in one awk run: `FNR == NR` is true only while reading the first file, so you can fill `g[key]` from golden and `l[key]` from live, then loop over the union of keys in `END`. Sort the output afterwards by printing `key|text` and `sort -t'|' -k1,1`.
+- Trimming: `sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s)`; split at the first `=` with `index($0, "=")`; a quoted value is `v ~ /^".*"$/`.
+- Octal from `ls -l`: take `cut -c2-10`; per triple add 4 for `r`, 2 for `w`, 1 for `x`, `s` or `t`. `${m:i:1}` slices a string.
+- Masking: `tolower(key) ~ /pass|secret|token|key/`.

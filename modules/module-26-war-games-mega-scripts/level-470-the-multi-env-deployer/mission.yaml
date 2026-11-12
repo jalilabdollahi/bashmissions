@@ -1,22 +1,552 @@
 id: 470
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Multi-Env Deployer
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Multi-Env Deployer` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Multi-Env Deployer
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 410
+story: |
+  With the storm closing in, everybody wants their fix in production "right now". Last
+  week a change that had never been near staging went straight to prod because the
+  deploy command accepted any environment, and a typo took the booking page down. Mara
+  draws a line on the whiteboard: dev, staging, prod, and a gate between each step.
+  The code must have soaked, the smoke tests must pass, a second person must have signed
+  off, and nothing ships during a change freeze. You are building the promotion tool that
+  enforces the line and also tells people exactly which gate stopped them.
+objective: |
+  Write solution.sh with two commands:
+    `solution.sh status APP`
+    `solution.sh [--dry-run] promote APP FROM TO`
+  Anything else: `usage: solution.sh status APP | [--dry-run] promote APP FROM TO` on stderr, exit 2.
+  Time: NOW = `date +%s` unless the environment variable NOW is set. The person doing the
+  deploy is `$DEPLOYER` if set, else `$USER`.
+
+  Configuration is `pipeline.conf` (fields separated by `|`; blank and `#` lines ignored):
+    order|dev staging prod                    the environments, in promotion order (must come first)
+    gate|ENV|GATE|ARG                         a gate that must pass to promote INTO ENV
+  Gates: `soak` (ARG minutes, a whole number), `tests`, `approval`, `freeze` (ARG is `-`).
+  Problems exit 3 with a message on stderr: `error: pipeline.conf is missing`,
+  `error: pipeline.conf line N: unknown gate 'G'`, `error: pipeline.conf line N: bad soak minutes 'X'`,
+  `error: pipeline.conf line N: unknown environment 'E'`, `error: pipeline.conf has no order line`
+  (N counts every line).
+
+  State: `state/APP/ENV.version` (current version) and `state/APP/ENV.since` (epoch when it
+  arrived), `state/APP/history.log`.
+
+  `status APP` prints `printf '%-8s %-10s %s\n' ENV VERSION AGE` and one row per environment in
+  order; AGE is `M min` (whole minutes since `.since`); an environment with no version shows `-` and `-`.
+
+  `promote APP FROM TO`: FROM and TO must be environments and TO must be the one right after FROM,
+  else `error: TO does not follow FROM in the pipeline`; FROM must have a version, else
+  `error: FROM has no version of APP` (both exit 3, checked in that order). VERSION is what FROM
+  runs now. If TO already runs it, print `TO already runs VERSION` and exit 0.
+  Print `promote APP VERSION: FROM -> TO` and then evaluate EVERY gate of TO, in config order,
+  without stopping at the first failure, one line each:
+    `gate LABEL: PASS` or `gate LABEL: PASS (detail)` / `gate LABEL: FAIL (reason)`
+  LABEL is `soak(N)` for soak and the gate name otherwise.
+  - soak: minutes in FROM = (NOW - FROM's .since) / 60 (a missing .since fails with `no arrival time`):
+    PASS `(M min in FROM)`, else FAIL `(M min in FROM, need N)`.
+  - tests: run `smoke-test FROM APP VERSION`; exit 0 passes, else FAIL `(smoke-test failed)`.
+  - approval: file `approvals/APP-VERSION-TO` with a line `approver=NAME`. Missing file: FAIL
+    `(no approval file approvals/APP-VERSION-TO)`; NAME equal to the deployer: FAIL
+    `(self-approval is not allowed)`; a file without an `approver=` line (or an empty name): FAIL
+    `(approval file names no approver)`; otherwise PASS `(approved by NAME)`.
+  - freeze: if the file `FREEZE` exists FAIL `(change freeze: FIRST LINE OF THE FILE)`, else PASS.
+  If any gate failed print `gates failed: N - not promoting` and exit 1. With `--dry-run` and all
+  gates passing print `dry run: gates passed, would deploy VERSION to TO` and exit 0.
+  Otherwise deploy with the tool `deployctl`:
+    `deployctl push APP VERSION ENV`, then `deployctl health ENV APP`
+  Print `push: ok` (a failed push: `push: FAILED` and, on stderr, `error: push to TO failed`, exit 4,
+  nothing recorded), then `health: ok`. After a healthy deploy write TO's .version and .since (= NOW),
+  append `NOW promote VERSION FROM->TO by DEPLOYER` to history.log and print
+  `promoted APP VERSION to TO (previous: PREV)` (PREV is `none` if TO had no version).
+  If health fails: print `health: FAILED`; with a previous version run `deployctl push APP PREV TO`,
+  print `rolled back TO to PREV`, `error: health check failed after promotion` on stderr, exit 5;
+  without a previous version print `error: health check failed and TO has no previous version`
+  on stderr, exit 6. State files stay untouched in both cases.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "gates as data: evaluate all, report all"
+  - "separation of duties: approver differs from deployer"
+  - "state files per app and environment"
+  - "promote what the previous environment runs, never a free-typed version"
+  - "rollback to the recorded previous version"
+required_patterns:
+  - pattern: 'deployctl'
+    message: "Deploy with deployctl push and verify with deployctl health."
+test_cases:
+  - name: status shows every environment
+    args:
+    - status
+    - shrimp-api
+    env:
+      NOW: '100000'
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: |-
+      ENV      VERSION    AGE
+      dev      2.5.0      16 min
+      staging  2.4.1      46 min
+      prod     2.3.9      833 min
+  - name: all gates pass and prod gets the release
+    args:
+    - promote
+    - shrimp-api
+    - staging
+    - prod
+    env:
+      NOW: '100000'
+      DEPLOYER: mara
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+      approvals/shrimp-api-2.4.1-prod: |
+        approver=priya
+    expected_stdout: |-
+      promote shrimp-api 2.4.1: staging -> prod
+      gate soak(30): PASS (46 min in staging)
+      gate approval: PASS (approved by priya)
+      gate freeze: PASS
+      push: ok
+      health: ok
+      promoted shrimp-api 2.4.1 to prod (previous: 2.3.9)
+    expected_files:
+      state/shrimp-api/prod.version: 2.4.1
+      state/shrimp-api/prod.since: '100000'
+      state/shrimp-api/history.log: 100000 promote 2.4.1 staging->prod by mara
+      .calls.log: |-
+        deployctl push shrimp-api 2.4.1 prod
+        deployctl health prod shrimp-api
+  - name: every failing gate is reported at once
+    args:
+    - promote
+    - shrimp-api
+    - staging
+    - prod
+    env:
+      NOW: '98000'
+      DEPLOYER: priya
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+      approvals/shrimp-api-2.4.1-prod: |
+        approver=priya
+      FREEZE: |
+        storm Hilda, no prod changes until Monday
+        second line
+    expected_stdout: |-
+      promote shrimp-api 2.4.1: staging -> prod
+      gate soak(30): FAIL (13 min in staging, need 30)
+      gate approval: FAIL (self-approval is not allowed)
+      gate freeze: FAIL (change freeze: storm Hilda, no prod changes until Monday)
+      gates failed: 3 - not promoting
+    expected_exit: 1
+    expected_files:
+      state/shrimp-api/prod.version: 2.3.9
+      .calls.log: null
+  - name: an approval for the wrong environment does not count
+    args:
+    - promote
+    - shrimp-api
+    - staging
+    - prod
+    env:
+      NOW: '100000'
+      DEPLOYER: mara
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+      approvals/shrimp-api-2.4.1-staging: |
+        approver=priya
+    expected_stdout: |-
+      promote shrimp-api 2.4.1: staging -> prod
+      gate soak(30): PASS (46 min in staging)
+      gate approval: FAIL (no approval file approvals/shrimp-api-2.4.1-prod)
+      gate freeze: PASS
+      gates failed: 1 - not promoting
+    expected_exit: 1
+  - name: dry run stops before deploying
+    args:
+    - --dry-run
+    - promote
+    - shrimp-api
+    - dev
+    - staging
+    env:
+      NOW: '100000'
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: |-
+      promote shrimp-api 2.5.0: dev -> staging
+      gate tests: PASS
+      dry run: gates passed, would deploy 2.5.0 to staging
+    expected_files:
+      .calls.log: smoke-test dev shrimp-api 2.5.0
+      state/shrimp-api/staging.version: 2.4.1
+  - name: smoke tests block staging
+    args:
+    - promote
+    - shrimp-api
+    - dev
+    - staging
+    env:
+      NOW: '100000'
+      FAKE_SMOKE_FAIL: dev
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: |-
+      promote shrimp-api 2.5.0: dev -> staging
+      gate tests: FAIL (smoke-test failed)
+      gates failed: 1 - not promoting
+    expected_exit: 1
+    expected_files:
+      state/shrimp-api/staging.version: 2.4.1
+      .calls.log: smoke-test dev shrimp-api 2.5.0
+  - name: unhealthy prod is rolled back
+    args:
+    - promote
+    - shrimp-api
+    - staging
+    - prod
+    env:
+      NOW: '100000'
+      DEPLOYER: mara
+      FAKE_HEALTH_FAIL: prod
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+      approvals/shrimp-api-2.4.1-prod: |
+        approver=priya
+    expected_stdout: |-
+      promote shrimp-api 2.4.1: staging -> prod
+      gate soak(30): PASS (46 min in staging)
+      gate approval: PASS (approved by priya)
+      gate freeze: PASS
+      push: ok
+      health: FAILED
+      rolled back prod to 2.3.9
+    expected_stderr: 'error: health check failed after promotion'
+    expected_exit: 5
+    expected_files:
+      state/shrimp-api/prod.version: 2.3.9
+      .calls.log: |-
+        deployctl push shrimp-api 2.4.1 prod
+        deployctl health prod shrimp-api
+        deployctl push shrimp-api 2.3.9 prod
+      state/shrimp-api/history.log: null
+  - name: first deploy into an empty environment that is unhealthy
+    args:
+    - promote
+    - tide-board
+    - dev
+    - staging
+    env:
+      NOW: '100000'
+      FAKE_HEALTH_FAIL: staging
+    files:
+      pipeline.conf: |
+        order|dev staging prod
+      state/tide-board/dev.version: |
+        0.3.0
+      state/tide-board/dev.since: |
+        1
+    expected_stdout: |-
+      promote tide-board 0.3.0: dev -> staging
+      push: ok
+      health: FAILED
+    expected_stderr: 'error: health check failed and staging has no previous version'
+    expected_exit: 6
+    expected_files:
+      .calls.log: |-
+        deployctl push tide-board 0.3.0 staging
+        deployctl health staging tide-board
+      state/tide-board/staging.version: null
+  - name: environments cannot be skipped
+    args:
+    - promote
+    - shrimp-api
+    - dev
+    - prod
+    env:
+      NOW: '100000'
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: ''
+    expected_stderr: 'error: prod does not follow dev in the pipeline'
+    expected_exit: 3
+  - name: nothing to promote
+    args:
+    - promote
+    - shrimp-api
+    - staging
+    - prod
+    env:
+      NOW: '100000'
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.4.1
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: prod already runs 2.4.1
+  - name: source environment has no version
+    args:
+    - promote
+    - ferry-web
+    - dev
+    - staging
+    env:
+      NOW: '100000'
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: ''
+    expected_stderr: 'error: dev has no version of ferry-web'
+    expected_exit: 3
+  - name: an approval file that names nobody
+    args:
+    - promote
+    - shrimp-api
+    - staging
+    - prod
+    env:
+      NOW: '100000'
+      DEPLOYER: mara
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+      approvals/shrimp-api-2.4.1-prod: |
+        reviewed: looks fine
+    expected_stdout: |-
+      promote shrimp-api 2.4.1: staging -> prod
+      gate soak(30): PASS (46 min in staging)
+      gate approval: FAIL (approval file names no approver)
+      gate freeze: PASS
+      gates failed: 1 - not promoting
+    expected_exit: 1
+  - name: bad gate in the config
+    args:
+    - status
+    - shrimp-api
+    files:
+      pipeline.conf: |
+        order|dev prod
+
+        gate|prod|magic|-
+    expected_stdout: ''
+    expected_stderr: 'error: pipeline.conf line 3: unknown gate ''magic'''
+    expected_exit: 3
+  - name: usage
+    args:
+    - deploy
+    - shrimp-api
+    files:
+      pipeline.conf: |
+        # promotion pipeline
+        order|dev staging prod
+        gate|staging|tests|-
+        gate|prod|soak|30
+        gate|prod|approval|-
+        gate|prod|freeze|-
+      state/shrimp-api/dev.version: |
+        2.5.0
+      state/shrimp-api/dev.since: |
+        99000
+      state/shrimp-api/staging.version: |
+        2.4.1
+      state/shrimp-api/staging.since: |
+        97200
+      state/shrimp-api/prod.version: |
+        2.3.9
+      state/shrimp-api/prod.since: |
+        50000
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh status APP | [--dry-run] promote APP FROM TO'
+    expected_exit: 2

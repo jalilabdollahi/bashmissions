@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# harbor-build APP VERSION  (FAKE_FAIL=build makes it fail)
+[[ $# -eq 2 ]] || { echo "harbor-build: usage: harbor-build APP VERSION" >&2; exit 2; }
+echo "harbor-build $1 $2" >> .calls.log
+if [[ ${FAKE_FAIL:-} == *build* ]]; then echo "compile error" >&2; exit 1; fi
+exit 0

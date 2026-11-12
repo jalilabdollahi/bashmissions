@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# certbot renew --cert-name NAME --config-dir DIR
+# Rewrites DIR/NAME.pem with a fresh 90 day certificate. FAKE_RENEW_FAIL="a b" makes
+# the listed names fail. Every call is logged to .calls.log.
+[[ ${1:-} == renew && ${2:-} == --cert-name && ${4:-} == --config-dir && $# -eq 5 ]] || {
+  echo "certbot: usage: certbot renew --cert-name NAME --config-dir DIR" >&2; exit 2; }
+name=$3 dir=$5
+echo "certbot renew $name" >> .calls.log
+for bad in ${FAKE_RENEW_FAIL:-}; do
+  if [[ $bad == "$name" ]]; then echo "certbot: renewal of $name failed (rate limit)" >&2; exit 1; fi
+done
+printf 'notAfter=Feb 18 12:00:00 2027 GMT\ndaysleft=90\n' > "$dir/$name.pem"

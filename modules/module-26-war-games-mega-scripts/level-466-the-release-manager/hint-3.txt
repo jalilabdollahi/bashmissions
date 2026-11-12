@@ -1,1 +1,18 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  [[ -z $(git status --porcelain) ]] || fail "working tree is not clean"
+  if last=$(git describe --tags --abbrev=0 2>/dev/null); then
+    [[ $last =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || fail "last tag '$last' is not vMAJOR.MINOR.PATCH"
+    major=${BASH_REMATCH[1]} ...; range="$last..HEAD"
+  else range=HEAD; fi
+  subjects=$(git log --pretty=format:%s "$range")      # empty -> message, exit 4
+
+  while IFS= read -r subject; do ...regex...; breaking+=(...) / feats+=(...) / fixes+=(...) / other+=("$subject"); done <<< "$subjects"
+  (( ${#breaking[@]} )) && next=... || (( ${#feats[@]} )) && ... || ...   # write it with if / elif
+
+  render_section() { echo "## v$next - $date_str"; echo; for each non-empty list: "### Title", "- item" lines, blank line; }
+  dry run: print "would release ..." + render_section, exit 0
+  tar -czf releases/$app-$next.tar.gz -C dist .;  sums from `read -r crc size _ < <(cksum < "$f")` for each dist file
+  { printf '# Changelog\n\n'; render_section; tail -n +3 CHANGELOG.md; } > CHANGELOG.md.new
+  git tag -a "v$next" -m "$app $next" || { rm -f the files; exit 5; };  mv CHANGELOG.md.new CHANGELOG.md
+  optional curl POST; final summary lines.

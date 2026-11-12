@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Parse a subject with one regex and capture groups: `re='^([a-z]+)(\(([^)]*)\))?(!)?: (.+)$'; if [[ $subject =~ $re ]]; then type=${BASH_REMATCH[1]} scope=${BASH_REMATCH[3]} bang=${BASH_REMATCH[4]} text=${BASH_REMATCH[5]}; fi`. Keep the regex in a variable so it is not re-quoted.
+- Keep four arrays (`breaking`, `feats`, `fixes`, `other`) and decide the bump from their sizes.
+- `git describe` fails when there are no tags: use it in `if last=$(git describe ... 2>/dev/null); then ...`.
+- Prepend without `sed -i`: write `{ printf '# Changelog\n\n'; section; tail -n +3 CHANGELOG.md; } > CHANGELOG.md.new`, then `mv` it over once the tag exists.
+- A name reference lets one function print any of the four lists: `local -n items=feats`.

@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Composite keys: `k = $2 SUBSEP $3`, then `n[k]++`, `xs[k, n[k]] = day`, `ys[k, n[k]] = used`. Remember the host and mount names in separate arrays.
+- Calendar maths without `date`: a civil date to day number is a short integer formula (the "days from civil" algorithm: shift the year when the month is January or February, work in 400-year eras). Write it as an awk function `days(y, m, d)` and a matching `civil(z)` that returns a formatted date. Leap years fall out of the formula for free.
+- Least squares: with x as days since the first sample, slope = (n*Sxy - Sx*Sy) / (n*Sxx - Sx*Sx).
+- To order rows by a computed value, print it as the first field, `sort -t'|' -k1,1n -k2,2 -k3,3`, and drop the field when you print the table.
+- Exit codes: finish with `if (( c > 0 )); then exit 2; fi` and so on.

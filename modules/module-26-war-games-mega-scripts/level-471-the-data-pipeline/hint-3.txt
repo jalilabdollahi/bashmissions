@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+  cat db/orders.psv > "$work/ids" (if it exists); cat state/processed.list > "$work/processed"
+
+  for f in "${files[@]}"; do
+    tr -d '\r' < "$f" > "$work/in.csv"
+    header wrong            -> echo "$name: quarantined (bad header)"; move (unless dry); continue
+    read -r crc size _ < <(cksum < "$f"); old=$(awk ... "$work/processed")
+    [[ -n $old ]]           -> echo "$name: skipped (already processed as $old)"; move to archive/$name.dup; continue
+    awk -F, -v ids=... -v out=... -v rej=... -v counts=... -v reasons=... '
+      function reject(why) { print NR "|" why "|" $0 >> rej; why_n[why]++; bad++ }
+      BEGIN { load the known ids }
+      NR == 1 || blank { next }
+      { n++; NF != 6 ...; empty id; empty customer; qty; price; date; (id in known) { dup++; next }
+        known[id] = 1; total = qty * price; revenue += total; good++; printf "...", ... >> out }
+      END { printf "%d %d %d %d %.2f\n", n, good, bad, dup, revenue > counts; reasons -> file }' "$work/in.csv"
+    print the per-file line; update the in-run memories; unless dry: append to db, rejects, state; mv the file
+  done
+  totals, quarantined / skipped, rejected-by-reason (sort), dry-run note, exit 1 if rejected or quarantined

@@ -1,22 +1,274 @@
 id: 465
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Config Drift Detector
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Config Drift Detector` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Config Drift Detector
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 390
+story: |
+  Three engineers touched the production proxy at 4 a.m. during the power flicker,
+  each one sure they were "just restoring" the old settings. By dawn the live config
+  no longer matches the golden copy in the repository, and nobody can say how. A
+  plain `diff -r` is useless: it shouts about comments, spacing and a timestamp that
+  changes every reload. Priya wants a drift report that only mentions differences that
+  matter, hides secrets, and can print the commands to put things back.
+objective: |
+  Write solution.sh: `solution.sh [--plan] GOLDEN_DIR LIVE_DIR`
+
+  Errors on stderr, exit 2: wrong arguments `usage: solution.sh [--plan] GOLDEN_DIR LIVE_DIR`;
+  a directory that does not exist `error: DIR is not a directory` (with the name given).
+
+  The managed files are all regular files under GOLDEN_DIR except the two control files
+  `.modes` and `.ignore` (at its top level). Compare them with the same relative path under
+  LIVE_DIR. Files under LIVE_DIR that are not in the golden tree are `UNMANAGED`.
+  - `.ignore`: key names, one per line; those keys are ignored in `.conf` comparisons.
+  - `.modes`: lines `RELATIVE_PATH OCTAL` (for example `ssl/site.key 600`). For listed files
+    the live permissions must match; read them from `ls -l` (no stat) and convert to octal.
+
+  Comparing a pair of files:
+  - `.conf` files are compared by settings. Ignore blank lines, lines whose first
+    non-space character is `#` or `;`, and lines without `=`. A setting is `KEY=VALUE`:
+    trim spaces around both parts, strip one pair of double quotes around the value, last
+    duplicate wins. Report each difference, sorted by key:
+      `  ~ KEY: GOLDEN -> LIVE`    value differs
+      `  + KEY: LIVE`              only in live
+      `  - KEY: GOLDEN`            only in golden
+    Keys that contain `pass`, `secret`, `token` or `key` (any case) show `***` instead of
+    values. Ignored keys never appear. Differences in comments, spacing, quoting or order
+    are not drift.
+  - every other file is compared with cksum; if it differs: `  ~ content differs`.
+  - mode mismatch: `  ~ mode: expected 640, found 644`.
+  Report format (paths sorted, golden and live paths merged):
+    `DRIFT path` followed by its detail lines, for files present on both sides with a
+    difference; `MISSING path` for golden files absent live; `UNMANAGED path`.
+  Finish with `files: N checked, D drifted, M missing, U unmanaged` (N = golden files).
+  Exit 0 when nothing drifted, is missing or is unmanaged, otherwise 1.
+
+  With `--plan`, print instead (and no report) a remediation plan, then exit as above:
+  first the line `# remediation plan (review before running)`, then in path order:
+  for MISSING files `mkdir -p 'LIVE/dir'` (only when the file is in a subdirectory) and
+  `cp 'GOLDEN/path' 'LIVE/path'`; for DRIFT files with a content difference the `cp`; for
+  any file with a golden mode listed whose live mode is wrong, or which was just copied,
+  `chmod OCTAL 'LIVE/path'`; for UNMANAGED files `# unmanaged: LIVE/path (decide by hand)`.
+  A plan with nothing to do prints only the header. (Use the directory names exactly as given.)
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "normalising before comparing, so only meaningful differences remain"
+  - "merging two sorted file lists"
+  - "ls -l permission string to octal"
+  - "masking secrets in output"
+  - "a dry-run plan instead of a risky auto-fix"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk to normalise and compare the settings."
+  - pattern: 'ls -l'
+    message: "Read permissions with ls -l; stat is not portable."
+test_cases:
+  - name: the 4 a.m. drift report
+    args:
+    - golden
+    - live
+    files:
+      golden/nginx.conf: |
+        # managed by git
+        worker_processes = 2
+        gzip = on
+        server_name = "tides.lanternfish.example"
+      golden/app/settings.conf: |
+        db_host=dory
+        db_password=correct-horse
+        last_reload=2026-11-01
+        pool=10
+      golden/ssl/site.key:
+        content: |
+          PRIVATE
+        mode: '0600'
+      golden/motd: |
+        Welcome aboard
+      golden/cron.d/tides: |
+        */30 * * * * root /opt/tide-sync
+      golden/.modes: |
+        ssl/site.key 600
+        nginx.conf 644
+      golden/.ignore: |
+        last_reload
+      live/nginx.conf:
+        content: |
+          worker_processes=8
+          ; comment moved
+          server_name=tides.lanternfish.example
+          debug = on
+        mode: '0644'
+      live/app/settings.conf: |
+        pool=10
+        db_host = dory
+        db_password = hunter2
+        last_reload=2026-11-12T03:14
+      live/ssl/site.key:
+        content: |
+          PRIVATE
+        mode: '0644'
+      live/motd: |
+        Welcome aboard!
+      live/tmp.conf: |
+        scratch=1
+      live/notes/readme: |
+        temporary
+    expected_stdout: |-
+      DRIFT app/settings.conf
+        ~ db_password: *** -> ***
+      MISSING cron.d/tides
+      DRIFT motd
+        ~ content differs
+      DRIFT nginx.conf
+        + debug: on
+        - gzip: on
+        ~ worker_processes: 2 -> 8
+      UNMANAGED notes/readme
+      DRIFT ssl/site.key
+        ~ mode: expected 600, found 644
+      UNMANAGED tmp.conf
+      files: 5 checked, 4 drifted, 1 missing, 2 unmanaged
+    expected_exit: 1
+  - name: plan mode prints the commands
+    args:
+    - --plan
+    - golden
+    - live
+    files:
+      golden/nginx.conf: |
+        # managed by git
+        worker_processes = 2
+        gzip = on
+        server_name = "tides.lanternfish.example"
+      golden/app/settings.conf: |
+        db_host=dory
+        db_password=correct-horse
+        last_reload=2026-11-01
+        pool=10
+      golden/ssl/site.key:
+        content: |
+          PRIVATE
+        mode: '0600'
+      golden/motd: |
+        Welcome aboard
+      golden/cron.d/tides: |
+        */30 * * * * root /opt/tide-sync
+      golden/.modes: |
+        ssl/site.key 600
+        nginx.conf 644
+      golden/.ignore: |
+        last_reload
+      live/nginx.conf:
+        content: |
+          worker_processes=8
+          ; comment moved
+          server_name=tides.lanternfish.example
+          debug = on
+        mode: '0644'
+      live/app/settings.conf: |
+        pool=10
+        db_host = dory
+        db_password = hunter2
+        last_reload=2026-11-12T03:14
+      live/ssl/site.key:
+        content: |
+          PRIVATE
+        mode: '0644'
+      live/motd: |
+        Welcome aboard!
+      live/tmp.conf: |
+        scratch=1
+      live/notes/readme: |
+        temporary
+    expected_stdout: |-
+      # remediation plan (review before running)
+      cp 'golden/app/settings.conf' 'live/app/settings.conf'
+      mkdir -p 'live/cron.d'
+      cp 'golden/cron.d/tides' 'live/cron.d/tides'
+      cp 'golden/motd' 'live/motd'
+      cp 'golden/nginx.conf' 'live/nginx.conf'
+      chmod 644 'live/nginx.conf'
+      # unmanaged: live/notes/readme (decide by hand)
+      chmod 600 'live/ssl/site.key'
+      # unmanaged: live/tmp.conf (decide by hand)
+    expected_exit: 1
+  - name: cosmetic differences are not drift
+    args:
+    - golden
+    - live
+    files:
+      golden/app.conf: |
+        # primary
+        name = "harbor"
+        port=80
+      golden/.ignore: ''
+      live/app.conf: |
+        port = 80
+
+        ; edited at 4am
+        name=harbor
+        name=harbor
+    expected_stdout: 'files: 1 checked, 0 drifted, 0 missing, 0 unmanaged'
+  - name: mode only drift gets just a chmod in the plan
+    args:
+    - --plan
+    - golden
+    - live
+    files:
+      golden/ssl/site.key: |
+        PRIVATE
+      golden/.modes: |
+        ssl/site.key 600
+      live/ssl/site.key:
+        content: |
+          PRIVATE
+        mode: '0640'
+    expected_stdout: |-
+      # remediation plan (review before running)
+      chmod 600 'live/ssl/site.key'
+    expected_exit: 1
+  - name: mode drift in the report
+    args:
+    - golden
+    - live
+    files:
+      golden/ssl/site.key: |
+        PRIVATE
+      golden/.modes: |
+        ssl/site.key 600
+      live/ssl/site.key:
+        content: |
+          PRIVATE
+        mode: '0640'
+    expected_stdout: |-
+      DRIFT ssl/site.key
+        ~ mode: expected 600, found 640
+      files: 1 checked, 1 drifted, 0 missing, 0 unmanaged
+    expected_exit: 1
+  - name: a clean match with no plan
+    args:
+    - --plan
+    - golden
+    - live
+    files:
+      golden/motd: |
+        hello
+      live/motd: |
+        hello
+    expected_stdout: '# remediation plan (review before running)'
+  - name: golden directory missing
+    args:
+    - golden
+    - live
+    files:
+      live/motd: |
+        hello
+    expected_stdout: ''
+    expected_stderr: 'error: golden is not a directory'
+    expected_exit: 2
+  - name: wrong number of arguments
+    args:
+    - golden
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--plan] GOLDEN_DIR LIVE_DIR'
+    expected_exit: 2

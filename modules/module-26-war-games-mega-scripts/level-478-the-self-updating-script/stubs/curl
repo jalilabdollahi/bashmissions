@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# curl stand-in for the update server: curl -sS --fail --max-time N -o OUTFILE URL
+# https://updates.lanternfish.example/lantern/PATH is served from fixtures/server/PATH.
+# FAKE_NET=down fails like an unreachable host (exit 6).
+out="" url=""
+while (( $# )); do
+  case $1 in
+    -s|-S|-sS|-f|--fail) ;;
+    --max-time) shift ;;
+    -o) out=$2; shift ;;
+    -*) echo "curl: option $1: is unknown" >&2; exit 2 ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+[[ -n $url && -n $out ]] || { echo "curl: this stand-in needs -o OUTFILE and a URL" >&2; exit 2; }
+if [[ ${FAKE_NET:-} == down ]]; then echo "curl: (6) Could not resolve host: updates.lanternfish.example" >&2; exit 6; fi
+base=https://updates.lanternfish.example/lantern/
+[[ $url == "$base"* ]] || { echo "curl: (6) Could not resolve host" >&2; exit 6; }
+file=fixtures/server/${url#"$base"}
+if [[ ! -f $file ]]; then echo "curl: (22) The requested URL returned error: 404" >&2; exit 22; fi
+cat "$file" > "$out"

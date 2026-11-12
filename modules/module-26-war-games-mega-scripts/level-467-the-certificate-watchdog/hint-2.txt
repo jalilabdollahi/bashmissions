@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- `if ! end=$(openssl x509 -noout -enddate -in "$f" 2>/dev/null); then status=INVALID; ...` tests the command's success and captures its output in one go; strip the prefix with `${end#notAfter=}`.
+- Seconds from days: `$((crit * 86400))`.
+- A function that sets globals (`status`, `expires`) is easy to call again after a renewal to refresh them.
+- Count renewal *attempts* (not successes) against the limit, so a failing CA is not hammered.
+- Counters per status: `declare -A count=([OK]=0 [WARN]=0 ...)` and `count[$status]=$((count[$status] + 1))`.
+- Keep a flag `renewed_any` and run `systemctl reload nginx` once, after the loop and the table.
+- `certs=("$dir"/*.pem)` and `[[ -e ${certs[0]} ]]` detect an empty glob.

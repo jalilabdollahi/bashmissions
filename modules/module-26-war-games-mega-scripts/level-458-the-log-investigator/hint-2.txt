@@ -1,1 +1,7 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques to reach for:
+
+- Zero-padded `YYYY-MM-DD HH:MM:SS` strings compare correctly as text, so both the window test and the sort need no date arithmetic. In awk build the timestamp with substr() and compare with < and >.
+- Recognise formats with regexes built from `[0-9]` classes (no `{4}` intervals in POSIX awk) and `$0 ~ regex`.
+- Peel fields off a line with a tiny helper: `word = rest; sub(/ .*/, "", word); rest = substr(rest, length(word) + 2)`.
+- Emit records as `TS|FILEINDEX|LINENO|SVC|LEVEL|MSG` and sort with `sort -t'|' -k1,1 -k2,2n -k3,3n`. The message goes last because it may contain `|` itself.
+- Make the scratch directory with `work=$(mktemp -d)` and `trap 'rm -rf "$work"' EXIT`.

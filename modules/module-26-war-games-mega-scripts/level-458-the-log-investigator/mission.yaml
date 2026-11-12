@@ -1,22 +1,192 @@
 id: 458
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Log Investigator
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Log Investigator` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Log Investigator
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 360
+story: |
+  At 03:14 the storm knocked a ferry-booking backend over, and by morning three
+  teams have three different stories. The web tier logs one way, the database
+  another, and the haproxy box writes plain syslog with no year in sight. Gus
+  wants one page that says what broke first and how it spread, before the
+  insurance call at nine. You are the investigator: merge every log into a single
+  timeline.
+objective: |
+  Write solution.sh: `solution.sh FROM TO LOGFILE...`
+
+  FROM and TO are the window, each as one argument in the form
+  `YYYY-MM-DD HH:MM:SS` (both ends included). At least one log file is required.
+  Three log formats may appear, even inside one file:
+    A  `[2026-11-12 03:14:07] web ERROR upstream timed out`      (service, level, message)
+    B  `2026-11-12T03:14:09Z|db|WARN|connection pool at 95%`     (message may contain `|`)
+    C  `Nov 12 03:14:11 marlin haproxy[221]: [ERROR] backend is DOWN`
+  In C the service is the process name without `[pid]` or the trailing colon, the
+  day may be space padded (`Nov  9`), the year is the year of FROM, and a line
+  without a `[LEVEL]` right after the colon counts as INFO.
+  Level names WARNING, CRITICAL and ERR are normalised to WARN, CRIT and ERROR.
+  Ranking: INFO < WARN < ERROR < CRIT. Only events inside the window with level
+  WARN or worse are kept. Blank lines are ignored; any other line that matches
+  none of the formats is counted as unparseable.
+
+  Output (stdout):
+    == Incident timeline FROM .. TO ==
+    one line per kept event, sorted by time (ties: file order on the command
+    line, then line order), formatted with printf '%s %-8s %-5s %s\n'
+    on: timestamp (`YYYY-MM-DD HH:MM:SS`), service, level, message
+    (or the single line `(no WARN-or-worse events in window)`)
+    == Summary ==
+    files: N | lines: R | in window: W | kept: K | unparseable: U
+    first error: TIMESTAMP SERVICE        (first ERROR or CRIT, or `first error: none`)
+    by service: svc=count svc=count ...   (kept events, services in alphabetical order, or `by service: none`)
+
+  R counts non-blank lines read, W the parseable lines inside the window.
+  Exit status: 0 normally, 1 if the timeline contains at least one CRIT event.
+  Errors go to stderr with exit 2: wrong argument count `usage: solution.sh FROM TO LOGFILE...`,
+  a bad timestamp `error: bad timestamp 'X'`, FROM not before TO `error: window is empty`,
+  an unreadable file `error: cannot read FILE` (checked before any output).
+  Use only POSIX awk (no interval expressions like {4}).
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "one awk pass per log format, normalised into one record shape"
+  - "ISO timestamps sort as plain strings"
+  - "sort with several keys for a stable merge"
+  - "mktemp -d plus trap cleanup"
+  - "exit status as an alert signal"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk to parse the three formats."
+  - pattern: '\bsort\b'
+    message: "Merge the events with sort."
+test_cases:
+  - name: three formats become one timeline
+    args:
+    - '2026-11-12 03:00:00'
+    - '2026-11-12 03:30:00'
+    - web.log
+    - db.log
+    - edge.log
+    files:
+      web.log: |
+        [2026-11-12 03:10:02] web INFO request ok /book
+        [2026-11-12 03:14:07] web ERROR upstream timed out (pool=ferry)
+        [2026-11-12 03:14:55] web WARN retrying upstream | attempt 2
+        [2026-11-12 02:59:59] web ERROR before the window
+        [2026-11-12 03:31:00] web ERROR after the window
+        this line is garbage
+      db.log: |
+        2026-11-12T03:14:09Z|db|WARN|connection pool at 95%
+        2026-11-12T03:14:30Z|db|ERROR|too many connections | rejecting
+        2026-11-12T03:20:00Z|db|INFO|pool recovered
+      edge.log: |
+        Nov 12 03:14:11 marlin haproxy[221]: [ERROR] backend ferry is DOWN
+        Nov 12 03:14:11 marlin kernel: [WARNING] oom score raised
+        Nov 12 03:25:00 marlin haproxy[221]: [CRITICAL] all backends down
+        Nov  9 03:14:11 marlin haproxy[221]: [ERROR] old event
+        Nov 12 03:15:00 marlin cron[5]: session opened
+    expected_stdout: |-
+      == Incident timeline 2026-11-12 03:00:00 .. 2026-11-12 03:30:00 ==
+      2026-11-12 03:14:07 web      ERROR upstream timed out (pool=ferry)
+      2026-11-12 03:14:09 db       WARN  connection pool at 95%
+      2026-11-12 03:14:11 haproxy  ERROR backend ferry is DOWN
+      2026-11-12 03:14:11 kernel   WARN  oom score raised
+      2026-11-12 03:14:30 db       ERROR too many connections | rejecting
+      2026-11-12 03:14:55 web      WARN  retrying upstream | attempt 2
+      2026-11-12 03:25:00 haproxy  CRIT  all backends down
+      == Summary ==
+      files: 3 | lines: 14 | in window: 10 | kept: 7 | unparseable: 1
+      first error: 2026-11-12 03:14:07 web
+      by service: db=2 haproxy=2 kernel=1 web=2
+    expected_exit: 1
+  - name: a window that ends before the critical event exits 0
+    args:
+    - '2026-11-12 03:00:00'
+    - '2026-11-12 03:20:00'
+    - web.log
+    - edge.log
+    files:
+      web.log: |
+        [2026-11-12 03:14:07] web ERROR upstream timed out
+      edge.log: |
+        Nov 12 03:14:11 marlin haproxy[221]: [ERROR] backend ferry is DOWN
+        Nov 12 03:25:00 marlin haproxy[221]: [CRITICAL] all backends down
+    expected_stdout: |-
+      == Incident timeline 2026-11-12 03:00:00 .. 2026-11-12 03:20:00 ==
+      2026-11-12 03:14:07 web      ERROR upstream timed out
+      2026-11-12 03:14:11 haproxy  ERROR backend ferry is DOWN
+      == Summary ==
+      files: 2 | lines: 3 | in window: 2 | kept: 2 | unparseable: 0
+      first error: 2026-11-12 03:14:07 web
+      by service: haproxy=1 web=1
+  - name: quiet window
+    args:
+    - '2026-11-12 04:00:00'
+    - '2026-11-12 05:00:00'
+    - web.log
+    files:
+      web.log: |
+        [2026-11-12 04:10:00] web INFO all quiet
+        [2026-11-12 04:11:00] web INFO still quiet
+    expected_stdout: |-
+      == Incident timeline 2026-11-12 04:00:00 .. 2026-11-12 05:00:00 ==
+      (no WARN-or-worse events in window)
+      == Summary ==
+      files: 1 | lines: 2 | in window: 2 | kept: 0 | unparseable: 0
+      first error: none
+      by service: none
+  - name: syslog year comes from FROM and padded days work
+    args:
+    - '2025-01-02 00:00:00'
+    - '2025-01-03 23:59:59'
+    - edge.log
+    files:
+      edge.log: |
+        Jan  2 08:00:00 marlin sshd[9]: [WARN] failed password for root
+        Jan  3 09:15:00 marlin sshd[9]: [ERR] too many failures
+        Jan  4 09:15:00 marlin sshd[9]: [ERR] outside window
+    expected_stdout: |-
+      == Incident timeline 2025-01-02 00:00:00 .. 2025-01-03 23:59:59 ==
+      2025-01-02 08:00:00 sshd     WARN  failed password for root
+      2025-01-03 09:15:00 sshd     ERROR too many failures
+      == Summary ==
+      files: 1 | lines: 3 | in window: 2 | kept: 2 | unparseable: 0
+      first error: 2025-01-03 09:15:00 sshd
+      by service: sshd=2
+  - name: unreadable file is refused before any output
+    args:
+    - '2026-11-12 03:00:00'
+    - '2026-11-12 03:30:00'
+    - web.log
+    - missing.log
+    files:
+      web.log: |
+        [2026-11-12 03:14:07] web ERROR upstream timed out
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read missing.log'
+    expected_exit: 2
+  - name: bad timestamp
+    args:
+    - 2026-11-12 3:00
+    - '2026-11-12 03:30:00'
+    - web.log
+    files:
+      web.log: ''
+    expected_stdout: ''
+    expected_stderr: 'error: bad timestamp ''2026-11-12 3:00'''
+    expected_exit: 2
+  - name: reversed window
+    args:
+    - '2026-11-12 04:00:00'
+    - '2026-11-12 03:30:00'
+    - web.log
+    files:
+      web.log: ''
+    expected_stdout: ''
+    expected_stderr: 'error: window is empty'
+    expected_exit: 2
+  - name: too few arguments
+    args:
+    - '2026-11-12 04:00:00'
+    - '2026-11-12 05:30:00'
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh FROM TO LOGFILE...'
+    expected_exit: 2

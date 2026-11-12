@@ -1,1 +1,16 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  VERSION=1.0.0; BASE=https://updates.lanternfish.example/lantern; self=$0
+  vercmp() { IFS=. read -ra a <<< "$1"; IFS=. read -ra b <<< "$2"; for i in 0 1 2; do ... echo -1 / 1 ...; done; echo 0; }
+
+  update:
+    parse --check / --force / --channel (validated);  work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+    curl -sS --fail --max-time 10 -o "$work/VERSION" "$BASE/$channel/VERSION" || exit 3 (message)
+    latest=$(head -n 1 ...); validate with the regex; rel=$(vercmp "$VERSION" "$latest")
+    1 -> downgrade, exit 4;  0 -> up to date (unless --force and not --check);  --check -> "update available", exit 10
+    curl the .sh and the .cksum into $work (exit 5 on failure)
+    checksum / bash -n / reported version, each: echo "update aborted: ..." >&2; exit 5
+    cp -p "$self" "$self.old"; cp -p "$self" "$self.new"; cat "$work/new.sh" > "$self.new"; mv "$self.new" "$self"
+    echo "updated lantern $VERSION -> $latest (previous kept as $self.old)"; exit 0
+
+  rollback: [[ -f $self.old ]] || exit 3; old=$(bash "$self.old" version); mv "$self.old" "$self"; echo "rolled back to $old"

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# openssl stand-in for certificates stored as two text lines:
+#   notAfter=Nov 20 12:00:00 2026 GMT
+#   daysleft=5          (negative when already expired)
+# Supports: openssl x509 -noout -enddate -in FILE
+#           openssl x509 -noout -checkend SECONDS -in FILE
+[[ ${1:-} == x509 ]] || { echo "openssl: only 'x509' is supported by this stand-in" >&2; exit 2; }
+shift
+enddate=0 checkend="" file=""
+while (( $# )); do
+  case $1 in
+    -noout) ;;
+    -enddate) enddate=1 ;;
+    -checkend) checkend=$2; shift ;;
+    -in) file=$2; shift ;;
+    *) echo "openssl: unknown option $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+[[ -n $file ]] || { echo "openssl: -in FILE is required" >&2; exit 2; }
+if [[ ! -r $file ]] || ! grep -q '^notAfter=' "$file" || ! grep -q '^daysleft=' "$file"; then
+  echo "Could not read certificate from $file" >&2
+  exit 1
+fi
+if (( enddate )); then
+  grep '^notAfter=' "$file"
+  exit 0
+fi
+if [[ -n $checkend ]]; then
+  days=$(sed -n 's/^daysleft=//p' "$file")
+  if (( days * 86400 > checkend )); then
+    echo "Certificate will not expire"
+    exit 0
+  fi
+  echo "Certificate will expire"
+  exit 1
+fi
+echo "openssl: nothing to do" >&2
+exit 2

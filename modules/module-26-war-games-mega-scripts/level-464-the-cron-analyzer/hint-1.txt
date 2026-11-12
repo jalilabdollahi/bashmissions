@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Treat the day as 1440 minutes. For each job decide whether it runs on the chosen day, then list the minutes at which it starts and mark every minute it then occupies. Once every job has an occupancy table, finding overlaps is counting: for each minute, which jobs are busy, and which pairs are busy together. The real work is in the field expansion and in cron's slightly odd day rule, so write those as small, separately testable awk functions.

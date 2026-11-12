@@ -1,22 +1,205 @@
 id: 478
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Self-Updating Script
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Self-Updating Script` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Self-Updating Script
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 450
+story: |
+  The `lantern` rota tool is now installed on thirty laptops, and half of them run a
+  version that still has the Thursday double-booking bug. Theo suggests the obvious fix:
+  "Let it update itself." Priya goes pale. A script that downloads code from the network
+  and replaces itself is exactly what an attacker would love, so the update must
+  distrust the server: check the checksum, check the syntax, check what the new script says
+  about itself, never downgrade, and swap the file in one atomic step so a power cut during
+  the storm cannot leave half a script behind.
+objective: |
+  Write solution.sh, the `lantern` tool whose own version is the constant `1.0.0`:
+    `solution.sh version`
+    `solution.sh update [--check] [--force] [--channel NAME]`
+    `solution.sh rollback`
+  Anything else (including a channel that does not match `^[a-z]+$`): `usage: solution.sh version | update [--check] [--force] [--channel NAME] | rollback`
+  on stderr, exit 2. `version` prints `lantern 1.0.0`. The tool refers to itself as `$0`.
+
+  The update server is reached with `curl` (on PATH): files live under
+  `https://updates.lanternfish.example/lantern/CHANNEL/` (CHANNEL defaults to `stable`). Download with
+  `curl -sS --fail --max-time 10 -o OUTFILE URL`. The server publishes `VERSION` (one line, the latest version),
+  and for that version `lantern-X.Y.Z.sh` (the new script) and `lantern-X.Y.Z.cksum` (one line `CRC SIZE`).
+
+  `update` does, in order:
+  1. Fetch VERSION. A download failure: `update check failed: cannot reach server` on stderr, exit 3. A value that is not
+     `X.Y.Z` (three whole numbers): `update check failed: server sent a bad version 'V'`, exit 3.
+  2. Compare numerically with 1.0.0 (component by component, not as text: 1.10.0 is newer than 1.9.0).
+     - Same version: `lantern 1.0.0 is up to date` and exit 0, unless `--force` (continue and reinstall).
+     - Older: `refusing to downgrade from 1.0.0 to V` on stderr, exit 4 (even with --force).
+     - Newer with `--check`: print `update available: 1.0.0 -> V` and exit 10, changing nothing.
+     - Newer without --check: go on. (`--check` with the same version behaves like the first case.)
+  3. Download the script and the checksum file into a scratch directory made with `mktemp -d` (removed by a trap, always);
+     a failed download is `update aborted: download failed` (stderr, exit 5).
+  4. Verify, in this order, each failure printing `update aborted: REASON` on stderr and exiting 5, with nothing changed:
+     `checksum mismatch` (the `cksum` of the downloaded file, CRC and size, differs from the checksum file),
+     `downloaded script has a syntax error` (`bash -n`), `downloaded script reports version R, expected V`
+     (its output of `bash NEWSCRIPT version` must be exactly `lantern V`; R is what it printed after removing `lantern `, or `nothing`).
+  5. Install: copy the current script to `$0.old` (keeping its permissions), prepare the new script next to the old one as
+     `$0.new` (same permissions as the current script: start from `cp -p` of it), and move it over `$0`
+     with `mv` (never write into the running file). Then print `updated lantern 1.0.0 -> V (previous kept as $0.old)` and
+     exit 0 immediately: the file that was running is gone.
+  `rollback`: without `$0.old`: `error: no previous version to roll back to` on stderr, exit 3. Otherwise ask it
+  (`bash $0.old version`), move it over `$0` and print `rolled back to <what it printed>`.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "never trust the server: verify before you install"
+  - "numeric version comparison, no downgrades"
+  - "atomic replacement with mv; never overwrite a running script"
+  - "validating a download in a scratch directory"
+  - "keeping the previous version for rollback"
+required_patterns:
+  - pattern: 'bash -n'
+    message: "Check the downloaded script with bash -n before installing it."
+  - pattern: '\bcksum\b'
+    message: "Verify the download with cksum."
+  - pattern: '\bmv\b'
+    message: "Replace the script with mv, which swaps the file atomically."
+  - pattern: 'mktemp -d'
+    message: "Download into a scratch directory made with mktemp -d."
+test_cases:
+  - name: version
+    args:
+    - version
+    expected_stdout: lantern 1.0.0
+  - name: check reports an available update and changes nothing
+    args:
+    - update
+    - --check
+    expected_stdout: 'update available: 1.0.0 -> 1.2.0'
+    expected_exit: 10
+    expected_files:
+      solution.sh.old: null
+      solution.sh.new: null
+  - name: an update replaces the script
+    args:
+    - update
+    expected_stdout: updated lantern 1.0.0 -> 1.2.0 (previous kept as solution.sh.old)
+    expected_files:
+      solution.sh: |-
+        #!/usr/bin/env bash
+        # lantern 1.2.0, served by updates.lanternfish.example
+        case ${1:-} in
+          version) echo "lantern 1.2.0" ;;
+          *) echo "lantern 1.2.0: storm rota ready" ;;
+        esac
+      solution.sh.new: null
+  - name: already up to date
+    args:
+    - update
+    - --channel
+    - same
+    expected_stdout: lantern 1.0.0 is up to date
+    expected_files:
+      solution.sh.old: null
+  - name: force reinstalls the same version
+    args:
+    - update
+    - --force
+    - --channel
+    - same
+    expected_stdout: updated lantern 1.0.0 -> 1.0.0 (previous kept as solution.sh.old)
+    expected_files:
+      solution.sh.new: null
+  - name: downgrades are refused even with force
+    args:
+    - update
+    - --force
+    - --channel
+    - old
+    expected_stdout: ''
+    expected_stderr: refusing to downgrade from 1.0.0 to 0.9.0
+    expected_exit: 4
+    expected_files:
+      solution.sh.old: null
+  - name: a checksum mismatch aborts the update
+    args:
+    - update
+    - --channel
+    - badsum
+    expected_stdout: ''
+    expected_stderr: 'update aborted: checksum mismatch'
+    expected_exit: 5
+    expected_files:
+      solution.sh.old: null
+      solution.sh.new: null
+  - name: a script with a syntax error is not installed
+    args:
+    - update
+    - --channel
+    - syntax
+    expected_stdout: ''
+    expected_stderr: 'update aborted: downloaded script has a syntax error'
+    expected_exit: 5
+    expected_files:
+      solution.sh.old: null
+      solution.sh.new: null
+  - name: a script that lies about its version is not installed
+    args:
+    - update
+    - --channel
+    - liar
+    expected_stdout: ''
+    expected_stderr: 'update aborted: downloaded script reports version 1.4.9, expected 1.5.0'
+    expected_exit: 5
+    expected_files:
+      solution.sh.old: null
+      solution.sh.new: null
+  - name: a nonsense version from the server
+    args:
+    - update
+    - --channel
+    - weird
+    expected_stdout: ''
+    expected_stderr: 'update check failed: server sent a bad version ''latest'''
+    expected_exit: 3
+  - name: server unreachable
+    args:
+    - update
+    env:
+      FAKE_NET: down
+    expected_stdout: ''
+    expected_stderr: 'update check failed: cannot reach server'
+    expected_exit: 3
+  - name: a major bump is detected
+    args:
+    - update
+    - --check
+    - --channel
+    - beta
+    expected_stdout: 'update available: 1.0.0 -> 2.0.0'
+    expected_exit: 10
+  - name: rollback restores the previous version
+    args:
+    - rollback
+    files:
+      solution.sh.old: |
+        #!/usr/bin/env bash
+        echo "lantern 0.9.5"
+    expected_stdout: rolled back to lantern 0.9.5
+    expected_files:
+      solution.sh.old: null
+  - name: rollback without a backup
+    args:
+    - rollback
+    expected_stdout: ''
+    expected_stderr: 'error: no previous version to roll back to'
+    expected_exit: 3
+  - name: bad channel name
+    args:
+    - update
+    - --channel
+    - Stable!
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh version | update [--check] [--force] [--channel NAME] | rollback'
+    expected_exit: 2
+  - name: unknown command
+    args:
+    - upgrade
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh version | update [--check] [--force] [--channel NAME] | rollback'
+    expected_exit: 2

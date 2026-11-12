@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+Techniques:
+
+- Atomic claim: `mkdir "$q/claims/$id" 2>/dev/null || continue`. Only the worker whose mkdir succeeds runs the job, but look again right after: if the job file has already left pending/ (a faster worker finished it and released its claim), `rmdir` your claim and skip.
+- Atomic publication: `printf ... > "$q/.tmp-$id"; mv "$q/.tmp-$id" "$q/pending/$id.job"`: a rename within one filesystem is atomic.
+- Zero padded ids: `printf -v id '%04d' "$n"`; the counter lives in `queue/.next`.
+- Workers: define `worker() { ... }`, start with `worker &` in a loop, then a single `wait`. Variables set before starting are inherited; results come back through files, e.g. `$work/$id.result`.
+- Retry loop: `for (( a = 1; a <= max_tries; a++ )); do rc=0; bash -c "$command" > out 2>&1 || rc=$?; (( rc == 0 )) && break; (( a < max_tries )) && sleep 1; done`. Capturing `rc` this way keeps `set -e` out of the way.
+- Run lock and cleanup: `mkdir queue/work.lock || exit 4` and `trap 'rmdir queue/work.lock; rm -rf "$work"' EXIT`.
+- Orphans: a claim directory whose job is still in pending/ belongs to a dead run.

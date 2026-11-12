@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# harbor-health APP : fails for the first FAKE_HEALTH_FAILS calls, then succeeds.
+[[ $# -eq 1 ]] || { echo "harbor-health: usage: harbor-health APP" >&2; exit 2; }
+echo "harbor-health $1" >> .calls.log
+n=0; [[ -f .health-count ]] && n=$(<.health-count)
+echo $((n + 1)) > .health-count
+(( n >= ${FAKE_HEALTH_FAILS:-0} ))

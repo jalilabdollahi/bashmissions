@@ -1,1 +1,16 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  now=${NOW:-$(date +%s)}
+  validate: while IFS='|' read -r name key op thr collectors; do ...field count, case $op, number regex, each collector...; arrays+=(...) ; done < "$rules"
+  declare -A metric; while IFS='=' read -r k v; do metric[$k]=$v; done < "$sample"
+  breached() { awk -v v="$1" -v op="$2" -v t="$3" 'BEGIN { ...; exit !r }'; }
+  collect()  { case $1 in procs) ps aux > "$2/procs.txt" ;; disk) df -P > ... ;; net) ss -tn > ... ;; logs:*) tail -n "$n" "$path" > "$2/log-${path##*/}.txt" ;; esac; }
+
+  for each rule:
+    value=${metric[$key]:-}; not a number -> "no data for KEY"; not breached -> "ok (KEY=VALUE)"
+    breaches++ ; cooldown check via incidents/.last/NAME
+    seq=$(( $(< incidents/.seq) + 1 )); id=$(printf 'INC-%04d-%s' ...); tmp=$(mktemp -d incidents/.tmp-XXXXXX)
+    trigger.txt; for spec in the collectors: collect || write "collector failed" and remember; mv "$tmp" "incidents/$id"; tmp=
+    echo "$seq" > incidents/.seq; echo "$now" > incidents/.last/$name; echo "$id|$now|$value" >> incidents/INDEX
+    prune everything beyond the newest $keep directories
+  summary line; exit 1 if any breach

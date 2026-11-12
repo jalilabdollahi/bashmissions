@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  inspect() {   # FILE -> $status, $expires
+    if ! end=$(openssl x509 -noout -enddate -in "$1" 2>/dev/null); then status=INVALID; expires=-; return 0; fi
+    expires=${end#notAfter=}
+    if   ! openssl x509 -noout -checkend 0 -in "$1" >/dev/null 2>&1;                     then status=EXPIRED
+    elif ! openssl x509 -noout -checkend $((crit * 86400)) -in "$1" >/dev/null 2>&1;     then status=CRIT
+    elif ! openssl x509 -noout -checkend $((warn * 86400)) -in "$1" >/dev/null 2>&1;     then status=WARN
+    else status=OK; fi
+  }
+
+  for f in "${certs[@]}"; do
+    name=...; inspect "$f"; note=
+    if renew requested and status is WARN/CRIT/EXPIRED; then
+      if attempts >= max: note="renew skipped"
+      else attempts++; if certbot renew --cert-name "$name" --config-dir "$dir" >/dev/null 2>&1; then inspect "$f"; note=renewed; renewed_any=1; else note="renew failed"; fi; fi
+    fi
+    count[$status]++ ; rows+=("$(printf '%-14s %-8s %-30s %s' ...)")
+  done
+  header, rows, one reload if renewed_any, summary, exit 2 / 1 / 0

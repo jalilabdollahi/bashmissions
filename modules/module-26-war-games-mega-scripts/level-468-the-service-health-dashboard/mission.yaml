@@ -1,22 +1,327 @@
 id: 468
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Service Health Dashboard
 difficulty: expert
-xp: 210
-objective: Implement the mega-script mission `The Service Health Dashboard` using
-  structured steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Service Health Dashboard
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 400
+story: |
+  The storm command post has one wall monitor and a dozen people staring at it. The
+  harbour master wants to see, in one glance, whether the ferry site, the tide API,
+  the buoy link and the back-office disks are fine, without opening six dashboards.
+  Ollie volunteered to "just ping everything in a loop", and the first version took
+  forty seconds because every check waited for the one before it. The new board has
+  to run all checks at once, group them sensibly, and be honest about which failures
+  are cosmetic and which are an emergency.
+objective: |
+  Write solution.sh: `solution.sh [--color] [--problems-only] CONFIG`
+  Errors on stderr, exit 2: `usage: solution.sh [--color] [--problems-only] CONFIG`
+  and `error: cannot read CONFIG`.
+
+  CONFIG lines (blank lines and `#` lines ignored): `GROUP|NAME|TYPE|TARGET|ARG`, all five
+  fields non-empty (use `-` when ARG is unused). A NAME ending in `!` marks a critical
+  service. A malformed config stops the run before any check, exit 3, on stderr:
+  `error: CONFIG line N: need GROUP|NAME|TYPE|TARGET|ARG` or
+  `error: CONFIG line N: unknown type 'T'` (N counts every line, including comments).
+  Types and their states (each check yields a state UP, DEGRADED or DOWN and a detail):
+  - `http`: `curl -sS -o /dev/null -w '%{http_code}' --max-time 3 TARGET` (a curl failure counts
+    as code 000). ARG is the expected status. Equal: UP `HTTP 200`. 000: DOWN `no response`.
+    500 or more: DOWN `HTTP 503`. Anything else: DEGRADED `HTTP 301 (want 200)`.
+  - `tcp`: TARGET is `HOST:PORT`; `nc -z -w 2 HOST PORT` succeeds: UP `port open`,
+    else DOWN `connection refused`.
+  - `file`: a heartbeat file TARGET that must have been modified within ARG minutes
+    (`find TARGET -mmin -ARG`): UP `fresh (<= ARG min)`; DOWN `stale (> ARG min)`;
+    a file that does not exist: DOWN `missing`.
+  - `disk`: `df -P TARGET` shows the Capacity column (field 5 of the second line, e.g. `85%`);
+    with P the percent used and ARG the limit: P >= ARG is DOWN, P >= ARG-10 is DEGRADED,
+    else UP; the detail is `P% used`.
+  All checks run concurrently (background jobs and `wait`); their results are collected
+  in a scratch directory made with `mktemp -d` and removed by a trap. Output order must
+  not depend on which check finishes first.
+
+  Output:
+    == Lanternfish Status Board ==
+    then for each group in order of first appearance:
+    `== GROUP == [U/N up]`   (U services UP out of N in the group)
+    and one row per service in config order: printf '  %-8s %-14s %s\n' STATE NAME DETAIL
+  With `--problems-only` only the groups that contain at least one non-UP service are shown
+  (and only their non-UP rows); the group header still shows the full count.
+  With `--color` the STATE word (after padding to 8) is wrapped in ANSI codes:
+  UP `\033[32m`, DEGRADED `\033[33m`, DOWN `\033[31m`, followed by `\033[0m`.
+  Last line: `overall: STATE (D down, G degraded, U up)` where STATE is DOWN if any critical
+  service is DOWN, else DEGRADED if any service is not UP, else UP. Exit status: 0 UP,
+  1 DEGRADED, 2 DOWN.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "parallel checks with background jobs, wait and per-job result files"
+  - "one function per check type with a uniform STATE|detail result"
+  - "deterministic output from nondeterministic work"
+  - "ANSI colour only on request"
+  - "validate the whole config before running anything"
+required_patterns:
+  - pattern: '\bwait\b'
+    message: "Run the checks in the background and use wait."
+  - pattern: 'mktemp -d'
+    message: "Collect results in a directory made with mktemp -d."
+test_cases:
+  - name: a stormy board
+    args:
+    - services.conf
+    files:
+      services.conf: |
+        # group|name|type|target|arg
+        Harbour|ferry-web!|http|https://ferry.lanternfish.example/health|200
+        Harbour|tide-api|http|https://tides.lanternfish.example/v1/now|200
+        Harbour|webcam-feed|file|feeds/webcam.stamp|5
+        Fleet|buoy-link!|tcp|buoy.lanternfish.example:443|-
+        Fleet|halibut-ssh|tcp|halibut.lanternfish.example:22|-
+        Back office|billing|http|https://billing.lanternfish.example/ping|200
+        Back office|data-disk|disk|/data|90
+        Back office|logs-disk|disk|/var/log|90
+      http/ferry.lanternfish.example/health.code: '200'
+      http/tides.lanternfish.example/v1/now.code: '503'
+      http/billing.lanternfish.example/ping.code: '301'
+      ports.open: |
+        buoy.lanternfish.example:443
+      df.table: |
+        /data 85
+        /var/log 40
+      feeds/webcam.stamp:
+        content: |
+          x
+        mtime: 1700000000
+    expected_stdout: |-
+      == Lanternfish Status Board ==
+      == Harbour == [1/3 up]
+        UP       ferry-web!     HTTP 200
+        DOWN     tide-api       HTTP 503
+        DOWN     webcam-feed    stale (> 5 min)
+      == Fleet == [1/2 up]
+        UP       buoy-link!     port open
+        DOWN     halibut-ssh    connection refused
+      == Back office == [1/3 up]
+        DEGRADED billing        HTTP 301 (want 200)
+        DEGRADED data-disk      85% used
+        UP       logs-disk      40% used
+      overall: DEGRADED (3 down, 2 degraded, 3 up)
+    expected_exit: 1
+  - name: a critical service down makes the whole board DOWN
+    args:
+    - services.conf
+    files:
+      services.conf: |
+        # group|name|type|target|arg
+        Harbour|ferry-web!|http|https://ferry.lanternfish.example/health|200
+        Harbour|tide-api|http|https://tides.lanternfish.example/v1/now|200
+        Harbour|webcam-feed|file|feeds/webcam.stamp|5
+        Fleet|buoy-link!|tcp|buoy.lanternfish.example:443|-
+        Fleet|halibut-ssh|tcp|halibut.lanternfish.example:22|-
+        Back office|billing|http|https://billing.lanternfish.example/ping|200
+        Back office|data-disk|disk|/data|90
+        Back office|logs-disk|disk|/var/log|90
+      http/ferry.lanternfish.example/health.code: '502'
+      http/tides.lanternfish.example/v1/now.code: '503'
+      http/billing.lanternfish.example/ping.code: '301'
+      ports.open: |
+        buoy.lanternfish.example:443
+      df.table: |
+        /data 85
+        /var/log 40
+      feeds/webcam.stamp:
+        content: |
+          x
+        mtime: 1700000000
+    expected_stdout: |-
+      == Lanternfish Status Board ==
+      == Harbour == [0/3 up]
+        DOWN     ferry-web!     HTTP 502
+        DOWN     tide-api       HTTP 503
+        DOWN     webcam-feed    stale (> 5 min)
+      == Fleet == [1/2 up]
+        UP       buoy-link!     port open
+        DOWN     halibut-ssh    connection refused
+      == Back office == [1/3 up]
+        DEGRADED billing        HTTP 301 (want 200)
+        DEGRADED data-disk      85% used
+        UP       logs-disk      40% used
+      overall: DOWN (4 down, 2 degraded, 2 up)
+    expected_exit: 2
+  - name: everything fine
+    args:
+    - services.conf
+    files:
+      services.conf: |
+        # group|name|type|target|arg
+        Harbour|ferry-web!|http|https://ferry.lanternfish.example/health|200
+        Harbour|tide-api|http|https://tides.lanternfish.example/v1/now|200
+        Harbour|webcam-feed|file|feeds/webcam.stamp|5
+        Fleet|buoy-link!|tcp|buoy.lanternfish.example:443|-
+        Fleet|halibut-ssh|tcp|halibut.lanternfish.example:22|-
+        Back office|billing|http|https://billing.lanternfish.example/ping|200
+        Back office|data-disk|disk|/data|90
+        Back office|logs-disk|disk|/var/log|90
+      http/ferry.lanternfish.example/health.code: '200'
+      http/tides.lanternfish.example/v1/now.code: '200'
+      http/billing.lanternfish.example/ping.code: '200'
+      ports.open: |
+        buoy.lanternfish.example:443
+        halibut.lanternfish.example:22
+      df.table: |
+        /data 20
+        /var/log 40
+      feeds/webcam.stamp: |
+        fresh
+    expected_stdout: |-
+      == Lanternfish Status Board ==
+      == Harbour == [3/3 up]
+        UP       ferry-web!     HTTP 200
+        UP       tide-api       HTTP 200
+        UP       webcam-feed    fresh (<= 5 min)
+      == Fleet == [2/2 up]
+        UP       buoy-link!     port open
+        UP       halibut-ssh    port open
+      == Back office == [3/3 up]
+        UP       billing        HTTP 200
+        UP       data-disk      20% used
+        UP       logs-disk      40% used
+      overall: UP (0 down, 0 degraded, 8 up)
+  - name: only problems
+    args:
+    - --problems-only
+    - services.conf
+    files:
+      services.conf: |
+        # group|name|type|target|arg
+        Harbour|ferry-web!|http|https://ferry.lanternfish.example/health|200
+        Harbour|tide-api|http|https://tides.lanternfish.example/v1/now|200
+        Harbour|webcam-feed|file|feeds/webcam.stamp|5
+        Fleet|buoy-link!|tcp|buoy.lanternfish.example:443|-
+        Fleet|halibut-ssh|tcp|halibut.lanternfish.example:22|-
+        Back office|billing|http|https://billing.lanternfish.example/ping|200
+        Back office|data-disk|disk|/data|90
+        Back office|logs-disk|disk|/var/log|90
+      http/ferry.lanternfish.example/health.code: '200'
+      http/tides.lanternfish.example/v1/now.code: '503'
+      http/billing.lanternfish.example/ping.code: '301'
+      ports.open: |
+        buoy.lanternfish.example:443
+      df.table: |
+        /data 85
+        /var/log 40
+      feeds/webcam.stamp:
+        content: |
+          x
+        mtime: 1700000000
+    expected_stdout: |-
+      == Lanternfish Status Board ==
+      == Harbour == [1/3 up]
+        DOWN     tide-api       HTTP 503
+        DOWN     webcam-feed    stale (> 5 min)
+      == Fleet == [1/2 up]
+        DOWN     halibut-ssh    connection refused
+      == Back office == [1/3 up]
+        DEGRADED billing        HTTP 301 (want 200)
+        DEGRADED data-disk      85% used
+      overall: DEGRADED (3 down, 2 degraded, 3 up)
+    expected_exit: 1
+  - name: colour on request
+    args:
+    - --color
+    - services.conf
+    files:
+      services.conf: |
+        # group|name|type|target|arg
+        Harbour|ferry-web!|http|https://ferry.lanternfish.example/health|200
+        Harbour|tide-api|http|https://tides.lanternfish.example/v1/now|200
+        Harbour|webcam-feed|file|feeds/webcam.stamp|5
+        Fleet|buoy-link!|tcp|buoy.lanternfish.example:443|-
+        Fleet|halibut-ssh|tcp|halibut.lanternfish.example:22|-
+        Back office|billing|http|https://billing.lanternfish.example/ping|200
+        Back office|data-disk|disk|/data|90
+        Back office|logs-disk|disk|/var/log|90
+      http/ferry.lanternfish.example/health.code: '200'
+      http/tides.lanternfish.example/v1/now.code: '503'
+      http/billing.lanternfish.example/ping.code: '301'
+      ports.open: |
+        buoy.lanternfish.example:443
+      df.table: |
+        /data 85
+        /var/log 40
+      feeds/webcam.stamp:
+        content: |
+          x
+        mtime: 1700000000
+    expected_stdout: "== Lanternfish Status Board ==\n== Harbour == [1/3 up]\n  \e[32mUP      \e[0m ferry-web!     HTTP 200\n  \e[31mDOWN    \e[0m tide-api       HTTP 503\n  \e[31mDOWN    \e[0m webcam-feed\
+      \    stale (> 5 min)\n== Fleet == [1/2 up]\n  \e[32mUP      \e[0m buoy-link!     port open\n  \e[31mDOWN    \e[0m halibut-ssh    connection refused\n== Back office == [1/3 up]\n  \e[33mDEGRADED\e[0m\
+      \ billing        HTTP 301 (want 200)\n  \e[33mDEGRADED\e[0m data-disk      85% used\n  \e[32mUP      \e[0m logs-disk      40% used\noverall: DEGRADED (3 down, 2 degraded, 3 up)"
+    expected_exit: 1
+  - name: connection failure and missing heartbeat
+    args:
+    - services.conf
+    files:
+      services.conf: |
+        Edge|proxy|http|https://proxy.lanternfish.example/|200
+        Edge|heartbeat|file|feeds/missing.stamp|10
+      http/proxy.lanternfish.example/.fail: ''
+    expected_stdout: |-
+      == Lanternfish Status Board ==
+      == Edge == [0/2 up]
+        DOWN     proxy          no response
+        DOWN     heartbeat      missing
+      overall: DEGRADED (2 down, 0 degraded, 0 up)
+    expected_exit: 1
+  - name: unknown type stops everything
+    args:
+    - services.conf
+    files:
+      services.conf: |
+        # comment
+        Edge|proxy|http|https://proxy.lanternfish.example/|200
+        Edge|pager|smoke-signal|north|-
+    expected_stdout: ''
+    expected_stderr: 'error: services.conf line 3: unknown type ''smoke-signal'''
+    expected_exit: 3
+  - name: too few fields
+    args:
+    - services.conf
+    files:
+      services.conf: |
+        Edge|proxy|http|https://x.example/
+    expected_stdout: ''
+    expected_stderr: 'error: services.conf line 1: need GROUP|NAME|TYPE|TARGET|ARG'
+    expected_exit: 3
+  - name: no config
+    args:
+    - nope.conf
+    expected_stdout: ''
+    expected_stderr: 'error: cannot read nope.conf'
+    expected_exit: 2
+  - name: bad flag
+    args:
+    - --loud
+    - services.conf
+    files:
+      services.conf: |
+        # group|name|type|target|arg
+        Harbour|ferry-web!|http|https://ferry.lanternfish.example/health|200
+        Harbour|tide-api|http|https://tides.lanternfish.example/v1/now|200
+        Harbour|webcam-feed|file|feeds/webcam.stamp|5
+        Fleet|buoy-link!|tcp|buoy.lanternfish.example:443|-
+        Fleet|halibut-ssh|tcp|halibut.lanternfish.example:22|-
+        Back office|billing|http|https://billing.lanternfish.example/ping|200
+        Back office|data-disk|disk|/data|90
+        Back office|logs-disk|disk|/var/log|90
+      http/ferry.lanternfish.example/health.code: '200'
+      http/tides.lanternfish.example/v1/now.code: '503'
+      http/billing.lanternfish.example/ping.code: '301'
+      ports.open: |
+        buoy.lanternfish.example:443
+      df.table: |
+        /data 85
+        /var/log 40
+      feeds/webcam.stamp:
+        content: |
+          x
+        mtime: 1700000000
+    expected_stdout: ''
+    expected_stderr: 'usage: solution.sh [--color] [--problems-only] CONFIG'
+    expected_exit: 2
