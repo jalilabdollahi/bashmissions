@@ -1,0 +1,1 @@
+Idempotent means every step first asks "is this already the way I want it?" and only acts when the answer is no. Work out the right question for each of the five items: a command's exit status, a directory test, a file test, a whole-line search, a link test. Never overwrite something an operator may have edited.

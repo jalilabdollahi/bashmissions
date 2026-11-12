@@ -1,0 +1,1 @@
+Deploying is not the finish line: asking the service "are you up?" is. Ask repeatedly, wait a little between questions, and give up after a fixed number of tries so a broken release fails the pipeline instead of hanging it. Let the exit status of the check decide each round.

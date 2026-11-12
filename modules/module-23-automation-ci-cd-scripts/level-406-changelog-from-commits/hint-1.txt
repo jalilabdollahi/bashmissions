@@ -1,0 +1,1 @@
+Read the subjects once and drop each into the right bucket as you go; print only after the last line has been read. Buckets are just arrays. A single pattern can tell you the type, the scope and whether there is a "!".

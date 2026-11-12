@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Fake sleep: records the request and returns at once so tests stay fast.
+if [[ $# -ne 1 || ! $1 =~ ^[0-9]+$ ]]; then
+  echo "sleep: this stub takes one whole number of seconds" >&2
+  exit 2
+fi
+echo "sleep $1" >> .calls.log

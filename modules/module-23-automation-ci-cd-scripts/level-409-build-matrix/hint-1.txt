@@ -1,0 +1,1 @@
+A matrix is every item of one list paired with every item of another, so you need a loop inside a loop. First turn the comma-separated strings into real lists. Keep going when a job fails, and count how many ran and how many passed.

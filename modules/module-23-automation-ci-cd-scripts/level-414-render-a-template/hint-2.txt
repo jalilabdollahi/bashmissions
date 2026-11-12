@@ -1,0 +1,9 @@
+Useful pieces, with generic examples:
+
+  before=${text%%'<<'*}          # everything before the first "<<"
+  after=${text#*'<<'}            # everything after it
+  [[ $chunk =~ ^\<\<([a-z]+)\>\>(.*)$ ]]   # 1 = word, 2 = remainder
+  [[ -v $name ]]                 # is the variable called by that name set?
+  echo "${!name}"                # its value (indirect expansion)
+
+`rendered+=text` appends to a string. `printf '%s\n' "${list[@]}" >&2` prints one error per element.

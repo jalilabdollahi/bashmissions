@@ -1,0 +1,125 @@
+id: 414
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Render a Template
+difficulty: expert
+xp: 380
+story: |
+  Every Lanternfish customer site needs an nginx config that differs in three
+  places: the hostname, the port and the log folder. Theo keeps one template
+  and fills it in with `sed`, which worked until Gull & Anchor Pub chose a
+  site title with an ampersand in it and the config turned into gibberish.
+  Time for a renderer that treats values as data and tells you when a
+  variable is missing instead of printing an empty hole.
+objective: |
+  Write solution.sh, called as `solution.sh TEMPLATE`. Read the template and
+  write the rendered text to stdout, replacing placeholders with environment
+  variables:
+    ${NAME}            the value of NAME
+    ${NAME:-fallback}  the value of NAME, or `fallback` when NAME is unset OR empty
+  NAME is letters, digits and underscores, not starting with a digit. The
+  fallback is any text up to the first `}` (it may be empty).
+  Everything else is copied exactly: `$NAME` without braces, `$5`, and a `${`
+  that is not a valid placeholder (`${1x}`, `${open`) stay as they are.
+  A replaced value is never scanned again: if a value contains `${OTHER}`
+  that text stays literal. Values may contain `&`, `/`, `\` or spaces.
+  A variable that is unset and has no fallback is an error. A variable set to
+  the empty string is fine (it renders as nothing). Report every missing name
+  once, in the order first seen, as `missing variable: NAME` on stderr; then
+  print nothing at all to stdout and exit 1.
+  If TEMPLATE cannot be read print `cannot read TEMPLATE` to stderr, exit 2.
+  Only exported environment variables count. The script's own internal
+  variables (for example a template asking for ${line} or ${template}) must
+  never leak into the output: treat them like any other unset name.
+  Do not use eval, envsubst, sed or awk.
+concepts:
+  - "placeholder substitution by scanning with parameter expansion and a regex"
+  - "[[ -v name ]] and ${!name}: set/unset and indirect expansion"
+  - "values are data: no re-scanning, no eval"
+forbidden_patterns:
+  - pattern: '\b(eval|envsubst|sed|awk)\b'
+    message: "Render with a Bash loop (regex plus ${!name}); eval, envsubst, sed and awk are not allowed."
+required_patterns:
+  - pattern: '\$\{!\w+\}'
+    message: "Read a variable whose name is stored in another variable with ${!name}."
+test_cases:
+  - name: a site config
+    args: [site.conf.tpl]
+    env: {SITE_HOST: harbourbakery.example, LOG_DIR: /var/log/sites}
+    files:
+      site.conf.tpl: |
+        server {
+          server_name ${SITE_HOST};
+          upstream 127.0.0.1:${APP_PORT:-8080};
+          access_log ${LOG_DIR}/${SITE_HOST}.log;   # costs $5, see $HOST
+        }
+    expected_stdout: |-
+      server {
+        server_name harbourbakery.example;
+        upstream 127.0.0.1:8080;
+        access_log /var/log/sites/harbourbakery.example.log;   # costs $5, see $HOST
+      }
+  - name: awkward characters in values
+    args: [page.tpl]
+    env: {TITLE: "Gull & Anchor / Pub \\o/", MOTTO: "a | b"}
+    files:
+      page.tpl: |
+        <title>${TITLE}</title>
+        <p>${MOTTO}</p>
+    expected_stdout: |-
+      <title>Gull & Anchor / Pub \o/</title>
+      <p>a | b</p>
+  - name: empty values and fallbacks
+    args: [t.tpl]
+    env: {SET_EMPTY: "", SET_FULL: "yes"}
+    files:
+      t.tpl: |
+        a=[${SET_EMPTY}]
+        b=[${SET_EMPTY:-fallback}]
+        c=[${SET_FULL:-fallback}]
+        d=[${NOPE:-}]
+        e=[${NOPE:-two words}]
+    expected_stdout: |-
+      a=[]
+      b=[fallback]
+      c=[yes]
+      d=[]
+      e=[two words]
+  - name: values are not expanded again
+    args: [t.tpl]
+    env: {A: "${B}", B: "boom"}
+    files:
+      t.tpl: "x=${A} y=${B}\n"
+    expected_stdout: 'x=${B} y=boom'
+  - name: placeholders that are not placeholders
+    args: [t.tpl]
+    env: {NAME: ok}
+    files:
+      t.tpl: |
+        ${1x} ${open ${NAME} $NAME $$ ${NAME
+    expected_stdout: '${1x} ${open ok $NAME $$ ${NAME'
+  - name: two variables are missing, one twice
+    args: [t.tpl]
+    env: {KNOWN: here}
+    files:
+      t.tpl: |
+        ${KNOWN} ${DB_HOST}
+        ${CACHE_URL} ${DB_HOST} ${KNOWN}
+    expected_stderr: |-
+      missing variable: DB_HOST
+      missing variable: CACHE_URL
+    expected_exit: 1
+  - name: unreadable template
+    args: [nothing.tpl]
+    expected_stderr: "cannot read nothing.tpl"
+    expected_exit: 2
+  - name: internal variables never leak
+    files:
+      leak.tpl: "user=${USER} spy=${template}${rest}\n"
+    args: [leak.tpl]
+    expected_stderr: |-
+      missing variable: template
+      missing variable: rest
+    expected_stdout: ""
+    expected_exit: 1

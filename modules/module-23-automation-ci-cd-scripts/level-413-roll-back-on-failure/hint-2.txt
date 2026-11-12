@@ -1,0 +1,6 @@
+Symlinks are read and rewritten with two commands:
+
+  readlink live            # prints the target text, e.g. builds/b7
+  ln -sfn builds/b8 live   # point "live" at builds/b8, replacing the old link
+
+`-n` matters: without it, when `live` already points at a directory, `ln` creates the new link inside that directory. `[[ -L live ]]` tests for a symlink. `${path#builds/}` strips a leading `builds/`. Save a failing status with `rc=0; cmd || rc=$?`.

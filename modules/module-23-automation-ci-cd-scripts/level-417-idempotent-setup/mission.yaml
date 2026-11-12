@@ -1,0 +1,130 @@
+id: 417
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Idempotent Setup
+difficulty: expert
+xp: 420
+story: |
+  Setting up a new Lanternfish app server takes eight commands, and the
+  runbook says "run setup.sh". Ollie ran it twice by mistake, and the second
+  run overwrote the customer's edited config and added the same `umask` line
+  to the profile again. A setup script should be like a good light switch:
+  pressing it twice leaves the room as it is after pressing it once.
+objective: |
+  Write solution.sh (no arguments) that brings the current directory to this
+  state, touching only what is not already right, and prints one line per item
+  (`created ...` when it had to make it, `ok ...` when it was already in place),
+  in this order:
+    1. group `deploy`: check with `getent group deploy` (exit 0 = exists); if
+       missing run `groupadd deploy`.            created group deploy | ok group deploy
+    2. directories `app/releases`, `app/shared`, `app/logs`, one line each
+                                                 created dir PATH | ok dir PATH
+    3. file `app/shared/config.env` holding the single line `PORT=8080`. An
+       existing file is NEVER changed, even if its content is different.
+                                                 created file PATH | ok file PATH
+    4. the exact line `umask 027` in `app/profile` (create the file if needed).
+       "Exact" means a whole line: `# umask 027` or `umask 0277` do not count.
+       Append to the end, on a line of its own, even if the file lacks a final
+       newline.
+                                                 created line umask 027 in app/profile
+                                                 | ok line umask 027 in app/profile
+    5. a symbolic link `app/current-logs` pointing at `logs` (relative to
+       app/, i.e. `ln -s logs app/current-logs`). If something that is not a
+       link already has that name print `conflict: app/current-logs exists and is not a link`
+       to stderr and exit 1.                     created link PATH | ok link PATH
+  Finish with `setup complete: N created, M already in place`.
+  Running the script twice must change nothing the second time.
+concepts:
+  - "idempotence: check, then create"
+  - "test before you act: -d, -e, -L, grep -qxF, getent"
+  - "never overwrite what the operator already edited"
+required_patterns:
+  - pattern: 'grep\s+(-[a-zA-Z]*x[a-zA-Z]*F|-[a-zA-Z]*F[a-zA-Z]*x)'
+    message: "Test for the whole line with `grep -qxF`: -x whole line, -F literal text."
+test_cases:
+  - name: a brand new server
+    expected_stdout: |-
+      created group deploy
+      created dir app/releases
+      created dir app/shared
+      created dir app/logs
+      created file app/shared/config.env
+      created line umask 027 in app/profile
+      created link app/current-logs
+      setup complete: 7 created, 0 already in place
+    expected_files:
+      .calls.log: |
+        getent group deploy
+        groupadd deploy
+      app/shared/config.env: "PORT=8080"
+      app/profile: "umask 027"
+      app/current-logs/: true
+  - name: everything is already there, edited config survives
+    files:
+      .groups: "deploy\n"
+      "app/releases/": ""
+      "app/shared/": ""
+      "app/logs/": ""
+      app/shared/config.env: "PORT=9999\nDEBUG=1\n"
+      app/profile: "export A=1\numask 027\nexport B=2\n"
+      app/current-logs: {symlink: logs}
+    expected_stdout: |-
+      ok group deploy
+      ok dir app/releases
+      ok dir app/shared
+      ok dir app/logs
+      ok file app/shared/config.env
+      ok line umask 027 in app/profile
+      ok link app/current-logs
+      setup complete: 0 created, 7 already in place
+    expected_files:
+      .calls.log: "getent group deploy"
+      app/shared/config.env: "PORT=9999\nDEBUG=1\n"
+      app/profile: "export A=1\numask 027\nexport B=2\n"
+  - name: partly set up
+    files:
+      .groups: "deploy\n"
+      "app/releases/": ""
+      app/profile: "export LANG=C\n"
+    expected_stdout: |-
+      ok group deploy
+      ok dir app/releases
+      created dir app/shared
+      created dir app/logs
+      created file app/shared/config.env
+      created line umask 027 in app/profile
+      created link app/current-logs
+      setup complete: 5 created, 2 already in place
+    expected_files:
+      app/profile: "export LANG=C\numask 027\n"
+  - name: lookalike lines do not count, missing final newline is repaired
+    files:
+      .groups: "deploy\n"
+      app/profile: "# umask 027\numask 0277\n umask 027"
+    expected_stdout: |-
+      ok group deploy
+      created dir app/releases
+      created dir app/shared
+      created dir app/logs
+      created file app/shared/config.env
+      created line umask 027 in app/profile
+      created link app/current-logs
+      setup complete: 6 created, 1 already in place
+    expected_files:
+      app/profile: "# umask 027\numask 0277\n umask 027\numask 027\n"
+  - name: a plain file is in the way of the link
+    files:
+      .groups: "deploy\n"
+      app/current-logs: "someone's notes\n"
+    expected_stdout: |-
+      ok group deploy
+      created dir app/releases
+      created dir app/shared
+      created dir app/logs
+      created file app/shared/config.env
+      created line umask 027 in app/profile
+    expected_stderr: "conflict: app/current-logs exists and is not a link"
+    expected_exit: 1
+    expected_files:
+      app/current-logs: "someone's notes\n"

@@ -1,0 +1,8 @@
+`mkdir DIR` succeeds for exactly one caller and fails for the others, atomically, so a directory works as a lock. A trap removes it at the end, whatever the reason for ending:
+
+  if mkdir /tmp/mylock 2>/dev/null; then
+    trap 'rmdir /tmp/mylock' EXIT
+    # ... work ...
+  fi
+
+Set the trap only after mkdir succeeded. `trap 'exit 130' INT TERM` makes signals end the script normally, so the EXIT trap runs. After `shift`, `"$@"` is the rest of the command line; run it with `"$@" >> file 2>&1 || rc=$?`.

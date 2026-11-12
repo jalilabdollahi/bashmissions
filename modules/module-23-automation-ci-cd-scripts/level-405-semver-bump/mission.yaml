@@ -1,0 +1,70 @@
+id: 405
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Semver Bump
+difficulty: advanced
+xp: 300
+story: |
+  Lanternfish's version numbers are edited by hand, and last month somebody
+  released 1.9.10 as 1.10.0 and 1.10.0 as 1.1.0, which sorted below it. Theo
+  has been promising a bump tool for weeks. Mara hands you the rules of
+  semantic versioning and asks for a script that cannot get them wrong.
+objective: |
+  Write solution.sh, called as `solution.sh VERSION PART`. PART is one of
+  `major`, `minor`, `patch`. Print the bumped version and nothing else.
+  VERSION is `MAJOR.MINOR.PATCH`, optionally with a leading `v` (which the
+  output keeps). Each number is `0` or a number without leading zeros.
+  Bumping rules: major adds 1 to MAJOR and resets MINOR and PATCH to 0;
+  minor adds 1 to MINOR and resets PATCH; patch adds 1 to PATCH.
+  Numbers are real numbers, not digits: 1.9.9 minor gives 1.10.0.
+  Errors go to stderr with exit 2:
+    - wrong number of arguments or an unknown PART:
+        usage: solution.sh VERSION major|minor|patch
+    - a VERSION that does not match the format above (`1.2`, `1.2.3.4`,
+      `v1.2.3-rc1`, `01.2.3`, ` 1.2.3`):
+        invalid version: <VERSION as given>
+  Do the splitting with Bash only: no awk, cut, sed or tr.
+concepts:
+  - "validate a version with a regex, then split it with BASH_REMATCH"
+  - "case statement to select the bump"
+  - "arithmetic on numbers that must not be treated as octal"
+required_patterns:
+  - pattern: '\bcase\b'
+    message: "Use a case statement to choose between major, minor and patch."
+forbidden_patterns:
+  - pattern: '\b(awk|cut|sed|tr)\b'
+    message: "Split the version with a regex and BASH_REMATCH, not an external tool."
+test_cases:
+  - name: patch bump
+    args: [1.2.3, patch]
+    expected_stdout: "1.2.4"
+  - name: minor bump resets patch and carries past 9
+    args: [1.9.9, minor]
+    expected_stdout: "1.10.0"
+  - name: major bump keeps the v prefix
+    args: [v2.14.7, major]
+    expected_stdout: "v3.0.0"
+  - name: from zero
+    args: [0.0.0, patch]
+    expected_stdout: "0.0.1"
+  - name: two parts only
+    args: ["1.2", patch]
+    expected_stderr: "invalid version: 1.2"
+    expected_exit: 2
+  - name: pre-release is not accepted
+    args: [v1.2.3-rc1, minor]
+    expected_stderr: "invalid version: v1.2.3-rc1"
+    expected_exit: 2
+  - name: leading zero is not accepted
+    args: ["01.2.3", patch]
+    expected_stderr: "invalid version: 01.2.3"
+    expected_exit: 2
+  - name: unknown part
+    args: [1.2.3, huge]
+    expected_stderr: "usage: solution.sh VERSION major|minor|patch"
+    expected_exit: 2
+  - name: missing part
+    args: [1.2.3]
+    expected_stderr: "usage: solution.sh VERSION major|minor|patch"
+    expected_exit: 2

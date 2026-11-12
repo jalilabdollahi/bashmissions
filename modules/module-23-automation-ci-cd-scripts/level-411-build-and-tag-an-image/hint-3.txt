@@ -1,0 +1,16 @@
+re='^([0-9]+)\.([0-9]+)\.[0-9]+(-[0-9A-Za-z.]+)?$'
+# bad IMAGE or VERSION -> usage, exit 2
+major=${BASH_REMATCH[1]} minor=${BASH_REMATCH[2]} suffix=${BASH_REMATCH[3]}
+
+if ! docker build --build-arg "VERSION=$version" -t "$image:$version" "$context"; then
+  # "build failed", exit 1
+fi
+
+tags=("$version")
+if [[ -z $suffix ]]; then
+  # docker tag twice (major.minor and latest) and add both names to tags
+fi
+
+for tag in "${tags[@]}"; do
+  # docker push "$image:$tag" (or "push failed: ..." and exit 1), then print pushed
+done

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Fake docker: build, tag, push. Images live in .images, pushed refs in .pushed.
+# FAKE_DOCKER_FAIL=build|push makes that subcommand fail. Every call is logged.
+echo "docker $*" >> .calls.log
+die() { echo "$1" >&2; exit "${2:-1}"; }
+have() { [[ -f .images ]] && grep -qxF -- "$1" .images; }
+
+sub=${1:-}; shift || true
+case $sub in
+  build)
+    tags=() ctx=""
+    while (( $# )); do
+      case $1 in
+        -t)           [[ $# -ge 2 ]] || die "docker build: -t needs a value" 2; tags+=("$2"); shift 2 ;;
+        --build-arg)  [[ $# -ge 2 && $2 == *=* ]] || die "docker build: --build-arg needs KEY=VALUE" 2; shift 2 ;;
+        -*)           die "unknown flag: $1" 2 ;;
+        *)            [[ -z $ctx ]] || die "docker build: exactly one context directory" 2; ctx=$1; shift ;;
+      esac
+    done
+    [[ -n $ctx ]] || die '"docker build" requires exactly 1 argument.' 2
+    (( ${#tags[@]} > 0 )) || die "docker build: this stub requires at least one -t NAME:TAG" 2
+    [[ ${FAKE_DOCKER_FAIL:-} == build ]] && die "ERROR: failed to solve: process \"/bin/sh -c make\" did not complete successfully"
+    [[ -f $ctx/Dockerfile ]] || die "ERROR: failed to read dockerfile: open $ctx/Dockerfile: no such file or directory"
+    printf '%s\n' "${tags[@]}" >> .images
+    ;;
+  tag)
+    [[ $# -eq 2 ]] || die "docker tag: usage is 'docker tag SOURCE TARGET'" 2
+    have "$1" || die "Error response from daemon: No such image: $1"
+    echo "$2" >> .images
+    ;;
+  push)
+    [[ $# -eq 1 && $1 != -* ]] || die "docker push: usage is 'docker push NAME:TAG'" 2
+    [[ $1 == *:* ]] || die "docker push: this stub wants an explicit :TAG" 2
+    have "$1" || die "An image does not exist locally with the tag: ${1%%:*}"
+    [[ ${FAKE_DOCKER_FAIL:-} == push ]] && die "denied: requested access to the resource is denied"
+    echo "$1" >> .pushed
+    ;;
+  *) die "docker: '$sub' is not implemented in this stub" 2 ;;
+esac

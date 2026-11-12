@@ -1,0 +1,11 @@
+Capture a command's output and branch on its success in one step:
+
+  if out=$(some-command --flag 2>/dev/null); then
+    echo "got: $out"
+  else
+    echo "command failed"
+  fi
+
+To split `name-3-gabc123` when the name may contain hyphens, anchor the regex at the end and let the first group be greedy:
+
+  [[ $s =~ ^(.+)-([0-9]+)-g([0-9a-f]+)$ ]]   # 1=name 2=number 3=hash

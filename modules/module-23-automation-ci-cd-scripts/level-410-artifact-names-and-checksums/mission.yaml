@@ -1,0 +1,89 @@
+id: 410
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Artifact Names and Checksums
+difficulty: expert
+xp: 340
+story: |
+  The build matrix drops its results into `dist/` with names like
+  `linux-amd64.tar`. Harbour Bakery downloaded one last week, could not tell
+  which release it belonged to, and could not tell whether the download had
+  been cut short. Gus would like the files to carry the product name and
+  version, and a manifest beside them so anyone can verify a download.
+objective: |
+  Write solution.sh, called as `solution.sh NAME VERSION`. NAME is lowercase
+  letters, digits and hyphens; VERSION is `MAJOR.MINOR.PATCH`. Otherwise print
+  `usage: solution.sh NAME VERSION` to stderr and exit 2.
+  Work on the files `dist/*.tar`:
+    1. Rename each one `<os>-<arch>.tar` to `NAME-VERSION-<os>-<arch>.tar`
+       (`dist/linux-amd64.tar` -> `dist/lanternfish-agent-2.3.1-linux-amd64.tar`).
+       A file whose name already starts with `NAME-VERSION-` is left alone, so
+       the script is safe to run twice.
+    2. Write `dist/MANIFEST.txt`: one line per tar, sorted by file name:
+         <checksum> <size in bytes> <file name>
+       with the checksum and size exactly as printed by `cksum` (file name
+       only, no directory).
+    3. Print `wrote dist/MANIFEST.txt (N artifact(s))`.
+  Other files in dist/ are not touched and not listed. If there is no
+  `dist/*.tar` at all print `no artifacts in dist/` to stderr and exit 1
+  (nothing is created).
+concepts:
+  - "derive file names with parameter expansion and mv"
+  - "cksum for portable checksums (CRC and size)"
+  - "write a manifest atomically; keep reruns idempotent"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Use cksum: it prints the checksum, the size and the name, on every platform."
+test_cases:
+  - name: three fresh artifacts
+    args: [lanternfish-agent, 2.3.1]
+    files:
+      dist/linux-amd64.tar: "agent linux build\n"
+      dist/macos-arm64.tar: "agent macos build\n"
+      dist/linux-arm64.tar: "agent arm build\n"
+      dist/notes.txt: "left alone\n"
+    expected_stdout: "wrote dist/MANIFEST.txt (3 artifact(s))"
+    expected_files:
+      dist/MANIFEST.txt: |
+        1897068822 18 lanternfish-agent-2.3.1-linux-amd64.tar
+        159619571 16 lanternfish-agent-2.3.1-linux-arm64.tar
+        3332261284 18 lanternfish-agent-2.3.1-macos-arm64.tar
+      dist/lanternfish-agent-2.3.1-linux-amd64.tar: "agent linux build\n"
+      dist/linux-amd64.tar: null
+      dist/notes.txt: "left alone\n"
+  - name: rerun after a partial rename
+    args: [lanternfish-agent, 2.3.1]
+    files:
+      dist/lanternfish-agent-2.3.1-linux-amd64.tar: "agent linux build\n"
+      dist/macos-arm64.tar: "agent macos build\n"
+      dist/MANIFEST.txt: "stale\n"
+    expected_stdout: "wrote dist/MANIFEST.txt (2 artifact(s))"
+    expected_files:
+      dist/MANIFEST.txt: |
+        1897068822 18 lanternfish-agent-2.3.1-linux-amd64.tar
+        3332261284 18 lanternfish-agent-2.3.1-macos-arm64.tar
+      dist/macos-arm64.tar: null
+  - name: one artifact, another product
+    args: [dory-cli, 0.9.12]
+    files:
+      dist/windows-x64.tar: "x\n"
+    expected_stdout: "wrote dist/MANIFEST.txt (1 artifact(s))"
+    expected_files:
+      dist/MANIFEST.txt: "2192966820 2 dory-cli-0.9.12-windows-x64.tar"
+  - name: nothing to package
+    args: [dory-cli, 1.0.0]
+    files:
+      dist/README.txt: "no tars here\n"
+    expected_stderr: "no artifacts in dist/"
+    expected_exit: 1
+    expected_files:
+      dist/MANIFEST.txt: null
+  - name: bad name
+    args: ["Dory CLI", 1.0.0]
+    expected_stderr: "usage: solution.sh NAME VERSION"
+    expected_exit: 2
+  - name: bad version
+    args: [dory-cli, 1.0]
+    expected_stderr: "usage: solution.sh NAME VERSION"
+    expected_exit: 2

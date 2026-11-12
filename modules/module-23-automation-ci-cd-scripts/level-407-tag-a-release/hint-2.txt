@@ -1,0 +1,6 @@
+Two ways git talks to a script:
+
+  if [[ -n $(git status --porcelain) ]]; then echo dirty; fi     # output
+  if git rev-parse -q --verify refs/tags/v9 >/dev/null; then ...  # exit code
+
+`--porcelain` output is stable and empty when the tree is clean. `rev-parse -q --verify REF` prints a hash and exits 0 when REF exists, exits 1 silently when it does not. `if ! command; then` branches on failure even under `set -e`.

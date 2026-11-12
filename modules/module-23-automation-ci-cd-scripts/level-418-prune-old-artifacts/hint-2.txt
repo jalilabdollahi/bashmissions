@@ -1,0 +1,6 @@
+`[[ a -nt b ]]` is true when file a is newer than file b. A glob in an array keeps each name whole:
+
+  files=()
+  for p in logs/*; do [[ -f $p && ! -L $p ]] && files+=("$p"); done
+
+(`shopt -s nullglob` makes an empty directory give an empty array.) Count newer files with a nested loop over the array. `${p##*/}` strips the directory part. `rm -f -- "$p"` deletes a name even if it starts with `-`. Expanding an empty array under `set -u` can fail in older Bash; `"${files[@]+"${files[@]}"}"` is the safe spelling.

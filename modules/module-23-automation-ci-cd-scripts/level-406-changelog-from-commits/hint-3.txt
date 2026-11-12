@@ -1,0 +1,11 @@
+while IFS= read -r subject || [[ -n $subject ]]; do
+  # skip "" and "Merge ..."
+  if [[ $subject =~ $re ]]; then
+    # bullet="- $text", or "- $scope: $text" when scope is not empty
+    # bang set -> breaking; type feat -> features; type fix -> fixes; else other
+  else
+    # not conventional -> other, with the whole subject
+  fi
+done
+
+A small function section TITLE ITEMS... that returns quietly when it gets no items keeps the printing part short. Print "## $version" first.

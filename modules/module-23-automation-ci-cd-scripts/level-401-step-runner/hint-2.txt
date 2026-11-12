@@ -1,0 +1,7 @@
+Under `set -e`, a command that is part of `||` or an `if` does not abort the script, and `$?` still holds its status:
+
+  rc=0
+  bash thing.sh || rc=$?
+  echo "thing.sh finished with $rc"
+
+`exit "$rc"` then passes the number on. `$#` is the number of arguments; `for x in "$@"` visits each one.

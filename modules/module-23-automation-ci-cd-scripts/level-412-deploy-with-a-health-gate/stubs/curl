@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Fake curl for a health endpoint. Understands -f -s -S (alone or combined),
+# --max-time N, -o FILE and one URL. The Nth call (N = FAKE_HEALTHY_AFTER,
+# default 3) is the first to see HTTP 200; earlier calls get a 503 and, with -f,
+# exit 22 like the real thing. FAKE_HEALTHY_AFTER=never keeps it down.
+echo "curl $*" >> .calls.log
+fail=0 url=""
+while (( $# )); do
+  case $1 in
+    --max-time) [[ ${2:-} =~ ^[0-9]+$ ]] || { echo "curl: (2) bad --max-time" >&2; exit 2; }; shift 2 ;;
+    -o)         [[ $# -ge 2 ]] || { echo "curl: -o needs a file" >&2; exit 2; }; shift 2 ;;
+    -[fsS]*)    [[ $1 =~ ^-[fsS]+$ ]] || { echo "curl: option $1 is not implemented" >&2; exit 2; }
+                [[ $1 == *f* ]] && fail=1
+                shift ;;
+    -*)         echo "curl: option $1 is not implemented" >&2; exit 2 ;;
+    *)          url=$1; shift ;;
+  esac
+done
+[[ -n $url ]] || { echo "curl: no URL specified" >&2; exit 2; }
+n=0
+[[ -f .health-count ]] && n=$(<.health-count)
+n=$(( n + 1 ))
+echo "$n" > .health-count
+after=${FAKE_HEALTHY_AFTER:-3}
+if [[ $after != never ]] && (( n >= after )); then
+  echo '{"status":"ok"}'
+  exit 0
+fi
+if (( fail )); then
+  echo "curl: (22) The requested URL returned error: 503" >&2
+  exit 22
+fi
+echo '{"status":"starting"}'
+exit 0

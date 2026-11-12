@@ -1,0 +1,13 @@
+created=0 present=0
+# helpers: created_it "what" and already_ok "what" bump a counter and echo created/ok
+
+if getent group deploy >/dev/null; then already_ok ...; else groupadd deploy; created_it ...; fi
+
+for dir in app/releases app/shared app/logs; do
+  if [[ -d $dir ]]; then ...; else mkdir -p "$dir"; ...; fi
+done
+
+# config.env: [[ -e ]] -> ok, else write PORT=8080
+# profile: [[ -f $profile ]] && grep -qxF -- "$line" "$profile" -> ok;
+#          else (add a newline first when [[ -s ... && -n $(tail -c1 ...) ]]) append the line
+# link: [[ -L ]] ok; elif [[ -e ]] conflict (stderr, exit 1); else ln -s logs app/current-logs

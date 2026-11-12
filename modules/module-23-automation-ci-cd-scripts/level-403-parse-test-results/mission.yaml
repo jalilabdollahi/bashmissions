@@ -1,0 +1,95 @@
+id: 403
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Parse Test Results
+difficulty: advanced
+xp: 280
+story: |
+  The storefront tests now print TAP, the Test Anything Protocol, and Gus
+  wants one line on the dashboard: how many passed, how many failed. Theo's
+  first attempt was `grep -c ok`, which counted the line "not ok" as a pass
+  and a comment that said "ok to ignore". Time for a real parser.
+objective: |
+  Write solution.sh, called as `solution.sh TAP_FILE`. Read the TAP stream
+  line by line. Only lines that START with `ok ` or `not ok ` are results
+  (`ok N description` / `not ok N - description`; the dash is optional).
+  Everything else (the `TAP version` line, `#` comments, indented diagnostics)
+  is ignored, except the plan line `1..N`.
+  Classify each result:
+    - `ok` with a `# SKIP` directive           -> skipped
+    - `not ok` with a `# TODO` directive       -> todo (not a failure)
+    - any other `ok`                           -> passed
+    - any other `not ok`                       -> failed
+  For every failed result print `FAIL N: <description>` (in file order). The
+  description has the optional `- ` removed; for SKIP/TODO results the
+  directive is removed too, other `# text` stays.
+  Then print `passed=P failed=F skipped=S todo=T`.
+  Exit codes: if the plan line is missing, or N differs from the number of
+  results, print `plan mismatch: planned N, ran R` (use N=0 when there is no
+  plan) to stderr and exit 3. Otherwise exit 1 if anything failed, else 0.
+  If TAP_FILE cannot be read print `cannot read TAP_FILE` to stderr, exit 2.
+concepts:
+  - "parsing a line protocol with [[ =~ ]] and BASH_REMATCH"
+  - "counters and exit codes that summarise a run"
+  - "a plan line detects a runner that crashed halfway"
+required_patterns:
+  - pattern: 'BASH_REMATCH'
+    message: "Capture the pieces of each result line with a regex and BASH_REMATCH."
+test_cases:
+  - name: all green
+    args: [run.tap]
+    files:
+      run.tap: |
+        TAP version 13
+        1..3
+        ok 1 - login works
+        ok 2 - cart totals
+        ok 3 - receipts render
+    expected_stdout: "passed=3 failed=0 skipped=0 todo=0"
+  - name: failures, skips and todos mixed
+    args: [run.tap]
+    files:
+      run.tap: |
+        TAP version 13
+        1..6
+        ok 1 - login works
+        not ok 2 - checkout totals
+          ---
+          message: expected 42 got 41
+          ...
+        ok 3 - emoji names # SKIP not on this OS
+        not ok 4 - gift wrap # TODO feature unfinished
+        # note: not ok 9 is only a comment, ok to ignore
+        ok 5 shipping rates
+        not ok 6 - refund email # flaky
+    expected_stdout: |-
+      FAIL 2: checkout totals
+      FAIL 6: refund email # flaky
+      passed=2 failed=2 skipped=1 todo=1
+    expected_exit: 1
+  - name: the runner crashed after three tests
+    args: [run.tap]
+    files:
+      run.tap: |
+        1..5
+        ok 1 - boot
+        ok 2 - migrate
+        not ok 3 - seed data
+    expected_stdout: |-
+      FAIL 3: seed data
+      passed=2 failed=1 skipped=0 todo=0
+    expected_stderr: "plan mismatch: planned 5, ran 3"
+    expected_exit: 3
+  - name: no plan line at all
+    args: [run.tap]
+    files:
+      run.tap: |
+        ok 1 - boot
+    expected_stdout: "passed=1 failed=0 skipped=0 todo=0"
+    expected_stderr: "plan mismatch: planned 0, ran 1"
+    expected_exit: 3
+  - name: unreadable file
+    args: [nothing.tap]
+    expected_stderr: "cannot read nothing.tap"
+    expected_exit: 2

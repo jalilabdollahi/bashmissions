@@ -1,0 +1,12 @@
+prefix="$name-$version-"
+shopt -s nullglob
+tars=(dist/*.tar)
+# none? message on stderr, exit 1
+
+for path in "${tars[@]}"; do
+  base=${path##*/}
+  # already starts with $prefix? skip; otherwise mv "$path" "dist/$prefix$base"
+done
+
+( cd dist && cksum "$prefix"*.tar > MANIFEST.tmp && mv MANIFEST.tmp MANIFEST.txt )
+# count the lines of the manifest and print the final message

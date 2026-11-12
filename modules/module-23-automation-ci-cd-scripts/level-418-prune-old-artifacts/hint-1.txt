@@ -1,0 +1,1 @@
+Give every file a rank: how many other files are newer than it. Files whose rank is below the limit survive. Ranking by comparing pairs avoids parsing any command's output, so odd file names cannot confuse you. Decide in advance what happens when two files have the same timestamp.

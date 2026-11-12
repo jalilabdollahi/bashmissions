@@ -1,0 +1,75 @@
+id: 408
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Version from git describe
+difficulty: expert
+xp: 340
+story: |
+  Every Lanternfish build prints a version into its footer, and Noor can never
+  tell from a support ticket which code a customer is running: the footer
+  says "1.4.0" for builds made on the tag and for builds made twelve commits
+  later. Mara wants the build to ask git where it is, and to derive the
+  version from the answer instead of from a file somebody forgot to edit.
+objective: |
+  Write solution.sh (no arguments). Run exactly
+    git describe --tags --long --dirty --match 'v[0-9]*'
+  Its output looks like `v1.4.0-12-g3f2a1bc` (last tag, commits since the tag,
+  `g` + abbreviated hash) with `-dirty` appended when the tree has uncommitted
+  changes. The tag itself may contain hyphens (`v1.5.0-rc1`). Print one line,
+  `version=<V>`, built like this:
+    - tag only, 0 commits since, clean tree   -> the tag without its `v`:
+                                                 version=1.4.0
+    - anything else                           -> <tag without v>-dev.<N>+g<hash>
+                                                 and `.dirty` after the hash
+                                                 when dirty:
+                                                 version=1.4.0-dev.12+g3f2a1bc
+                                                 version=1.4.0-dev.0+g3f2a1bc.dirty
+  If `git describe` fails (there is no tag yet) use the short hash from
+  `git rev-parse --short HEAD`: version=0.0.0-dev+g<hash>
+  If describe succeeds but its output does not parse, print
+  `cannot parse describe output: <text>` to stderr and exit 1.
+concepts:
+  - "git describe --tags --long: tag, distance and hash in one string"
+  - "parse from the right: the tag may contain hyphens"
+  - "fall back when a command fails: if out=$(cmd); then ... else ... fi"
+required_patterns:
+  - pattern: 'BASH_REMATCH'
+    message: "Take the tag, distance and hash out of the describe text with a regex and BASH_REMATCH."
+test_cases:
+  - name: twelve commits after the tag
+    files:
+      .describe: "v1.4.0-12-g3f2a1bc"
+    expected_stdout: "version=1.4.0-dev.12+g3f2a1bc"
+    expected_files:
+      .calls.log: "git describe --tags --long --dirty --match v[0-9]*"
+  - name: exactly on the tag
+    files:
+      .describe: "v1.4.0-0-g3f2a1bc"
+    expected_stdout: "version=1.4.0"
+  - name: on the tag but with uncommitted changes
+    files:
+      .describe: "v1.4.0-0-g3f2a1bc-dirty"
+    expected_stdout: "version=1.4.0-dev.0+g3f2a1bc.dirty"
+  - name: tag with a pre-release part
+    files:
+      .describe: "v1.5.0-rc1-3-g9d8c7b6"
+    expected_stdout: "version=1.5.0-rc1-dev.3+g9d8c7b6"
+  - name: no tags yet
+    files:
+      .head: "b00b135"
+    expected_stdout: "version=0.0.0-dev+gb00b135"
+    expected_files:
+      .calls.log: |
+        git describe --tags --long --dirty --match v[0-9]*
+        git rev-parse --short HEAD
+  - name: other tags are ignored by --match
+    files:
+      .describe: "release-7-g1234abc"
+      .head: "1234abc"
+    expected_stdout: "version=0.0.0-dev+g1234abc"
+  - name: describe output that is not a version
+    files:
+      .describe: "v2next-4-g1234abc"
+    expected_stderr: "cannot parse describe output: v2next-4-g1234abc"
+    expected_exit: 1

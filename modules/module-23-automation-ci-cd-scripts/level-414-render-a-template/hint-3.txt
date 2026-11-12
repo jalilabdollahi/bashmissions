@@ -1,0 +1,17 @@
+re='^\$\{([A-Za-z_][A-Za-z0-9_]*)(:-([^}]*))?\}(.*)$'
+while IFS= read -r line || [[ -n $line ]]; do
+  rest=$line rendered=""
+  while [[ $rest == *'${'* ]]; do
+    rendered+=${rest%%'${'*}
+    rest='${'${rest#*'${'}
+    if [[ $rest =~ $re ]]; then
+      # name=${BASH_REMATCH[1]}  fallback group is [2] (with :-) and [3] (text)  rest=${BASH_REMATCH[4]}
+      # set and non-empty -> ${!name}; has a :- part -> fallback; set but empty -> nothing;
+      # else remember the name once
+    else
+      # keep a literal "${" and drop it from $rest
+    fi
+  done
+  output+=$rendered$rest$'\n'
+done < "$template"
+# missing names -> stderr, exit 1; otherwise printf '%s' "$output"

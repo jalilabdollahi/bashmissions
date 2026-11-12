@@ -1,0 +1,111 @@
+id: 406
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Changelog from Commits
+difficulty: advanced
+xp: 300
+story: |
+  Noor keeps asking the same question from customers: "what changed in this
+  release?" Theo answers by scrolling through `git log` and typing from
+  memory. Mara points out that the team already writes commit subjects in the
+  conventional style, `feat(cart): ...` and `fix: ...`, so the changelog can
+  write itself. The release job pipes the subjects into your script.
+objective: |
+  Write solution.sh, called as `solution.sh VERSION`. It reads commit subjects
+  from stdin, one per line (the output of `git log --format=%s`), and prints a
+  Markdown changelog. Ignore blank lines and subjects starting with `Merge `.
+  A conventional subject looks like `type: text`, `type(scope): text`, or the
+  same with a `!` before the colon (`feat!: text`, `fix(api)!: text`), where
+  type is lowercase letters. Sort each subject into ONE section:
+    - has a `!`                     -> Breaking changes
+    - type `feat`                   -> Features
+    - type `fix`                    -> Fixes
+    - anything else, including subjects that are not conventional -> Other
+  A bullet is `- scope: text` when there is a scope and `- text` when there
+  is not (for Breaking, Features and Fixes). Bullets in Other are the subject
+  exactly as written. Keep input order inside each section.
+  Output: first `## VERSION`; then for every section that has bullets, in
+  the order Breaking changes, Features, Fixes, Other: an empty line,
+  `### <section name>`, and its bullets. If there is nothing to list print
+  `## VERSION`, an empty line, and `No changes.`
+  Without VERSION print `usage: solution.sh VERSION` to stderr and exit 2.
+concepts:
+  - "group lines into buckets (arrays) while reading stdin"
+  - "regex captures for type, scope, bang and text"
+  - "emit sections in a fixed order, skipping empty ones"
+required_patterns:
+  - pattern: 'BASH_REMATCH'
+    message: "Split each subject into type, scope and text with a regex and BASH_REMATCH."
+test_cases:
+  - name: every kind of subject
+    args: [v2.0.0]
+    stdin: |
+      feat(cart): add gift notes
+      fix: round VAT correctly
+      docs: update the runbook
+      Merge branch 'main' into release
+
+      feat!: drop the v1 API
+      fix(auth)!: reject expired tokens
+      Tweak the harbour colours
+      feat: wishlist page
+    expected_stdout: |-
+      ## v2.0.0
+
+      ### Breaking changes
+      - drop the v1 API
+      - auth: reject expired tokens
+
+      ### Features
+      - cart: add gift notes
+      - wishlist page
+
+      ### Fixes
+      - round VAT correctly
+
+      ### Other
+      - docs: update the runbook
+      - Tweak the harbour colours
+  - name: only fixes, empty sections are skipped
+    args: [1.0.1]
+    stdin: |
+      fix(db): close idle connections
+      fix(db): retry on deadlock
+    expected_stdout: |-
+      ## 1.0.1
+
+      ### Fixes
+      - db: close idle connections
+      - db: retry on deadlock
+  - name: nothing but merges
+    args: [1.0.2]
+    stdin: |
+      Merge pull request #41 from theo/typo
+      Merge branch 'main'
+    expected_stdout: |-
+      ## 1.0.2
+
+      No changes.
+  - name: empty input
+    args: [3.1.0]
+    expected_stdout: |-
+      ## 3.1.0
+
+      No changes.
+  - name: a colon inside a plain subject
+    args: [0.9.0]
+    stdin: |
+      Fix: Capital letters are not conventional
+      feat(ui): Open hours: Mon-Fri
+    expected_stdout: |-
+      ## 0.9.0
+
+      ### Features
+      - ui: Open hours: Mon-Fri
+
+      ### Other
+      - Fix: Capital letters are not conventional
+  - name: version is required
+    expected_stderr: "usage: solution.sh VERSION"
+    expected_exit: 2

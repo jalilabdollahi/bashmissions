@@ -1,0 +1,93 @@
+id: 407
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Tag a Release
+difficulty: advanced
+xp: 320
+story: |
+  Release day at Lanternfish used to mean Theo typing `git tag v1.5.0` from
+  memory. Twice he tagged with uncommitted changes, and once he re-used a tag
+  that was already out, so two different builds both claimed to be 1.5.0. The
+  tag is the contract with customers. It should only be created when the tree
+  is clean and the name is new.
+objective: |
+  Write solution.sh, called as `solution.sh VERSION`. VERSION is
+  `MAJOR.MINOR.PATCH`, with or without a leading `v`; the tag is always
+  `v` + the numbers (`1.5.0` and `v1.5.0` both give `v1.5.0`). Anything else
+  prints `invalid version: <VERSION>` to stderr and exits 2, before git is
+  called at all.
+  Then, using `git`, in exactly this order:
+    1. `git status --porcelain` - if it prints anything, print
+       `working tree is not clean` to stderr and exit 1.
+    2. `git rev-parse -q --verify refs/tags/<tag>` - if it succeeds, the tag
+       exists: print `tag <tag> already exists` to stderr and exit 1.
+       (Its output is not wanted; send it to /dev/null.)
+    3. `git tag -a <tag> -m "Release <tag>"`
+    4. `git push origin <tag>` - if it fails, print
+       `push failed: tag <tag> exists locally, remove it with: git tag -d <tag>`
+       to stderr and exit 1.
+  On success print `released <tag>`. Steps after a refusal must not run.
+concepts:
+  - "driving git (status --porcelain, rev-parse --verify, tag -a, push)"
+  - "guard clauses before a state-changing command"
+  - "cleaning up after a half-finished release"
+required_patterns:
+  - pattern: 'git\s+tag\s+-a\b'
+    message: "Create an annotated tag: git tag -a TAG -m MESSAGE."
+  - pattern: 'status\s+--porcelain'
+    message: "Use `git status --porcelain`: empty output means a clean tree."
+test_cases:
+  - name: clean tree, new tag
+    args: [1.5.0]
+    files:
+      .git-tags: "v1.4.0\n"
+    expected_stdout: "released v1.5.0"
+    expected_files:
+      .calls.log: |
+        git status --porcelain
+        git rev-parse -q --verify refs/tags/v1.5.0
+        git tag -a v1.5.0 -m Release v1.5.0
+        git push origin v1.5.0
+      .git-tags: |
+        v1.4.0
+        v1.5.0
+      .git-pushed: "v1.5.0"
+  - name: version already has a v
+    args: [v2.0.0]
+    expected_stdout: "released v2.0.0"
+    expected_files:
+      .git-tags: "v2.0.0"
+  - name: dirty tree stops everything
+    args: [1.5.1]
+    files:
+      .git-dirty: " M deploy/app.sh\n?? notes.txt\n"
+    expected_stderr: "working tree is not clean"
+    expected_exit: 1
+    expected_files:
+      .calls.log: "git status --porcelain"
+      .git-tags: null
+  - name: tag already exists
+    args: [1.4.0]
+    files:
+      .git-tags: "v1.3.0\nv1.4.0\n"
+    expected_stderr: "tag v1.4.0 already exists"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        git status --porcelain
+        git rev-parse -q --verify refs/tags/v1.4.0
+  - name: push fails after tagging
+    args: [1.6.0]
+    env: {FAKE_PUSH_FAIL: "1"}
+    expected_stderr: "push failed: tag v1.6.0 exists locally, remove it with: git tag -d v1.6.0"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      .git-pushed: null
+  - name: not a version
+    args: [1.6]
+    expected_stderr: "invalid version: 1.6"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null

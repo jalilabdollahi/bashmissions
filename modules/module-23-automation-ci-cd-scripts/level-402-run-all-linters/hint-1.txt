@@ -1,0 +1,1 @@
+This is the opposite of the last level: instead of stopping at the first failure, remember every failure and decide only at the end. You need somewhere to put the names of the linters that failed.

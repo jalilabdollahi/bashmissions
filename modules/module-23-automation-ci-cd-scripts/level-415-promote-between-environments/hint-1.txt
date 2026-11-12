@@ -1,0 +1,1 @@
+Put the environments in an ordered list; "the next stage" is then just "the index plus one". Run every check before the deploy, and write down the new state only after the deploy succeeded, so a failure leaves the records telling the truth. For "is this version newer", compare numbers part by part, not as text.

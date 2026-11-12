@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fake groupadd NAME. Fails with status 9 if the group exists, like the real one.
+echo "groupadd $*" >> .calls.log
+if [[ $# -ne 1 || $1 == -* ]]; then
+  echo "groupadd: this stub takes exactly one group name" >&2
+  exit 2
+fi
+if [[ -f .groups ]] && grep -qxF -- "$1" .groups; then
+  echo "groupadd: group '$1' already exists" >&2
+  exit 9
+fi
+echo "$1" >> .groups

@@ -1,0 +1,1 @@
+The switch itself is cheap and reversible, as long as you wrote down what was there before. Read the old link target first, then change the link, then test, and use the remembered value to undo the change if the test fails. Think about the first deploy, when there is nothing to remember.

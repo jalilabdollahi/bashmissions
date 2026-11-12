@@ -1,0 +1,16 @@
+name=${1:-}
+# validate name (^[A-Za-z0-9_-]+$) and that a command follows, else usage + exit 2
+shift
+lock="locks/$name.lock" log="logs/$name.log"
+mkdir -p locks logs
+
+if ! mkdir "$lock" 2>/dev/null; then
+  # append the "skipped" line to $log, exit 0
+fi
+trap 'rmdir "$lock"' EXIT
+# also make INT and TERM end the script normally
+
+# append "[$name] start: $*", then:
+rc=0
+"$@" >> "$log" 2>&1 || rc=$?
+# append the finish line, exit "$rc"

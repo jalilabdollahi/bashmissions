@@ -1,0 +1,1 @@
+An image is built once. Extra names for it are just more tags pointing at the same build, so build, then tag, then push every name. Whether the moving tags are allowed depends only on whether the version has a pre-release suffix, so work that out right after parsing it.

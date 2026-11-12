@@ -1,0 +1,75 @@
+id: 402
+module: 23
+module_name: automation-ci-cd-scripts
+module_display: Build & Deploy
+title: Run All Linters
+difficulty: advanced
+xp: 260
+story: |
+  Ollie pushed a branch, waited eight minutes for the pipeline, and got a red
+  cross: the shell linter failed. He fixed it, pushed again, waited again, and
+  the YAML linter failed. "Why didn't it just tell me about both?" he asks,
+  and nobody has a good answer. Make the lint stage report everything at once.
+objective: |
+  Write solution.sh, called as `solution.sh FILE...`. Run these three linters,
+  in this order, each as `LINTER -q FILE...` with all the files:
+    shellcheck, yamllint, markdownlint
+  A linter failing must NOT stop the others. After each linter print
+    <linter>: ok
+  or
+    <linter>: FAILED (exit CODE)
+  to stdout. When all three have run: if none failed print
+  `all linters passed` and exit 0; otherwise print
+  `lint failed: <failed linters separated by spaces, in run order>` to stderr
+  and exit 1. With no FILE arguments print `usage: solution.sh FILE...` to
+  stderr and exit 2 without running anything.
+concepts:
+  - "collect every failure instead of stopping at the first"
+  - "cmd || rc=$? to survive set -e"
+  - "accumulate results in an array"
+test_cases:
+  - name: everything is clean
+    args: [deploy.sh, app.yaml, README.md]
+    expected_stdout: |-
+      shellcheck: ok
+      yamllint: ok
+      markdownlint: ok
+      all linters passed
+    expected_files:
+      .calls.log: |
+        shellcheck -q deploy.sh app.yaml README.md
+        yamllint -q deploy.sh app.yaml README.md
+        markdownlint -q deploy.sh app.yaml README.md
+  - name: two linters fail, all three still run
+    args: [a.sh, b.yaml]
+    env: {FAKE_RC_SHELLCHECK: "1", FAKE_RC_MARKDOWNLINT: "3"}
+    expected_stdout: |-
+      shellcheck: FAILED (exit 1)
+      yamllint: ok
+      markdownlint: FAILED (exit 3)
+    expected_stderr: "lint failed: shellcheck markdownlint"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        shellcheck -q a.sh b.yaml
+        yamllint -q a.sh b.yaml
+        markdownlint -q a.sh b.yaml
+  - name: only the middle one fails
+    args: ["release notes.md"]
+    env: {FAKE_RC_YAMLLINT: "2"}
+    expected_stdout: |-
+      shellcheck: ok
+      yamllint: FAILED (exit 2)
+      markdownlint: ok
+    expected_stderr: "lint failed: yamllint"
+    expected_exit: 1
+    expected_files:
+      .calls.log: |
+        shellcheck -q release notes.md
+        yamllint -q release notes.md
+        markdownlint -q release notes.md
+  - name: no files
+    expected_stderr: "usage: solution.sh FILE..."
+    expected_exit: 2
+    expected_files:
+      .calls.log: null

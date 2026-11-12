@@ -1,0 +1,1 @@
+Two jobs: give each file a meaningful name, then describe the final set of files in a manifest. Do the renaming first so the manifest lists the new names. Be careful that running the script twice must not rename a file twice, and that an empty dist/ is an error, not a silent success.

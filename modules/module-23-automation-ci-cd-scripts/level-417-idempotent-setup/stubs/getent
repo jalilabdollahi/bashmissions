@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Fake getent: only "getent group NAME". Groups live in .groups, one per line.
+# Like the real tool: prints the entry and exits 0 if found, exits 2 if not.
+echo "getent $*" >> .calls.log
+if [[ ${1:-} != group || $# -ne 2 ]]; then
+  echo "getent: only 'getent group NAME' is implemented" >&2
+  exit 2
+fi
+if [[ -f .groups ]] && grep -qxF -- "$2" .groups; then
+  echo "$2:x:1001:"
+  exit 0
+fi
+exit 2

@@ -1,0 +1,9 @@
+Tests worth knowing, with generic examples:
+
+  [[ -d some/dir ]]            # a directory exists
+  [[ -e path ]]                # anything exists (but a dangling link says no)
+  [[ -L path ]]                # it is a symbolic link
+  grep -qxF -- "text" file     # file has a line that is EXACTLY "text" (-x whole line, -F no regex, -q silent)
+  if some-command >/dev/null; then ...   # branch on a command's exit status
+
+`[[ -s file ]]` means non-empty. `$(tail -c1 file)` is empty when the file ends with a newline, and the last character otherwise. Small helper functions that bump a counter and print keep the five blocks tidy.
