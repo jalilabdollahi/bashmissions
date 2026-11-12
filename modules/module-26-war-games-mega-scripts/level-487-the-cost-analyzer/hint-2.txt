@@ -1,1 +1,13 @@
-Keep the script safe and deterministic inside the mission workspace.
+Graduated tiers: walk the tiers from cheapest cumulative limit upward, remember where the previous tier ended, and charge only the slice that falls in the current tier:
+
+  top = min(qty, upto)            # for the "*" tier top = qty
+  total += (top - prev) * price   # only if top > prev
+  prev = upto                     # stop once qty <= upto
+
+Half-up rounding with integers: (num + den/2) / den, e.g. cents=$(( (tenthousandths + 50) / 100 )).
+
+Decimal prices "0.0125" -> 125: split into whole and fraction (regex capture groups in BASH_REMATCH), pad the fraction to 4 digits, whole*10000 + fraction. Use 10# in arithmetic so 08 is not octal.
+
+Associative array key with two parts:  qty[$cust|$item]  (the | is fine inside the brackets).
+Money:  printf '$%d.%02d' $((c / 100)) $((c % 100)), with the sign handled separately.
+Sorting customers: printf '%s\n' "${customers[@]}" | sort.

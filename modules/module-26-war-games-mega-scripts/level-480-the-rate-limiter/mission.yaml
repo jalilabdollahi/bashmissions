@@ -1,22 +1,193 @@
 id: 480
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Rate Limiter
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Rate Limiter` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Rate Limiter
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 340
+story: |
+  When the storm closed the road to the data centre, every customer dashboard
+  in town started refreshing itself twice a second, and Harbour Bakery's
+  "just checking" script took the status API down for everyone else. Gus does
+  not want to ban anyone. He wants fairness: each client gets a bucket of
+  tokens that refills slowly, a request spends a token, and an empty bucket
+  means "come back in a moment". Priya adds one condition: no wall clock, so
+  she can replay last night's traffic and get the same answers.
+objective: |
+  Write solution.sh, a token-bucket rate limiter that replays requests.
+
+    solution.sh LIMITS STATE < requests
+
+  LIMITS is a text file, one rule per line: `CLIENT CAPACITY SECONDS_PER_TOKEN`
+  (all integers, at least 1). `CLIENT` may be `*`, the default rule for
+  clients without their own. Blank lines and lines starting with `#` are
+  ignored.
+
+  STATE is the saved buckets, one per line: `CLIENT TOKENS LAST`. It may not
+  exist yet (no buckets). It is rewritten at the end, sorted by client name
+  (plain `sort`), and it keeps the buckets of clients that made no request.
+
+  Requests arrive on stdin, one per line: `TS CLIENT [COST]`. TS is the
+  request time in whole seconds (your fake clock), COST defaults to 1.
+  Blank and `#` lines are ignored but still count in line numbers.
+
+  Bucket rules:
+    - A client seen for the first time starts with a full bucket and LAST=TS.
+    - Refill before every request: ELAPSED = TS - LAST. Add ELAPSED /
+      SECONDS_PER_TOKEN whole tokens (integer division) and move LAST forward by
+      exactly (tokens added x SECONDS_PER_TOKEN), so partial progress is not
+      lost. Never exceed CAPACITY; whenever the bucket is full, set LAST to TS.
+    - If TOKENS >= COST: subtract COST and print
+        `TS CLIENT allow tokens=N`   (N = tokens left)
+    - Otherwise print `TS CLIENT deny retry=S`, where S is the number of
+      seconds from TS until the bucket would hold COST tokens (the bucket is
+      left unchanged).
+    - If COST is larger than CAPACITY it can never succeed: print
+      `TS CLIENT reject cost=COST capacity=CAPACITY`.
+
+  After all requests print `summary: allowed=A denied=D` (rejects count as
+  denied).
+
+  Errors (print to stderr, skip that line, keep going, and exit 1 at the end):
+    `line N: no limit for CLIENT`    no rule and no `*` rule
+    `line N: bad request`            wrong field count, TS or COST not a
+                                     non-negative integer (COST must be >= 1)
+    `line N: time goes backwards`    TS smaller than the previous accepted TS
+  N is the physical line number on stdin.
+
+  If LIMITS cannot be read print `cannot read LIMITS` to stderr and exit 2.
+  Wrong number of arguments: `usage: solution.sh LIMITS STATE < requests` to
+  stderr, exit 2. Use associative arrays (`declare -A`) for the buckets.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "token bucket: capacity, refill, spend"
+  - "integer-only refill that keeps the remainder"
+  - "state persisted between runs"
+  - "an injected clock makes traffic replayable"
+required_patterns:
+  - pattern: 'declare\s+-A'
+    message: "Keep the buckets in associative arrays (declare -A)."
+test_cases:
+  - name: burst empties the bucket
+    args: [limits.conf, state.db]
+    files:
+      limits.conf: |
+        # client capacity seconds_per_token
+        bakery 3 10
+        books  5 2
+        *      2 30
+      state.db: |
+        books 1 90
+    stdin: |
+      100 bakery
+      100 bakery
+      100 bakery
+      100 bakery
+    expected_stdout: |-
+      100 bakery allow tokens=2
+      100 bakery allow tokens=1
+      100 bakery allow tokens=0
+      100 bakery deny retry=10
+      summary: allowed=3 denied=1
+    expected_files:
+      state.db: |-
+        bakery 0 100
+        books 1 90
+  - name: refill keeps the remainder
+    args: [limits.conf, state.db]
+    files:
+      limits.conf: |
+        bakery 3 10
+      state.db: |
+        bakery 0 100
+    stdin: |
+      125 bakery
+      126 bakery
+      127 bakery
+      130 bakery
+    expected_stdout: |-
+      125 bakery allow tokens=1
+      126 bakery allow tokens=0
+      127 bakery deny retry=3
+      130 bakery allow tokens=0
+      summary: allowed=3 denied=1
+    expected_files:
+      state.db: "bakery 0 130"
+  - name: a long pause never overfills
+    args: [limits.conf, state.db]
+    files:
+      limits.conf: |
+        books 5 2
+      state.db: |
+        books 4 100
+    stdin: |
+      1000 books 3
+      1001 books 3
+    expected_stdout: |-
+      1000 books allow tokens=2
+      1001 books deny retry=1
+      summary: allowed=1 denied=1
+    expected_files:
+      state.db: "books 2 1000"
+  - name: default rule, cost and impossible requests
+    args: [limits.conf, state.db]
+    files:
+      limits.conf: |
+        bakery 3 10
+        *      2 30
+    stdin: |
+      50 dory 2
+      51 dory
+
+      52 dory 3
+    expected_stdout: |-
+      50 dory allow tokens=0
+      51 dory deny retry=29
+      52 dory reject cost=3 capacity=2
+      summary: allowed=1 denied=2
+    expected_files:
+      state.db: "dory 0 50"
+  - name: unknown client without a default rule
+    args: [limits.conf, state.db]
+    files:
+      limits.conf: |
+        bakery 3 10
+    stdin: |
+      100 ghost
+      101 bakery
+    expected_stdout: |-
+      101 bakery allow tokens=2
+      summary: allowed=1 denied=0
+    expected_stderr: "line 1: no limit for ghost"
+    expected_exit: 1
+    expected_files:
+      state.db: "bakery 2 101"
+  - name: damaged requests are skipped
+    args: [limits.conf, state.db]
+    files:
+      limits.conf: |
+        bakery 3 10
+    stdin: |
+      200 bakery
+      150 bakery
+      abc bakery
+      201 bakery 0
+      202 bakery 1 extra
+      203 bakery
+    expected_stdout: |-
+      200 bakery allow tokens=2
+      203 bakery allow tokens=1
+      summary: allowed=2 denied=0
+    expected_stderr: |-
+      line 2: time goes backwards
+      line 3: bad request
+      line 4: bad request
+      line 5: bad request
+    expected_exit: 1
+  - name: limits file missing
+    args: [nope.conf, state.db]
+    expected_stderr: "cannot read nope.conf"
+    expected_exit: 2
+  - name: wrong argument count
+    args: [limits.conf]
+    expected_stderr: "usage: solution.sh LIMITS STATE < requests"
+    expected_exit: 2

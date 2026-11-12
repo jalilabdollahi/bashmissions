@@ -1,1 +1,10 @@
-Keep the script safe and deterministic inside the mission workspace.
+Use the exit status of mkdir itself as the decision, and keep stderr quiet so the player sees only your messages:
+
+  if mkdir "$lock" 2>/dev/null; then   # we won
+  ...
+  elif [[ -d $lock ]]; then            # somebody else is there
+  else                                 # failed for another reason
+
+Arithmetic comparison of the deadline works only on digits, so check it first:  [[ $expires =~ ^[0-9]+$ ]]  and then  (( expires > now )).
+Reading a one-line file without a subprocess: holder=$(< "$lock/owner").
+A half-written lock (directory exists, files do not yet) must count as busy, not stale.

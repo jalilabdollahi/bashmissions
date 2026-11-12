@@ -1,1 +1,22 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  die() { echo "$*" >&2; exit 1; }
+
+  live_slot() {                       # sets live and idle, or dies
+    [[ -L $root/current ]] || die "current is not a valid release link"
+    out=$(ls -ld "$root/current"); target=${out##* -> }
+    case $target in releases/blue) live=blue;; releases/green) live=green;; *) die "current is not a valid release link";; esac
+    [[ -d $root/releases/$live ]] || die "..."
+    idle=...the other one
+  }
+
+  version() { local v=; [[ -r $root/releases/$1/VERSION ]] && v=$(< "$root/releases/$1/VERSION"); printf '%s' "${v:-none}"; }
+
+  point_current() {
+    ln -sfn "releases/$1" "$tmplink"
+    mv -fT "$tmplink" "$root/current" 2>/dev/null || mv -fh "$tmplink" "$root/current"
+  }
+
+  switch: new=$(version "$idle"); checks; smoke-test "$root/releases/$idle" >/dev/null || die ...;
+          point_current "$idle"; echo "$live" > previous (via temp + mv); log; echo "switched: ..."
+  rollback: back=$(< previous) ...; reject empty / same as live; point_current "$back"; ...

@@ -1,0 +1,5 @@
+# traffic share for the new release, in percent
+5
+10
+50
+100

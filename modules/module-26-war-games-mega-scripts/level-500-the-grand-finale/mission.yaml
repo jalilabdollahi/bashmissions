@@ -1,22 +1,302 @@
 id: 500
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Grand Finale
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Grand Finale` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Grand Finale
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 500
+story: |
+  The last storm of the season is over. The shop is up, the backups are
+  fresh, the fleet is quiet, and Mara has been unusually silent for ten
+  minutes, which for Mara means she is about to say something nice. She slides
+  her pager across the desk. "Before you take it, one tool. Everything you
+  built this season, behind one command, so the person on call needs
+  nothing else: `lantern health`, `lantern backups`, `lantern report`. And
+  `lantern handover`, which only works when everything is green, because you
+  never hand someone a pager on a bad night." You pick up your keyboard. This
+  is the last mission.
+objective: |
+  Write solution.sh, the `lantern` operations CLI. Work in the current
+  directory; all dates are written YYYYMMDD and passed in as TODAY (a valid
+  calendar date, leap years included) so that nothing depends on the clock.
+
+    solution.sh version
+    solution.sh health [SERVICES]
+    solution.sh backups TODAY [DIR]
+    solution.sh report TODAY
+    solution.sh handover TODAY PERSON
+
+  version: print `lantern 1.0.0`.
+
+  health: SERVICES defaults to `services.conf`: lines `NAME URL` (`#` and blank
+  lines ignored). For each service run
+    curl -s -o /dev/null -w '%{http_code}' URL
+  (it prints a three-digit code; a failed connection gives `000`, and curl may
+  also exit non-zero, which must not stop you). Print for each
+    printf '%-8s %s %s\n' NAME CODE LABEL
+  where LABEL is `ok` for 2xx, `WARN` for 3xx and 4xx, `DOWN` for everything
+  else (5xx, 000). Then `health: A ok, B warn, C down`. Exit 1 if C > 0, else 0.
+  An unreadable SERVICES file prints `cannot read SERVICES` to stderr, exit 2.
+
+  backups: DIR defaults to `backups`. It holds `NAME-YYYYMMDD.bak` files, each
+  with a companion `NAME-YYYYMMDD.bak.sum` holding the two numbers that
+  `cksum < FILE` printed when the backup was made (`SUM SIZE`). Files that do
+  not match the name pattern, or whose date is not a real date, are ignored.
+  Only the NEWEST backup of each NAME is examined. MAX_AGE (environment, whole
+  days, default 7) is the oldest acceptable age. AGE is the number of days from
+  the backup's date to TODAY. For each NAME in alphabetical order print
+    printf '%-10s %s age %dd %s\n' NAME YYYY-MM-DD AGE STATUS
+  STATUS is the first that applies: `CORRUPT` (a sum file exists but differs
+  from the current `cksum < FILE` output), `NOSUM` (no sum file), `STALE`
+  (AGE greater than MAX_AGE), else `ok`. Finally
+  `backups: N ok, M problems`. Exit 1 if there is any problem. If DIR holds no
+  valid backup print `no backups found in DIR` to stderr and exit 1.
+  Date arithmetic: compute day numbers yourself (days_from_civil: shift
+  January and February to the end of the previous year, then
+  `era*146097 + yoe*365 + yoe/4 - yoe/100 + doy`), because `date -d` does not
+  exist everywhere.
+
+  report: print
+    `LANTERN STATUS YYYY-MM-DD`, `-- services --`, the lines of `health`
+    (no summary line), `-- backups --`, the lines of `backups` (no summary
+    line), `-- verdict --`, and the verdict word.
+  The verdict is RED if any service is DOWN, any newest backup is CORRUPT or
+  STALE, or there are no backups; otherwise AMBER if any service is WARN or any
+  backup is NOSUM; otherwise GREEN. Exit status 0 for GREEN, 1 for AMBER, 3 for
+  RED. In the report an unreadable `services.conf` is a RED verdict with the
+  line `cannot read services.conf` in the services section, and a missing
+  backups folder is RED with `no backups found in backups`.
+
+  handover: PERSON matches `[a-z]+`. `oncall.txt` holds `PERSON since YYYYMMDD`
+  (missing means nobody). Run the report silently first: if the verdict is not
+  GREEN print `refusing handover: status is VERDICT` to stderr and exit 3,
+  changing nothing. If PERSON already has the pager print `PERSON is already on
+  call` to stderr and exit 1. Otherwise write `PERSON since TODAY` to
+  oncall.txt, append `TODAY OLD -> PERSON` to handover.log (OLD is `nobody` when
+  there was none), and print two lines:
+    pager handed over: OLD -> PERSON
+    Good luck, PERSON. The lantern is yours.
+
+  A bad TODAY (not YYYYMMDD or not a real date) or a bad PERSON, an unknown
+  subcommand, or the wrong number of arguments: print
+  `usage: solution.sh version | health [SERVICES] | backups TODAY [DIR] | report TODAY | handover TODAY PERSON`
+  to stderr and exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "one CLI, many subcommands, shared functions"
+  - "calendar arithmetic with integers (days from civil)"
+  - "checksums to verify backups; status codes to classify health"
+  - "a verdict that gates a risky action"
+required_patterns:
+  - pattern: '\bcksum\b'
+    message: "Verify backups by comparing cksum with the stored sum file."
+  - pattern: 'curl'
+    message: "Probe the services with curl."
+forbidden_patterns:
+  - pattern: 'date\s+-[dj]'
+    message: "date -d / -j are not portable. Do the day arithmetic yourself."
+test_cases:
+  - name: version
+    args: [version]
+    expected_stdout: "lantern 1.0.0"
+  - name: health with every outcome
+    args: [health]
+    files:
+      services.conf: |
+        # NAME URL
+        shop http://shop.lanternfish.example/health
+        mail http://mail.lanternfish.example:8025/health
+        dns  http://dns.lanternfish.example/health
+        blog http://blog.lanternfish.example/health
+      net.txt: |
+        shop.lanternfish.example 200
+        mail.lanternfish.example 301
+        dns.lanternfish.example 503
+    expected_stdout: |-
+      shop     200 ok
+      mail     301 WARN
+      dns      503 DOWN
+      blog     000 DOWN
+      health: 1 ok, 1 warn, 2 down
+    expected_exit: 1
+  - name: health with a different services file
+    args: [health, svc.txt]
+    files:
+      svc.txt: "api http://api.lanternfish.example/ping\n"
+      net.txt: "api.lanternfish.example 404\n"
+    expected_stdout: |-
+      api      404 WARN
+      health: 0 ok, 1 warn, 0 down
+  - name: backups, newest per name, with a boundary age
+    args: [backups, "20261112"]
+    files: &bk
+      backups/shop-20261110.bak: "dump of shop db v2\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+      backups/shop-20261109.bak: "dump of shop db v1\n"
+      backups/shop-20261109.bak.sum: "3763558855 19\n"
+      backups/mail-20261105.bak: "mail spool archive\n"
+      backups/mail-20261105.bak.sum: "1578067438 19\n"
+      backups/dns-20261101.bak: "dns zones export\n"
+      backups/dns-20261101.bak.sum: "1215287677 17\n"
+      backups/notes.txt: "ignored\n"
+      backups/odd-20261399.bak: "not a date\n"
+    expected_stdout: |-
+      dns        2026-11-01 age 11d STALE
+      mail       2026-11-05 age 7d ok
+      shop       2026-11-10 age 2d ok
+      backups: 2 ok, 1 problems
+    expected_exit: 1
+  - name: corrupt and unsummed backups, MAX_AGE from the environment
+    args: [backups, "20261112"]
+    env:
+      MAX_AGE: "30"
+    files:
+      backups/shop-20261110.bak: "dump of shop db v2 (truncated\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+      backups/mail-20261105.bak: "mail spool archive\n"
+      backups/dns-20261101.bak: "dns zones export\n"
+      backups/dns-20261101.bak.sum: "1215287677 17\n"
+    expected_stdout: |-
+      dns        2026-11-01 age 11d ok
+      mail       2026-11-05 age 7d NOSUM
+      shop       2026-11-10 age 2d CORRUPT
+      backups: 1 ok, 2 problems
+    expected_exit: 1
+  - name: leap years and new years are counted correctly
+    args: [backups, "20240301", archive]
+    env:
+      MAX_AGE: "90"
+    files:
+      archive/leap-20240228.bak: "mail spool archive\n"
+      archive/leap-20240228.bak.sum: "1578067438 19\n"
+      archive/newyear-20231231.bak: "mail spool archive\n"
+      archive/newyear-20231231.bak.sum: "1578067438 19\n"
+      archive/century-19000301.bak: "mail spool archive\n"
+      archive/century-19000301.bak.sum: "1578067438 19\n"
+    expected_stdout: |-
+      century    1900-03-01 age 45291d STALE
+      leap       2024-02-28 age 2d ok
+      newyear    2023-12-31 age 61d ok
+      backups: 2 ok, 1 problems
+    expected_exit: 1
+  - name: no backups at all
+    args: [backups, "20261112", empty]
+    files:
+      "empty/": ""
+    expected_stderr: "no backups found in empty"
+    expected_exit: 1
+  - name: a green report
+    args: [report, "20261112"]
+    files: &green
+      services.conf: |
+        shop http://shop.lanternfish.example/health
+        mail http://mail.lanternfish.example/health
+      net.txt: |
+        shop.lanternfish.example 200
+        mail.lanternfish.example 204
+      backups/shop-20261110.bak: "dump of shop db v2\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+      backups/mail-20261105.bak: "mail spool archive\n"
+      backups/mail-20261105.bak.sum: "1578067438 19\n"
+    expected_stdout: |-
+      LANTERN STATUS 2026-11-12
+      -- services --
+      shop     200 ok
+      mail     204 ok
+      -- backups --
+      mail       2026-11-05 age 7d ok
+      shop       2026-11-10 age 2d ok
+      -- verdict --
+      GREEN
+  - name: an amber report
+    args: [report, "20261112"]
+    files:
+      services.conf: |
+        shop http://shop.lanternfish.example/health
+      net.txt: "shop.lanternfish.example 302\n"
+      backups/shop-20261110.bak: "dump of shop db v2\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+    expected_stdout: |-
+      LANTERN STATUS 2026-11-12
+      -- services --
+      shop     302 WARN
+      -- backups --
+      shop       2026-11-10 age 2d ok
+      -- verdict --
+      AMBER
+    expected_exit: 1
+  - name: a red report
+    args: [report, "20261112"]
+    files:
+      services.conf: |
+        shop http://shop.lanternfish.example/health
+      net.txt: "shop.lanternfish.example 500\n"
+    expected_stdout: |-
+      LANTERN STATUS 2026-11-12
+      -- services --
+      shop     500 DOWN
+      -- backups --
+      no backups found in backups
+      -- verdict --
+      RED
+    expected_exit: 3
+  - name: handover when everything is green
+    args: [handover, "20261112", player]
+    files:
+      services.conf: |
+        shop http://shop.lanternfish.example/health
+        mail http://mail.lanternfish.example/health
+      net.txt: |
+        shop.lanternfish.example 200
+        mail.lanternfish.example 204
+      backups/shop-20261110.bak: "dump of shop db v2\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+      oncall.txt: "mara since 20260101\n"
+      handover.log: "20260101 nobody -> mara\n"
+    expected_stdout: |-
+      pager handed over: mara -> player
+      Good luck, player. The lantern is yours.
+    expected_files:
+      oncall.txt: "player since 20261112"
+      handover.log: |-
+        20260101 nobody -> mara
+        20261112 mara -> player
+  - name: the first ever handover starts from nobody
+    args: [handover, "20261112", mara]
+    files: *green
+    expected_stdout: |-
+      pager handed over: nobody -> mara
+      Good luck, mara. The lantern is yours.
+    expected_files:
+      oncall.txt: "mara since 20261112"
+      handover.log: "20261112 nobody -> mara"
+  - name: no handover on a bad night
+    args: [handover, "20261112", player]
+    files:
+      services.conf: "shop http://shop.lanternfish.example/health\n"
+      net.txt: "shop.lanternfish.example 503\n"
+      backups/shop-20261110.bak: "dump of shop db v2\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+      oncall.txt: "mara since 20260101\n"
+    expected_stderr: "refusing handover: status is RED"
+    expected_exit: 3
+    expected_files:
+      oncall.txt: "mara since 20260101"
+      handover.log: null
+  - name: the pager holder cannot hand it to themselves
+    args: [handover, "20261112", mara]
+    files:
+      services.conf: "shop http://shop.lanternfish.example/health\n"
+      net.txt: "shop.lanternfish.example 200\n"
+      backups/shop-20261110.bak: "dump of shop db v2\n"
+      backups/shop-20261110.bak.sum: "3795496014 19\n"
+      oncall.txt: "mara since 20260101\n"
+    expected_stderr: "mara is already on call"
+    expected_exit: 1
+  - name: not a real date
+    args: [report, "20260230"]
+    expected_stderr: "usage: solution.sh version | health [SERVICES] | backups TODAY [DIR] | report TODAY | handover TODAY PERSON"
+    expected_exit: 2
+  - name: a bad name for the new on-call person
+    args: [handover, "20261112", "Player One"]
+    expected_stderr: "usage: solution.sh version | health [SERVICES] | backups TODAY [DIR] | report TODAY | handover TODAY PERSON"
+    expected_exit: 2

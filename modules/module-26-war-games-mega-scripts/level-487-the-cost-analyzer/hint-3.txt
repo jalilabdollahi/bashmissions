@@ -1,1 +1,18 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  round_div() { echo $(( ($1 + $2 / 2) / $2 )); }
+  money() { local c=$1 s=; (( c < 0 )) && { s=-; c=$((-c)); }; printf '%s$%d.%02d' "$s" $((c/100)) $((c%100)); }
+
+  items=(); declare -A unit tiers disc qty
+  # PRICES: read -r item u rest; for t in $rest: [[ $t =~ ^([0-9]+|\*):([0-9]+)(\.([0-9]{1,4}))?$ ]]
+  #   price=$(( 10#${BASH_REMATCH[2]} * 10000 + 10#$frac ));  upto must increase, "*" must be last
+  #   tiers[$item]+="$upto:$price "      bad -> "bad price line N", exit 2
+
+  line_cost() {   # ITEM QTY -> tenthousandths
+    prev=0 total=0
+    for t in ${tiers[$1]}; do ...top=min(qty, upto) or qty for *; total+=(top-prev)*price...; done
+  }
+
+  # USAGE: IFS=, read -r cust item q extra <<< "$line"; skip the header; validate; qty[$cust|$item]+=q
+  # per customer: items in price order -> round_div(line_cost, 100); subtotal; discount; minimum; tax; total
+  # printf '%-10s %6d %-5s %10s\n' ... and printf '%-23s %10s\n' ...

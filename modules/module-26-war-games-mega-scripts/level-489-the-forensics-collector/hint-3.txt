@@ -1,1 +1,22 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  collect() {
+    case_dir=$1 analyst=$2 now=$3; shift 3
+    good=(); for src in "$@"; do if [[ -f $src && ! -L $src ]]; then good+=("$src"); else echo "skipped $src: not a regular file" >&2; fi; done
+    (( ${#good[@]} )) || { echo "nothing to collect" >&2; exit 1; }
+    mkdir "$case_dir"; mkdir "$case_dir/evidence"; : > "$case_dir/manifest.txt"
+    for src in "${good[@]}"; do
+      n=$((n+1)); printf -v name '%03d-%s' "$n" "${src##*/}"
+      cp -p "$src" ...; compare cksum of source and copy (exit 3 on mismatch); chmod 0444 ...
+      printf '%s %s %s %s\n' "$name" "$sum" "$size" "$src" >> manifest.txt
+    done
+    seal=$(cksum < manifest.txt) -> first field into manifest.seal; custody line; final message
+  }
+
+  verify() {
+    checks: dir, manifest; seal compare -> "seal OK" / "SEAL MISMATCH"
+    while read -r name sum size orig; do MISSING / MODIFIED / WRITABLE / OK done < manifest.txt
+    EXTRA loop; summary; custody line OK or FAILED; exit 1 on problems
+  }
+
+  main: case "$1" in collect) ... refuse an existing CASE before calling collect ;; verify) ... ;; *) usage ;; esac

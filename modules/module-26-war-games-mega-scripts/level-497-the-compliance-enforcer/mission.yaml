@@ -1,22 +1,278 @@
 id: 497
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Compliance Enforcer
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Compliance Enforcer` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Compliance Enforcer
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 480
+story: |
+  The auditors arrive Monday. Priya's compliance spreadsheet says "mostly
+  green", which in her experience means "mostly unchecked". She wants the
+  policy as a file of rules that a machine can read, a mode that only reports,
+  a mode that fixes what it can and proves the fix, and a way for a human to
+  say "this one is waived until the migration is done" without the waiver
+  living forever. And whatever it changes, it must keep a backup of the
+  original, because the auditors will ask what it looked like before.
+objective: |
+  Write solution.sh, a policy checker and enforcer.
+
+    solution.sh [--dry-run] check   ROOT RULES NOW [WAIVERS]
+    solution.sh [--dry-run] enforce ROOT RULES NOW [WAIVERS]
+
+  `--dry-run` is only allowed with `enforce`. ROOT is the directory the rules
+  apply to; every PATH in a rule is relative to it. NOW is epoch seconds (a
+  non-negative integer).
+
+  RULES: one rule per line, `ID SEVERITY TYPE PATH [ARGUMENTS...]`. Blank lines
+  and `#` comments are ignored. ID is unique. SEVERITY is `high`, `medium` or
+  `low`. PATH must not start with `/` or contain `..` (else
+  `rules line N: path escapes ROOT`). Types and their arguments (the arguments
+  are the rest of the line, internal spaces included):
+    mode PATH MODE         the rwx permission bits of PATH must be MODE (3 or 4
+                           octal digits; only the last three digits are
+                           compared, so 0600 equals 600). Read the current mode
+                           from `ls -ld`.
+    line PATH TEXT         PATH must contain a line exactly equal to TEXT.
+    noline PATH REGEX      no line of PATH may match the extended regex REGEX
+                           (a missing file passes).
+    setting PATH KEY VALUE a line `KEY VALUE` (whitespace separated, KEY compared
+                           case-insensitively, lines starting with # ignored)
+                           must exist; the first such line decides and its
+                           value (the rest of the line, trimmed) must equal
+                           VALUE exactly.
+    absent PATH            PATH must not exist.
+  Any other problem prints `rules line N: MESSAGE` on stderr, exit 2:
+  `unknown type 'X'`, `bad severity 'X'`, `duplicate id 'X'`, `wrong arguments`
+  (a rule needs its arguments: mode 1, line 1+ words, noline 1+, setting 2+,
+  absent none), `bad mode 'X'`. All such lines are listed before exiting.
+
+  Evaluation of one rule, with MSG describing a failure:
+    mode:    PATH missing -> `PATH does not exist`; else `PATH has mode MMMM,
+             wants WWWW` (4-digit octal, e.g. 0644 and 0600)
+    line:    PATH missing or without the line -> `PATH is missing the required line`
+    noline:  `PATH has N forbidden line(s)`
+    setting: no such key -> `KEY is not set`; else `KEY is 'ACTUAL', wants 'VALUE'`
+    absent:  `PATH exists`
+
+  WAIVERS (optional): lines `ID until=EPOCH [REASON...]`, `#` and blank lines
+  ignored; a bad line prints `waivers line N: bad waiver` and exits 2. A rule
+  with a waiver whose EPOCH is >= NOW is waived: print
+  `WAIVED ID (SEV) until EPOCH: REASON` (REASON defaults to `no reason`) and do
+  nothing else for that rule. A waiver with EPOCH < NOW has expired: print
+  `waiver for ID expired` to stderr and treat the rule normally.
+
+  check prints per rule, in file order:
+    `PASS ID`   or   `FAIL ID (SEV): MSG`
+  enforce handles a failing rule like this:
+    1. Can it be fixed? Not when the target of a `mode` rule is missing, when
+       an `absent` target is a directory, or when the parent folder of a
+       `line`/`setting` target does not exist. Then print
+       `CANNOT FIX ID (SEV): MSG`.
+    2. With --dry-run print `WOULD FIX ID (SEV): FIXTEXT` and change nothing.
+    3. Otherwise, before the first change to an existing file in this run, copy
+       it with `cp -p` to ROOT/.compliance-backup/PATH (create the folders,
+       never overwrite an existing backup), then apply the fix:
+         mode    `chmod MMMM PATH` with the wanted mode as 4 digits
+         line    append TEXT as a line (add a missing final newline first;
+                 create the file if needed)
+         noline  keep only non-matching lines (note: `mktemp` files are 0600,
+                 write the result back over the original so its mode survives)
+         setting replace the first `KEY` line by `KEY VALUE`, or append
+                 `KEY VALUE` if there was none
+         absent  remove the file
+       and evaluate the rule again. If it passes print `FIXED ID (SEV): FIXTEXT`
+       where FIXTEXT is `chmod MMMM PATH`, `appended line to PATH`,
+       `removed N line(s) from PATH`, `set KEY=VALUE in PATH` (literally
+       `set KEY=VALUE in PATH`) or `removed PATH`; if not print
+       `STILL FAILING ID (SEV): MSG`.
+  The last line is `summary: pass=P fixed=F waived=W failed=X`. P counts PASS,
+  F counts FIXED (or WOULD FIX in a dry run), W counts waived, X counts FAIL in
+  check and CANNOT FIX / STILL FAILING in enforce. The exit status is 1 when
+  X is above 0, or, in a dry run or in `check`, when any rule failed; otherwise 0.
+
+  Wrong arguments: `usage: solution.sh [--dry-run] check|enforce ROOT RULES NOW [WAIVERS]`
+  on stderr, exit 2. Unreadable files: `cannot read FILE`, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "policy as data: rules, severities, waivers with an expiry"
+  - "check, enforce and dry-run on the same rule engine"
+  - "reading permissions with ls -ld and comparing octal modes"
+  - "back up before changing, verify after changing"
+required_patterns:
+  - pattern: '\bchmod\b'
+    message: "Fix permission rules with chmod."
+  - pattern: 'ls\s+-ld?'
+    message: "Read the current mode with ls -ld (there is no stat in the portable toolbox)."
+  - pattern: 'cp\s+-p'
+    message: "Back up originals with cp -p before changing them."
+test_cases:
+  - name: check reports every rule
+    args: [check, srv, fixtures/policy.rules, "1700000000"]
+    files:
+      srv/etc/shadow:
+        content: "root:x\n"
+        mode: "0644"
+      srv/etc/ssh/sshd_config: |
+        # sshd
+        Port 22
+        PermitRootLogin yes
+      srv/etc/passwd: |
+        root:x:0:0
+        guest:x:1000:1000
+        theo:x:1001:1001
+        guest2:x:1002
+      srv/etc/motd: "Welcome\n"
+      srv/www/.env.backup: "SECRET=1\n"
+    expected_stdout: |-
+      FAIL R001 (high): etc/shadow has mode 0644, wants 0600
+      FAIL R002 (high): PermitRootLogin is 'yes', wants 'no'
+      FAIL R003 (medium): etc/passwd has 1 forbidden line(s)
+      FAIL R004 (low): etc/motd is missing the required line
+      FAIL R005 (high): www/.env.backup exists
+      summary: pass=0 fixed=0 waived=0 failed=5
+    expected_exit: 1
+  - name: a fully compliant tree
+    args: [check, srv, fixtures/policy.rules, "1700000000"]
+    files:
+      srv/etc/shadow:
+        content: "root:x\n"
+        mode: "0600"
+      srv/etc/ssh/sshd_config: |
+        PERMITROOTLOGIN no
+      srv/etc/passwd: "root:x:0:0\n"
+      srv/etc/motd: |
+        Authorized use only
+    expected_stdout: |-
+      PASS R001
+      PASS R002
+      PASS R003
+      PASS R004
+      PASS R005
+      summary: pass=5 fixed=0 waived=0 failed=0
+  - name: enforce fixes, backs up and verifies
+    args: [enforce, srv, fixtures/policy.rules, "1700000000"]
+    files: &dirty
+      srv/etc/shadow:
+        content: "root:x\n"
+        mode: "0644"
+      srv/etc/ssh/sshd_config: |
+        # sshd
+        Port 22
+        PermitRootLogin yes
+        UseDNS no
+      srv/etc/passwd:
+        content: |
+          root:x:0:0
+          guest:x:1000:1000
+          theo:x:1001:1001
+        mode: "0644"
+      srv/etc/motd: "Welcome"
+      srv/www/.env.backup: "SECRET=1\n"
+    expected_stdout: |-
+      FIXED R001 (high): chmod 0600 etc/shadow
+      FIXED R002 (high): set PermitRootLogin=no in etc/ssh/sshd_config
+      FIXED R003 (medium): removed 1 line(s) from etc/passwd
+      FIXED R004 (low): appended line to etc/motd
+      FIXED R005 (high): removed www/.env.backup
+      summary: pass=0 fixed=5 waived=0 failed=0
+    expected_files:
+      srv/etc/ssh/sshd_config: |-
+        # sshd
+        Port 22
+        PermitRootLogin no
+        UseDNS no
+      srv/etc/passwd: |-
+        root:x:0:0
+        theo:x:1001:1001
+      srv/etc/motd: |-
+        Welcome
+        Authorized use only
+      srv/www/.env.backup: null
+      srv/.compliance-backup/etc/ssh/sshd_config: |-
+        # sshd
+        Port 22
+        PermitRootLogin yes
+        UseDNS no
+      srv/.compliance-backup/etc/passwd: |-
+        root:x:0:0
+        guest:x:1000:1000
+        theo:x:1001:1001
+      srv/.compliance-backup/etc/shadow: "root:x"
+      srv/.compliance-backup/etc/motd: "Welcome"
+  - name: dry run changes nothing
+    args: [--dry-run, enforce, srv, fixtures/policy.rules, "1700000000"]
+    files: *dirty
+    expected_stdout: |-
+      WOULD FIX R001 (high): chmod 0600 etc/shadow
+      WOULD FIX R002 (high): set PermitRootLogin=no in etc/ssh/sshd_config
+      WOULD FIX R003 (medium): removed 1 line(s) from etc/passwd
+      WOULD FIX R004 (low): appended line to etc/motd
+      WOULD FIX R005 (high): removed www/.env.backup
+      summary: pass=0 fixed=5 waived=0 failed=0
+    expected_exit: 1
+    expected_files:
+      srv/etc/motd: "Welcome"
+      srv/www/.env.backup: "SECRET=1"
+      srv/.compliance-backup: null
+  - name: a waiver silences a rule until it expires
+    args: [check, srv, fixtures/policy.rules, "1700000500", fixtures/waivers.txt]
+    files:
+      srv/etc/shadow:
+        content: "root:x\n"
+        mode: "0600"
+      srv/etc/ssh/sshd_config: "PermitRootLogin yes\n"
+      srv/etc/passwd: "guest:x:1\n"
+      srv/etc/motd: "hello\n"
+    expected_stdout: |-
+      PASS R001
+      WAIVED R002 (high) until 1700001000: migration freeze
+      FAIL R003 (medium): etc/passwd has 1 forbidden line(s)
+      WAIVED R004 (low) until 1700000500: no reason
+      PASS R005
+      summary: pass=2 fixed=0 waived=2 failed=1
+    expected_stderr: "waiver for R003 expired"
+    expected_exit: 1
+  - name: things that cannot be fixed are reported
+    args: [enforce, srv, rules.txt, "1700000000"]
+    files:
+      rules.txt: |
+        A1 high mode etc/missing 0600
+        A2 low line nodir/motd Hello there
+        A3 medium absent var/cache
+        A4 low setting etc/app.conf Mode strict
+      srv/var/cache/keep: "x\n"
+      srv/etc/app.conf: "# nothing\n"
+    expected_stdout: |-
+      CANNOT FIX A1 (high): etc/missing does not exist
+      CANNOT FIX A2 (low): nodir/motd is missing the required line
+      CANNOT FIX A3 (medium): var/cache exists
+      FIXED A4 (low): set Mode=strict in etc/app.conf
+      summary: pass=0 fixed=1 waived=0 failed=3
+    expected_exit: 1
+    expected_files:
+      srv/etc/app.conf: |-
+        # nothing
+        Mode strict
+  - name: a bad rules file lists every problem
+    args: [check, srv, rules.txt, "1700000000"]
+    files:
+      "srv/": ""
+      rules.txt: |
+        B1 high mode etc/shadow 0600
+        B2 urgent mode etc/shadow 0600
+        B1 high mode etc/shadow 0600
+        B3 high sudo etc/shadow
+        B4 high mode etc/shadow 9999
+        B5 low mode ../etc/shadow 0600
+        B6 low setting etc/x Key
+    expected_stderr: |-
+      rules line 2: bad severity 'urgent'
+      rules line 3: duplicate id 'B1'
+      rules line 4: unknown type 'sudo'
+      rules line 5: bad mode '9999'
+      rules line 6: path escapes ROOT
+      rules line 7: wrong arguments
+    expected_exit: 2
+  - name: dry-run needs enforce
+    args: [--dry-run, check, srv, fixtures/policy.rules, "1700000000"]
+    expected_stderr: "usage: solution.sh [--dry-run] check|enforce ROOT RULES NOW [WAIVERS]"
+    expected_exit: 2

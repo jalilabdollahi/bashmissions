@@ -1,1 +1,21 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A final to roles req events isstate; initial=; dups=(); order=()
+  while read each line; do skip blanks/#; read -ra w <<< "$line"
+    case ${w[0]} in
+      initial) ...  final) ...comma list...
+      *) need >= 3 names; options role=... / require=...; bad -> "$machine:$n: bad line"
+         key=$from|$ev; if to[$key] exists: dups+=("$from $ev") else store, events[$from]+="$ev ", order+=("$key")
+    esac
+  done < "$machine";   any bad line -> exit 2;  no initial -> exit 2
+
+  validate: BFS from $initial; print duplicates, unreachable (sorted), dead ends (sorted),
+            final-with-exits (sorted), then "N problems found"; or "OK: ${#isstate[@]} states, ${#order[@]} transitions"
+
+  ticket: state=$initial; read "state=", "history=", other "key=value" lines; unknown state -> exit 2
+  show:   the four kinds of lines
+  fire:   key=$state'|'$ev
+          [[ -n ${to[$key]:-} ]]      else illegal (list the allowed events), exit 1
+          role in ${roles[$key]}      else denied, exit 3
+          apply FIELD=VALUE args, then require= must be non-empty   else blocked, exit 4
+          write state, fields (sorted), history lines to a temp file; mv -f; print "FROM -> TO (EVENT by ROLE)"

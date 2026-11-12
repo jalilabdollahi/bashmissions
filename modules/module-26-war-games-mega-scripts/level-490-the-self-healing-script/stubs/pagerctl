@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Pretend pager: `pagerctl notify SERVICE MESSAGE`. Recorded in .calls.log.
+if [[ ${1:-} != notify || $# -ne 3 ]]; then
+  echo "pagerctl: usage: pagerctl notify SERVICE MESSAGE" >&2
+  exit 2
+fi
+echo "page $2: $3" >> .calls.log

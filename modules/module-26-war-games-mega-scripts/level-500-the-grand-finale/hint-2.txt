@@ -1,1 +1,15 @@
-Keep the script safe and deterministic inside the mission workspace.
+Status code from curl, without letting a failed connection stop the script:
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$url" 2>/dev/null) || true
+  [[ $code =~ ^[0-9]{3}$ ]] || code=000
+Classify with a case pattern:  case $code in 2??) ... ;; 3??|4??) ... ;; *) ... ;; esac
+
+Substrings of a date:  y=${s:0:4} m=${s:4:2} d=${s:6:2}   (use 10#$m so 08 is not octal)
+Days since 1970 from year/month/day ("days from civil"):
+  (( m <= 2 )) && y=$((y - 1))
+  era=$(( (y >= 0 ? y : y - 399) / 400 ));  yoe=$((y - era * 400))
+  mp=$(( m > 2 ? m - 3 : m + 9 ));  doy=$(( (153 * mp + 2) / 5 + d - 1 ))
+  doe=$(( yoe * 365 + yoe / 4 - yoe / 100 + doy ));  days=$(( era * 146097 + doe - 719468 ))
+Age = days(today) - days(backup).
+
+Newest backup per name: loop over the files, match  ^(.+)-([0-9]{8})\.bak$  and keep the larger date in an associative array (8-digit strings compare correctly with [[ a > b ]]).
+Compare checksums:  read -r a b < "$f.sum";  [[ "$a $b" == "$(cksum < "$f")" ]]

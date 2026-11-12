@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Separate the policy from the loop. The policy is a small function: given the strategy, the base delay, the cap and the number of the attempt that just failed, it returns how many seconds to wait. Test it first through the `plan` command, which needs no command at all. The loop is then simple: run the command, and on failure ask in order "is this failure worth retrying at all?", "was that the last attempt?", "would waiting break the budget?", and only then wait and go round again.

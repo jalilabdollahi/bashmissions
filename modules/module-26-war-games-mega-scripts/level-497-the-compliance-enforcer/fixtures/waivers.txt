@@ -1,0 +1,4 @@
+# waivers: ID until=EPOCH reason
+R002 until=1700001000 migration freeze
+R003 until=1700000100 old customer account
+R004 until=1700000500

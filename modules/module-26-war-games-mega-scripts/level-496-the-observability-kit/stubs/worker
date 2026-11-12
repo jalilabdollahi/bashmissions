@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Pretend job: `worker SECONDS [EXIT]` "takes" SECONDS by moving .clock forward,
+# prints one line and exits with EXIT (default 0).
+if [[ ! ${1:-} =~ ^[0-9]+$ || $# -gt 2 ]]; then
+  echo "worker: usage: worker SECONDS [EXIT]" >&2
+  exit 2
+fi
+now=1700000000
+[[ -r .clock ]] && now=$(< .clock)
+echo "$((now + $1))" > .clock
+echo "worker: waited $1"
+exit "${2:-0}"

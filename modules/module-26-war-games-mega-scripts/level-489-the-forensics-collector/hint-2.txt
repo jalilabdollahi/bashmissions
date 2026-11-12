@@ -1,1 +1,11 @@
-Keep the script safe and deterministic inside the mission workspace.
+cksum prints "CRC SIZE"; reading it from stdin (cksum < file) prints no file name, which makes comparisons simple:
+
+  read -r sum size < <(cksum < "$src")
+  [[ "$(cksum < "$copy")" == "$sum $size" ]]
+
+Numbered names with leading zeros:  printf -v name '%03d-%s' "$n" "${src##*/}"
+Copy keeping timestamps, lock afterwards:  cp -p "$src" "$dest"; chmod 0444 "$dest"
+Test "is this file still writable by its owner?":  [[ -n $(find "$f" -perm -0200) ]]
+Regular file but not a symlink:  [[ -f $src && ! -L $src ]]
+Manifest lines whose last field may contain spaces:  while read -r name sum size orig; do ... done < manifest.txt  (the last variable takes the rest of the line).
+Extra files:  remember the listed names in an associative array, then loop over  find "$case/evidence" -type f | LC_ALL=C sort.

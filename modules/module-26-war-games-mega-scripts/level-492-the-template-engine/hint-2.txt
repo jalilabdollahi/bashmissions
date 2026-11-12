@@ -1,1 +1,13 @@
-Keep the script safe and deterministic inside the mission workspace.
+Classifying a directive line with a regex:  [[ $line =~ ^[[:space:]]*\{%(.*)%\}[[:space:]]*$ ]]  then BASH_REMATCH[1] holds the text between the markers.
+
+Pairing blocks: keep an array `stack` of line indexes. `if`/`for` push their index. `endif`/`endfor` check that the top of the stack is the right kind, record end_of[top]=$i, and pop. `else` records else_of[top]. Anything left on the stack at the end is unclosed.
+
+Replacing placeholders without eval or sed: peel the text apart
+  out+=${rest%%\{\{*}      # everything before the first {{
+  rest=${rest#*\{\{}       # everything after it
+  expr=${rest%%\}\}*}      # the name (and :-fallback) up to }}
+  rest=${rest#*\}\}}
+Fallback:  ${expr#*:-}   Name:  ${expr%%:-*}.   Distinguish unset from empty with  [[ -z ${vars[$name]+set} ]].
+
+Scope for loops: before the loop save the old values of the item variable and of loop.index (and whether they were set), after the loop put them back, otherwise a nested loop overwrites the outer loop.index.
+A list: IFS=, read -ra items <<< "$value".

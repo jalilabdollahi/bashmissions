@@ -1,22 +1,230 @@
 id: 496
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Observability Kit
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The Observability Kit` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Observability Kit
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 480
+story: |
+  The nightly backup took four hours on Tuesday and nobody knows why. The
+  logs say "done", the graph shows a flat line, and the one person who
+  understood the script is on a boat. Priya's verdict: the company has logs, it
+  has numbers, and it has nothing that says where the time went. Build the
+  three pillars into one small kit that any script can use: metrics (counters),
+  structured logs, and spans, timed records of each step that know which
+  step they belong to. Then a report that puts all three on one screen.
+objective: |
+  Write solution.sh, an observability kit.
+
+    solution.sh OUT metric inc NAME [N]
+    solution.sh OUT metric set NAME VALUE
+    solution.sh OUT log LEVEL MESSAGE...
+    solution.sh OUT span NAME -- COMMAND [ARGS...]
+    solution.sh OUT report [--slow N]
+
+  OUT is a directory that must exist (`no such directory: OUT` on stderr, exit
+  2). It holds metrics.txt, logs.txt, spans.txt and ids. Time always comes from
+  `date +%s` (a stub in the tests that returns the number in `.clock`).
+
+  metric: NAME matches `[a-z][a-z0-9_.]*`, N and VALUE are non-negative
+  integers (N defaults to 1). metrics.txt has one `NAME VALUE` line per metric,
+  sorted with `LC_ALL=C sort`; rewrite it through a temporary file and `mv`.
+  `inc` adds N (a new metric starts at 0), `set` replaces the value. Print
+  `NAME=VALUE`.
+
+  log: LEVEL is debug, info, warn or error in any letter case; store it in
+  lower case. Append `TS LEVEL trace=TRACE MESSAGE` to logs.txt, where TS is
+  `date +%s`, TRACE is the environment variable OBS_TRACE or `-`, and MESSAGE is
+  the remaining arguments joined with single spaces. Also increase the metric
+  `log.LEVEL` by 1 (same rules as `metric inc`). Print nothing.
+
+  span: run COMMAND and record how long it took.
+    - TRACE is OBS_TRACE if set, otherwise a new trace id `tN`. The span id is a
+      new `sN`. Counters live in OUT/ids as one line `trace=N span=M` (missing
+      file means 0 and 0); allocate by increasing and rewriting the file
+      (temporary file + `mv`) BEFORE running the command.
+    - PARENT is OBS_PARENT if set, otherwise `-`.
+    - START = `date +%s` before the command, DUR = `date +%s` after minus START.
+    - Run COMMAND with OBS_TRACE=TRACE and OBS_PARENT=SPANID in its environment,
+      so a nested `solution.sh ... span` becomes its child. Its stdout and
+      stderr pass through. Remember its exit status.
+    - Append `TRACE SPANID PARENT START DUR STATUS NAME` to spans.txt, STATUS
+      being `ok` or `exit=E`. NAME matches `[a-z0-9._-]+`.
+    - Increase the metrics `span.total`, and `span.errors` if the command
+      failed. Exit with COMMAND's status.
+
+  report [--slow N] prints (N defaults to 5, a non-negative integer):
+    `== metrics ==` then the lines of metrics.txt, or `(none)`
+    `== logs ==`, `levels: debug=D info=I warn=W error=E` (counted from
+        logs.txt) and then one line `error trace=TRACE: MESSAGE` per error log,
+        in file order
+    `== traces ==` then, for each trace in numeric order of its id (tN; ids
+        are compared by the number), `trace TID` and its spans as a tree:
+        roots are spans whose parent is `-` or unknown; children follow their
+        parent, ordered by span number; each line is indented by 2 spaces
+        times (depth + 1) and reads `SPANID NAME DURs STATUS`, followed by
+        ` SLOW` when DUR is greater than N. `(none)` if there are no spans.
+    `summary: traces=T spans=S errors=E slow=L` (errors = spans whose status
+        is not ok, slow = spans flagged SLOW).
+  Missing files count as empty.
+
+  Wrong arguments, a bad level, name or number: print
+  `usage: solution.sh OUT metric inc NAME [N] | metric set NAME VALUE | log LEVEL MESSAGE... | span NAME -- COMMAND... | report [--slow N]`
+  to stderr and exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "three signals: metrics, logs, spans"
+  - "trace and parent ids passed through the environment"
+  - "atomic counters and sorted state files"
+  - "building a tree from flat records"
+required_patterns:
+  - pattern: 'date\s+\+%s'
+    message: "Read the time with date +%s."
+  - pattern: '\bmv\b'
+    message: "Rewrite metrics.txt and ids through a temporary file and mv."
+test_cases:
+  - name: counting things
+    args: [out, metric, inc, jobs.done]
+    files:
+      "out/": ""
+    expected_stdout: "jobs.done=1"
+    expected_files:
+      out/metrics.txt: "jobs.done 1"
+  - name: increment by an amount, state stays sorted
+    args: [out, metric, inc, jobs.done, "5"]
+    files:
+      out/metrics.txt: |
+        zeta 9
+        jobs.done 2
+        alpha 1
+    expected_stdout: "jobs.done=7"
+    expected_files:
+      out/metrics.txt: |-
+        alpha 1
+        jobs.done 7
+        zeta 9
+  - name: set a gauge
+    args: [out, metric, set, queue.depth, "12"]
+    files:
+      out/metrics.txt: "queue.depth 40\n"
+    expected_stdout: "queue.depth=12"
+    expected_files:
+      out/metrics.txt: "queue.depth 12"
+  - name: a structured log line also counts as a metric
+    args: [out, log, WARN, disk, almost, full]
+    env:
+      OBS_TRACE: t9
+    files:
+      out/.keep: ""
+      .clock: "1700000007"
+    expected_files:
+      out/logs.txt: "1700000007 warn trace=t9 disk almost full"
+      out/metrics.txt: "log.warn 1"
+  - name: a log outside any trace
+    args: [out, log, info, "hello  world"]
+    files:
+      out/.keep: ""
+    expected_files:
+      out/logs.txt: "1700000000 info trace=- hello  world"
+  - name: a span records duration and passes output through
+    args: [out, span, dump-db, --, worker, "7"]
+    files:
+      out/.keep: ""
+    expected_stdout: "worker: waited 7"
+    expected_files:
+      out/spans.txt: "t1 s1 - 1700000000 7 ok dump-db"
+      out/ids: "trace=1 span=1"
+      out/metrics.txt: "span.total 1"
+  - name: a failing span keeps the exit status
+    args: [out, span, upload, --, worker, "3", "4"]
+    files:
+      out/ids: "trace=4 span=11\n"
+    expected_stdout: "worker: waited 3"
+    expected_exit: 4
+    expected_files:
+      out/spans.txt: "t5 s12 - 1700000000 3 exit=4 upload"
+      out/ids: "trace=5 span=12"
+      out/metrics.txt: |-
+        span.errors 1
+        span.total 1
+  - name: nested spans share a trace and know their parent
+    args: [out, span, backup-run, --, bash, solution.sh, out, span, dump-db, --, worker, "7"]
+    files:
+      out/.keep: ""
+    expected_stdout: "worker: waited 7"
+    expected_files:
+      out/spans.txt: |-
+        t1 s2 s1 1700000000 7 ok dump-db
+        t1 s1 - 1700000000 7 ok backup-run
+      out/ids: "trace=1 span=2"
+      out/metrics.txt: "span.total 2"
+  - name: one report for everything
+    args: [out, report]
+    files: &telemetry
+      out/metrics.txt: |
+        jobs.done 3
+        log.error 1
+      out/logs.txt: |
+        1700000001 info trace=t1 starting backup
+        1700000008 warn trace=t1 upload slow
+        1700000011 error trace=t1 upload failed: connection reset
+        1700000100 info trace=t2 probing
+      out/spans.txt: |
+        t1 s2 s1 1700000000 7 ok dump-db
+        t1 s3 s1 1700000007 4 exit=3 upload
+        t1 s1 - 1700000000 12 ok backup-run
+        t2 s4 - 1700000100 1 ok health-check
+    expected_stdout: |-
+      == metrics ==
+      jobs.done 3
+      log.error 1
+      == logs ==
+      levels: debug=0 info=2 warn=1 error=1
+      error trace=t1: upload failed: connection reset
+      == traces ==
+      trace t1
+        s1 backup-run 12s ok SLOW
+          s2 dump-db 7s ok SLOW
+          s3 upload 4s exit=3
+      trace t2
+        s4 health-check 1s ok
+      summary: traces=2 spans=4 errors=1 slow=2
+  - name: report with a different slow threshold
+    args: [out, report, --slow, "10"]
+    files: *telemetry
+    expected_stdout: |-
+      == metrics ==
+      jobs.done 3
+      log.error 1
+      == logs ==
+      levels: debug=0 info=2 warn=1 error=1
+      error trace=t1: upload failed: connection reset
+      == traces ==
+      trace t1
+        s1 backup-run 12s ok SLOW
+          s2 dump-db 7s ok
+          s3 upload 4s exit=3
+      trace t2
+        s4 health-check 1s ok
+      summary: traces=2 spans=4 errors=1 slow=1
+  - name: report on an empty directory
+    args: [out, report]
+    files:
+      out/.keep: ""
+    expected_stdout: |-
+      == metrics ==
+      (none)
+      == logs ==
+      levels: debug=0 info=0 warn=0 error=0
+      == traces ==
+      (none)
+      summary: traces=0 spans=0 errors=0 slow=0
+  - name: a bad log level
+    args: [out, log, LOUD, hi]
+    files:
+      out/.keep: ""
+    expected_stderr: "usage: solution.sh OUT metric inc NAME [N] | metric set NAME VALUE | log LEVEL MESSAGE... | span NAME -- COMMAND... | report [--slow N]"
+    expected_exit: 2
+  - name: missing output directory
+    args: [nowhere, report]
+    expected_stderr: "no such directory: nowhere"
+    expected_exit: 2

@@ -1,1 +1,20 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  out=$1 mode=$2; shift 2; [[ -d $out ]] || ... "no such directory: $out"
+  replace_file() { tmp=$(mktemp "$1.XXXXXX"); cat > "$tmp"; mv -f "$tmp" "$1"; }
+
+  metric_apply() {  # op name value: read "name value" lines into an assoc array, change one, write back sorted, echo the value
+  }
+
+  log:    level=${1,,}; now=$(date +%s); echo "$now $level trace=${OBS_TRACE:--} $*" >> "$logs"; metric_apply inc "log.$level" 1 >/dev/null
+
+  span:   trace=${OBS_TRACE:-}  (else allocate "t$N" from the ids file)  span id "s$M" (allocate BEFORE running)
+          parent=${OBS_PARENT:--}; start=$(date +%s)
+          status=0; OBS_TRACE=$trace OBS_PARENT=$sid "$@" || status=$?
+          end=$(date +%s); label=ok or exit=$status
+          echo "$trace $sid $parent $start $((end-start)) $label $name" >> "$spans"
+          metrics span.total (+ span.errors); exit "$status"
+
+  report: cat metrics (or "(none)"); count levels from logs.txt and echo the error lines;
+          read spans -> arrays; kids[$parent]+="$sid "; show() { print line; for k in children sorted by number; do show "$k" $((depth+1)); done }
+          traces in numeric order; summary line

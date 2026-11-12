@@ -1,1 +1,13 @@
-Keep the script safe and deterministic inside the mission workspace.
+Parse the file names with a regex and capture groups:
+  [[ $base =~ ^([0-9]{3})-([a-z0-9-]+)\.(up|down)$ ]]   # BASH_REMATCH[1] id, [2] name, [3] kind
+
+Fingerprint:  read -r sum _ < <(cksum < "$file")
+
+Collect ids from two sources and put them in order, once each:
+  mapfile -t all_ids < <(printf '%s\n' "${!file_name[@]}" "${led_ids[@]}" | LC_ALL=C sort -u)
+(three-digit zero-padded ids sort correctly as text, and the same trick lets you compare them: [[ $id < $newest ]] .)
+
+Running a command and keeping its exit status under set -e:  rc=0; dbexec "$file" || rc=$?
+Recording progress: append to the ledger right after each success with  echo "$id $sum $name" >> "$ledger".
+Removing one line from the ledger safely: write all the other lines to a temp file and mv it over (mktemp "$ledger.XXXXXX").
+Take the newest applied id with  sort | tail -n 1, and the "newest first" order for down with  sort -r.

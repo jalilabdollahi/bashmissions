@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Pretend database client: `dbexec FILE` "runs" a migration file.
+# A file containing a line that says FAIL stops with exit status 3, like a SQL
+# error would. Every call is recorded in .calls.log.
+if [[ $# -ne 1 || ! -f $1 ]]; then
+  echo "dbexec: usage: dbexec FILE" >&2
+  exit 2
+fi
+echo "dbexec $1" >> .calls.log
+if grep -qx FAIL "$1"; then
+  exit 3
+fi

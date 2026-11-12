@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Pretend event handler: `HANDLER TOPIC SEQ MESSAGE`. Records the call.
+# FAKE_FAIL=name1,name2 makes the named handlers exit 1.
+me=${0##*/}
+if [[ $# -ne 3 ]]; then
+  echo "$me: usage: $me TOPIC SEQ MESSAGE" >&2
+  exit 2
+fi
+echo "$me $1 $2 $3" >> .calls.log
+[[ ",${FAKE_FAIL:-}," == *",$me,"* ]] && exit 1
+exit 0

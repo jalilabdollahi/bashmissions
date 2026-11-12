@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Pretend git, just enough for a pull-based deploy:
+#   git -C DIR pull --ff-only          (FAKE_GIT=fail makes it fail)
+#   git -C DIR rev-parse --short HEAD  (prints FAKE_SHA, default abc1234)
+if [[ ${1:-} != -C || $# -lt 3 || ! -d ${2:-} ]]; then
+  echo "git: usage: git -C DIR COMMAND" >&2
+  exit 2
+fi
+shift 2
+case "$*" in
+  "pull --ff-only")
+    [[ ${FAKE_GIT:-ok} == fail ]] && exit 1
+    exit 0 ;;
+  "rev-parse --short HEAD")
+    echo "${FAKE_SHA:-abc1234}" ;;
+  *)
+    echo "git: unsupported command: $*" >&2
+    exit 2 ;;
+esac

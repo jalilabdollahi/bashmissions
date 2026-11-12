@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+A bucket is just two numbers per client: how many tokens it holds and the moment it was last topped up. Before each request you work out how many tokens the elapsed time has earned, add them (never above the capacity), then either spend the cost or refuse. Because the time arrives with each request, nothing in your script needs a clock. Keep all buckets in associative arrays keyed by client, load them from STATE at the start and write them back at the end.

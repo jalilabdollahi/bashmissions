@@ -1,1 +1,13 @@
-Keep the script safe and deterministic inside the mission workspace.
+Distinguish "sick" from "unknown" by the exit status of the status command, without letting set -e kill you:
+
+  rc=0; svcctl status "$svc" > /dev/null 2>&1 || rc=$?
+  (( rc == 0 )) ... (( rc == 3 )) ... else sick
+
+Single-instance lock that cleans itself up:
+
+  if ! mkdir "$state.lock" 2>/dev/null; then echo "another healer is running" >&2; exit 1; fi
+  trap 'rm -rf "$state.lock"' EXIT
+
+Keep the action list per service as a space-separated string in an associative array, and split it with  for action in ${plan[$svc]}  (word splitting is what you want here).
+The three outcomes of the remediation loop (healed / budget ran out / all actions failed) are best tracked with small flags set inside the loop and examined after it.
+Counters in a file: associative array count[$svc], read at the start and written at the end with  | LC_ALL=C sort > "$state".

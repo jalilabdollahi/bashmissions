@@ -1,1 +1,1 @@
-Use this curriculum concept: combine 5+ Bash scripting concepts.
+Draw the three states on paper first: closed (calls flow, failures are counted), open (calls are refused until the cooldown has passed), half-open (one trial call decides whether to close again or open again). Your script is stateless between runs, so the first thing it does is load the state file and the last thing it does is save it. Write load_state and save_state first, then one function that decides what a "run" does for each state.

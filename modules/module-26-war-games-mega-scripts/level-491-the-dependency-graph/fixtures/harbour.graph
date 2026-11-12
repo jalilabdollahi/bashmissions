@@ -1,0 +1,9 @@
+# harbour platform: SERVICE: what it needs running first
+web: api cache
+api: db auth
+auth: db
+cache:
+db: disk
+disk:
+dns:
+mail: dns

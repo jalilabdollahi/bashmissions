@@ -1,22 +1,159 @@
 id: 485
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Chaos Monkey
 difficulty: expert
-xp: 230
-objective: Implement the mega-script mission `The Chaos Monkey` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Chaos Monkey
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 380
+story: |
+  The storm took out `dory` for twenty minutes and the failover that "had been
+  tested" turned out to have been tested once, in 2023, by someone who has
+  since left. Priya's rule is blunt: if you have never broken it on purpose,
+  you do not know that it works. Mara agrees, with one condition. A chaos
+  tool that breaks things randomly is a menace; one that breaks things from a
+  seed, so that last Tuesday's disaster can be replayed to the exact fault, is
+  engineering.
+objective: |
+  Write solution.sh, a seeded chaos monkey.
+
+    solution.sh [--dry-run] SEED ROUNDS FLEET
+
+  SEED is a non-negative integer (up to 18 digits), ROUNDS a positive integer.
+  FLEET lists services, one per line: `SERVICE` or `SERVICE protected`. Blank
+  and `#` lines are ignored. Protected services are never touched. The eligible
+  targets are the unprotected services in file order. If there are none print
+  `no eligible services in FLEET` to stderr and exit 1.
+
+  Do NOT use $RANDOM: its sequence differs between Bash versions. Implement a
+  tiny linear congruential generator with Bash arithmetic:
+    state starts as SEED & 2147483647
+    next(): state = (state * 1103515245 + 12345) & 2147483647
+            and the value returned is  state >> 16
+  Every draw calls next() once, in exactly this order, for each round:
+    1. ROLL = next() % 100. If ROLL >= CHANCE (environment variable, an integer
+       0..100, default 50) the round is calm and there are no more draws.
+    2. TARGET = targets[next() % number_of_targets]
+    3. FAULT  = next() % 3: 0 kill, 1 delay, 2 drop
+    4. P = next() % 9 + 1 (always drawn, only used by delay and drop)
+       delay uses P*100 milliseconds, drop uses P*10 percent.
+  The fault description is `kill SVC`, `delay SVC 600ms` or `drop SVC 60%`.
+
+  Output, one line per round, rounds numbered from 1:
+    calm round:      `round N: calm`
+    dry run:         `round N: would DESCRIPTION`
+    live run:        `round N: DESCRIPTION -> S1 -> S2`
+  A live run injects with `chaosctl kill SVC`, `chaosctl delay SVC MS` or
+  `chaosctl drop SVC PERCENT`, reads S1 with `chaosctl status SVC`, repairs with
+  `chaosctl heal SVC`, then reads S2 with `chaosctl status SVC`. A round is
+  unhealed when S2 is not `healthy`. A dry run calls nothing.
+
+  Finally print
+    live:    `summary: rounds=R faults=F unhealed=U`
+    dry run: `summary: rounds=R faults=F (dry run)`
+  and exit 1 if any round was unhealed (live only), otherwise 0.
+
+  Errors, all on stderr with exit 2: a bad SEED, ROUNDS or CHANCE prints
+  `usage: solution.sh [--dry-run] SEED ROUNDS FLEET` (for CHANCE print
+  `invalid CHANCE`); an unreadable FLEET prints `cannot read FLEET`.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "a seeded pseudo-random generator written in shell arithmetic"
+  - "determinism: same seed, same disaster"
+  - "bit masking & and shifts >> to keep numbers in range"
+  - "inject, observe, repair, verify"
+required_patterns:
+  - pattern: '1103515245'
+    message: "Implement the LCG from the objective: state * 1103515245 + 12345, masked to 31 bits."
+forbidden_patterns:
+  - pattern: 'RANDOM'
+    message: "$RANDOM is not reproducible across Bash versions. Write the LCG yourself."
+test_cases:
+  - name: dry run is a replayable plan
+    args: [--dry-run, "42", "8", fixtures/fleet.txt]
+    expected_stdout: |-
+      round 1: calm
+      round 2: would kill cuttlefish
+      round 3: calm
+      round 4: calm
+      round 5: would delay cuttlefish 600ms
+      round 6: would kill dory
+      round 7: would drop cuttlefish 60%
+      round 8: calm
+      summary: rounds=8 faults=4 (dry run)
+    expected_files:
+      .calls.log: null
+  - name: another seed, another storm
+    args: [--dry-run, "7", "8", fixtures/fleet.txt]
+    expected_stdout: |-
+      round 1: calm
+      round 2: would kill anchovy
+      round 3: calm
+      round 4: would drop dory 60%
+      round 5: would drop flounder 90%
+      round 6: would delay dory 300ms
+      round 7: calm
+      round 8: calm
+      summary: rounds=8 faults=4 (dry run)
+  - name: live run injects and heals
+    args: ["42", "8", fixtures/fleet.txt]
+    expected_stdout: |-
+      round 1: calm
+      round 2: kill cuttlefish -> down -> healthy
+      round 3: calm
+      round 4: calm
+      round 5: delay cuttlefish 600ms -> slow -> healthy
+      round 6: kill dory -> down -> healthy
+      round 7: drop cuttlefish 60% -> lossy -> healthy
+      round 8: calm
+      summary: rounds=8 faults=4 unhealed=0
+    expected_files:
+      .calls.log: |-
+        kill cuttlefish
+        heal cuttlefish
+        delay cuttlefish 600
+        heal cuttlefish
+        kill dory
+        heal dory
+        drop cuttlefish 60
+        heal cuttlefish
+  - name: a service that does not recover fails the run
+    args: ["2026", "5", fixtures/fleet.txt]
+    env:
+      CHANCE: "100"
+      FAKE_STUCK: dory
+    expected_stdout: |-
+      round 1: delay dory 300ms -> slow -> slow
+      round 2: drop flounder 80% -> lossy -> healthy
+      round 3: kill dory -> down -> down
+      round 4: kill dory -> down -> down
+      round 5: drop dory 60% -> lossy -> lossy
+      summary: rounds=5 faults=5 unhealed=4
+    expected_exit: 1
+  - name: chance zero means calm seas
+    args: ["42", "3", fixtures/fleet.txt]
+    env:
+      CHANCE: "0"
+    expected_stdout: |-
+      round 1: calm
+      round 2: calm
+      round 3: calm
+      summary: rounds=3 faults=0 unhealed=0
+    expected_files:
+      .calls.log: null
+  - name: protected services are never eligible
+    args: ["42", "3", fixtures/all-protected.txt]
+    expected_stderr: "no eligible services in fixtures/all-protected.txt"
+    expected_exit: 1
+  - name: bad seed
+    args: ["lucky", "3", fixtures/fleet.txt]
+    expected_stderr: "usage: solution.sh [--dry-run] SEED ROUNDS FLEET"
+    expected_exit: 2
+  - name: bad chance
+    args: ["42", "3", fixtures/fleet.txt]
+    env:
+      CHANCE: "101"
+    expected_stderr: "invalid CHANCE"
+    expected_exit: 2
+  - name: missing fleet file
+    args: ["42", "3", nope.txt]
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 2

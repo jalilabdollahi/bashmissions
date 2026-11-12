@@ -1,0 +1,8 @@
+initial open
+final closed
+open     triage    triaged
+triaged  escalate  pager
+triaged  close     closed
+open     triage    mitigating
+orphan   wake      open
+closed   reopen    open

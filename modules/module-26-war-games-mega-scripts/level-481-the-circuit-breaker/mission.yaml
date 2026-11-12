@@ -1,22 +1,217 @@
 id: 481
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Circuit Breaker
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The Circuit Breaker` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Circuit Breaker
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 340
+story: |
+  During the storm the card gateway started timing out, and the shop checkout
+  kept calling it anyway: every customer waited thirty seconds to be told no,
+  and the retry pile-up kept the gateway down after it had recovered. Theo
+  wants what electricians have had for a century: after a few failures, stop
+  calling, let the other side rest, then send one careful probe. Because each
+  checkout is a separate process, the breaker's memory has to live in a file.
+objective: |
+  Write solution.sh, a circuit breaker that guards any command.
+
+    solution.sh STATE run NOW CMD [ARGS...]
+    solution.sh STATE status NOW
+    solution.sh STATE reset
+
+  STATE is the breaker's file. NOW is the current time in whole seconds (no
+  real clock). The file holds exactly three lines, in this order:
+    state=closed|open|half-open
+    failures=N
+    opened_at=TS          (0 while closed)
+  A missing file means `closed`, 0 failures. Any other content (unknown
+  state, a missing key, a non-numeric number) is corrupt: print
+  `corrupt state file STATE` to stderr and exit 2.
+
+  Settings come from environment variables: THRESHOLD (default 3, consecutive
+  failures that open the circuit) and COOLDOWN (default 30 seconds). If one is
+  not a positive integer print `invalid THRESHOLD` or `invalid COOLDOWN` to
+  stderr and exit 2.
+
+  `run` behaviour. The guarded command's own stdout and stderr pass through
+  untouched; the breaker reports on stderr with a `breaker: ` prefix.
+    closed:    run CMD. Success: failures=0, print `breaker: ok`, exit 0.
+               Failure: failures+1 and print `breaker: failure K/T`. When K
+               reaches T the state becomes open with opened_at=NOW and the
+               message is `breaker: failure K/T, circuit OPEN`. Exit with the
+               command's own exit status.
+    open:      if NOW - opened_at is less than COOLDOWN do NOT run CMD: print
+               `breaker: circuit open, call skipped (retry in S s)` where S is
+               the seconds still to wait, and exit 75. Otherwise treat it as
+               half-open.
+    half-open: (also what an elapsed `open` becomes, and what a crashed earlier
+               probe leaves behind) run CMD once as a probe. Success: closed,
+               failures=0, `breaker: probe succeeded, circuit CLOSED`, exit 0.
+               Failure: open again with opened_at=NOW and failures unchanged,
+               `breaker: probe failed, circuit OPEN again`, exit with the
+               command's status.
+  Write the new state through a temporary file in the same folder and `mv` it
+  into place, so a crash can never leave a half-written state file.
+
+  `status` prints one line to stdout, never runs anything:
+    `closed (failures K/T)` | `open (probe in S s)` | `open (probe due)` |
+    `half-open (probe due)`
+  `reset` deletes STATE and prints `breaker reset`.
+
+  Wrong arguments: print `usage: solution.sh STATE run NOW CMD [ARGS...] | status NOW | reset`
+  to stderr, exit 2. NOW must be a non-negative integer.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "closed / open / half-open state machine"
+  - "state persisted in a file across separate runs"
+  - "atomic write: temp file then mv"
+  - "passing a command through and keeping its exit status"
+required_patterns:
+  - pattern: '\bmv\b'
+    message: "Write the state to a temp file and mv it into place."
+  - pattern: '"\$@"|"\$\{[a-z_]*\[@\]\}"'
+    message: "Run the guarded command with \"$@\" (or an array) so its arguments stay intact."
+test_cases:
+  - name: closed circuit passes a good call
+    args: [bk.state, run, "1000", payments-api, charge, A-100]
+    expected_stdout: "charged A-100"
+    expected_stderr: "breaker: ok"
+    expected_files:
+      bk.state: |-
+        state=closed
+        failures=0
+        opened_at=0
+  - name: a failure is counted and the exit status kept
+    args: [bk.state, run, "1000", payments-api, charge, A-101]
+    env:
+      FAKE_PAY: fail
+    files:
+      bk.state: |
+        state=closed
+        failures=1
+        opened_at=0
+    expected_stdout: "timeout talking to gateway"
+    expected_stderr: "breaker: failure 2/3"
+    expected_exit: 7
+    expected_files:
+      bk.state: |-
+        state=closed
+        failures=2
+        opened_at=0
+  - name: the third failure opens the circuit
+    args: [bk.state, run, "1000", payments-api, charge, A-102]
+    env:
+      FAKE_PAY: fail
+    files:
+      bk.state: |
+        state=closed
+        failures=2
+        opened_at=0
+    expected_stdout: "timeout talking to gateway"
+    expected_stderr: "breaker: failure 3/3, circuit OPEN"
+    expected_exit: 7
+    expected_files:
+      bk.state: |-
+        state=open
+        failures=3
+        opened_at=1000
+  - name: open circuit skips the call
+    args: [bk.state, run, "1012", payments-api, charge, A-103]
+    files:
+      bk.state: |
+        state=open
+        failures=3
+        opened_at=1000
+    expected_stderr: "breaker: circuit open, call skipped (retry in 18 s)"
+    expected_exit: 75
+    expected_files:
+      .calls.log: null
+      bk.state: |-
+        state=open
+        failures=3
+        opened_at=1000
+  - name: probe after the cooldown closes the circuit
+    args: [bk.state, run, "1030", payments-api, charge, A-104]
+    files:
+      bk.state: |
+        state=open
+        failures=3
+        opened_at=1000
+    expected_stdout: "charged A-104"
+    expected_stderr: "breaker: probe succeeded, circuit CLOSED"
+    expected_files:
+      bk.state: |-
+        state=closed
+        failures=0
+        opened_at=0
+      .calls.log: "charge A-104"
+  - name: failed probe reopens with a fresh timer
+    args: [bk.state, run, "1031", payments-api, charge, A-105]
+    env:
+      FAKE_PAY: fail
+    files:
+      bk.state: |
+        state=half-open
+        failures=3
+        opened_at=1000
+    expected_stdout: "timeout talking to gateway"
+    expected_stderr: "breaker: probe failed, circuit OPEN again"
+    expected_exit: 7
+    expected_files:
+      bk.state: |-
+        state=open
+        failures=3
+        opened_at=1031
+  - name: THRESHOLD and COOLDOWN come from the environment
+    args: [bk.state, run, "50", payments-api, charge, A-106]
+    env:
+      FAKE_PAY: fail
+      THRESHOLD: "1"
+      COOLDOWN: "5"
+    expected_stdout: "timeout talking to gateway"
+    expected_stderr: "breaker: failure 1/1, circuit OPEN"
+    expected_exit: 7
+    expected_files:
+      bk.state: |-
+        state=open
+        failures=1
+        opened_at=50
+  - name: status lines
+    args: [bk.state, status, "1010"]
+    files:
+      bk.state: |
+        state=open
+        failures=3
+        opened_at=1000
+    expected_stdout: "open (probe in 20 s)"
+  - name: status of a fresh breaker
+    args: [bk.state, status, "1010"]
+    expected_stdout: "closed (failures 0/3)"
+  - name: corrupt state file
+    args: [bk.state, status, "1010"]
+    files:
+      bk.state: |
+        state=melted
+        failures=3
+        opened_at=1000
+    expected_stderr: "corrupt state file bk.state"
+    expected_exit: 2
+  - name: reset deletes the file
+    args: [bk.state, reset]
+    files:
+      bk.state: |
+        state=open
+        failures=3
+        opened_at=1000
+    expected_stdout: "breaker reset"
+    expected_files:
+      bk.state: null
+  - name: bad setting
+    args: [bk.state, status, "1010"]
+    env:
+      THRESHOLD: lots
+    expected_stderr: "invalid THRESHOLD"
+    expected_exit: 2
+  - name: run without a command
+    args: [bk.state, run, "1000"]
+    expected_stderr: "usage: solution.sh STATE run NOW CMD [ARGS...] | status NOW | reset"
+    expected_exit: 2

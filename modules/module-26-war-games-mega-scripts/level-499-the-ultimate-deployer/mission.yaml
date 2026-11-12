@@ -1,22 +1,325 @@
 id: 499
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Ultimate Deployer
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Ultimate Deployer` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Ultimate Deployer
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 500
+story: |
+  The storm is over, and Mara has one thing left on her list: nobody should
+  ever have to type a deploy command again. From now on the truth lives in the
+  git repository, one small manifest per application, and a reconciler makes
+  the live fleet match it: create what is missing, update what differs,
+  check that every change is healthy, and put back whatever is not. It must
+  refuse to run during a freeze, refuse a deploy that changes too much at
+  once, never run twice at the same time, and leave an audit trail with the
+  commit it deployed. This is the biggest script you have written so far; it
+  uses almost everything.
+objective: |
+  Write solution.sh, a pull-based deployer.
+
+    solution.sh [--dry-run] [--prune] REPO LIVE NOW
+
+  REPO is a git working copy with the desired state: one file per application,
+  `REPO/apps/NAME.app`. LIVE is a directory with what is deployed: one
+  `NAME.state` file per application, plus the audit log. NOW is epoch seconds
+  (a non-negative integer). Both directories must exist
+  (`not a directory: X`, exit 2).
+
+  A manifest and a state file have lines `KEY=VALUE`:
+    version=1.5.0     required, `N.N.N` digits
+    replicas=3        1..20, default 1
+    port=8080         1..65535, default 8080
+    order=30          0..99, default 50 (manifests only; lower goes first)
+  Blank lines and `#` lines are ignored. NAME matches `[a-z0-9-]+`.
+
+  Do these steps in this order:
+    1. FREEZE: if REPO/FREEZE exists and is not empty print
+       `deploy freeze active: FIRST LINE` to stderr, exit 1.
+    2. LOCK: create the directory LIVE/.lock with `mkdir`. If that fails print
+       `another deploy is running` to stderr, exit 1. Remove it on every exit
+       path (trap).
+    3. PULL: run `git -C REPO pull --ff-only` (output discarded). On failure
+       print `git pull failed, nothing deployed` to stderr, exit 1. Then
+       SHA=`git -C REPO rev-parse --short HEAD`.
+    4. VALIDATE every manifest before any change. All problems are printed to
+       stderr as `invalid manifest apps/NAME.app: MESSAGE` (files in glob
+       order, messages in line order, `missing version` last for that file),
+       then exit 2: `bad name` (the file name), `bad version 'X'`,
+       `bad replicas 'X'`, `bad port 'X'`, `bad order 'X'`, `unknown key 'X'`,
+       `missing version`. No applications at all: `no applications in
+       REPO/apps` on stderr, exit 2.
+    5. PLAN: apps sorted by (order, name). An app is `create` when there is no
+       state file, `unchanged` when version, replicas and port all match its
+       state file, otherwise `update`. State files without a manifest are
+       orphans. Let CHANGES be creates + updates (+ orphans when --prune).
+       MAX_CHANGES (environment, default 5, positive integer, else
+       `invalid MAX_CHANGES`, exit 2): if CHANGES is larger, print
+       `too many changes (N > MAX), refusing` to stderr, exit 1. (With
+       --dry-run print `warning: N changes exceed MAX_CHANGES=MAX` to stderr
+       instead and carry on.)
+    6. APPLY each app in plan order:
+       unchanged -> print `unchanged NAME VERSION`.
+       Otherwise `deployctl apply NAME VERSION REPLICAS PORT`. If that exits
+       non-zero print `FAILED NAME (deployctl exit E)` and move on (failed).
+       Otherwise run `healthctl NAME`. Healthy: write NAME.state (three lines,
+       `version=`, `replicas=`, `port=`), print `created NAME VERSION` or
+       `updated NAME OLD -> NEW`. Unhealthy: for a create run
+       `deployctl remove NAME` and print `removed NAME (health check failed on
+       create)`; for an update re-apply the OLD version with its old replicas
+       and port (`deployctl apply NAME OLDVERSION OLDREPLICAS OLDPORT`), leave
+       the state file as it was and print `rolled back NAME NEW -> OLD
+       (health check failed)`. Both count as rolled back.
+       Every create/update outcome is appended to LIVE/audit.log as
+       `NOW SHA ACTION NAME DETAIL RESULT` (ACTION create or update; DETAIL is
+       the version for a create and `OLD->NEW` for an update; RESULT ok, failed
+       or rolled-back).
+    7. ORPHANS (after all apps, alphabetical): without --prune print `orphan
+       NAME (not in repo, use --prune to remove)`. With --prune run
+       `deployctl remove NAME`, delete its state file, audit it as
+       `NOW SHA delete NAME OLDVERSION ok` and print `deleted NAME`.
+    8. REPORT: print
+       `deploy SHA: created=C updated=U deleted=D rolled-back=R failed=F unchanged=K`.
+       If R + F is above 0 also run `notifyctl send "deploy SHA: R rolled back,
+       F failed"` and exit 1; else exit 0.
+  With --dry-run steps 1-5 run as usual (the pull included), nothing is
+  applied, written or audited, and the output is `unchanged NAME VERSION`,
+  `would create NAME VERSION`, `would update NAME OLD -> NEW`, `orphan ...`
+  or `would delete NAME` per app, then
+  `plan for SHA: create=C update=U delete=D unchanged=K`, exit 0.
+
+  Wrong arguments or unknown options: `usage: solution.sh [--dry-run] [--prune] REPO LIVE NOW`
+  on stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "GitOps: desired state in git, a reconciler makes live match"
+  - "plan, validate, apply, verify, roll back"
+  - "guards: freeze, lock, change budget"
+  - "audit trail tied to the deployed commit"
+required_patterns:
+  - pattern: '\btrap\b'
+    message: "Release the lock with a trap."
+  - pattern: '\bmkdir\b'
+    message: "Take the deploy lock with mkdir."
+  - pattern: 'git\s+-C'
+    message: "Talk to git with git -C REPO so the script does not depend on the current directory."
+test_cases:
+  - name: reconcile a fleet
+    args: [repo, live, "1700000000"]
+    files: &fleet
+      repo/apps/db.app: "version=1.0.0\nreplicas=1\norder=10\n"
+      repo/apps/api.app: "version=2.3.0\nreplicas=2\nport=9000\norder=20\n"
+      repo/apps/web.app: "# the shop\nversion=1.5.0\nreplicas=3\norder=30\n"
+      repo/apps/mail.app: "version=0.9.1\n"
+      live/db.state: "version=1.0.0\nreplicas=1\nport=8080\n"
+      live/web.state: "version=1.4.2\nreplicas=3\nport=8080\n"
+      live/old-cron.state: "version=0.1.0\nreplicas=1\nport=8080\n"
+    expected_stdout: |-
+      unchanged db 1.0.0
+      created api 2.3.0
+      updated web 1.4.2 -> 1.5.0
+      created mail 0.9.1
+      orphan old-cron (not in repo, use --prune to remove)
+      deploy abc1234: created=2 updated=1 deleted=0 rolled-back=0 failed=0 unchanged=1
+    expected_files:
+      live/api.state: |-
+        version=2.3.0
+        replicas=2
+        port=9000
+      live/web.state: |-
+        version=1.5.0
+        replicas=3
+        port=8080
+      live/mail.state: |-
+        version=0.9.1
+        replicas=1
+        port=8080
+      live/old-cron.state: "version=0.1.0\nreplicas=1\nport=8080"
+      live/audit.log: |-
+        1700000000 abc1234 create api 2.3.0 ok
+        1700000000 abc1234 update web 1.4.2->1.5.0 ok
+        1700000000 abc1234 create mail 0.9.1 ok
+      live/.lock: null
+      .calls.log: |-
+        deployctl apply api 2.3.0 2 9000
+        healthctl api
+        deployctl apply web 1.5.0 3 8080
+        healthctl web
+        deployctl apply mail 0.9.1 1 8080
+        healthctl mail
+  - name: prune removes orphans
+    args: [--prune, repo, live, "1700000000"]
+    env:
+      FAKE_SHA: 9f8e7d6
+    files: *fleet
+    expected_stdout: |-
+      unchanged db 1.0.0
+      created api 2.3.0
+      updated web 1.4.2 -> 1.5.0
+      created mail 0.9.1
+      deleted old-cron
+      deploy 9f8e7d6: created=2 updated=1 deleted=1 rolled-back=0 failed=0 unchanged=1
+    expected_files:
+      live/old-cron.state: null
+      live/audit.log: |-
+        1700000000 9f8e7d6 create api 2.3.0 ok
+        1700000000 9f8e7d6 update web 1.4.2->1.5.0 ok
+        1700000000 9f8e7d6 create mail 0.9.1 ok
+        1700000000 9f8e7d6 delete old-cron 0.1.0 ok
+  - name: an unhealthy update is rolled back
+    args: [repo, live, "1700000000"]
+    env:
+      FAKE_UNHEALTHY: web
+    files: *fleet
+    expected_stdout: |-
+      unchanged db 1.0.0
+      created api 2.3.0
+      rolled back web 1.5.0 -> 1.4.2 (health check failed)
+      created mail 0.9.1
+      orphan old-cron (not in repo, use --prune to remove)
+      deploy abc1234: created=2 updated=0 deleted=0 rolled-back=1 failed=0 unchanged=1
+    expected_exit: 1
+    expected_files:
+      live/web.state: |-
+        version=1.4.2
+        replicas=3
+        port=8080
+      live/audit.log: |-
+        1700000000 abc1234 create api 2.3.0 ok
+        1700000000 abc1234 update web 1.4.2->1.5.0 rolled-back
+        1700000000 abc1234 create mail 0.9.1 ok
+      .calls.log: |-
+        deployctl apply api 2.3.0 2 9000
+        healthctl api
+        deployctl apply web 1.5.0 3 8080
+        healthctl web
+        deployctl apply web 1.4.2 3 8080
+        deployctl apply mail 0.9.1 1 8080
+        healthctl mail
+        notifyctl deploy abc1234: 1 rolled back, 0 failed
+  - name: an unhealthy new app is removed again
+    args: [repo, live, "1700000000"]
+    env:
+      FAKE_UNHEALTHY: mail
+    files: *fleet
+    expected_stdout: |-
+      unchanged db 1.0.0
+      created api 2.3.0
+      updated web 1.4.2 -> 1.5.0
+      removed mail (health check failed on create)
+      orphan old-cron (not in repo, use --prune to remove)
+      deploy abc1234: created=1 updated=1 deleted=0 rolled-back=1 failed=0 unchanged=1
+    expected_exit: 1
+    expected_files:
+      live/mail.state: null
+      live/audit.log: |-
+        1700000000 abc1234 create api 2.3.0 ok
+        1700000000 abc1234 update web 1.4.2->1.5.0 ok
+        1700000000 abc1234 create mail 0.9.1 rolled-back
+  - name: a failing apply is reported and the others carry on
+    args: [repo, live, "1700000000"]
+    env:
+      FAKE_APPLY_FAIL: api
+    files: *fleet
+    expected_stdout: |-
+      unchanged db 1.0.0
+      FAILED api (deployctl exit 4)
+      updated web 1.4.2 -> 1.5.0
+      created mail 0.9.1
+      orphan old-cron (not in repo, use --prune to remove)
+      deploy abc1234: created=1 updated=1 deleted=0 rolled-back=0 failed=1 unchanged=1
+    expected_exit: 1
+    expected_files:
+      live/api.state: null
+      live/audit.log: |-
+        1700000000 abc1234 create api 2.3.0 failed
+        1700000000 abc1234 update web 1.4.2->1.5.0 ok
+        1700000000 abc1234 create mail 0.9.1 ok
+  - name: dry run shows the plan and touches nothing
+    args: [--dry-run, --prune, repo, live, "1700000000"]
+    files: *fleet
+    expected_stdout: |-
+      unchanged db 1.0.0
+      would create api 2.3.0
+      would update web 1.4.2 -> 1.5.0
+      would create mail 0.9.1
+      would delete old-cron
+      plan for abc1234: create=2 update=1 delete=1 unchanged=1
+    expected_files:
+      live/api.state: null
+      live/audit.log: null
+      live/old-cron.state: "version=0.1.0\nreplicas=1\nport=8080"
+      .calls.log: null
+  - name: nothing to do, nobody is paged
+    args: [repo, live, "1700000000"]
+    files:
+      repo/apps/db.app: "version=1.0.0\n"
+      live/db.state: "version=1.0.0\nreplicas=1\nport=8080\n"
+    expected_stdout: |-
+      unchanged db 1.0.0
+      deploy abc1234: created=0 updated=0 deleted=0 rolled-back=0 failed=0 unchanged=1
+    expected_files:
+      .calls.log: null
+      live/audit.log: null
+  - name: a freeze stops everything
+    args: [repo, live, "1700000000"]
+    files:
+      repo/FREEZE: "storm warning until Monday\nsecond line\n"
+      repo/apps/db.app: "version=1.0.0\n"
+      "live/": ""
+    expected_stderr: "deploy freeze active: storm warning until Monday"
+    expected_exit: 1
+    expected_files:
+      .calls.log: null
+  - name: too many changes in one run
+    args: [repo, live, "1700000000"]
+    env:
+      MAX_CHANGES: "2"
+    files: *fleet
+    expected_stderr: "too many changes (3 > 2), refusing"
+    expected_exit: 1
+    expected_files:
+      .calls.log: null
+      live/audit.log: null
+  - name: another deployer holds the lock
+    args: [repo, live, "1700000000"]
+    files:
+      repo/apps/db.app: "version=1.0.0\n"
+      "live/.lock/": ""
+    expected_stderr: "another deploy is running"
+    expected_exit: 1
+  - name: git cannot pull
+    args: [repo, live, "1700000000"]
+    env:
+      FAKE_GIT: fail
+    files:
+      repo/apps/db.app: "version=1.0.0\n"
+      "live/": ""
+    expected_stderr: "git pull failed, nothing deployed"
+    expected_exit: 1
+    expected_files:
+      live/.lock: null
+  - name: every manifest problem is listed before anything changes
+    args: [repo, live, "1700000000"]
+    files:
+      repo/apps/Worse_Name.app: "version=1.0.0\n"
+      repo/apps/bad.app: "replicas=zero\nflavour=x\n"
+      repo/apps/good.app: "version=1.0.0\n"
+      repo/apps/odd.app: "version=1.0\nport=70000\norder=100\n"
+      "live/": ""
+    expected_stderr: |-
+      invalid manifest apps/Worse_Name.app: bad name
+      invalid manifest apps/bad.app: bad replicas 'zero'
+      invalid manifest apps/bad.app: unknown key 'flavour'
+      invalid manifest apps/bad.app: missing version
+      invalid manifest apps/odd.app: bad version '1.0'
+      invalid manifest apps/odd.app: bad port '70000'
+      invalid manifest apps/odd.app: bad order '100'
+      invalid manifest apps/odd.app: missing version
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+      live/.lock: null
+  - name: bad option
+    args: [--force, repo, live, "1700000000"]
+    expected_stderr: "usage: solution.sh [--dry-run] [--prune] REPO LIVE NOW"
+    expected_exit: 2

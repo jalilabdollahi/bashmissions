@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Pretend card-payment gateway: `payments-api charge ORDER`.
+# FAKE_PAY=ok (default) | fail. Every call is recorded in .calls.log.
+if [[ ${1:-} != charge || $# -ne 2 ]]; then
+  echo "payments-api: usage: payments-api charge ORDER" >&2
+  exit 2
+fi
+echo "charge $2" >> .calls.log
+if [[ ${FAKE_PAY:-ok} == fail ]]; then
+  echo "timeout talking to gateway"
+  exit 7
+fi
+echo "charged $2"

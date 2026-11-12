@@ -1,1 +1,25 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A cap spt tokens last
+  # rules:   while read -r client c s _; do ... [[ $client == '*' ]] ... done < "$limits"
+  # buckets: while read -r client t l; do tokens[$client]=$t; last[$client]=$l; done < "$state"
+
+  refill() {   # CLIENT TS
+    local c=$1 ts=$2 added
+    if (( ts > last[$c] )); then
+      added=$(( (ts - last[$c]) / spt[$c] ))
+      tokens[$c]=$(( tokens[$c] + added ))
+      last[$c]=$(( last[$c] + added * spt[$c] ))
+    fi
+    if (( tokens[$c] >= cap[$c] )); then tokens[$c]=${cap[$c]}; last[$c]=$ts; fi
+  }
+
+  n=0
+  while IFS= read -r line || [[ -n $line ]]; do
+    n=$((n+1))
+    # skip blank/# lines; read -r ts client cost extra <<< "$line"; cost=${cost:-1}
+    # validate (digits, cost >= 1, no extra field) -> "line $n: bad request"
+    # ts < prev_ts -> "time goes backwards";  unknown client and no default -> "no limit for"
+    # new client: full bucket, last=ts.   refill; then reject / allow / deny.
+  done
+  summary, save state sorted, exit 1 when errors happened

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Pretend pager/chat: `notifyctl send MESSAGE`. Recorded in .calls.log.
+if [[ ${1:-} != send || $# -ne 2 ]]; then
+  echo "notifyctl: usage: notifyctl send MESSAGE" >&2
+  exit 2
+fi
+echo "notifyctl $2" >> .calls.log

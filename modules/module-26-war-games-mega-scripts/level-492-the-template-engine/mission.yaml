@@ -1,22 +1,216 @@
 id: 492
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Template Engine
 difficulty: expert
-xp: 200
-objective: Implement the mega-script mission `The Template Engine` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Template Engine
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 440
+story: |
+  During the storm migration Theo hand-edited forty nginx configs, and the one
+  he forgot to edit was the one for Tidewater Books, which now sends customers
+  to a server that is underwater. Mara is done with copy-and-paste. Configs
+  should be generated from one template plus a small file of variables:
+  a placeholder here, an optional TLS block there, a repeated line per backend.
+  Every tool she has found for this wants a language runtime the harbour
+  servers do not have, so you will write a tiny template engine in Bash.
+objective: |
+  Write solution.sh, a template renderer.
+
+    solution.sh [-D NAME=VALUE]... TEMPLATE VARS
+
+  VARS: lines `NAME=VALUE` (VALUE is everything after the first `=`, and may be
+  empty or contain `=`). Blank lines and `#` lines are ignored. NAME matches
+  `[A-Za-z_][A-Za-z0-9_]*`; anything else prints `bad vars line N` to stderr
+  and exits 2. Each `-D NAME=VALUE` option sets or overrides a variable (same
+  rules; a bad one prints `bad -D option` and exits 2). A list is a value
+  with items separated by commas.
+
+  TEMPLATE is text with two kinds of markup.
+
+  1. Placeholders `{{NAME}}`, `{{ NAME }}` or `{{NAME:-FALLBACK}}`. They are
+     replaced by the variable's value, or by FALLBACK when the variable is unset
+     or empty. A variable named like `loop.index` is allowed inside loops
+     (see below). Any number of placeholders may appear on one line.
+  2. Block directives, each alone on its own line (leading and trailing
+     spaces allowed); the directive line itself produces no output:
+       {% if COND %} ... {% else %} ... {% endif %}        (else is optional)
+       {% for ITEM in LISTVAR %} ... {% endfor %}
+     COND is one of `VAR`, `not VAR`, `VAR == WORD`, `VAR != WORD`. `VAR` is
+     true when it is set and its value, in lower case, is not empty, `0`,
+     `false`, `no` or `off`. An unset variable is false in a condition and
+     never an error. WORD is compared literally with the value.
+     A `for` runs its body once per comma-separated item (an empty list runs it
+     zero times). Inside the body `{{ITEM}}` is the current item and
+     `{{loop.index}}` is its 1-based position. Blocks nest. After a loop ends,
+     ITEM and loop.index have the values they had before it (nested loops
+     must not leak into the outer one).
+
+  Plain lines are copied as they are (after placeholder replacement).
+
+  Errors go to stderr as `line N: MESSAGE` (N is the template's physical line),
+  produce no stdout at all, and exit 1:
+    `unclosed 'if'`  /  `unclosed 'for'`      (reported at the opening line)
+    `'else' without 'if'`, `'endif' without 'if'`, `'endfor' without 'for'`
+    `bad directive 'TEXT'`    (anything else inside {% %}, TEXT trimmed)
+    `unclosed '{{'`           a placeholder that never ends
+    `undefined variable 'NAME'`  a placeholder without fallback whose variable
+                                 is unset (an EMPTY variable is fine), or a
+                                 `for` over an unset list
+  Structural errors are all listed, in line order. Undefined-variable and
+  unclosed-placeholder errors are found while rendering: report only the first
+  one of those, and only when there are no structural errors.
+
+  Wrong arguments: `usage: solution.sh [-D NAME=VALUE]... TEMPLATE VARS` on
+  stderr, exit 2. Unreadable files: `cannot read FILE`, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "parsing a small markup language into a block structure"
+  - "recursive rendering of nested blocks"
+  - "scoped variables: save and restore around a loop"
+  - "no output until you know the whole template is valid"
+required_patterns:
+  - pattern: 'declare\s+-A'
+    message: "Keep the variables in an associative array."
+forbidden_patterns:
+  - pattern: '\beval\b'
+    message: "eval would run template text as code; the whole point is that templates are data."
+  - pattern: '\benvsubst\b'
+    message: "envsubst is not available everywhere, and it cannot do blocks."
+test_cases:
+  - name: a full site with TLS and three backends
+    args: [fixtures/site.tpl, fixtures/site.vars]
+    expected_stdout: |-
+      # generated for harbour.example - do not edit by hand
+      server {
+          listen 8443;
+          server_name harbour.example;
+          ssl_certificate /etc/ssl/harbour.example.pem;
+          server anchovy:8080;   # backend 1
+          server barracuda:8080;   # backend 2
+          server cuttlefish:8080;   # backend 3
+      }
+  - name: false condition, fallback port, command-line override
+    args: [-D, tls=no, -D, "backends=dory", -D, port=, fixtures/site.tpl, fixtures/site.vars]
+    expected_stdout: |-
+      # generated for harbour.example - do not edit by hand
+      server {
+          listen 80;
+          server_name harbour.example;
+          # no TLS yet
+          server dory:8080;   # backend 1
+      }
+  - name: an empty list runs the loop zero times
+    args: [-D, backends=, fixtures/site.tpl, fixtures/site.vars]
+    expected_stdout: |-
+      # generated for harbour.example - do not edit by hand
+      server {
+          listen 8443;
+          server_name harbour.example;
+          ssl_certificate /etc/ssl/harbour.example.pem;
+      }
+  - name: nested loops restore the outer loop index
+    args: [t.tpl, v.vars]
+    files:
+      t.tpl: |
+        {% for dc in datacenters %}
+        [{{dc}}]
+        {% for host in hosts %}
+          {{loop.index}}. {{host}}.{{dc}}
+        {% endfor %}
+        # done {{dc}} ({{loop.index}} of 2)
+        {% endfor %}
+      v.vars: |
+        datacenters=north,south
+        hosts=a,b
+    expected_stdout: |-
+      [north]
+        1. a.north
+        2. b.north
+      # done north (1 of 2)
+      [south]
+        1. a.south
+        2. b.south
+      # done south (2 of 2)
+  - name: comparisons and not, inside a loop
+    args: [t.tpl, v.vars]
+    files:
+      t.tpl: |
+        {% for svc in services %}
+        {% if env == prod %}
+        {{svc}}: replicas={{replicas:-3}}
+        {% else %}
+        {{svc}}: replicas=1
+        {% endif %}
+        {% endfor %}
+        {% if not maintenance %}
+        open for business
+        {% endif %}
+        {% if env != prod %}
+        (not production)
+        {% endif %}
+      v.vars: |
+        env=prod
+        services=web,db
+        maintenance=OFF
+        replicas=
+    expected_stdout: |-
+      web: replicas=3
+      db: replicas=3
+      open for business
+  - name: values may contain equals signs and several placeholders per line
+    args: [t.tpl, v.vars]
+    files:
+      t.tpl: "url={{base}}?a={{ a }}&b={{b:-none}} again {{a}}\n"
+      v.vars: |
+        # comment
+        base=https://x.example/q
+        a=1=2
+    expected_stdout: "url=https://x.example/q?a=1=2&b=none again 1=2"
+  - name: structural errors are all listed and nothing is printed
+    args: [t.tpl, v.vars]
+    files:
+      t.tpl: |
+        {% if tls %}
+        text
+        {% endfor %}
+        {% for h in hosts %}
+        {% bogus thing %}
+        {% else %}
+        {% endif %}
+      v.vars: "tls=1\n"
+    expected_stderr: |-
+      line 1: unclosed 'if'
+      line 3: 'endfor' without 'for'
+      line 4: unclosed 'for'
+      line 5: bad directive 'bogus thing'
+      line 6: 'else' without 'if'
+      line 7: 'endif' without 'if'
+    expected_exit: 1
+  - name: an undefined variable stops the render with no output
+    args: [t.tpl, v.vars]
+    files:
+      t.tpl: |
+        first line is fine
+        server_name {{domain}};
+        listen {{port}};
+      v.vars: "port=80\n"
+    expected_stderr: "line 2: undefined variable 'domain'"
+    expected_exit: 1
+  - name: an unclosed placeholder
+    args: [t.tpl, v.vars]
+    files:
+      t.tpl: "hello {{name\n"
+      v.vars: "name=x\n"
+    expected_stderr: "line 1: unclosed '{{'"
+    expected_exit: 1
+  - name: bad vars line
+    args: [fixtures/site.tpl, v.vars]
+    files:
+      v.vars: |
+        domain=ok
+        this line has no equals
+    expected_stderr: "bad vars line 2"
+    expected_exit: 2
+  - name: missing template
+    args: [nope.tpl, fixtures/site.vars]
+    expected_stderr: "cannot read nope.tpl"
+    expected_exit: 2

@@ -1,22 +1,172 @@
 id: 479
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Distributed Lock
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Distributed Lock` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Distributed Lock
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 320
+story: |
+  The first storm of the season knocked out the Lanternfish primary link for
+  forty seconds, and when it came back two deploy scripts woke up at the same
+  moment and both started rewriting the same config. Theo's version of "locking"
+  was a file called `deploy.lock` that nobody ever deleted. Mara wants a real
+  one: a lock that only one process can take, that says who holds it, and that
+  gives itself up when its owner crashes in the dark and never comes back.
+objective: |
+  Write solution.sh, a small lock manager built on the fact that `mkdir` is
+  atomic: of two processes creating the same directory, exactly one succeeds.
+  The lock IS a directory LOCK. Inside it two files record the holder:
+  `owner` (the owner name) and `expires` (epoch seconds, a plain integer).
+  There is no real clock: the current time is always passed in as NOW.
+
+    solution.sh acquire LOCK OWNER TTL NOW
+    solution.sh release LOCK OWNER
+    solution.sh status  LOCK NOW
+
+  acquire (TTL and NOW must be positive integers):
+    - Try `mkdir LOCK`. If it works, write `owner` and `expires` (NOW+TTL) and
+      print `acquired LOCK by OWNER until EXPIRES`.
+    - If LOCK already exists and its owner is the same OWNER and it has not
+      expired, extend it: set `expires` to NOW+TTL and print
+      `renewed LOCK by OWNER until EXPIRES`.
+    - If it exists, is held by someone else, and EXPIRES is greater than NOW,
+      print `busy: LOCK held by HOLDER for another N s` to stderr (N =
+      EXPIRES-NOW) and exit 1. Change nothing.
+    - If it exists and EXPIRES is less than or equal to NOW, the holder is
+      presumed dead: print `reclaimed stale lock of HOLDER` to stdout, remove the
+      old lock and take it with the normal steps (so a second line,
+      `acquired ...`, follows).
+    - If the `owner` or `expires` file is missing, or `expires` is not a
+      number, someone is probably mid-acquire. Never steal it: treat it as busy
+      with holder `unknown` and print `busy: LOCK held by unknown` to stderr,
+      exit 1.
+    - If `mkdir` fails and LOCK does not exist (for example the parent folder is
+      missing), print `cannot create LOCK` to stderr and exit 2.
+    - Do not use `mkdir -p`: it succeeds when the directory exists, which
+      defeats the whole idea.
+
+  release LOCK OWNER:
+    - No LOCK: `not locked: LOCK` to stderr, exit 1.
+    - Held by another owner: `refused: LOCK belongs to HOLDER, not OWNER` to
+      stderr, exit 3. Nothing is removed.
+    - Otherwise remove the two files and the directory, print `released LOCK`.
+      (An expired lock may still be released by its owner.)
+
+  status LOCK NOW prints exactly one line and exits 0:
+    `free` when there is no LOCK;
+    `held by HOLDER, N s left` while EXPIRES is greater than NOW;
+    `expired, was held by HOLDER` otherwise.
+
+  Any other command or the wrong number of arguments, or a TTL/NOW that is
+  not a positive integer: print
+  `usage: solution.sh acquire LOCK OWNER TTL NOW | release LOCK OWNER | status LOCK NOW`
+  to stderr and exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "mkdir as an atomic test-and-set"
+  - "lock metadata: owner and expiry"
+  - "stale lock detection with an injected clock"
+  - "validating input before acting"
+required_patterns:
+  - pattern: '\bmkdir\b'
+    message: "Take the lock with mkdir: it either creates the directory or fails, atomically."
+forbidden_patterns:
+  - pattern: '\bflock\b'
+    message: "flock is not available everywhere; build the lock from mkdir."
+  - pattern: 'mkdir\s+(-[a-z]*p|--parents)'
+    message: "mkdir -p succeeds on an existing directory, so it cannot tell you who got there first."
+test_cases:
+  - name: free lock is acquired
+    args: [acquire, locks/deploy.lock, mara, "300", "1700000000"]
+    files:
+      "locks/": ""
+    expected_stdout: "acquired locks/deploy.lock by mara until 1700000300"
+    expected_files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+  - name: second owner is turned away
+    args: [acquire, locks/deploy.lock, theo, "60", "1700000100"]
+    files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+    expected_stderr: "busy: locks/deploy.lock held by mara for another 200 s"
+    expected_exit: 1
+    expected_files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+  - name: owner renews its own lock
+    args: [acquire, locks/deploy.lock, mara, "300", "1700000250"]
+    files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+    expected_stdout: "renewed locks/deploy.lock by mara until 1700000550"
+    expected_files:
+      locks/deploy.lock/expires: "1700000550"
+  - name: stale lock is reclaimed
+    args: [acquire, locks/deploy.lock, theo, "120", "1700000300"]
+    files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+    expected_stdout: |-
+      reclaimed stale lock of mara
+      acquired locks/deploy.lock by theo until 1700000420
+    expected_files:
+      locks/deploy.lock/owner: theo
+      locks/deploy.lock/expires: "1700000420"
+  - name: half-written lock is never stolen
+    args: [acquire, locks/deploy.lock, theo, "60", "1800000000"]
+    files:
+      locks/deploy.lock/owner: mara
+    expected_stderr: "busy: locks/deploy.lock held by unknown"
+    expected_exit: 1
+    expected_files:
+      locks/deploy.lock/owner: mara
+  - name: missing parent folder
+    args: [acquire, nowhere/deploy.lock, mara, "60", "1700000000"]
+    expected_stderr: "cannot create nowhere/deploy.lock"
+    expected_exit: 2
+  - name: bad ttl is a usage error
+    args: [acquire, locks/deploy.lock, mara, "soon", "1700000000"]
+    files:
+      "locks/": ""
+    expected_stderr: "usage: solution.sh acquire LOCK OWNER TTL NOW | release LOCK OWNER | status LOCK NOW"
+    expected_exit: 2
+  - name: release by the owner
+    args: [release, locks/deploy.lock, mara]
+    files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+    expected_stdout: "released locks/deploy.lock"
+    expected_files:
+      locks/deploy.lock: null
+  - name: release by a stranger is refused
+    args: [release, locks/deploy.lock, theo]
+    files:
+      locks/deploy.lock/owner: mara
+      locks/deploy.lock/expires: "1700000300"
+    expected_stderr: "refused: locks/deploy.lock belongs to mara, not theo"
+    expected_exit: 3
+    expected_files:
+      locks/deploy.lock/owner: mara
+  - name: release when nothing is locked
+    args: [release, locks/deploy.lock, mara]
+    files:
+      "locks/": ""
+    expected_stderr: "not locked: locks/deploy.lock"
+    expected_exit: 1
+  - name: status of a held lock
+    args: [status, locks/deploy.lock, "1700000120"]
+    files:
+      locks/deploy.lock/owner: priya
+      locks/deploy.lock/expires: "1700000300"
+    expected_stdout: "held by priya, 180 s left"
+  - name: status of an expired lock
+    args: [status, locks/deploy.lock, "1700000999"]
+    files:
+      locks/deploy.lock/owner: priya
+      locks/deploy.lock/expires: "1700000300"
+    expected_stdout: "expired, was held by priya"
+  - name: status of a free lock
+    args: [status, locks/deploy.lock, "1700000999"]
+    files:
+      "locks/": ""
+    expected_stdout: "free"

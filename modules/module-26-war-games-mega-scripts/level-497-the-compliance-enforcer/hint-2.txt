@@ -1,1 +1,13 @@
-Keep the script safe and deterministic inside the mission workspace.
+Current permissions without stat: `ls -ld PATH` starts with ten characters like -rw-r--r--. Skip the first (file type) and walk the other nine, adding 4, 2, 1 for r, w, x in each group of three:
+
+  perms=$(ls -ld "$f"); perms=${perms%% *}
+  c=${perms:1:1}            # substring: offset 1, length 1
+
+Normalise modes before comparing: keep the last three digits and print them with a leading 0 (600 and 0600 are the same rule).
+
+Rewriting a file but keeping its permissions: mktemp creates files with mode 0600, and `mv tmpfile file` would replace the original's mode with that. Instead write the new content over the old file:  cat "$tmp" > "$file"  (the redirect keeps the existing inode and mode).
+
+Backup with the original mode and timestamps:  cp -p "$file" "$root/.compliance-backup/$rel"  after mkdir -p of the folder; do it only once per file and never overwrite an existing backup.
+
+Case-insensitive comparison of keys:  [[ ${k,,} == "${key,,}" ]]
+Counting matches without failing under set -e:  count=$(grep -cE -- "$re" "$f" || true)

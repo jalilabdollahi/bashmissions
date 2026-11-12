@@ -1,1 +1,23 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  soak=${SOAK:-60}; min_reqs=${MIN_REQS:-100}; tolerance=${TOLERANCE_PM:-20}   # validate: ^[1-9][0-9]*$
+
+  steps=(); prev=0
+  while read -r step _; do skip blanks/#; must be digits, > prev, <= 100; steps+=("$step"); prev=$step; done < "$plan"
+  (( ${#steps[@]} )) and prev == 100, else "bad plan: ..." exit 2
+
+  declare -A c_reqs c_errs b_reqs b_errs
+  while read -r step cr ce br be _; do ...; done < "$metrics"
+
+  rate_pm() { if (( $2 == 0 )); then echo 0; else echo $(( $1 * 1000 / $2 )); fi; }
+  tenths()  { printf '%d.%d%%' $(($1 / 10)) $(($1 % 10)); }
+  set_weight() { lbctl weight "$1" || { echo "cannot set weight $1%" >&2; lbctl weight 0 || true; exit 3; }; }
+  abort() { lbctl weight 0 || true; echo "$release aborted at $1%: $2"; exit 1; }
+
+  for step in "${steps[@]}"; do
+    set_weight "$step"
+    if step is 100: message, lbctl promote, "$release promoted", break
+    sleep "$soak"
+    judge: missing -> abort; c_reqs < min_reqs -> abort; crate > brate + tolerance -> abort
+    echo "step $step%: canary ... baseline ... ok"
+  done

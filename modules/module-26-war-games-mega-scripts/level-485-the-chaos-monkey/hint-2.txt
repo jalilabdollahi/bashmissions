@@ -1,1 +1,9 @@
-Keep the script safe and deterministic inside the mission workspace.
+A linear congruential generator is one line of arithmetic. Bash integers are 64 bit, so this cannot overflow when the state stays below 2^31:
+
+  state=$(( (state * 1103515245 + 12345) & 2147483647 ))     # & keeps 31 bits
+  rnd=$(( state >> 16 ))                                      # the high bits are the "random" ones
+
+Wrap it in a function that sets a global (calling it inside $( ) would run it in a subshell and lose the new state!).
+Picking from an array:  target=${targets[rnd % ${#targets[@]}]}
+Reading the fleet:  while read -r name flag _; do ...; done < "$fleet"  and skip names whose flag is "protected".
+Remember that the parameter draw happens even for a "kill" fault, so the later rounds line up.

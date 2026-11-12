@@ -1,22 +1,264 @@
 id: 494
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Event Bus
 difficulty: expert
-xp: 220
-objective: Implement the mega-script mission `The Event Bus` using structured steps,
-  temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Event Bus
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 460
+story: |
+  Every system at Lanternfish learned about a failed deploy in a different
+  way: Theo's script emailed Priya, the status board polled a file, the audit
+  log was updated by hand on Fridays. When the storm hit, three of the four
+  never heard the news. Mara's fix is the oldest pattern in messaging: whoever
+  has news publishes it to a named topic, whoever cares subscribes, and a
+  dispatcher delivers each message to each subscriber, in order, once, and
+  without letting one broken listener stop the rest. No network, no daemon:
+  a folder on disk is the bus.
+objective: |
+  Write solution.sh, a file-based publish/subscribe bus.
+
+    solution.sh BUS subscribe PATTERN NAME HANDLER
+    solution.sh BUS unsubscribe NAME
+    solution.sh BUS publish TOPIC MESSAGE...
+    solution.sh BUS dispatch
+    solution.sh BUS status
+
+  BUS is a directory that must already exist (`no such bus: BUS` on stderr,
+  exit 2). Layout (create sub-folders as needed):
+    BUS/spool/NNNNNN      one file per message, 6-digit number, content:
+                          line 1 the topic, line 2 the message
+    BUS/subs/NAME         two lines: the pattern, the handler
+    BUS/cursor/NAME       the highest message number this subscriber is done with
+    BUS/tries/NAME        `SEQ COUNT`: failed attempts so far for message SEQ
+    BUS/dead/NAME.NNNNNN  a dead-lettered message (same format as spool)
+
+  Names: a TOPIC matches `[a-z0-9][a-z0-9._-]*`; a PATTERN is a topic where
+  `*` may also appear (glob matching: `deploy.*`, `*`); NAME matches
+  `[a-z][a-z0-9-]*`; HANDLER matches `[A-Za-z0-9_./-]+` (one command word).
+  A violation prints `bad topic 'X'`, `bad pattern 'X'`, `bad name 'X'` or
+  `bad handler 'X'` to stderr and exits 2.
+
+  subscribe: a name may be used once (`subscriber NAME already exists`, exit
+  1). The new subscriber starts at the current last message number: cursor =
+  that number (0 on an empty spool), so it only sees future messages. Print
+  `NAME subscribed to PATTERN (cursor C)`.
+  unsubscribe: remove the subscription, its cursor and tries file. Print
+  `NAME unsubscribed`, or `no such subscriber: NAME` (exit 1).
+  publish: the message text is all remaining arguments joined with single
+  spaces. Its number is the highest number in the spool plus 1. Claim the file
+  atomically: turn on `noclobber` (`set -C`) in a subshell so that `>` refuses
+  to overwrite an existing file, and if it does refuse, try the next number.
+  Print `published #N to TOPIC (S subscribers)`, S being how many subscribers'
+  patterns match the topic.
+  dispatch: handle subscribers in alphabetical order of NAME. For each, look at
+  every message with number greater than its cursor, in order:
+    - a topic that does not match the pattern is skipped: cursor moves on
+      silently;
+    - otherwise run `HANDLER TOPIC SEQ MESSAGE` (three arguments) and:
+        success -> print `deliver #SEQ TOPIC -> NAME ok`, cursor = SEQ, and
+                   forget any tries record for that message;
+        failure -> the failed attempt count for this message becomes (stored
+                   count + 1), saved in BUS/tries/NAME as `SEQ COUNT`. If it
+                   reached MAX_TRIES (environment, default 3) move the
+                   message to BUS/dead/NAME.NNNNNN, print
+                   `dead-letter #SEQ TOPIC -> NAME after K attempts`, move the
+                   cursor to SEQ, delete the tries file and carry on with the next
+                   message. Otherwise print
+                   `deliver #SEQ TOPIC -> NAME failed (attempt K/MAX)` and
+                   stop this subscriber for this run (its later messages wait,
+                   so order is kept). Other subscribers are unaffected.
+  Write each cursor as soon as it moves. At the end print
+  `dispatch: delivered=D failed=F dead=X` and exit 1 if F or X is not zero.
+  status: print `messages: N` (the last number) and then one line per
+  subscriber, alphabetical: `NAME topic=PATTERN handler=H cursor=C pending=P dead=D`
+  (pending = messages above the cursor that match the pattern, dead = files in
+  BUS/dead for that name), or `no subscribers`.
+
+  Wrong arguments: `usage: solution.sh BUS subscribe PATTERN NAME HANDLER | unsubscribe NAME | publish TOPIC MESSAGE... | dispatch | status`
+  on stderr, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "publish / subscribe through a spool directory"
+  - "per-subscriber cursors give each listener its own pace"
+  - "retry counting and a dead-letter folder"
+  - "noclobber: atomic file creation to claim a sequence number"
+required_patterns:
+  - pattern: 'set\s+-[a-zA-Z]*C|noclobber'
+    message: "Claim the message file atomically with noclobber (set -C) and try the next number if it is taken."
+test_cases:
+  - name: subscribe on an empty bus
+    args: [bus, subscribe, "deploy.*", board, status-board]
+    files:
+      "bus/": ""
+    expected_stdout: "board subscribed to deploy.* (cursor 0)"
+    expected_files:
+      bus/subs/board: |-
+        deploy.*
+        status-board
+      bus/cursor/board: "0"
+  - name: a late subscriber starts at the end of the spool
+    args: [bus, subscribe, "*", audit, audit-log]
+    files:
+      bus/spool/000001: "deploy.started\nv1\n"
+      bus/spool/000002: "backup.done\nok\n"
+    expected_stdout: "audit subscribed to * (cursor 2)"
+    expected_files:
+      bus/cursor/audit: "2"
+  - name: a name can only be used once
+    args: [bus, subscribe, "*", audit, audit-log]
+    files:
+      bus/subs/audit: "*\naudit-log\n"
+    expected_stderr: "subscriber audit already exists"
+    expected_exit: 1
+  - name: publish numbers the message and counts subscribers
+    args: [bus, publish, deploy.started, release, v1.5.0, started]
+    files:
+      bus/spool/000001: "backup.done\nok\n"
+      bus/spool/000003: "backup.done\nok again\n"
+      bus/subs/audit: "*\naudit-log\n"
+      bus/subs/board: "deploy.*\nstatus-board\n"
+      bus/subs/pager: "deploy.failed\nnotify-oncall\n"
+    expected_stdout: "published #4 to deploy.started (2 subscribers)"
+    expected_files:
+      bus/spool/000004: |-
+        deploy.started
+        release v1.5.0 started
+  - name: the first message of a bus
+    args: [bus, publish, backup.done, nightly ok]
+    files:
+      "bus/": ""
+    expected_stdout: "published #1 to backup.done (0 subscribers)"
+    expected_files:
+      bus/spool/000001: |-
+        backup.done
+        nightly ok
+  - name: a bad topic
+    args: [bus, publish, "Deploy Started", hello]
+    files:
+      "bus/": ""
+    expected_stderr: "bad topic 'Deploy Started'"
+    expected_exit: 2
+  - name: dispatch delivers each message to each matching subscriber
+    args: [bus, dispatch]
+    files: &fleet
+      bus/spool/000001: "deploy.started\nv1.5.0 started\n"
+      bus/spool/000002: "deploy.failed\nv1.5.0 health check 502\n"
+      bus/spool/000003: "backup.done\nnightly ok\n"
+      bus/subs/audit: "*\naudit-log\n"
+      bus/subs/board: "deploy.*\nstatus-board\n"
+      bus/subs/pager: "deploy.failed\nnotify-oncall\n"
+      bus/cursor/audit: "0\n"
+      bus/cursor/board: "1\n"
+      bus/cursor/pager: "0\n"
+    expected_stdout: |-
+      deliver #1 deploy.started -> audit ok
+      deliver #2 deploy.failed -> audit ok
+      deliver #3 backup.done -> audit ok
+      deliver #2 deploy.failed -> board ok
+      deliver #2 deploy.failed -> pager ok
+      dispatch: delivered=5 failed=0 dead=0
+    expected_files:
+      bus/cursor/audit: "3"
+      bus/cursor/board: "3"
+      bus/cursor/pager: "3"
+      .calls.log: |-
+        audit-log deploy.started 1 v1.5.0 started
+        audit-log deploy.failed 2 v1.5.0 health check 502
+        audit-log backup.done 3 nightly ok
+        status-board deploy.failed 2 v1.5.0 health check 502
+        notify-oncall deploy.failed 2 v1.5.0 health check 502
+  - name: a failing handler blocks only its own subscriber
+    args: [bus, dispatch]
+    env:
+      FAKE_FAIL: notify-oncall
+    files: *fleet
+    expected_stdout: |-
+      deliver #1 deploy.started -> audit ok
+      deliver #2 deploy.failed -> audit ok
+      deliver #3 backup.done -> audit ok
+      deliver #2 deploy.failed -> board ok
+      deliver #2 deploy.failed -> pager failed (attempt 1/3)
+      dispatch: delivered=4 failed=1 dead=0
+    expected_exit: 1
+    expected_files:
+      bus/cursor/audit: "3"
+      bus/cursor/board: "3"
+      bus/cursor/pager: "1"
+      bus/tries/pager: "2 1"
+  - name: the third failure dead-letters the message and moves on
+    args: [bus, dispatch]
+    env:
+      FAKE_FAIL: notify-oncall
+    files:
+      bus/spool/000002: "deploy.failed\nv1.5.0 health check 502\n"
+      bus/spool/000003: "deploy.failed\nv1.5.1 health check 502\n"
+      bus/subs/pager: "deploy.failed\nnotify-oncall\n"
+      bus/cursor/pager: "1\n"
+      bus/tries/pager: "2 2\n"
+    expected_stdout: |-
+      dead-letter #2 deploy.failed -> pager after 3 attempts
+      deliver #3 deploy.failed -> pager failed (attempt 1/3)
+      dispatch: delivered=0 failed=1 dead=1
+    expected_exit: 1
+    expected_files:
+      bus/dead/pager.000002: |-
+        deploy.failed
+        v1.5.0 health check 502
+      bus/cursor/pager: "2"
+      bus/tries/pager: "3 1"
+  - name: MAX_TRIES is configurable and a success clears the record
+    args: [bus, dispatch]
+    env:
+      MAX_TRIES: "5"
+    files:
+      bus/spool/000002: "deploy.failed\nv1.5.0 health check 502\n"
+      bus/subs/pager: "deploy.failed\nnotify-oncall\n"
+      bus/cursor/pager: "1\n"
+      bus/tries/pager: "2 4\n"
+    expected_stdout: |-
+      deliver #2 deploy.failed -> pager ok
+      dispatch: delivered=1 failed=0 dead=0
+    expected_files:
+      bus/cursor/pager: "2"
+      bus/tries/pager: null
+  - name: status overview
+    args: [bus, status]
+    files:
+      bus/spool/000001: "deploy.started\nv1\n"
+      bus/spool/000002: "deploy.failed\nv1 failed\n"
+      bus/spool/000003: "backup.done\nok\n"
+      bus/subs/audit: "*\naudit-log\n"
+      bus/subs/pager: "deploy.failed\nnotify-oncall\n"
+      bus/cursor/audit: "1\n"
+      bus/cursor/pager: "0\n"
+      bus/dead/pager.000001: "deploy.failed\nold\n"
+    expected_stdout: |-
+      messages: 3
+      audit topic=* handler=audit-log cursor=1 pending=2 dead=0
+      pager topic=deploy.failed handler=notify-oncall cursor=0 pending=1 dead=1
+  - name: unsubscribe removes everything
+    args: [bus, unsubscribe, pager]
+    files:
+      bus/subs/pager: "deploy.failed\nnotify-oncall\n"
+      bus/cursor/pager: "2\n"
+      bus/tries/pager: "3 1\n"
+    expected_stdout: "pager unsubscribed"
+    expected_files:
+      bus/subs/pager: null
+      bus/cursor/pager: null
+      bus/tries/pager: null
+  - name: unsubscribe an unknown name
+    args: [bus, unsubscribe, ghost]
+    files:
+      "bus/": ""
+    expected_stderr: "no such subscriber: ghost"
+    expected_exit: 1
+  - name: a handler may not contain spaces
+    args: [bus, subscribe, "*", audit, "rm -rf"]
+    files:
+      "bus/": ""
+    expected_stderr: "bad handler 'rm -rf'"
+    expected_exit: 2
+  - name: a missing bus
+    args: [nowhere, status]
+    expected_stderr: "no such bus: nowhere"
+    expected_exit: 2

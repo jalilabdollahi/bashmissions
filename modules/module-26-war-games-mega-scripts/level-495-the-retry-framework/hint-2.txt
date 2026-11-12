@@ -1,1 +1,15 @@
-Keep the script safe and deterministic inside the mission workspace.
+Exponential growth without ** (Bash has it, but you also need a ceiling so nothing overflows): start from the delay and double it N-1 times, stopping as soon as you pass the hard limit:
+
+  w=$delay
+  for (( i = 1; i < n; i++ )); do w=$(( w * 2 )); (( w >= 86400 )) && break; done
+
+Apply the cap afterwards:  (( max > 0 && w > max )) && w=$max
+
+Run a command and keep its status when set -e is on:
+  status=0; "$@" || status=$?
+
+Parse options in a loop until `--`:
+  while (( $# > 0 )) && [[ $1 != -- ]]; do case $1 in --attempts) attempts=$2 ;; ... esac; shift 2; done
+
+Is a code in a comma list?   [[ ",$retry_on," == *",$code,"* ]]
+Messages from the wrapper go to stderr (>&2) so the command's own stdout stays clean for pipes.

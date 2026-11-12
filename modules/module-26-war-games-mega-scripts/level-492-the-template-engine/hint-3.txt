@@ -1,1 +1,22 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  declare -A vars          # from VARS (regex ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$) and then -D overrides
+
+  # phase 1: for each line index i: kind[i]=text|if|else|endif|for|endfor|skip, arg[i]=condition or "item list"
+  #          stack of open if/for indexes; end_of[open]=closer, else_of[open]=else index
+  #          errors collected as "padded-line-number message", printed sorted, exit 1
+
+  render() {   # START END
+    local j=$1
+    while (( j < $2 )); do
+      case ${kind[j]} in
+        text) substitute ...; buffer+=$subst$'\n'; j=$((j+1)) ;;
+        if)   if eval_cond "${arg[j]}"; then render $((j+1)) "${else_of[j]:-${end_of[j]}}"; elif [[ -n ${else_of[j]:-} ]]; then render $((else_of[j]+1)) "${end_of[j]}"; fi; j=$((end_of[j]+1)) ;;
+        for)  save item/loop.index; for item in the list: set vars, render the body; restore; j=$((end_of[j]+1)) ;;
+        *)    j=$((j+1)) ;;
+      esac
+    done
+  }
+
+  render 0 "$total" || { echo "$runtime_error" >&2; exit 1; }
+  printf '%s' "$buffer"

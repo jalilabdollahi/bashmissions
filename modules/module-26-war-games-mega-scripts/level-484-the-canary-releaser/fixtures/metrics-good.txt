@@ -1,0 +1,4 @@
+# step  canary_reqs canary_errs base_reqs base_errs
+5   400   2   9600  38
+10  900   5   9100  36
+50  4000  30  4000  20

@@ -1,22 +1,152 @@
 id: 491
 module: 26
 module_name: war-games-mega-scripts
-module_display: 'War Games: Mega Scripts'
+module_display: "Storm Season: War Games"
 title: The Dependency Graph
 difficulty: expert
-xp: 240
-objective: Implement the mega-script mission `The Dependency Graph` using structured
-  steps, temp workspace, cleanup trap, arrays, functions, and reporting.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    mission=The Dependency Graph
-    steps=5
-    status=complete
-  expected_exit: 0
-  comparison: exact
-fixtures: []
+xp: 440
+story: |
+  After the storm the whole fleet cold-started at once and ended up in a heap:
+  `web` came up before `api`, `api` before `db`, and `db` before its disk was
+  mounted, so everything crashed three times and had to be restarted by hand
+  in an order that only Theo remembered. Mara wants that order written down
+  where a machine can use it, as a graph of "needs" lines, plus a tool that
+  turns the graph into a start order, a stop order and a list of what can start
+  in parallel. It must also complain, loudly and usefully, when somebody adds a
+  line that makes two services wait for each other forever.
+objective: |
+  Write solution.sh, a dependency resolver.
+
+    solution.sh levels GRAPH [TARGET...]
+    solution.sh order  GRAPH [TARGET...]
+    solution.sh stop   GRAPH [TARGET...]
+    solution.sh check  GRAPH
+
+  GRAPH: one service per line, `NAME: DEP DEP ...` (dependencies are started
+  FIRST; the list may be empty, `cache:`). Names match `[a-z0-9-]+`. Blank lines
+  and `#` comments are ignored. Problems are reported on stderr as
+  `GRAPH:LINE: MESSAGE` (GRAPH exactly as given), all of them in file order,
+  then exit 2:
+    `expected NAME: DEPENDENCIES`    no colon on the line
+    `bad name 'X'`
+    `duplicate service 'X'`          the second and later definitions
+    `unknown dependency 'X' of 'Y'`  X is never defined as a service (reported at
+                                     Y's line)
+  Repeated names inside one dependency list count once.
+
+  Resolution uses Kahn's algorithm in layers: LEVEL 1 is every service without
+  unmet dependencies; LEVEL 2 is every service whose dependencies are all in
+  level 1; and so on. Inside a level, names are sorted alphabetically
+  (`LC_ALL=C sort`).
+
+  levels: print one line per level, `N: name name ...`.
+  order:  print the services one per line, level by level (the start order).
+  stop:   the same list in exactly reverse order (the stop order).
+  check:  print `OK: N services in M levels`.
+  With TARGET arguments, `levels`, `order` and `stop` consider only the targets
+  and everything they depend on, directly or indirectly. A TARGET that is not a
+  service prints `unknown service 'X'` to stderr and exits 2.
+
+  Cycles: if some services can never be placed in a level, print to stdout
+  `cycle detected: a -> b -> c -> a` and exit 1, with this exact search: take
+  the alphabetically first unplaced service, repeatedly follow its alphabetically
+  first dependency that is also unplaced, until a service repeats; print the path
+  from the first occurrence of that repeated service to its second occurrence.
+  A service that depends on itself is a cycle: `cycle detected: x -> x`. Only
+  the part of the graph being resolved is examined (so asking for targets that
+  do not lead into a cycle succeeds).
+
+  Wrong arguments: `usage: solution.sh levels|order|stop GRAPH [TARGET...] | check GRAPH`
+  on stderr, exit 2. An unreadable GRAPH: `cannot read GRAPH`, exit 2.
 concepts:
-- combine 5+ Bash scripting concepts
-scaffold: true
+  - "topological sort with Kahn's algorithm, layer by layer"
+  - "cycle detection and printing an actual cycle"
+  - "reverse edges (dependents) to release waiting nodes"
+  - "transitive closure of the targets"
+required_patterns:
+  - pattern: 'declare\s+-A'
+    message: "Keep the graph in associative arrays (declare -A)."
+test_cases:
+  - name: start levels for the whole fleet
+    args: [levels, fixtures/harbour.graph]
+    expected_stdout: |-
+      1: cache disk dns
+      2: db mail
+      3: auth
+      4: api
+      5: web
+  - name: start order
+    args: [order, fixtures/harbour.graph]
+    expected_stdout: |-
+      cache
+      disk
+      dns
+      db
+      mail
+      auth
+      api
+      web
+  - name: stop order is the exact reverse
+    args: [stop, fixtures/harbour.graph]
+    expected_stdout: |-
+      web
+      api
+      auth
+      mail
+      db
+      dns
+      disk
+      cache
+  - name: a target brings its dependencies only
+    args: [order, fixtures/harbour.graph, web]
+    expected_stdout: |-
+      cache
+      disk
+      db
+      auth
+      api
+      web
+  - name: two targets share dependencies
+    args: [levels, fixtures/harbour.graph, mail, auth]
+    expected_stdout: |-
+      1: disk dns
+      2: db mail
+      3: auth
+  - name: check a healthy graph
+    args: [check, fixtures/harbour.graph]
+    expected_stdout: "OK: 8 services in 5 levels"
+  - name: a cycle is reported with its path
+    args: [order, fixtures/loop.graph]
+    expected_stdout: "cycle detected: a -> b -> c -> a"
+    expected_exit: 1
+  - name: a target outside the cycle still resolves
+    args: [order, fixtures/loop.graph, d]
+    expected_stdout: "d"
+  - name: a target that leads into the cycle fails
+    args: [check, fixtures/loop.graph]
+    expected_stdout: "cycle detected: a -> b -> c -> a"
+    expected_exit: 1
+  - name: a service that needs itself
+    args: [check, self.graph]
+    files:
+      self.graph: |
+        db:
+        x: db x
+    expected_stdout: "cycle detected: x -> x"
+    expected_exit: 1
+  - name: every parse problem is listed
+    args: [check, fixtures/broken.graph]
+    expected_stderr: |-
+      fixtures/broken.graph:1: unknown dependency 'zzz' of 'web'
+      fixtures/broken.graph:2: expected NAME: DEPENDENCIES
+      fixtures/broken.graph:3: bad name 'Bad Name'
+      fixtures/broken.graph:5: duplicate service 'db'
+    expected_exit: 2
+  - name: unknown target
+    args: [order, fixtures/harbour.graph, teleporter]
+    expected_stderr: "unknown service 'teleporter'"
+    expected_exit: 2
+  - name: unknown command
+    args: [sort, fixtures/harbour.graph]
+    expected_stderr: "usage: solution.sh levels|order|stop GRAPH [TARGET...] | check GRAPH"
+    expected_exit: 2

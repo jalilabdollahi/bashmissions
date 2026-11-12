@@ -1,0 +1,5 @@
+initial open
+open triage
+open triage triaged colour=red
+open Triage triaged
+final

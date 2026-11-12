@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Pretend service manager, driven by files in svc/.
+#   svcctl status NAME      exit 0 and print "up", or exit 1 and print "down"
+#                           (exit 3 for a service that does not exist)
+#   svcctl ACTION NAME      ACTION is restart | clear-cache | rotate-logs | failover
+# svc/NAME holds up or down; svc/NAME.fix names the one action that cures it.
+# Actions are recorded in .calls.log.
+cmd=${1:-}
+name=${2:-}
+if [[ -z $name || $# -ne 2 ]]; then
+  echo "svcctl: usage: svcctl status|ACTION NAME" >&2
+  exit 2
+fi
+if [[ ! -f svc/$name ]]; then
+  echo "svcctl: unknown service $name" >&2
+  exit 3
+fi
+case $cmd in
+  status)
+    state=$(< "svc/$name")
+    echo "$state"
+    [[ $state == up ]] ;;
+  restart|clear-cache|rotate-logs|failover)
+    echo "svcctl $cmd $name" >> .calls.log
+    if [[ -f svc/$name.fix && $(< "svc/$name.fix") == "$cmd" ]]; then
+      echo up > "svc/$name"
+    fi ;;
+  *)
+    echo "svcctl: unknown command $cmd" >&2
+    exit 2 ;;
+esac

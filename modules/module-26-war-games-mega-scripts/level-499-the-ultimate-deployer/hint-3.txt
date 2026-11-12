@@ -1,1 +1,22 @@
-Print only the expected result lines; redirect or stub external side effects.
+Skeleton:
+
+  parse flags (--dry-run, --prune), then repo live now; validate dirs
+  [[ -s $repo/FREEZE ]] && { echo "deploy freeze active: $(head -n 1 "$repo/FREEZE")" >&2; exit 1; }
+  mkdir "$live/.lock" || ... ; trap 'rmdir "$live/.lock" 2>/dev/null || true' EXIT
+  git -C "$repo" pull --ff-only >/dev/null 2>&1 || { echo "git pull failed, nothing deployed" >&2; exit 1; }
+  sha=$(git -C "$repo" rev-parse --short HEAD)
+
+  declare -A dver drep dport dorder lver lrep lport
+  for f in "$repo"/apps/*.app: validate name, read keys with defaults (replicas 1, port 8080, order 50), collect problems
+  for f in "$live"/*.state: read lver/lrep/lport, remember names
+  action_of NAME -> create | update | unchanged;  orphans = live names without manifest
+  changes > MAX_CHANGES -> refuse (or warn when --dry-run)
+
+  for n in $ordered; do
+    unchanged: print, count, continue.   dry run: print "would ...", continue
+    rc=0; deployctl apply "$n" ... || rc=$?;  rc != 0 -> "FAILED ..." (audit, count) continue
+    if healthctl "$n"; then write_state; audit ok; print created/updated
+    else create: deployctl remove; update: deployctl apply with the OLD values; audit rolled-back; print
+  done
+  orphans: print, or with --prune: deployctl remove, rm state, audit, "deleted"
+  summary; notifyctl send when rolled + failed > 0; exit 1 in that case
