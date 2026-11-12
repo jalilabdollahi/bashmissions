@@ -1,0 +1,10 @@
+  while getopts "fm:" opt; do ...; done; shift $((OPTIND - 1))
+  check_root_login() { [[ -f $1/sshd_config ]] || return 1; ...first PermitRootLogin value must be "no"...; }
+  check_disk()       { ...awk over df.txt, skip line 1, fail if column 5 + 0 >= 90... }
+  check_time_sync()  { [[ -f $1/services.txt ]] && grep -qx 'chronyd active' "$1/services.txt"; }
+  check_reboot()     { [[ ! -e $1/reboot-required ]]; }
+  names=(...); funcs=(check_root_login check_disk check_time_sync check_reboot)
+  for host_dir in "$root"/*/; do
+    ...for each function: "${funcs[i]}" "$host_dir" -> PASS or FAIL; header "host: P/4"; lines (all or failures only)...
+  done
+Finish with percent=$(( passed * 100 / total )), the fleet line, and the verdict against $minimum.

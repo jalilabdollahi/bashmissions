@@ -1,0 +1,1 @@
+You need fast "is X installed, and which version?" lookups, so load the whole package list into a key/value structure once, then walk the policy and ask it questions. The only tricky part is comparing versions: they are lists of numbers, not text.

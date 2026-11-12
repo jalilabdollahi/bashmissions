@@ -1,0 +1,2 @@
+Filesystem     1024-blocks     Used Available Capacity Mounted on
+/dev/vda1         20549132  4310200  15164584      23% /

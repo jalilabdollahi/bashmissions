@@ -1,0 +1,7 @@
+  uid=$(awk -F: -v u="$user" '$1 == u { print $3 }' fixtures/etc/passwd)
+  [[ -n $uid ]] || { echo "unknown user: $user" >&2; exit 1; }
+  (( uid >= 1000 )) || { echo "refusing to offboard system account $user" >&2; exit 3; }
+  if (( dry )); then ...two "would" lines...; exit 0; fi
+  usermod -L -s /usr/sbin/nologin "$user"
+  if [[ -d $home ]]; then mkdir -p offboarded; tar -czf ... -C fixtures/home "$user"; ...count files...; fi
+End with the four report lines (archive: none when there was no home).

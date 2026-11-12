@@ -1,0 +1,1 @@
+This is a loop over hosts, and each pass must survive anything: an unreachable machine, a command that fails, a command that does not exist. Capture both what the remote command printed and how it ended, then decide how to present it. One classic trap: ssh reads standard input.

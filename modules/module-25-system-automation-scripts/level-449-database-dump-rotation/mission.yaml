@@ -1,0 +1,125 @@
+id: 449
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Database Dump Rotation
+difficulty: expert
+xp: 380
+story: |
+  The Tidewater Books order database lives on one Postgres server, and the
+  only copy of last month's orders is a dump somebody made "that one time".
+  Gus wants a nightly dump, Theo wants it compressed, and Mara wants the one
+  property that makes it trustworthy: a failed dump must never push out a good
+  old one. The classic disaster is a script that prunes first and dumps
+  second, and finds out at 3 a.m. which half failed.
+objective: |
+  Write solution.sh DB OUTDIR STAMP KEEP.
+  - DB is a database name matching `^[a-z][a-z0-9_]*$`
+    (else `bad database name: DB` on stderr, exit 2).
+  - OUTDIR receives the dumps (create it if needed); STAMP is a label such as
+    `20260301`; KEEP is how many dumps of this database to retain, a whole
+    number of at least 1 (else `bad keep count: KEEP`, exit 2).
+
+  1. Dump with `pg_dump --no-owner DB`, compress the stream with gzip and
+     write it to `OUTDIR/DB-STAMP.sql.gz.partial`. If either pg_dump or gzip
+     fails, delete the partial file, print `dump failed for DB` to stderr, exit
+     1, and do NOT prune anything (pg_dump's own error text may also appear).
+  2. Check the partial file with `gzip -t`, rename it to `DB-STAMP.sql.gz`
+     (replacing a dump with the same stamp, if any) and print
+     `dumped OUTDIR/DB-STAMP.sql.gz`.
+  3. Prune: the dumps of this database are the files named
+     `OUTDIR/DB-<digits>.sql.gz` (so dumps of a database called `app-staging`
+     are never mistaken for `app`). Sorted by name, keep the newest KEEP and
+     delete the rest, printing `pruned NAME` for each.
+  4. Print `kept K dumps` (K = how many dumps of DB remain).
+
+  Wrong argument count: `usage: solution.sh DB OUTDIR STAMP KEEP` on stderr,
+  exit 2.
+concepts:
+  - "pipefail makes a failing pg_dump visible through a pipe"
+  - "write to .partial, verify, rename; prune only after success"
+  - "glob precisely so one database's dumps are not confused with another's"
+required_patterns:
+  - pattern: 'pg_dump'
+    message: "Dump the database with pg_dump."
+  - pattern: 'gzip\b'
+    message: "Compress the dump with gzip."
+  - pattern: 'pipefail'
+    message: "Without set -o pipefail, a failing pg_dump inside a pipe goes unnoticed."
+test_cases:
+  - name: dump, then prune the oldest
+    args: [app, backups, "20260301", "3"]
+    files:
+      backups/app-20260226.sql.gz: "x"
+      backups/app-20260227.sql.gz: "x"
+      backups/app-20260228.sql.gz: "x"
+      backups/app-staging-20260101.sql.gz: "belongs to another database"
+    expected_stdout: |-
+      dumped backups/app-20260301.sql.gz
+      pruned app-20260226.sql.gz
+      kept 3 dumps
+    expected_files:
+      backups/app-20260301.sql.gz: true
+      backups/app-20260301.sql.gz.partial: null
+      backups/app-20260226.sql.gz: null
+      backups/app-20260227.sql.gz: true
+      backups/app-20260228.sql.gz: true
+      backups/app-staging-20260101.sql.gz: "belongs to another database"
+      .calls.log: "pg_dump app\n"
+  - name: fewer dumps than KEEP, nothing pruned
+    args: [orders, backups, "20260301", "7"]
+    files:
+      backups/orders-20260228.sql.gz: "x"
+    expected_stdout: |-
+      dumped backups/orders-20260301.sql.gz
+      kept 2 dumps
+    expected_files:
+      backups/orders-20260228.sql.gz: true
+      backups/orders-20260301.sql.gz: true
+  - name: database does not exist, old dumps survive
+    args: [nosuchdb, backups, "20260301", "1"]
+    files:
+      backups/nosuchdb-20260228.sql.gz: "the only good copy"
+    expected_stdout: ""
+    expected_stderr: "dump failed for nosuchdb"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      backups/nosuchdb-20260228.sql.gz: "the only good copy"
+      backups/nosuchdb-20260301.sql.gz: null
+      backups/nosuchdb-20260301.sql.gz.partial: null
+  - name: the server dies half way through the dump
+    args: [app, backups, "20260301", "1"]
+    env:
+      FAKE_PG_BREAK: "1"
+    files:
+      backups/app-20260228.sql.gz: "the only good copy"
+    expected_stdout: ""
+    expected_stderr: "dump failed for app"
+    stderr_comparison: contains
+    expected_exit: 1
+    expected_files:
+      backups/app-20260228.sql.gz: "the only good copy"
+      backups/app-20260301.sql.gz: null
+      backups/app-20260301.sql.gz.partial: null
+  - name: running twice on the same day replaces that day's dump
+    args: [app, backups, "20260301", "2"]
+    files:
+      backups/app-20260301.sql.gz: "stale"
+    expected_stdout: |-
+      dumped backups/app-20260301.sql.gz
+      kept 1 dumps
+  - name: keep must be a positive number
+    args: [app, backups, "20260301", "0"]
+    expected_stderr: "bad keep count: 0"
+    expected_exit: 2
+    expected_files:
+      .calls.log: null
+  - name: database name with a path in it
+    args: ["../etc", backups, "20260301", "2"]
+    expected_stderr: "bad database name: ../etc"
+    expected_exit: 2
+  - name: wrong argument count
+    args: [app, backups]
+    expected_stderr: "usage: solution.sh DB OUTDIR STAMP KEEP"
+    expected_exit: 2

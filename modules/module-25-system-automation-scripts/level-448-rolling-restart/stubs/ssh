@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# ssh stand-in that runs two fake remote commands:
+#   systemctl restart UNIT       systemctl is-active UNIT
+# Flags: -n and -o BatchMode=yes. Failure switches (environment):
+#   FAKE_DOWN=host          that host is unreachable (exit 255)
+#   FAKE_RESTART_FAIL=host  restart exits 1
+#   FAKE_SLOW=host          is-active says "activating" twice after a restart, then "active"
+#   FAKE_BROKEN=host        is-active says "failed" forever after a restart
+# Every call is logged to .calls.log; per-host check counters live in .state/.
+nostdin=0 host=
+while (( $# )); do
+  case $1 in
+    -n) nostdin=1 ;;
+    -o) [[ $2 == BatchMode=* ]] || { echo "ssh: stub does not know option $2" >&2; exit 2; }; shift ;;
+    -*) echo "ssh: stub does not know flag $1" >&2; exit 2 ;;
+    *)  host=$1; shift; break ;;
+  esac
+  shift
+done
+[[ -n $host ]] || { echo "usage: ssh [-n] [-o BatchMode=yes] host command" >&2; exit 2; }
+(( nostdin )) || cat > /dev/null
+echo "ssh $host $*" >> .calls.log
+if [[ ${FAKE_DOWN:-} == "$host" ]]; then
+  echo "ssh: connect to host $host port 22: Connection timed out" >&2; exit 255
+fi
+[[ ${1:-} == systemctl ]] || { echo "bash: ${1:-}: command not found" >&2; exit 127; }
+mkdir -p .state
+case ${2:-} in
+  restart)
+    [[ ${FAKE_RESTART_FAIL:-} == "$host" ]] && { echo "Failed to restart ${3:-}.service: Unit not found." >&2; exit 1; }
+    echo 0 > ".state/$host"
+    exit 0 ;;
+  is-active)
+    n=$(( $(cat ".state/$host" 2>/dev/null || echo 0) + 1 ))
+    echo "$n" > ".state/$host"
+    if [[ ${FAKE_BROKEN:-} == "$host" ]]; then echo failed; exit 3; fi
+    if [[ ${FAKE_SLOW:-} == "$host" ]] && (( n <= 2 )); then echo activating; exit 3; fi
+    echo active; exit 0 ;;
+  *) echo "systemctl: stub does not know '${2:-}'" >&2; exit 2 ;;
+esac

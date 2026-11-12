@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# pg_dump stand-in: pg_dump [--no-owner] [-U USER] DBNAME  -> plain SQL on stdout.
+# Dumps come from fixtures/db/DBNAME.sql. Unknown database: error, exit 1.
+# FAKE_PG_BREAK=1 makes the dump die half way (first line printed, then exit 1),
+# like a server that goes away during the dump.
+db=
+while (( $# )); do
+  case $1 in
+    --no-owner) ;;
+    -U) shift ;;
+    -*) echo "pg_dump: invalid option -- '${1#-}'" >&2; exit 2 ;;
+    *)  db=$1 ;;
+  esac
+  shift
+done
+[[ -n $db ]] || { echo "pg_dump: no database name given" >&2; exit 2; }
+echo "pg_dump $db" >> .calls.log
+if [[ ! -f fixtures/db/$db.sql ]]; then
+  echo "pg_dump: error: connection to server on socket \"/var/run/postgresql/.s.PGSQL.5432\" failed: FATAL:  database \"$db\" does not exist" >&2
+  exit 1
+fi
+if [[ ${FAKE_PG_BREAK:-} == 1 ]]; then
+  head -n 1 "fixtures/db/$db.sql"
+  echo "pg_dump: error: connection to server was lost" >&2
+  exit 1
+fi
+cat "fixtures/db/$db.sql"

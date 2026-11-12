@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# scp stand-in: scp [-q] [-o BatchMode=yes] LOCALFILE HOST:REMOTEPATH
+# "Uploads" by copying into remote/HOST/<path> in the current directory.
+# Hosts must exist as fixtures/hosts/HOST; fixtures/hosts/HOST/unreachable simulates a dead host.
+# scp exits 1 on any failure, as the real one does. Calls are logged to .calls.log.
+args=()
+while (( $# )); do
+  case $1 in
+    -q) ;;
+    -o) case $2 in BatchMode=*) ;; *) echo "scp: stub does not know option $2" >&2; exit 2 ;; esac; shift ;;
+    -*) echo "scp: stub does not know flag $1" >&2; exit 2 ;;
+    *)  args+=("$1") ;;
+  esac
+  shift
+done
+(( ${#args[@]} == 2 )) || { echo "usage: scp [-q] [-o BatchMode=yes] source host:target" >&2; exit 2; }
+src=${args[0]} dst=${args[1]}
+[[ $dst == *:* ]] || { echo "scp: target must look like host:path" >&2; exit 2; }
+host=${dst%%:*} path=${dst#*:}
+echo "scp $src $dst" >> .calls.log
+[[ -f $src ]] || { echo "scp: $src: No such file or directory" >&2; exit 1; }
+if [[ ! -d fixtures/hosts/$host ]]; then
+  echo "ssh: Could not resolve hostname $host: Name or service not known" >&2; exit 1
+fi
+if [[ -e fixtures/hosts/$host/unreachable ]]; then
+  echo "ssh: connect to host $host port 22: Connection timed out" >&2; exit 1
+fi
+mkdir -p "remote/$host/$(dirname "${path#/}")"
+cp "$src" "remote/$host/${path#/}"

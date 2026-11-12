@@ -1,0 +1,160 @@
+id: 456
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Compliance Report
+difficulty: expert
+xp: 480
+story: |
+  The Harbour Savings Co-op, Lanternfish's biggest customer, will renew its
+  contract only if Lanternfish can show a compliance report for the hosts that
+  carry its data. Gus has promised it for Friday. Priya has the four
+  controls she cares about, and the evidence collected from each host sits in
+  a folder per machine. You have everything you need: it just has to become
+  one honest, readable pass/fail report.
+objective: |
+  Write solution.sh [-f] [-m PCT] HOSTSDIR. Each sub-folder of HOSTSDIR is a
+  host (plain files are ignored; hosts in name order) holding the evidence
+  files described below. Apply four checks to every host, in this order:
+  1. `root-login-disabled`: file `sshd_config` exists and its first
+     `PermitRootLogin` line (keyword case-insensitive, blanks allowed before
+     it, comments ignored) has the value `no` (case-insensitive).
+  2. `disk-under-90`: file `df.txt` (output of `df -P`, header on the first
+     line, Capacity such as `97%` in column 5) exists and every filesystem is
+     below 90%.
+  3. `time-sync`: file `services.txt` (lines `NAME STATE`) has a line
+     `chronyd active`.
+  4. `no-pending-reboot`: there is NO file called `reboot-required`.
+  A check whose evidence file is missing fails (except check 4, which passes
+  when the file is absent).
+
+  Print for each host a header `HOST: P/4` (P = checks passed) followed by one
+  line per check, indented by two spaces: `  [PASS] NAME` or `  [FAIL] NAME`.
+  With `-f` print only the failing check lines (headers always appear).
+  Then print
+    fleet: P/T checks passed (X%)
+  where X = P*100/T rounded down (integer arithmetic), and a verdict line
+    result: PASS
+  or `result: FAIL (need M%)`. The fleet passes when X is at least M, where
+  M comes from `-m PCT` (a whole number from 0 to 100; default 100). Exit 0
+  on PASS, 1 on FAIL.
+
+  A bad PCT: `bad minimum: PCT` on stderr, exit 2. A HOSTSDIR with no host
+  folders: `no hosts in HOSTSDIR` on stderr, exit 1. HOSTSDIR not a
+  directory: `no such directory: HOSTSDIR` on stderr, exit 1. Without a
+  HOSTSDIR argument: `usage: solution.sh [-f] [-m PCT] HOSTSDIR` on stderr, exit 2.
+concepts:
+  - "getopts with a flag and an option argument"
+  - "several independent checks combined into one scorecard"
+  - "integer percentage with $(( )) and a pass threshold"
+required_patterns:
+  - pattern: 'getopts'
+    message: "Parse -f and -m PCT with getopts."
+test_cases:
+  - name: three hosts, full report
+    args: ["hosts"]
+    files:
+      hosts/anchovy/sshd_config: "Port 22\nPermitRootLogin no\n"
+      hosts/anchovy/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 41152736 9210416 29832256 24% /\n"
+      hosts/anchovy/services.txt: "sshd active\nchronyd active\n"
+      hosts/barracuda/sshd_config: "# PermitRootLogin no\nPermitRootLogin YES\nPermitRootLogin no\n"
+      hosts/barracuda/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 41152736 37500000 3652736 91% /\n"
+      hosts/barracuda/services.txt: "sshd active\nchronyd inactive\n"
+      hosts/barracuda/reboot-required: "pending kernel update\n"
+      hosts/cuttlefish/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 20549132 18300000 2249132 89% /\n/dev/vdb1 10000000 1200000 8800000 12% /data\n"
+      hosts/cuttlefish/services.txt: "chronyd active\n"
+      hosts/README: "evidence collected by the nightly job\n"
+    expected_stdout: |-
+      anchovy: 4/4
+        [PASS] root-login-disabled
+        [PASS] disk-under-90
+        [PASS] time-sync
+        [PASS] no-pending-reboot
+      barracuda: 0/4
+        [FAIL] root-login-disabled
+        [FAIL] disk-under-90
+        [FAIL] time-sync
+        [FAIL] no-pending-reboot
+      cuttlefish: 3/4
+        [FAIL] root-login-disabled
+        [PASS] disk-under-90
+        [PASS] time-sync
+        [PASS] no-pending-reboot
+      fleet: 7/12 checks passed (58%)
+      result: FAIL (need 100%)
+    expected_exit: 1
+  - name: only failures with -f
+    args: ["-f", "hosts"]
+    files:
+      hosts/anchovy/sshd_config: "PermitRootLogin no\n"
+      hosts/anchovy/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 100 24 76 24% /\n"
+      hosts/anchovy/services.txt: "chronyd active\n"
+      hosts/dory/sshd_config: "PermitRootLogin prohibit-password\n"
+      hosts/dory/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 100 90 10 90% /\n"
+      hosts/dory/services.txt: "chronyd active\n"
+    expected_stdout: |-
+      anchovy: 4/4
+      dory: 2/4
+        [FAIL] root-login-disabled
+        [FAIL] disk-under-90
+      fleet: 6/8 checks passed (75%)
+      result: FAIL (need 100%)
+    expected_exit: 1
+  - name: a lower threshold lets the fleet pass
+    args: ["-m", "70", "hosts"]
+    files:
+      hosts/anchovy/sshd_config: "PermitRootLogin no\n"
+      hosts/anchovy/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 100 24 76 24% /\n"
+      hosts/anchovy/services.txt: "chronyd active\n"
+      hosts/dory/sshd_config: "PermitRootLogin prohibit-password\n"
+      hosts/dory/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 100 90 10 90% /\n"
+      hosts/dory/services.txt: "chronyd active\n"
+    expected_stdout: |-
+      anchovy: 4/4
+        [PASS] root-login-disabled
+        [PASS] disk-under-90
+        [PASS] time-sync
+        [PASS] no-pending-reboot
+      dory: 2/4
+        [FAIL] root-login-disabled
+        [FAIL] disk-under-90
+        [PASS] time-sync
+        [PASS] no-pending-reboot
+      fleet: 6/8 checks passed (75%)
+      result: PASS
+  - name: a perfect fleet with flags together
+    args: ["-f", "-m", "100", "hosts"]
+    files:
+      hosts/eel/sshd_config: "  permitrootlogin   No\n"
+      hosts/eel/df.txt: "Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/vda1 100 5 95 5% /\n"
+      hosts/eel/services.txt: "chronyd active\n"
+    expected_stdout: |-
+      eel: 4/4
+      fleet: 4/4 checks passed (100%)
+      result: PASS
+  - name: threshold must be a percentage
+    args: ["-m", "abc", "hosts"]
+    files:
+      hosts/eel/df.txt: "x\n"
+    expected_stderr: "bad minimum: abc"
+    expected_exit: 2
+  - name: threshold above 100
+    args: ["-m", "101", "hosts"]
+    files:
+      hosts/eel/df.txt: "x\n"
+    expected_stderr: "bad minimum: 101"
+    expected_exit: 2
+  - name: folder without hosts
+    args: ["hosts"]
+    files:
+      hosts/README: "nothing here\n"
+    expected_stderr: "no hosts in hosts"
+    expected_exit: 1
+  - name: folder missing
+    args: ["nowhere"]
+    expected_stderr: "no such directory: nowhere"
+    expected_exit: 1
+  - name: no directory argument
+    args: ["-f"]
+    expected_stderr: "usage: solution.sh [-f] [-m PCT] HOSTSDIR"
+    expected_exit: 2

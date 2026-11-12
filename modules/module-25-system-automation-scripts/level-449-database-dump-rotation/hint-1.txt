@@ -1,0 +1,1 @@
+Order is everything: produce the new dump, prove it is good, and only then remove old ones. Any failure before the proof must leave the old dumps exactly as they were. One shell trap: a pipeline reports the status of its last command only, unless you ask otherwise.

@@ -1,0 +1,13 @@
+  row() { printf '%-10s %-17s %s\n' "$1" "$2" "$3"; }
+  for path in "$dir"/*; do
+    [[ -f $path ]] || continue
+    ...user=${path##*/}; lineno=0; found=0...
+    while IFS= read -r line || [[ -n $line ]]; do
+      ...skip comment/blank and VAR=value...
+      read -r first rest <<< "$line"
+      if [[ $first == @* ]]; then schedule=$first command=$rest
+      else read -r m h dom mon dow command <<< "$line"; schedule="$m $h $dom $mon $dow"; fi
+      ...empty command -> stderr malformed, else row and counters...
+    done < "$path"
+    ...no jobs found -> row "$user" - "(no jobs)"...
+  done

@@ -1,0 +1,1 @@
+Treat the CSV as untrusted input. Each line must pass two gates before useradd sees it: the name must follow the naming rule, and the account must not already exist. A failure in one line should be recorded and the loop should carry on.

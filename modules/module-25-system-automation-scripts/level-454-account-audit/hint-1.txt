@@ -1,0 +1,1 @@
+The report order is fixed by check, not by line number, so do not print while reading. Read once, drop findings into one list per check, and print the lists in the required order afterwards. Shadow is a lookup problem: load it first so each account can be checked as you read passwd.

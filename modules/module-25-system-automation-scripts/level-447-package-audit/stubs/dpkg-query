@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# dpkg-query stand-in: only  dpkg-query -W -f='${Package} ${Version}\n'
+# Prints the installed packages listed in fixtures/installed.txt ("name version").
+want=0 fmt=
+while (( $# )); do
+  case $1 in
+    -W|--show) want=1 ;;
+    -f)         fmt=$2; shift ;;
+    -f=*|--showformat=*) fmt=${1#*=} ;;
+    -f*)        fmt=${1#-f} ;;
+    *) echo "dpkg-query: stub does not know option $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+fmt=${fmt#=}
+(( want )) || { echo "dpkg-query: stub needs -W" >&2; exit 2; }
+if [[ $fmt != '${Package} ${Version}\n' ]]; then
+  echo "dpkg-query: stub only understands -f='\${Package} \${Version}\\n'" >&2; exit 2
+fi
+echo "dpkg-query $*" >> .calls.log
+cat fixtures/installed.txt

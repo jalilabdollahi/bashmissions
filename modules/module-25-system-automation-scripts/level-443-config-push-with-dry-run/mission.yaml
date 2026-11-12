@@ -1,0 +1,114 @@
+id: 443
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Config Push with Dry-Run
+difficulty: expert
+xp: 340
+story: |
+  Theo's new rate-limit settings have to reach every web host by noon.
+  Last time a config push went out with an empty file (the editor had not
+  saved yet) and three hosts started with no settings at all. Mara's new rule
+  for anything that writes to the fleet: it must be able to say what it
+  would do before it does it, and it must refuse obviously broken input.
+objective: |
+  Write solution.sh [-n] HOSTFILE LOCALFILE REMOTEPATH. HOSTFILE has one host
+  per line (blank lines and `#` comments ignored). LOCALFILE is the config to
+  distribute; REMOTEPATH is where it goes on each host.
+
+  Before touching any host:
+  - LOCALFILE not readable: `cannot read LOCALFILE` on stderr, exit 1.
+  - LOCALFILE empty (zero bytes): `refusing to push empty file: LOCALFILE`
+    on stderr, exit 1.
+
+  For each host, in order, copy the file with
+    scp -q -o BatchMode=yes LOCALFILE HOST:REMOTEPATH
+  and print `pushed HOST` if scp succeeded or `FAILED HOST` if it did not.
+  Keep going after a failure. At the end print `pushed X of Y` (X successful
+  hosts, Y hosts in the file) and exit 1 if any host failed.
+
+  With -n (dry run) do not call scp at all. Print for each host
+    would push LOCALFILE to HOST:REMOTEPATH
+  and finally `dry run: Y hosts, nothing copied`, exit 0.
+  Wrong argument count: `usage: solution.sh [-n] HOSTFILE LOCALFILE REMOTEPATH`
+  on stderr, exit 2.
+concepts:
+  - "scp HOST:PATH destination syntax"
+  - "dry-run mode: same loop, no side effects"
+  - "validate the payload before touching the fleet"
+required_patterns:
+  - pattern: '\bscp\b'
+    message: "Copy with scp."
+test_cases:
+  - name: push to three hosts, one is unreachable
+    args: [web.txt, ratelimit.conf, /etc/lanternfish/ratelimit.conf]
+    files:
+      web.txt: "anchovy\nflounder\ndory\n"
+      ratelimit.conf: "limit=100\nburst=20\n"
+    expected_stdout: |-
+      pushed anchovy
+      FAILED flounder
+      pushed dory
+      pushed 2 of 3
+    expected_exit: 1
+    expected_files:
+      remote/anchovy/etc/lanternfish/ratelimit.conf: "limit=100\nburst=20\n"
+      remote/dory/etc/lanternfish/ratelimit.conf: "limit=100\nburst=20\n"
+      remote/flounder/etc/lanternfish/ratelimit.conf: null
+      .calls.log: |
+        scp ratelimit.conf anchovy:/etc/lanternfish/ratelimit.conf
+        scp ratelimit.conf flounder:/etc/lanternfish/ratelimit.conf
+        scp ratelimit.conf dory:/etc/lanternfish/ratelimit.conf
+  - name: dry run copies nothing
+    args: ["-n", web.txt, ratelimit.conf, /etc/lanternfish/ratelimit.conf]
+    files:
+      web.txt: "# web tier\nanchovy\ndory\n"
+      ratelimit.conf: "limit=100\n"
+    expected_stdout: |-
+      would push ratelimit.conf to anchovy:/etc/lanternfish/ratelimit.conf
+      would push ratelimit.conf to dory:/etc/lanternfish/ratelimit.conf
+      dry run: 2 hosts, nothing copied
+    expected_files:
+      .calls.log: null
+      remote/anchovy/etc/lanternfish/ratelimit.conf: null
+  - name: every host succeeds
+    args: [web.txt, app.conf, /srv/app.conf]
+    files:
+      web.txt: "dory\nanchovy\n"
+      app.conf: "mode=prod\n"
+    expected_stdout: |-
+      pushed dory
+      pushed anchovy
+      pushed 2 of 2
+    expected_files:
+      remote/dory/srv/app.conf: "mode=prod\n"
+  - name: unknown host name counts as failed
+    args: [web.txt, app.conf, /srv/app.conf]
+    files:
+      web.txt: "dory\nmystery\n"
+      app.conf: "mode=prod\n"
+    expected_stdout: |-
+      pushed dory
+      FAILED mystery
+      pushed 1 of 2
+    expected_exit: 1
+  - name: an empty config is refused before any host is touched
+    args: [web.txt, ratelimit.conf, /etc/lanternfish/ratelimit.conf]
+    files:
+      web.txt: "anchovy\n"
+      ratelimit.conf: ""
+    expected_stdout: ""
+    expected_stderr: "refusing to push empty file: ratelimit.conf"
+    expected_exit: 1
+    expected_files:
+      .calls.log: null
+  - name: config file missing
+    args: [web.txt, gone.conf, /srv/x]
+    files:
+      web.txt: "anchovy\n"
+    expected_stderr: "cannot read gone.conf"
+    expected_exit: 1
+  - name: wrong number of arguments
+    args: [web.txt, app.conf]
+    expected_stderr: "usage: solution.sh [-n] HOSTFILE LOCALFILE REMOTEPATH"
+    expected_exit: 2

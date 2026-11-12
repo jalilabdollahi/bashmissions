@@ -1,0 +1,132 @@
+id: 445
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Log Archiver
+difficulty: expert
+xp: 340
+story: |
+  Barracuda's /var/log filled up overnight. Not with anything exciting: just
+  eighteen months of access logs nobody had touched. Theo says "compress
+  them", Noor says "do not touch today's, the support tools are still
+  writing to it", and Mara adds the rule that matters most in practice:
+  never delete the original until you have checked the compressed copy.
+objective: |
+  Write solution.sh LOGDIR DAYS. DAYS is a whole number. Look only at regular
+  files named `*.log` directly inside LOGDIR (not in sub-folders) that were
+  last modified MORE than DAYS days ago (`find -mtime +DAYS`). Handle them in
+  file-name order.
+
+  For each such file NAME.log:
+  - If `LOGDIR/archive/NAME.log.gz` already exists, print
+    `skipped NAME.log (already archived)` and leave the log alone.
+  - Otherwise create `LOGDIR/archive/` if needed and compress with
+    `gzip -c` into `LOGDIR/archive/NAME.log.gz.partial`. Check that file with
+    `gzip -t`, rename it to `NAME.log.gz`, and only then delete the original.
+    Print `archived NAME.log`.
+
+  End with `archived A, skipped S` (always printed, even when both are 0).
+
+  DAYS that is not a whole number: `bad day count: DAYS` on stderr, exit 2.
+  LOGDIR not a directory: `no such directory: LOGDIR` on stderr, exit 1.
+  Wrong argument count: `usage: solution.sh LOGDIR DAYS` on stderr, exit 2.
+concepts:
+  - "find -type f -name -mtime +N selects files by age"
+  - "gzip -c writes to stdout and keeps the original"
+  - "gzip -t verifies, then rename into place before deleting"
+required_patterns:
+  - pattern: 'find\b[^\n]*-mtime'
+    message: "Select old files with find ... -mtime +DAYS."
+  - pattern: 'gzip\s+-[A-Za-z]*t'
+    message: "Verify the compressed copy with gzip -t before deleting the original."
+test_cases:
+  - name: old logs are archived, new ones are left
+    args: [logs, "30"]
+    files:
+      logs/access-2023.log:
+        content: "GET / 200\nGET /about 200\n"
+        mtime: 1700000000
+      logs/error-2023.log:
+        content: "disk warning\n"
+        mtime: 1700000000
+      logs/current.log: "GET /today 200\n"
+    expected_stdout: |-
+      archived access-2023.log
+      archived error-2023.log
+      archived 2, skipped 0
+    expected_files:
+      logs/archive/access-2023.log.gz: true
+      logs/archive/error-2023.log.gz: true
+      logs/access-2023.log: null
+      logs/error-2023.log: null
+      logs/archive/access-2023.log.gz.partial: null
+      logs/current.log: "GET /today 200\n"
+  - name: nothing is old enough
+    args: [logs, "100000"]
+    files:
+      logs/access-2023.log:
+        content: "GET / 200\n"
+        mtime: 1700000000
+    expected_stdout: "archived 0, skipped 0"
+    expected_files:
+      logs/access-2023.log: "GET / 200\n"
+      logs/archive/: null
+  - name: an existing archive is not overwritten
+    args: [logs, "30"]
+    files:
+      logs/web.log:
+        content: "fresh content\n"
+        mtime: 1700000000
+      logs/archive/web.log.gz: "older archive bytes"
+      logs/db.log:
+        content: "db line\n"
+        mtime: 1700000000
+    expected_stdout: |-
+      archived db.log
+      skipped web.log (already archived)
+      archived 1, skipped 1
+    expected_files:
+      logs/web.log: "fresh content\n"
+      logs/archive/web.log.gz: "older archive bytes"
+      logs/db.log: null
+      logs/archive/db.log.gz: true
+  - name: only files directly in the folder, only .log
+    args: [logs, "30"]
+    files:
+      logs/old/deep.log:
+        content: "x\n"
+        mtime: 1700000000
+      logs/notes.txt:
+        content: "x\n"
+        mtime: 1700000000
+      logs/web.log:
+        content: "x\n"
+        mtime: 1700000000
+    expected_stdout: |-
+      archived web.log
+      archived 1, skipped 0
+    expected_files:
+      logs/old/deep.log: true
+      logs/notes.txt: true
+  - name: file names with spaces
+    args: [logs, "30"]
+    files:
+      "logs/pier pos.log":
+        content: "tx 1\n"
+        mtime: 1700000000
+    expected_stdout: |-
+      archived pier pos.log
+      archived 1, skipped 0
+    expected_files:
+      "logs/archive/pier pos.log.gz": true
+      "logs/pier pos.log": null
+  - name: days is not a number
+    args: [logs, soon]
+    files:
+      "logs/": ""
+    expected_stderr: "bad day count: soon"
+    expected_exit: 2
+  - name: folder is missing
+    args: [nope, "30"]
+    expected_stderr: "no such directory: nope"
+    expected_exit: 1

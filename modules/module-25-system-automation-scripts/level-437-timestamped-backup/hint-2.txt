@@ -1,0 +1,1 @@
+`tar -czf out.tar.gz -C /some/parent folder` changes into /some/parent first and then archives `folder`, so the archive entries start with `folder/`. To look inside without extracting: `tar -tzf out.tar.gz`. Entries that are directories end with `/`, which `grep -v '/$'` can filter out; `grep -c` counts what is left (and exits 1 when the count is 0, so think about `set -e`).

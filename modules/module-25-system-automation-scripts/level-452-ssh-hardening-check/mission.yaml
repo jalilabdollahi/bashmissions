@@ -1,0 +1,119 @@
+id: 452
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: SSH Hardening Check
+difficulty: expert
+xp: 400
+story: |
+  Priya's checklist for a new server starts with five lines of sshd_config.
+  The trouble is that people do read the file and still get it wrong:
+  somebody adds "PermitRootLogin no" at the bottom, never noticing that
+  "PermitRootLogin yes" sits higher up, and sshd obeys the first one.
+  She wants a checker that reads the file the way sshd does, not the way a
+  tired human does.
+objective: |
+  Write solution.sh FILE, which audits an sshd_config the way sshd reads it:
+  - Blank lines and lines starting with `#` (after optional blanks) are ignored.
+  - A line is `Keyword value` (blanks) or `Keyword=value` or `Keyword = value`.
+    Keywords and values are case-insensitive; compare and print values in
+    lowercase.
+  - For each keyword the FIRST occurrence wins.
+  - Reading stops at the first line whose keyword is `Match`: everything below
+    belongs to conditional blocks and is not part of the global settings.
+  - A keyword that never appears has its built-in default value.
+
+  Check these five settings, in this order (default in brackets):
+    PermitRootLogin           must be `no`            [prohibit-password]
+    PasswordAuthentication    must be `no`            [yes]
+    PermitEmptyPasswords      must be `no`            [no]
+    X11Forwarding             must be `no`            [no]
+    MaxAuthTries              must be a number <= 4   [6]
+  Print one line per setting:
+    PASS Keyword=value
+    FAIL Keyword=value (want no)                 (explicit value; MaxAuthTries: want <=4)
+  and when the value came from the built-in default, add the word `default`:
+    PASS Keyword=value (default)
+    FAIL Keyword=value (default, want no)        (MaxAuthTries: want <=4)
+  A MaxAuthTries value that is not a whole number fails. Keyword spelling in
+  the output is exactly as listed above.
+
+  Finish with `hardening: all 5 checks passed` (exit 0) or
+  `hardening: F of 5 checks failed` (exit 1). Unreadable FILE:
+  `cannot read FILE` (stderr, exit 1). No argument:
+  `usage: solution.sh FILE` (stderr, exit 2).
+concepts:
+  - "first match wins, then stop (awk exit / flags)"
+  - "case-insensitive keyword matching with tolower()"
+  - "defaults for unset values"
+required_patterns:
+  - pattern: 'tolower|\$\{[A-Za-z_]+,,\}|\[:upper:\]|-i\b'
+    message: "sshd keywords and values are case-insensitive; normalise case before comparing."
+test_cases:
+  - name: first occurrence wins, Match block is ignored
+    args: [sshd_config]
+    files:
+      sshd_config: "# managed by hand\nPort 22\nPermitRootLogin yes\nUsePAM yes\nPasswordAuthentication no\nX11Forwarding yes\nmaxauthtries 3\nPermitRootLogin no\n\nMatch User backup\n    PasswordAuthentication yes\n    MaxAuthTries 9\n"
+    expected_stdout: |-
+      FAIL PermitRootLogin=yes (want no)
+      PASS PasswordAuthentication=no
+      PASS PermitEmptyPasswords=no (default)
+      FAIL X11Forwarding=yes (want no)
+      PASS MaxAuthTries=3
+      hardening: 2 of 5 checks failed
+    expected_exit: 1
+  - name: an almost empty file runs on defaults
+    args: [sshd_config]
+    files:
+      sshd_config: "Port 22\nSubsystem sftp /usr/lib/openssh/sftp-server\n"
+    expected_stdout: |-
+      FAIL PermitRootLogin=prohibit-password (default, want no)
+      FAIL PasswordAuthentication=yes (default, want no)
+      PASS PermitEmptyPasswords=no (default)
+      PASS X11Forwarding=no (default)
+      FAIL MaxAuthTries=6 (default, want <=4)
+      hardening: 3 of 5 checks failed
+    expected_exit: 1
+  - name: hardened, with equals signs, capitals and indentation
+    args: [sshd_config]
+    files:
+      sshd_config: "  PermitRootLogin = No\nPASSWORDAUTHENTICATION=no\n\tPermitEmptyPasswords no\n# X11Forwarding yes\nX11Forwarding NO\nMaxAuthTries 4\n"
+    expected_stdout: |-
+      PASS PermitRootLogin=no
+      PASS PasswordAuthentication=no
+      PASS PermitEmptyPasswords=no
+      PASS X11Forwarding=no
+      PASS MaxAuthTries=4
+      hardening: all 5 checks passed
+  - name: settings below Match do not count, even good ones
+    args: [sshd_config]
+    files:
+      sshd_config: "Match Address 10.0.0.0/8\nPermitRootLogin no\nPasswordAuthentication no\n"
+    expected_stdout: |-
+      FAIL PermitRootLogin=prohibit-password (default, want no)
+      FAIL PasswordAuthentication=yes (default, want no)
+      PASS PermitEmptyPasswords=no (default)
+      PASS X11Forwarding=no (default)
+      FAIL MaxAuthTries=6 (default, want <=4)
+      hardening: 3 of 5 checks failed
+    expected_exit: 1
+  - name: odd MaxAuthTries values
+    args: [sshd_config]
+    files:
+      sshd_config: "PermitRootLogin no\nPasswordAuthentication no\nMaxAuthTries many\n"
+    expected_stdout: |-
+      PASS PermitRootLogin=no
+      PASS PasswordAuthentication=no
+      PASS PermitEmptyPasswords=no (default)
+      PASS X11Forwarding=no (default)
+      FAIL MaxAuthTries=many (want <=4)
+      hardening: 1 of 5 checks failed
+    expected_exit: 1
+  - name: file missing
+    args: [none]
+    expected_stderr: "cannot read none"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh FILE"
+    expected_exit: 2

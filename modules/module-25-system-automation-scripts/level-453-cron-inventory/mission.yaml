@@ -1,0 +1,105 @@
+id: 453
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Cron Inventory
+difficulty: expert
+xp: 400
+story: |
+  At 03:00 every night something on grouper makes the whole host crawl, and
+  nobody knows what, because scheduled jobs live in a different file for each
+  user and half of them were added by people who left. Ollie asks the
+  obvious question: "Is there a way to see them all in one place?" Mara
+  smiles, because there is, and it is a script you are about to write.
+objective: |
+  Write solution.sh DIR. DIR contains one crontab file per user (the file name
+  is the user name, like the contents of /var/spool/cron/crontabs). Print one
+  table of every scheduled job, using this layout for every line
+    printf '%-10s %-17s %s\n' USER SCHEDULE COMMAND
+  starting with the header line USER / SCHEDULE / COMMAND.
+
+  Rules:
+  - Users in file-name order (plain files only, names starting with `.` are
+    skipped); within a user, jobs in file order.
+  - Ignore blank lines, comment lines (first non-blank character is `#`) and
+    environment settings such as `MAILTO=ops@example` or `PATH=/usr/bin`.
+  - A job line has five schedule fields and then the command, or a single
+    `@name` schedule (`@reboot`, `@daily`, ...) and then the command. The
+    SCHEDULE column shows the schedule fields joined by single spaces,
+    whatever mix of blanks and tabs the file used. The command is the rest of
+    the line.
+  - A user whose file has no jobs still gets a row: schedule `-`, command
+    `(no jobs)`.
+  - A line with too few fields to contain a command is skipped and reported on
+    stderr as `USER line N: malformed entry` (N counts lines in that file).
+
+  Finish with `J jobs across U users` (U counts only users that have at least
+  one job). DIR not a directory: `no such directory: DIR` on stderr, exit 1.
+  No argument: `usage: solution.sh DIR` on stderr, exit 2.
+concepts:
+  - "read -r splits a crontab line into fields; the last variable keeps the rest"
+  - "classify lines: comment, environment, @special, five-field job"
+  - "report tables with printf column widths"
+required_patterns:
+  - pattern: "printf\\s+'%-10s %-17s %s"
+    message: "Format every row with printf '%-10s %-17s %s\\n' so the columns line up."
+test_cases:
+  - name: four users, mixed contents
+    args: [crontabs]
+    files:
+      crontabs/root: "# m h dom mon dow command\nMAILTO=ops@lanternfish.example\n0 3 * * * /usr/local/bin/backup-all\n*/15 * * * * /usr/local/bin/check-certs --warn 30\n@reboot /usr/local/bin/mount-spare\n"
+      crontabs/backup: "30 2 * * 0 tar -czf /backups/weekly.tgz /srv\n"
+      crontabs/deploy: "# nothing yet\n\n"
+      crontabs/www-data: "PATH=/usr/bin\n5 4 1 * * /usr/bin/php /var/www/cron.php\n"
+    expected_stdout: |-
+      USER       SCHEDULE          COMMAND
+      backup     30 2 * * 0        tar -czf /backups/weekly.tgz /srv
+      deploy     -                 (no jobs)
+      root       0 3 * * *         /usr/local/bin/backup-all
+      root       */15 * * * *      /usr/local/bin/check-certs --warn 30
+      root       @reboot           /usr/local/bin/mount-spare
+      www-data   5 4 1 * *         /usr/bin/php /var/www/cron.php
+      5 jobs across 3 users
+  - name: tabs, extra blanks, indented comments
+    args: [crontabs]
+    files:
+      crontabs/ollie: "   # indented comment\n0   3  *\t*   * /bin/true\n\n@daily\t/bin/sync-docs\n"
+    expected_stdout: |-
+      USER       SCHEDULE          COMMAND
+      ollie      0 3 * * *         /bin/true
+      ollie      @daily            /bin/sync-docs
+      2 jobs across 1 users
+  - name: a malformed line is reported and skipped
+    args: [crontabs]
+    files:
+      crontabs/noor: "0 9 * * 1-5 /usr/bin/ticket-digest\n0 9 * * *\n"
+    expected_stdout: |-
+      USER       SCHEDULE          COMMAND
+      noor       0 9 * * 1-5       /usr/bin/ticket-digest
+      1 jobs across 1 users
+    expected_stderr: "noor line 2: malformed entry"
+  - name: hidden files and sub-folders are not users
+    args: [crontabs]
+    files:
+      crontabs/.placeholder: "0 1 * * * /bin/hidden\n"
+      crontabs/theo: "0 1 * * * /bin/build-nightly\n"
+      crontabs/old/readme: "ignore me\n"
+    expected_stdout: |-
+      USER       SCHEDULE          COMMAND
+      theo       0 1 * * *         /bin/build-nightly
+      1 jobs across 1 users
+  - name: empty folder
+    args: [crontabs]
+    files:
+      "crontabs/": ""
+    expected_stdout: |-
+      USER       SCHEDULE          COMMAND
+      0 jobs across 0 users
+  - name: folder missing
+    args: [nowhere]
+    expected_stderr: "no such directory: nowhere"
+    expected_exit: 1
+  - name: no argument
+    args: []
+    expected_stderr: "usage: solution.sh DIR"
+    expected_exit: 2

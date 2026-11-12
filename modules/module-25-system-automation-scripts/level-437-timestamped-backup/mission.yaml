@@ -1,0 +1,86 @@
+id: 437
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Timestamped Backup
+difficulty: expert
+xp: 260
+story: |
+  Gus asked a simple question over lunch: "If someone deletes the Harbour
+  Bakery website folder, how long until we get it back?" Nobody liked the
+  silence that followed. Mara hands you the first job of your new fleet-wide
+  role: a backup script that every other tool will build on, one archive per
+  run, never overwriting yesterday's.
+objective: |
+  Write solution.sh. It takes three arguments: SRC (a directory), DEST (a
+  directory for archives) and STAMP (a label such as `20260301`; the
+  caller supplies it so the script never guesses the date).
+
+  - If there are not exactly three arguments, print
+    `usage: solution.sh SRC DEST STAMP` to stderr and exit 2.
+  - If SRC is not a directory, print `no such directory: SRC` to stderr and
+    exit 1.
+  - Create DEST if it does not exist.
+  - The archive is `DEST/NAME-STAMP.tar.gz`, where NAME is the last component
+    of SRC (a trailing slash on SRC must not matter). Inside the archive the
+    paths must start with NAME/ (not with the full path of SRC), so a restore
+    recreates one tidy folder.
+  - If that archive already exists, print `archive already exists: PATH` to
+    stderr, exit 1, and leave the old archive untouched.
+  - On success print two lines on stdout:
+      created DEST/NAME-STAMP.tar.gz
+      files: N
+    where N is the number of regular files in the archive (list it back with
+    `tar -tzf`; directory entries end in `/` and do not count).
+concepts:
+  - "tar -czf ARCHIVE -C PARENT NAME creates a gzip archive of one folder"
+  - "tar -tzf lists an archive without extracting it"
+  - "refuse to overwrite an existing backup"
+required_patterns:
+  - pattern: 'tar\s+-[A-Za-z]*c[A-Za-z]*'
+    message: "Create the archive with tar -czf."
+  - pattern: 'tar\s+-[A-Za-z]*t[A-Za-z]*'
+    message: "Count the files by listing the finished archive with tar -tzf."
+test_cases:
+  - name: a small website
+    args: [www, backups, "20260301"]
+    files:
+      www/index.html: "<h1>Harbour Bakery</h1>\n"
+      www/css/site.css: "body { color: navy; }\n"
+    expected_stdout: |-
+      created backups/www-20260301.tar.gz
+      files: 2
+    expected_files:
+      backups/www-20260301.tar.gz: true
+  - name: trailing slash and nested destination
+    args: [site/, out/nightly, "20260302"]
+    files:
+      site/a.txt: "a\n"
+      site/b.txt: "b\n"
+      site/docs/c.txt: "c\n"
+    expected_stdout: |-
+      created out/nightly/site-20260302.tar.gz
+      files: 3
+    expected_files:
+      out/nightly/site-20260302.tar.gz: true
+  - name: yesterday's archive is never overwritten
+    args: [www, backups, "20260301"]
+    files:
+      www/index.html: "new\n"
+      backups/www-20260301.tar.gz: "precious old bytes\n"
+    expected_stdout: ""
+    expected_stderr: "archive already exists: backups/www-20260301.tar.gz"
+    expected_exit: 1
+    expected_files:
+      backups/www-20260301.tar.gz: "precious old bytes\n"
+  - name: source folder is missing
+    args: [nothing-here, backups, "20260301"]
+    expected_stdout: ""
+    expected_stderr: "no such directory: nothing-here"
+    expected_exit: 1
+    expected_files:
+      backups/nothing-here-20260301.tar.gz: null
+  - name: wrong number of arguments
+    args: [www, backups]
+    expected_stderr: "usage: solution.sh SRC DEST STAMP"
+    expected_exit: 2

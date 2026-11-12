@@ -1,0 +1,12 @@
+  declare -A seen=()
+  while IFS= read -r line; do
+    ...trim leading blanks; skip empty and # lines...
+    line=${line//=/ }; read -r key value _ <<< "$line"; key=${key,,}
+    [[ $key == match ]] && break
+    [[ -n ${seen[$key]+set} ]] && continue
+    seen[$key]=${value,,}
+  done < "$file"
+  check() {  # name default kind: value from seen[] or the default; decide PASS/FAIL; build the suffix }
+  check PermitRootLogin prohibit-password no
+  ...four more calls...
+Count failures inside check, then print the summary.

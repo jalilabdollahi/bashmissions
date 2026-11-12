@@ -1,0 +1,11 @@
+  shopt -s nullglob
+  archives=("$dir"/*.tar.gz)
+  newest_from=$(( ${#archives[@]} - 7 ))
+  for i in "${!archives[@]}"; do
+    name=${archives[i]##*/}
+    if (( i >= newest_from )); then ...daily...
+    elif [[ $name == *-Sun.tar.gz ]]; then ...weekly...
+    else ...delete, or "would delete" when dry...
+    fi
+  done
+Count kept and deleted as you go; the last line depends on dry-run mode.

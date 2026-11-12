@@ -1,0 +1,1 @@
+Build one loop that serves two modes. In dry-run mode it only describes each step; in real mode it performs it. Put the checks on the payload (is it there, is it empty?) before the loop, so a bad file never reaches a single host.

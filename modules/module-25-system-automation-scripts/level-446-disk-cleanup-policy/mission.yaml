@@ -1,0 +1,158 @@
+id: 446
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Disk Cleanup Policy
+difficulty: expert
+xp: 360
+story: |
+  Cuttlefish is the build server, and builds leave rubbish: temp files,
+  crash dumps, enormous debug dumps nobody reads. A cron job that runs
+  "rm *.tmp" would have been fine, if only the rules were that simple.
+  Ollie suggests a policy file so the rules are written down where
+  Priya can review them, and a dry run so nobody has to trust the script.
+objective: |
+  Write solution.sh [-n] POLICY DIR. POLICY has one rule per line, three
+  whitespace-separated fields:
+    PATTERN MIN_AGE_DAYS MIN_BYTES
+  Blank lines and lines starting with `#` are ignored. A rule selects regular
+  files anywhere under DIR whose NAME matches PATTERN (a shell wildcard such
+  as `*.tmp`, matched with `find -name`), and that are older than
+  MIN_AGE_DAYS days (`-mtime +N`, skipped when N is 0) and larger than
+  MIN_BYTES bytes (`-size +Nc`, skipped when N is 0).
+
+  Validate the whole policy first: a rule needs exactly three fields and the
+  last two must be whole numbers; otherwise print
+  `policy line N: invalid rule: TEXT` to stderr (N counts every line of the
+  file, TEXT is the line as written), exit 1 and delete nothing.
+
+  Apply the rules in file order. Within a rule go in sorted path order. A
+  file removed by an earlier rule is not touched again. For each file print
+    delete PATH (rule R)
+  (R counts rules only, starting at 1, PATH is as printed by find) and remove
+  it. Finish with `removed N files, freed B bytes` (B is the sum of the sizes
+  of the removed files).
+
+  With -n delete nothing, print `would delete PATH (rule R)` lines and
+  finish with `would remove N files, B bytes`.
+  POLICY unreadable: `cannot read POLICY` (stderr, exit 1). DIR not a
+  directory: `no such directory: DIR` (stderr, exit 1). Wrong arguments:
+  `usage: solution.sh [-n] POLICY DIR` (stderr, exit 2).
+concepts:
+  - "policy as data: rules in a file, one engine"
+  - "find -name -mtime +N -size +Nc"
+  - "validate everything before deleting anything"
+required_patterns:
+  - pattern: '-size\b'
+    message: "Use find -size +Nc for the size rule (c = bytes)."
+  - pattern: '-mtime\b'
+    message: "Use find -mtime +N for the age rule."
+test_cases:
+  - name: three rules, five files affected by them
+    args: [policy.txt, scratch]
+    files:
+      policy.txt: "# pattern  min_age_days  min_bytes\n*.tmp 7 0\ncore.* 0 0\n*.dump 30 1000\n"
+      scratch/a.tmp:
+        content: "0123456789\n"
+        mtime: 1700000000
+      scratch/b.tmp: "fresh\n"
+      scratch/sub/core.123: "core dump data\n"
+      scratch/old.dump:
+        content: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        mtime: 1700000000
+      scratch/small.dump:
+        content: "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+        mtime: 1700000000
+      scratch/new.dump: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      scratch/keep.txt:
+        content: "important\n"
+        mtime: 1700000000
+    expected_stdout: |-
+      delete scratch/a.tmp (rule 1)
+      delete scratch/sub/core.123 (rule 2)
+      delete scratch/old.dump (rule 3)
+      removed 3 files, freed 1226 bytes
+    expected_files:
+      scratch/a.tmp: null
+      scratch/sub/core.123: null
+      scratch/old.dump: null
+      scratch/b.tmp: true
+      scratch/small.dump: true
+      scratch/new.dump: true
+      scratch/keep.txt: true
+  - name: dry run
+    args: ["-n", policy.txt, scratch]
+    files:
+      policy.txt: "# pattern  min_age_days  min_bytes\n*.tmp 7 0\ncore.* 0 0\n*.dump 30 1000\n"
+      scratch/a.tmp:
+        content: "0123456789\n"
+        mtime: 1700000000
+      scratch/b.tmp: "fresh\n"
+      scratch/sub/core.123: "core dump data\n"
+      scratch/old.dump:
+        content: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        mtime: 1700000000
+      scratch/small.dump:
+        content: "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+        mtime: 1700000000
+      scratch/new.dump: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      scratch/keep.txt:
+        content: "important\n"
+        mtime: 1700000000
+    expected_stdout: |-
+      would delete scratch/a.tmp (rule 1)
+      would delete scratch/sub/core.123 (rule 2)
+      would delete scratch/old.dump (rule 3)
+      would remove 3 files, 1226 bytes
+    expected_files:
+      scratch/a.tmp: true
+      scratch/sub/core.123: true
+      scratch/old.dump: true
+  - name: a file matching two rules goes once
+    args: [policy.txt, scratch]
+    files:
+      policy.txt: "# pattern  min_age_days  min_bytes\n*.tmp 7 0\ncore.* 0 0\n*.dump 30 1000\n"
+      scratch/core.7.tmp:
+        content: "abc\n"
+        mtime: 1700000000
+    expected_stdout: |-
+      delete scratch/core.7.tmp (rule 1)
+      removed 1 files, freed 4 bytes
+    expected_files:
+      scratch/core.7.tmp: null
+  - name: a broken rule stops everything before any deletion
+    args: [policy.txt, scratch]
+    files:
+      policy.txt: "# rules\n*.tmp 7 0\n*.dump seven 1000\n"
+      scratch/a.tmp:
+        content: "0123456789\n"
+        mtime: 1700000000
+    expected_stdout: ""
+    expected_stderr: "policy line 3: invalid rule: *.dump seven 1000"
+    expected_exit: 1
+    expected_files:
+      scratch/a.tmp: true
+  - name: nothing matches
+    args: [policy.txt, scratch]
+    files:
+      policy.txt: "*.bak 1 0\n"
+      scratch/keep.txt: "x\n"
+    expected_stdout: "removed 0 files, freed 0 bytes"
+    expected_files:
+      scratch/keep.txt: true
+  - name: missing policy file
+    args: [nopolicy.txt, scratch]
+    files:
+      "scratch/": ""
+    expected_stderr: "cannot read nopolicy.txt"
+    expected_exit: 1
+  - name: missing directory
+    args: [policy.txt, nodir]
+    files:
+      policy.txt: "*.tmp 1 0\n"
+    expected_stderr: "no such directory: nodir"
+    expected_exit: 1
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh [-n] POLICY DIR"
+    expected_exit: 2

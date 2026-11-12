@@ -1,0 +1,11 @@
+  while IFS= read -r path; do
+    name=${path##*/}; out=$dir/archive/$name.gz
+    if [[ -e $out ]]; then echo "skipped $name (already archived)"; ...; continue; fi
+    mkdir -p "$dir/archive"
+    gzip -c "$path" > "$out.partial"
+    gzip -t "$out.partial"
+    mv "$out.partial" "$out"
+    rm "$path"
+    ...archived line and counter...
+  done < <(find "$dir" -maxdepth 1 -type f -name '*.log' -mtime +"$days" | sort)
+Do not forget the numeric check on DAYS and the final summary line.

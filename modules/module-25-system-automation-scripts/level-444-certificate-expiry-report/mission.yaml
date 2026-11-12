@@ -1,0 +1,119 @@
+id: 444
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Certificate Expiry Report
+difficulty: expert
+xp: 340
+story: |
+  On a Sunday morning the Gull & Anchor Pub's booking site started showing
+  a browser warning that frightens customers: its certificate had expired
+  at midnight. Nobody was watching the date. Priya wants a report that runs
+  every morning and turns "expires on Mar 15" into "14 days left", sorted so
+  the scary ones are on top.
+objective: |
+  Write solution.sh TODAY CERTDIR. TODAY is a date like `2026-03-01` (passed
+  in, so the report is repeatable). CERTDIR holds files named `NAME.pem`.
+
+  For each certificate get its end date with
+    openssl x509 -enddate -noout -in FILE
+  which prints one line such as `notAfter=Mar  4 12:00:00 2026 GMT` (note:
+  single-digit days are padded with a space, so split on whitespace, not on
+  single spaces). Work out the number of whole days from TODAY to that date
+  (negative if already past), without using `date -d`: turn each date into a
+  day number with integer arithmetic (the days-since-year-0 formula in hint 3
+  works) and subtract.
+
+  Print one line per certificate, sorted by days remaining (smallest first,
+  ties by name), with exactly this layout:
+    printf '%-10s %5d  %s\n' NAME DAYS STATUS
+  where STATUS is EXPIRED (days < 0), WARN (0 to 30 days) or OK (more than
+  30). NAME is the file name without `.pem`. After the table print
+    checked N certificates, B need attention
+  where B counts EXPIRED and WARN. Exit 1 if B is greater than 0, else 0.
+
+  If openssl cannot read a certificate, print `cannot read certificate: NAME`
+  to stderr, leave it out of the table (it still counts toward N and B) and
+  carry on. TODAY not in the form YYYY-MM-DD: `bad date: TODAY` on stderr,
+  exit 2. No `.pem` files in CERTDIR: `no certificates in CERTDIR` on stderr,
+  exit 1. Wrong argument count: `usage: solution.sh TODAY CERTDIR`, exit 2.
+concepts:
+  - "openssl x509 -enddate prints notAfter=..."
+  - "date arithmetic with integers: convert to a day number, subtract"
+  - "month name to number lookup"
+  - "sort a report by a numeric key"
+required_patterns:
+  - pattern: 'openssl\s+x509'
+    message: "Read the end date with openssl x509 -enddate -noout -in FILE."
+forbidden_patterns:
+  - pattern: 'date\s+(-d|-j|--date)'
+    message: "date -d is not portable; compute day numbers with arithmetic."
+test_cases:
+  - name: a mixed fleet
+    args: ["2026-03-01", certs]
+    files:
+      certs/www.pem: "notAfter=Mar 15 12:00:00 2026 GMT\n"
+      certs/mail.pem: "notAfter=Feb 20 08:30:00 2026 GMT\n"
+      certs/api.pem: "notAfter=Jun  1 00:00:00 2026 GMT\n"
+      certs/shop.pem: "notAfter=Mar  1 23:59:59 2026 GMT\n"
+      certs/vpn.pem: "notAfter=Dec 31 10:00:00 2026 GMT\n"
+    expected_stdout: |-
+      mail          -9  EXPIRED
+      shop           0  WARN
+      www           14  WARN
+      api           92  OK
+      vpn          305  OK
+      checked 5 certificates, 3 need attention
+    expected_exit: 1
+  - name: everything healthy
+    args: ["2026-03-01", certs]
+    files:
+      certs/books.pem: "notAfter=Sep  9 12:00:00 2026 GMT\n"
+      certs/dental.pem: "notAfter=Apr 30 12:00:00 2026 GMT\n"
+    expected_stdout: |-
+      dental        60  OK
+      books        192  OK
+      checked 2 certificates, 0 need attention
+  - name: leap year is counted
+    args: ["2028-02-28", certs]
+    files:
+      certs/leap.pem: "notAfter=Mar  1 00:00:00 2028 GMT\n"
+      certs/later.pem: "notAfter=Mar 29 00:00:00 2028 GMT\n"
+    expected_stdout: |-
+      leap           2  WARN
+      later         30  WARN
+      checked 2 certificates, 2 need attention
+    expected_exit: 1
+  - name: a broken certificate file
+    args: ["2026-03-01", certs]
+    files:
+      certs/good.pem: "notAfter=Aug  1 00:00:00 2026 GMT\n"
+      certs/broken.pem: "-----BEGIN GARBAGE-----\n"
+    expected_stdout: |-
+      good         153  OK
+      checked 2 certificates, 1 need attention
+    expected_stderr: "cannot read certificate: broken"
+    stderr_comparison: contains
+    expected_exit: 1
+  - name: year boundary
+    args: ["2026-12-20", certs]
+    files:
+      certs/ny.pem: "notAfter=Jan  5 00:00:00 2027 GMT\n"
+    expected_stdout: |-
+      ny            16  WARN
+      checked 1 certificates, 1 need attention
+    expected_exit: 1
+  - name: bad date argument
+    args: ["01/03/2026", certs]
+    expected_stderr: "bad date: 01/03/2026"
+    expected_exit: 2
+  - name: empty folder
+    args: ["2026-03-01", certs]
+    files:
+      "certs/": ""
+    expected_stderr: "no certificates in certs"
+    expected_exit: 1
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh TODAY CERTDIR"
+    expected_exit: 2

@@ -1,0 +1,1 @@
+Three safety rules decide this script: touch only files that are really old, never overwrite an earlier archive, and delete the original only after the compressed copy has proven itself. Let find choose the files; do the safe sequence per file.

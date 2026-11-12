@@ -1,0 +1,1 @@
+Two jobs: pack the folder, then prove the pack has the right things in it. tar can do both (create, and list). The trick is the folder names stored inside the archive: you want the folder itself, not its whole path on this machine.

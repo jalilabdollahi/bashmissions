@@ -1,0 +1,110 @@
+id: 450
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Port Inventory
+difficulty: expert
+xp: 400
+story: |
+  Last month a contractor left a MySQL port open to the internet on
+  barracuda, and the only reason anyone knew was a stray scan from a
+  stranger. Priya now wants a weekly inventory: which of the interesting
+  ports answer on each host, and where that differs from what the host is
+  supposed to offer. Noor asks for something she can read without knowing
+  what 5432 means.
+objective: |
+  Write solution.sh HOSTFILE EXPECTED. HOSTFILE lists one host per line
+  (blank lines and `#` comments ignored). EXPECTED has lines of the form
+    HOST PORT [PORT...]
+  naming the ports each host is supposed to listen on; a line starting with
+  the word `default` applies to every host that has no line of its own, and
+  if there is no default either, nothing is expected. Comments and blank
+  lines are ignored there too.
+
+  Probe exactly these ports, in this order: 22 25 80 443 3306 5432. Test one
+  port with `nc -z -w 1 HOST PORT` (exit status 0 means open; hide nc's
+  error text). For each host print
+    HOST: open=P1,P2,...        (comma-separated, scan order; `-` if none)
+  and then one indented line per deviation, in scan order:
+    "  UNEXPECTED P"       the port is open but not expected
+    "  NOT-LISTENING P"    the port is expected but closed
+  (two leading spaces). Expected ports outside the six scanned ones are
+  ignored. Finish with
+    scanned N hosts, D deviations
+  and exit 1 if D is greater than 0, else 0.
+
+  Unreadable file: `cannot read FILE` on stderr, exit 1. Wrong argument
+  count: `usage: solution.sh HOSTFILE EXPECTED` on stderr, exit 2.
+concepts:
+  - "nc -z probes a port without sending data"
+  - "scan loop with an expected-state table"
+  - "a lookup table loaded from a file (associative array)"
+required_patterns:
+  - pattern: '\bnc\b[^\n]*-z'
+    message: "Probe with nc -z (zero-I/O mode)."
+  - pattern: 'declare\s+-A'
+    message: "Load the expected ports into an associative array keyed by host."
+test_cases:
+  - name: four hosts, four deviations
+    args: [hosts.txt, expected.txt]
+    files:
+      hosts.txt: "anchovy\nbarracuda\n# the db box\ncuttlefish\ndory\n"
+      expected.txt: "# host ports\ndefault 22\nanchovy 22 80 443\nbarracuda 22 80 443\ncuttlefish 22 5432\n"
+    expected_stdout: |-
+      anchovy: open=22,80,443
+      barracuda: open=22,80,3306
+        NOT-LISTENING 443
+        UNEXPECTED 3306
+      cuttlefish: open=22,25,5432
+        UNEXPECTED 25
+      dory: open=22,443
+        UNEXPECTED 443
+      scanned 4 hosts, 4 deviations
+    expected_exit: 1
+  - name: a host that matches its expectations
+    args: [hosts.txt, expected.txt]
+    files:
+      hosts.txt: "anchovy\n"
+      expected.txt: "# host ports\ndefault 22\nanchovy 22 80 443\nbarracuda 22 80 443\ncuttlefish 22 5432\n"
+    expected_stdout: |-
+      anchovy: open=22,80,443
+      scanned 1 hosts, 0 deviations
+  - name: a host that does not answer at all
+    args: [hosts.txt, expected.txt]
+    files:
+      hosts.txt: "ghost\n"
+      expected.txt: "# host ports\ndefault 22\nanchovy 22 80 443\nbarracuda 22 80 443\ncuttlefish 22 5432\n"
+    expected_stdout: |-
+      ghost: open=-
+        NOT-LISTENING 22
+      scanned 1 hosts, 1 deviations
+    expected_exit: 1
+  - name: no default means nothing is expected
+    args: [hosts.txt, expected.txt]
+    files:
+      hosts.txt: "dory\n"
+      expected.txt: "anchovy 22 80 443\n"
+    expected_stdout: |-
+      dory: open=22,443
+        UNEXPECTED 22
+        UNEXPECTED 443
+      scanned 1 hosts, 2 deviations
+    expected_exit: 1
+  - name: expected ports outside the scan list are ignored
+    args: [hosts.txt, expected.txt]
+    files:
+      hosts.txt: "dory\n"
+      expected.txt: "dory 22 443 8080\n"
+    expected_stdout: |-
+      dory: open=22,443
+      scanned 1 hosts, 0 deviations
+  - name: expected file missing
+    args: [hosts.txt, nope.txt]
+    files:
+      hosts.txt: "dory\n"
+    expected_stderr: "cannot read nope.txt"
+    expected_exit: 1
+  - name: one argument
+    args: [hosts.txt]
+    expected_stderr: "usage: solution.sh HOSTFILE EXPECTED"
+    expected_exit: 2

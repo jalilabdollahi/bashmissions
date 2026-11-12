@@ -1,0 +1,1 @@
+`awk -F: -v u="$user" '$1 == u { print $3 }' file` prints the UID field for one user (empty if not found). Compare numbers with `(( uid < 1000 ))`. `usermod -L` locks the password and `-s SHELL` replaces the login shell. `tar -czf out.tar.gz -C parent name` archives one folder with `name/` at the top of the archive; `[[ -d $home ]]` tells you if there is anything to archive.

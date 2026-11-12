@@ -1,0 +1,172 @@
+id: 438
+module: 25
+module_name: system-automation-scripts
+module_display: Running the Fleet
+title: Backup Retention
+difficulty: expert
+xp: 280
+story: |
+  The backup disk on halibut hit 96% on Monday. Theo's suggestion was "just
+  delete the old ones", which is how you end up with no old ones when a
+  customer asks for last month's invoice database. Mara wants a policy
+  instead: everything from the last week, plus one backup per week for as
+  far back as the files go.
+objective: |
+  Write solution.sh [-n] DIR. It applies a retention policy to the backup
+  archives named `*.tar.gz` directly inside DIR. The job names them like
+  `www-20260301-Sun.tar.gz` (the last part is the weekday, from `date +%a`),
+  so sorting by file name sorts by age.
+
+  Policy:
+  - the 7 newest archives are kept (reason: daily)
+  - of the older ones, keep those whose name ends in `-Sun.tar.gz`
+    (reason: weekly)
+  - delete every other older archive
+
+  Print one line per archive, in file-name order:
+    keep NAME (daily)
+    keep NAME (weekly)
+    delete NAME
+  then a summary line:
+    kept K, deleted D
+  With `-n` (dry run) delete nothing, print `would delete NAME` instead of
+  `delete NAME`, and end with `kept K, would delete D`.
+
+  If DIR does not exist print `no such directory: DIR` to stderr and exit 1.
+  An empty DIR is fine: print `kept 0, deleted 0`. A missing DIR argument
+  prints `usage: solution.sh [-n] DIR` to stderr and exits 2.
+concepts:
+  - "glob + sort order as a timeline"
+  - "keep-last-N plus a weekly rule"
+  - "dry-run flag with getopts or a manual check"
+required_patterns:
+  - pattern: 'nullglob|compgen|ls\b|find\b|for\s+\w+\s+in\s+"?\$'
+    message: "Walk over the archives with a glob or a listing; sorted names are your timeline."
+test_cases:
+  - name: twelve archives, real run
+    args: [backups]
+    files:
+      backups/www-20260201-Sun.tar.gz: "x
+"
+      backups/www-20260208-Sun.tar.gz: "x
+"
+      backups/www-20260210-Tue.tar.gz: "x
+"
+      backups/www-20260215-Sun.tar.gz: "x
+"
+      backups/www-20260218-Wed.tar.gz: "x
+"
+      backups/www-20260222-Sun.tar.gz: "x
+"
+      backups/www-20260224-Tue.tar.gz: "x
+"
+      backups/www-20260225-Wed.tar.gz: "x
+"
+      backups/www-20260226-Thu.tar.gz: "x
+"
+      backups/www-20260227-Fri.tar.gz: "x
+"
+      backups/www-20260228-Sat.tar.gz: "x
+"
+      backups/www-20260301-Sun.tar.gz: "x
+"
+    expected_stdout: |-
+      keep www-20260201-Sun.tar.gz (weekly)
+      keep www-20260208-Sun.tar.gz (weekly)
+      delete www-20260210-Tue.tar.gz
+      keep www-20260215-Sun.tar.gz (weekly)
+      delete www-20260218-Wed.tar.gz
+      keep www-20260222-Sun.tar.gz (daily)
+      keep www-20260224-Tue.tar.gz (daily)
+      keep www-20260225-Wed.tar.gz (daily)
+      keep www-20260226-Thu.tar.gz (daily)
+      keep www-20260227-Fri.tar.gz (daily)
+      keep www-20260228-Sat.tar.gz (daily)
+      keep www-20260301-Sun.tar.gz (daily)
+      kept 10, deleted 2
+    expected_files:
+      backups/www-20260210-Tue.tar.gz: null
+      backups/www-20260218-Wed.tar.gz: null
+      backups/www-20260208-Sun.tar.gz: true
+      backups/www-20260222-Sun.tar.gz: true
+  - name: dry run touches nothing
+    args: ["-n", backups]
+    files:
+      backups/www-20260201-Sun.tar.gz: "x
+"
+      backups/www-20260208-Sun.tar.gz: "x
+"
+      backups/www-20260210-Tue.tar.gz: "x
+"
+      backups/www-20260215-Sun.tar.gz: "x
+"
+      backups/www-20260218-Wed.tar.gz: "x
+"
+      backups/www-20260222-Sun.tar.gz: "x
+"
+      backups/www-20260224-Tue.tar.gz: "x
+"
+      backups/www-20260225-Wed.tar.gz: "x
+"
+      backups/www-20260226-Thu.tar.gz: "x
+"
+      backups/www-20260227-Fri.tar.gz: "x
+"
+      backups/www-20260228-Sat.tar.gz: "x
+"
+      backups/www-20260301-Sun.tar.gz: "x
+"
+    expected_stdout: |-
+      keep www-20260201-Sun.tar.gz (weekly)
+      keep www-20260208-Sun.tar.gz (weekly)
+      would delete www-20260210-Tue.tar.gz
+      keep www-20260215-Sun.tar.gz (weekly)
+      would delete www-20260218-Wed.tar.gz
+      keep www-20260222-Sun.tar.gz (daily)
+      keep www-20260224-Tue.tar.gz (daily)
+      keep www-20260225-Wed.tar.gz (daily)
+      keep www-20260226-Thu.tar.gz (daily)
+      keep www-20260227-Fri.tar.gz (daily)
+      keep www-20260228-Sat.tar.gz (daily)
+      keep www-20260301-Sun.tar.gz (daily)
+      kept 10, would delete 2
+    expected_files:
+      backups/www-20260210-Tue.tar.gz: true
+      backups/www-20260218-Wed.tar.gz: true
+  - name: fewer than seven archives, everything is daily
+    args: [backups]
+    files:
+      backups/www-20260227-Fri.tar.gz: "x
+"
+      backups/www-20260228-Sat.tar.gz: "x
+"
+      backups/www-20260301-Sun.tar.gz: "x
+"
+    expected_stdout: |-
+      keep www-20260227-Fri.tar.gz (daily)
+      keep www-20260228-Sat.tar.gz (daily)
+      keep www-20260301-Sun.tar.gz (daily)
+      kept 3, deleted 0
+  - name: other files in the folder are ignored
+    args: [backups]
+    files:
+      "backups/notes.txt": "keep me\n"
+      "backups/www-20260301-Sun.tar.gz": "x\n"
+    expected_stdout: |-
+      keep www-20260301-Sun.tar.gz (daily)
+      kept 1, deleted 0
+    expected_files:
+      backups/notes.txt: true
+  - name: empty folder
+    args: [backups]
+    files:
+      "backups/": ""
+    expected_stdout: "kept 0, deleted 0"
+  - name: missing folder
+    args: [nowhere]
+    expected_stderr: "no such directory: nowhere"
+    expected_exit: 1
+  - name: no arguments
+    args: []
+    expected_stderr: "usage: solution.sh [-n] DIR"
+    expected_exit: 2

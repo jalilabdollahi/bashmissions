@@ -1,0 +1,9 @@
+  while IFS= read -r host; do
+    [[ -z $host || $host == \#* ]] && continue
+    rc=0
+    out=$(ssh -n -o BatchMode=yes "$host" "$*" 2>&1) || rc=$?
+    if (( rc == 255 )); then echo "$host: UNREACHABLE"; ...failed++...; continue; fi
+    ...print each line of $out as "$host: $line"...
+    ...rc == 0 -> ok++, otherwise "$host: FAILED (exit $rc)" and failed++...
+  done < "$hostfile"
+Finish with the summary and a last command that is false when failed > 0.

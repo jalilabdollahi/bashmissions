@@ -1,0 +1,1 @@
+Reading the file like sshd means three behaviours: the first value of a keyword wins, nothing after the first Match line is global, and keywords are not case-sensitive. First turn the file into a table of "keyword gives value" following those rules; then the five checks are simple lookups with defaults.

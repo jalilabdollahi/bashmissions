@@ -1,0 +1,1 @@
+Calendar arithmetic is easy once every date is a plain number. Turn both TODAY and the certificate date into "day numbers" and subtract. Then the report is just: collect rows, sort by the number, print with a status word.

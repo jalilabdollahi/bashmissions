@@ -1,0 +1,1 @@
+Evidence work has two rules: never destroy what is already there, and keep as much as you can get. So a command that fails is still a fact worth recording, but a host that is completely unreachable means there is nothing to keep. Seal the folder with checksums only at the very end, after every file is final.

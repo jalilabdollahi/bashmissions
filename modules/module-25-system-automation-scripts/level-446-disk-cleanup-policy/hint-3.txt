@@ -1,0 +1,13 @@
+  while IFS= read -r line; do                # pass 2
+    [[ -z ${line//[[:space:]]/} || $line == \#* ]] && continue
+    rule=$((rule + 1)); read -r pat days bytes <<< "$line"
+    args=(-type f -name "$pat")
+    (( days > 0 ))  && args+=(-mtime +"$days")
+    (( bytes > 0 )) && args+=(-size +"$bytes"c)
+    while IFS= read -r path; do
+      [[ -f $path ]] || continue
+      size=$(( $(wc -c < "$path") ))
+      ...echo delete / would delete, rm unless dry, count and freed...
+    done < <(find "$dir" "${args[@]}" | sort)
+  done < "$policy"
+Pass 1 is the same loop with a validity test instead of find.

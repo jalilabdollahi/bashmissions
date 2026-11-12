@@ -1,0 +1,1 @@
+A crontab line can be four different things: nothing (blank or comment), a setting (NAME=value), a special schedule starting with @, or a five-field schedule. Decide which it is before you split it. The command is whatever remains after the schedule, spaces and all.

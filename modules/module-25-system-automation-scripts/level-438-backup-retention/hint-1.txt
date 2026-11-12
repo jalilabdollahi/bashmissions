@@ -1,0 +1,1 @@
+The file names already contain the date, in an order where alphabetical equals chronological. So "the newest 7" is simply "the last 7 names in sorted order". Think of the list as a numbered line and decide per position.

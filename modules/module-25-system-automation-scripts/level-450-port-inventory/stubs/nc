@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# nc stand-in for port probing:  nc -z [-w SECONDS] HOST PORT
+# Exit 0 if PORT is listed in fixtures/open/HOST (space separated), 1 otherwise.
+# A host with no file behaves like a host that does not resolve: error + exit 1.
+zero=0 args=()
+while (( $# )); do
+  case $1 in
+    -z) zero=1 ;;
+    -w) shift ;;
+    -*) echo "nc: stub does not know option $1" >&2; exit 2 ;;
+    *)  args+=("$1") ;;
+  esac
+  shift
+done
+(( zero )) || { echo "nc: stub only supports port probing, use -z" >&2; exit 2; }
+(( ${#args[@]} == 2 )) || { echo "usage: nc -z [-w secs] host port" >&2; exit 2; }
+host=${args[0]} port=${args[1]}
+echo "nc $host $port" >> .calls.log
+if [[ ! -f fixtures/open/$host ]]; then
+  echo "nc: getaddrinfo for host \"$host\" port $port: Name or service not known" >&2; exit 1
+fi
+[[ " $(cat "fixtures/open/$host") " == *" $port "* ]]

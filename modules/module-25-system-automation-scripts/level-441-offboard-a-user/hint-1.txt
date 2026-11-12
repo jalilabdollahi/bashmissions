@@ -1,0 +1,1 @@
+Think about order and about what must never happen. First make sure the target is a real, human account (a service account must be refused before any change is made). Then lock, then archive, then report. The dry-run branch must stop before anything is changed.

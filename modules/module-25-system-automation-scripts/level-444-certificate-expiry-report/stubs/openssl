@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# openssl stand-in: only "openssl x509 -enddate -noout -in FILE".
+# The fake certificate is a text file; its "notAfter=..." line is what the real
+# command would print. A file without one is "not a certificate".
+[[ ${1:-} == x509 ]] || { echo "openssl: stub only implements the x509 command" >&2; exit 2; }
+shift
+enddate=0 noout=0 file=
+while (( $# )); do
+  case $1 in
+    -enddate) enddate=1 ;;
+    -noout)   noout=1 ;;
+    -in)      file=$2; shift ;;
+    *) echo "openssl: stub does not know option $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+(( enddate && noout )) && [[ -n $file ]] || { echo "usage: openssl x509 -enddate -noout -in FILE" >&2; exit 2; }
+echo "openssl x509 -enddate -noout -in $file" >> .calls.log
+[[ -f $file ]] || { echo "Could not open file or uri for loading certificate from $file" >&2; exit 1; }
+line=$(grep '^notAfter=' "$file" || true)
+[[ -n $line ]] || { echo "Could not read certificate from $file" >&2; exit 1; }
+echo "$line"

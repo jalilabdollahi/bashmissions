@@ -1,0 +1,7 @@
+  daynum() {                      # year month day -> a number; subtract two of them
+    local y=$1 m=$((10#$2)) d=$((10#$3))
+    if (( m < 3 )); then y=$((y - 1)); m=$((m + 12)); fi
+    echo $(( 365*y + y/4 - y/100 + y/400 + (153*(m-3)+2)/5 + d ))
+  }
+  days=$(( $(daynum "$year" "$mnum" "$day") - today_n ))
+The `10#` stops Bash from reading "08" as invalid octal. Remember to count unreadable certificates and to end with a command that is false when any need attention.
