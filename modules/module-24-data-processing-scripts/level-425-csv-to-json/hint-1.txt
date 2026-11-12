@@ -1,0 +1,3 @@
+JSON is picky in ways CSV is not. A string must be wrapped in double quotes, so any double quote inside the text has to be marked, and since the marker is a backslash, backslashes in the text must be marked too. Think about which of the two to handle first, or better, how to handle both without handling anything twice.
+
+The other puzzle is the comma between objects: the last one must not have one.

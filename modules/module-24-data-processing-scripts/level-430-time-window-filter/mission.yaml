@@ -1,0 +1,104 @@
+id: 430
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Time Window Filter
+difficulty: expert
+xp: 350
+story: |
+  The deploy log of the whole fleet is one big file, and Theo needs to show that
+  nothing was released between the 14:00 snapshot and the 15:30 backup. Gus
+  needs a different slice: everything on the fourth of March, "whatever the
+  clock said". You could convert every timestamp to seconds, but Mara has a
+  better trick: nothing needs converting, because of the way the timestamps
+  were written.
+objective: |
+  Write solution.sh that takes three arguments: a log file, a FROM and a TO.
+  Each log line begins with an ISO-8601 UTC timestamp, then a server name and a
+  free-text message:
+    2026-03-04T14:05:10Z halibut deployed web-3.4.1
+  Print, unchanged and in file order, every line whose timestamp is at or after
+  FROM and strictly before TO (a half-open window, so two adjacent windows
+  never both contain the same line). FROM and TO are compared as plain text,
+  so they may be full timestamps, a date (`2026-03-04`), or an hour
+  (`2026-03-04T14`); no date conversion tools are allowed.
+  A line whose first field is not a full timestamp of the form
+  `YYYY-MM-DDTHH:MM:SSZ` is not printed; instead print `skipped line <N>` to
+  stderr (N is its line number). Blank lines are ignored silently and `\r`
+  line endings are stripped. If FROM sorts after TO, print
+  `error: FROM is after TO` to stderr and exit 1. With fewer than three
+  arguments print `usage: solution.sh LOG FROM TO` to stderr and exit 2.
+concepts:
+  - "ISO-8601 in one time zone sorts chronologically as text"
+  - "string comparison in awk: $1 >= from && $1 < to"
+  - "half-open intervals [from, to)"
+  - "partial timestamps as prefixes (a date is a valid bound)"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Compare the timestamp field with FROM and TO inside awk."
+  - pattern: '>=\s*\w+'
+    message: "Use >= for the lower bound."
+forbidden_patterns:
+  - pattern: '\bdate\b\s+(-d|-j|--date)'
+    message: "No date conversion: ISO timestamps compare correctly as text."
+test_cases:
+  - name: afternoon window
+    args: [deploys.log, "2026-03-04T14:00:00Z", "2026-03-04T15:30:00Z"]
+    files:
+      deploys.log: |
+        2026-03-04T13:59:59Z anchovy deployed web-3.4.0
+        2026-03-04T14:00:00Z halibut deployed web-3.4.1
+        2026-03-04T15:29:59Z marlin rolled back api-2.2.0 after errors
+        2026-03-04T15:30:00Z octopus deployed web-3.4.2
+        2026-03-04T16:00:00Z dory deployed api-2.3.0
+    expected_stdout: |-
+      2026-03-04T14:00:00Z halibut deployed web-3.4.1
+      2026-03-04T15:29:59Z marlin rolled back api-2.2.0 after errors
+  - name: whole day by date prefix
+    args: [fleet.log, "2026-03-04", "2026-03-05"]
+    files:
+      fleet.log: |
+        2026-03-03T23:59:59Z eel nightly backup done
+        2026-03-04T00:00:00Z eel nightly backup started
+        2026-03-04T23:59:59Z flounder reboot
+        2026-03-05T00:00:00Z grouper patch applied
+    expected_stdout: |-
+      2026-03-04T00:00:00Z eel nightly backup started
+      2026-03-04T23:59:59Z flounder reboot
+  - name: bad timestamps are reported
+    args: [mixed.log, "2026-04-01", "2026-04-02"]
+    files:
+      mixed.log: |
+        2026-04-01T08:00:00Z cuttlefish ok
+        04/01/2026 09:00 cuttlefish wrong date format
+
+        2026-4-1T10:00:00Z cuttlefish unpadded
+        2026-04-01T11:00:00Z cuttlefish still fine
+    expected_stdout: |-
+      2026-04-01T08:00:00Z cuttlefish ok
+      2026-04-01T11:00:00Z cuttlefish still fine
+    expected_stderr: |-
+      skipped line 2
+      skipped line 4
+  - name: hour prefix and windows endings
+    args: [win.log, "2026-05-01T10", "2026-05-01T11"]
+    files:
+      win.log: "2026-05-01T09:59:59Z pike early\r\n2026-05-01T10:30:00Z pike inside\r\n2026-05-01T11:00:00Z pike late\r\n"
+    expected_stdout: "2026-05-01T10:30:00Z pike inside"
+  - name: nothing in the window
+    args: [quiet.log, "2027-01-01", "2027-02-01"]
+    files:
+      quiet.log: |
+        2026-12-31T23:59:59Z sprat last of the year
+    expected_stdout: ""
+  - name: reversed window
+    args: [quiet.log, "2026-12-02", "2026-12-01"]
+    files:
+      quiet.log: |
+        2026-12-01T00:00:00Z skate hello
+    expected_stderr: "error: FROM is after TO"
+    expected_exit: 1
+  - name: missing arguments
+    args: [quiet.log, "2026-12-01"]
+    expected_stderr: "usage: solution.sh LOG FROM TO"
+    expected_exit: 2

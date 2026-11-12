@@ -1,0 +1,26 @@
+  shopt -u patsub_replacement 2>/dev/null || true
+
+  escaped=
+  html_escape() {
+    local s=$1
+    s=${s//&/&amp;}
+    # then < and >
+    escaped=$s
+  }
+
+  rows=; count=0
+  {
+    read -r _header || true
+    while IFS=, read -r time server summary || [[ -n $time ]]; do
+      summary=${summary%$'\r'}
+      # skip blank lines; escape the three cells;
+      rows+="<tr><td>...</td><td>...</td><td>...</td></tr>"$'\n'
+      count=$((count + 1))
+    done
+  } < "$1"
+
+  cat <<EOF
+  ...the page, with ${rows} and $count where they belong...
+  EOF
+
+(In your file the closing EOF has no leading spaces.)

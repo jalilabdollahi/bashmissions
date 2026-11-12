@@ -1,1 +1,3 @@
-Use this data-processing concept: check column count.
+Think of this as a bouncer at the door: nothing is processed, only judged. The checks run from cheapest to most specific: is there a file at all, is the header right, and then, row by row, does each row have the right shape.
+
+awk already counts the fields of every line for you, and it also knows which physical line it is on. Use both in your messages.

@@ -1,21 +1,124 @@
 id: 436
 module: 24
 module_name: data-processing-scripts
-module_display: Data Processing Scripts
+module_display: Data Wrangling
 title: Streaming Transform
-difficulty: advanced
-xp: 220
-objective: Transform a file line by line without using a temp file.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    item=ALPHA
-    item=BETA
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.txt
+difficulty: expert
+xp: 450
+story: |
+  The payment processor streams every transaction to `octopus` as it happens,
+  and Gus wants a running balance appended to each line as it goes by, so a
+  dashboard can show "money in today" live. The stream never ends, so the
+  script cannot wait for the end of the input, cannot collect lines in an
+  array, and the disk on `octopus` is full, so it cannot write temporary files
+  either. Mara's rule for the final exam of this module: the script's memory
+  use must be the same after a million lines as after ten.
+objective: |
+  Write solution.sh, a filter: it reads standard input and writes standard
+  output, no arguments. The input starts with the header line `ts,cents` and
+  continues with rows such as `2026-11-01T09:00:00Z,1250`, where cents is a
+  whole number that may be negative (refunds). Process the lines one at a time
+  and print each result as soon as it is known:
+    * for the header: `ts,amount,running`
+    * for each good row: `<ts>,<amount in dollars>,<running total in dollars>`
+      where dollars are written with exactly two decimals and a leading `-`
+      for negative values (`-3.05`, `0.07`, `1250.00`). Use integer arithmetic
+      only; do not compute with floating point.
+    * a row with an empty ts, or a cents value that is not a whole number
+      (optional leading `-`, then digits) prints `bad line <N>: <the line>`
+      to stderr (N is the input line number) and is skipped.
+    * blank lines are skipped silently (they still count as lines).
+  When the input ends, print one last line:
+    # rows=<good rows> total=<final running total in dollars>
+  If there was no input at all, print nothing. Ignore `\r` at line ends.
+  The script must not create temporary files (no `mktemp`, no `/tmp`, no
+  `> something.tmp`) and must not store the whole input (no `mapfile`,
+  `readarray`, `$(cat ...)` or `sort`); keep only the running total and two
+  counters.
 concepts:
-- process line by line, no temp file
-scaffold: true
+  - "a filter reads stdin and writes stdout, so it composes in pipelines"
+  - "constant memory: state is a few numbers, never a list of lines"
+  - "integer money: cents in, dollars out, with sign handling"
+  - "no temp files: the pipe is the buffer"
+required_patterns:
+  - pattern: '\bawk\b|\bwhile\b.*\bread\b'
+    message: "Process input line by line with awk or a while read loop."
+forbidden_patterns:
+  - pattern: '\bmktemp\b'
+    message: "No temporary files: the data flows straight through."
+  - pattern: '/tmp|>\s*\S*tmp|>\s*\$\{?TMPDIR'
+    message: "No temporary files: the data flows straight through."
+  - pattern: '\b(mapfile|readarray)\b|\$\(\s*cat\b'
+    message: "Do not load the whole input; handle one line at a time."
+  - pattern: '\bsort\b'
+    message: "sort has to see all of its input before it can print: not a streaming step."
+test_cases:
+  - name: deposits and a refund
+    stdin: |
+      ts,cents
+      2026-11-01T09:00:00Z,1250
+      2026-11-01T09:05:00Z,-305
+      2026-11-01T09:07:00Z,7
+      2026-11-01T09:09:00Z,100000
+    expected_stdout: |-
+      ts,amount,running
+      2026-11-01T09:00:00Z,12.50,12.50
+      2026-11-01T09:05:00Z,-3.05,9.45
+      2026-11-01T09:07:00Z,0.07,9.52
+      2026-11-01T09:09:00Z,1000.00,1009.52
+      # rows=4 total=1009.52
+  - name: balance goes negative
+    stdin: |
+      ts,cents
+      t1,-5
+      t2,-100
+      t3,150
+    expected_stdout: |-
+      ts,amount,running
+      t1,-0.05,-0.05
+      t2,-1.00,-1.05
+      t3,1.50,0.45
+      # rows=3 total=0.45
+  - name: bad rows are reported and skipped
+    stdin: |
+      ts,cents
+      t1,100
+
+      t2,12.5
+      ,300
+      t3,abc
+      t4,200
+    expected_stdout: |-
+      ts,amount,running
+      t1,1.00,1.00
+      t4,2.00,3.00
+      # rows=2 total=3.00
+    expected_stderr: |-
+      bad line 4: t2,12.5
+      bad line 5: ,300
+      bad line 6: t3,abc
+  - name: windows endings and no final newline
+    stdin: "ts,cents\r\nt1,250\r\nt2,-50"
+    expected_stdout: |-
+      ts,amount,running
+      t1,2.50,2.50
+      t2,-0.50,2.00
+      # rows=2 total=2.00
+  - name: header only
+    stdin: |
+      ts,cents
+    expected_stdout: |-
+      ts,amount,running
+      # rows=0 total=0.00
+  - name: no input at all
+    expected_stdout: ""
+  - name: very large amounts stay exact
+    stdin: |
+      ts,cents
+      t1,123456789012
+      t2,1
+    expected_stdout: |-
+      ts,amount,running
+      t1,1234567890.12,1234567890.12
+      t2,0.01,1234567890.13
+      # rows=2 total=1234567890.13

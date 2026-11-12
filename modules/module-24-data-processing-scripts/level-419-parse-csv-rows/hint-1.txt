@@ -1,0 +1,3 @@
+A CSV row is just a line with commas in it. Bash can already cut a line into pieces for you: the same word splitting that turns "a b c" into three words can be told to use a comma instead. Read the file one row at a time and give every column its own variable.
+
+Two edge cases decide whether your script is trustworthy: a last line without a newline, and Windows line endings.

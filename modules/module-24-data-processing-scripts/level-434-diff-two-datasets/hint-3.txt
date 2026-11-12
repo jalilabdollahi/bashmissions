@@ -1,0 +1,16 @@
+  diffs=$(
+    awk -F, '
+      { sub(/\r$/, "") }
+      $0 == "" || FNR == 1 { next }
+      { rest = substr($0, length($1) + 2) }
+      FNR == NR { old[$1] = rest; next }
+      { new[$1] = rest }
+      END {
+        for (k in new) # in new but not in old: print k "\t+ " k "," new[k]
+                       # in both and different: print k "\t~ " k ": " old[k] " -> " new[k]
+        for (k in old) # not in new: print k "\t- " k "," old[k]
+      }
+    ' "$1" "$2" | sort -t "$tab" -k1,1 | cut -f2-
+  )
+
+Then: empty $diffs means "no differences"; otherwise print $diffs and count the lines starting with "+ ", "- " and "~ " (remember || true). Before all this: the two checks for empty files and equal headers.

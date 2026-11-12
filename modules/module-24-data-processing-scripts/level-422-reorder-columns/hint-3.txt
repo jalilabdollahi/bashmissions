@@ -1,0 +1,16 @@
+  awk -F, -v OFS=, -v wanted="$2" '
+    { sub(/\r$/, "") }
+    NR == 1 {
+      for (i = 1; i <= NF; i++) pos[$i] = i
+      n = split(wanted, want, ",")
+      for (j = 1; j <= n; j++)
+        if (!(want[j] in pos)) { ...message to /dev/stderr...; exit 1 }
+    }
+    {
+      out = ""
+      for (j = 1; j <= n; j++) out = out (j > 1 ? OFS : "") $(pos[want[j]])
+      print out
+    }
+  ' "$1"
+
+Build the line in a variable so the separator goes only between columns, not after the last one.

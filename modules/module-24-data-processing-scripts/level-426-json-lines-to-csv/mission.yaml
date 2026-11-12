@@ -1,0 +1,87 @@
+id: 426
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: JSON Lines to CSV
+difficulty: expert
+xp: 310
+story: |
+  The new log shipper writes one JSON object per line, which is lovely for
+  machines and useless for Gus, who can only open spreadsheets. Nobody wants to
+  install a JSON parser on the log hosts just for one weekly export, and Mara
+  points out that the objects are flat, so careful text work will do. The
+  fields are not always in the same order, and some are missing.
+objective: |
+  Write solution.sh that takes one argument, a JSON Lines file: one flat JSON
+  object per line, for example
+    {"ts":"2026-06-01T10:00:00Z","host":"eel","status":503,"msg":"upstream down"}
+  Print a CSV with the header `ts,host,status,msg` and one row per object with
+  those four values, whatever order the keys appear in. Spaces after `:` may
+  appear. Rules:
+    * a string value is printed without its surrounding quotes; inside it,
+      `\"` means a quote and `\\` means a backslash
+    * a number or `true`/`false` is printed as written; `null` or a missing
+      key gives an empty cell
+    * a cell that contains a comma or a double quote is wrapped in double
+      quotes, with each inner quote doubled (CSV style)
+  Blank lines are skipped and `\r\n` endings are ignored. You may assume the
+  values of the four keys are the only places where the key names appear.
+concepts:
+  - "extract a value by searching for \"key\": with index()"
+  - "string versus bare JSON values"
+  - "unescaping while scanning"
+  - "CSV quoting on the way out"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk's index() and substr() to pull values out of each line."
+  - pattern: '\bindex\s*\('
+    message: "Locate each key with index(line, \"\\\"key\\\":\")."
+forbidden_patterns:
+  - pattern: '\bjq\b'
+    message: "jq is not installed on the log hosts; use awk."
+test_cases:
+  - name: keys in any order, with escapes
+    args: [events.jsonl]
+    files:
+      events.jsonl: |
+        {"ts":"2026-06-01T10:00:00Z","host":"eel","status":503,"msg":"upstream down"}
+        {"msg":"disk 91%, rotating","status":200,"host":"dory","ts":"2026-06-01T10:05:00Z"}
+        {"ts":"2026-06-01T10:07:00Z","host":"flounder","status":404,"msg":"he said \"stop\" twice"}
+    expected_stdout: |-
+      ts,host,status,msg
+      2026-06-01T10:00:00Z,eel,503,upstream down
+      2026-06-01T10:05:00Z,dory,200,"disk 91%, rotating"
+      2026-06-01T10:07:00Z,flounder,404,"he said ""stop"" twice"
+  - name: missing keys, null and spaces after the colon
+    args: [partial.jsonl]
+    files:
+      partial.jsonl: |
+        {"ts": "2026-06-02T08:00:00Z", "host": "grouper", "status": null, "msg": "boot"}
+        {"ts":"2026-06-02T08:01:00Z","status":200}
+        {"host":"halibut","msg":"C:\\logs\\new","ts":"2026-06-02T08:02:00Z","status":true}
+    expected_stdout: |-
+      ts,host,status,msg
+      2026-06-02T08:00:00Z,grouper,,boot
+      2026-06-02T08:01:00Z,,200,
+      2026-06-02T08:02:00Z,halibut,true,C:\logs\new
+  - name: key names inside other names are not confused
+    args: [lookalike.jsonl]
+    files:
+      lookalike.jsonl: |
+        {"hostname":"x","host":"marlin","ts":"2026-06-03T01:00:00Z","status":201,"msg":"ok"}
+    expected_stdout: |-
+      ts,host,status,msg
+      2026-06-03T01:00:00Z,marlin,201,ok
+  - name: blank lines and windows endings
+    args: [win.jsonl]
+    files:
+      win.jsonl: "{\"ts\":\"t1\",\"host\":\"octopus\",\"status\":1,\"msg\":\"a\"}\r\n\r\n{\"ts\":\"t2\",\"host\":\"pike\",\"status\":2,\"msg\":\"b\"}\r\n"
+    expected_stdout: |-
+      ts,host,status,msg
+      t1,octopus,1,a
+      t2,pike,2,b
+  - name: empty file still has the header
+    args: [none.jsonl]
+    files:
+      none.jsonl: ""
+    expected_stdout: "ts,host,status,msg"

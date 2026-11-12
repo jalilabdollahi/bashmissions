@@ -1,19 +1,91 @@
 id: 420
 module: 24
 module_name: data-processing-scripts
-module_display: Data Processing Scripts
+module_display: Data Wrangling
 title: Validate CSV Schema
-difficulty: advanced
-xp: 210
-objective: Validate that every CSV row has exactly three columns.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: schema=ok
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.csv
+difficulty: expert
+xp: 250
+story: |
+  Noor's support desk exports tickets every night, and last Tuesday somebody
+  pasted a subject with an extra comma into the tool. The importer swallowed
+  the row, shifted every column by one, and Gus received a report saying that
+  "urgent" tickets were opened in the year "Harbour Bakery". From now on the
+  export is checked before anything reads it.
+objective: |
+  Write solution.sh that takes one argument, a ticket export in CSV. The
+  expected header is exactly:
+    id,opened,priority,subject
+  Lines may end in `\r\n`; ignore the `\r`. Blank lines are skipped and are not
+  counted as rows. Check the file in this order:
+    * No lines at all: print `error: empty file` and exit 1.
+    * Header differs: print `error: unexpected header: <header line>` and exit 1.
+    * Then check every data row. A row with a field count other than 4 prints
+        line <N>: expected 4 fields, found <M>
+      (N is the physical line number in the file, header = line 1). Otherwise,
+      an empty id prints `line <N>: empty id`, and a priority that is not one
+      of low, normal, high, urgent prints `line <N>: bad priority "<value>"`.
+      Each bad row is reported once, with the first problem found.
+  At the end: if there were bad rows, print `invalid: <bad> of <rows> rows` and
+  exit 1; otherwise print `valid: <rows> rows` and exit 0. All messages go to
+  standard output.
 concepts:
-- check column count
-scaffold: true
+  - "NF is the number of fields in the current record"
+  - "NR is the physical line number, so it survives skipped lines"
+  - "exit inside awk, and exit status from END"
+  - "validating before processing"
+required_patterns:
+  - pattern: '\bNF\b'
+    message: "Count the fields of each row with awk's NF."
+test_cases:
+  - name: clean file
+    args: [tickets.csv]
+    files:
+      tickets.csv: |
+        id,opened,priority,subject
+        T-100,2026-04-01T09:15:00Z,high,Backup job failed
+        T-101,2026-04-01T09:40:00Z,low,Change invoice address
+        T-102,2026-04-02T07:05:00Z,urgent,Site down
+    expected_stdout: "valid: 3 rows"
+  - name: three kinds of bad row
+    args: [broken.csv]
+    files:
+      broken.csv: |
+        id,opened,priority,subject
+        T-200,2026-04-03T10:00:00Z,high,Disk full
+        T-201,2026-04-03T10:05:00Z,high,Slow, then fast, then down
+
+        ,2026-04-03T10:09:00Z,low,Missing id
+        T-203,2026-04-03T10:11:00Z,critical,Not a priority
+        T-204,2026-04-03T10:15:00Z,normal
+    expected_stdout: |-
+      line 3: expected 4 fields, found 6
+      line 5: empty id
+      line 6: bad priority "critical"
+      line 7: expected 4 fields, found 3
+      invalid: 4 of 5 rows
+    expected_exit: 1
+  - name: wrong header
+    args: [oldformat.csv]
+    files:
+      oldformat.csv: |
+        id,date,priority,subject
+        T-300,2026-04-04,low,Hello
+    expected_stdout: "error: unexpected header: id,date,priority,subject"
+    expected_exit: 1
+  - name: windows line endings are fine
+    args: [win.csv]
+    files:
+      win.csv: "id,opened,priority,subject\r\nT-400,2026-04-05T08:00:00Z,normal,Printer jam\r\nT-401,2026-04-05T08:30:00Z,urgent,Mail bounce\r\n"
+    expected_stdout: "valid: 2 rows"
+  - name: empty file
+    args: [nothing.csv]
+    files:
+      nothing.csv: ""
+    expected_stdout: "error: empty file"
+    expected_exit: 1
+  - name: header only is valid
+    args: [hdr.csv]
+    files:
+      hdr.csv: |
+        id,opened,priority,subject
+    expected_stdout: "valid: 0 rows"

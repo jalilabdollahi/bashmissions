@@ -1,0 +1,80 @@
+id: 427
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Parse Access Logs
+difficulty: expert
+xp: 320
+story: |
+  Priya wants to know who has been poking at the customer portal, and she wants
+  it in a form she can feed to her own tools: one tidy line per request, no
+  brackets, no quotes. The web server writes the combined log format, which is
+  famously awkward because spaces separate most fields but quotes surround the
+  ones that contain spaces. Some lines are damaged, and she wants to hear about
+  them, not have them vanish.
+objective: |
+  Write solution.sh that takes one argument, a web access log in combined log
+  format:
+    host ident user [date zone] "METHOD /path PROTO" status bytes "referer" "agent"
+  for example
+    203.0.113.7 - - [04/Mar/2026:10:15:02 +0000] "GET /login HTTP/1.1" 200 5123 "-" "Mozilla/5.0 (X11; Linux)"
+  For every good line print, separated by single spaces:
+    <host> <date> <METHOD> <path> <status> <bytes>
+  where `<date>` is the timestamp without brackets and zone (for example
+  `04/Mar/2026:10:15:02`), and a bytes value of `-` is printed as `0`.
+  A line is bad if the request is not exactly three words (for example `"-"`
+  from a client that sent nothing), if there are not six double quotes, or if
+  the status is not three digits. Bad lines print `bad line <N>` to stderr
+  (N is the line number in the file) and are skipped; the exit status stays 0.
+  Blank lines are ignored silently and `\r\n` endings must not leak.
+concepts:
+  - "split a record on a different separator: -F'\"'"
+  - "split(field, array, \" \") for the pieces in between"
+  - "validating shape before trusting positions"
+  - "writing diagnostics to stderr with line numbers"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Use awk with the double quote as field separator."
+  - pattern: "-F\\s*(\\\\?\"|'\"')"
+    message: "Split on the double quote: awk -F'\"'."
+test_cases:
+  - name: ordinary requests
+    args: [access.log]
+    files:
+      access.log: |
+        203.0.113.7 - - [04/Mar/2026:10:15:02 +0000] "GET /login HTTP/1.1" 200 5123 "-" "Mozilla/5.0 (X11; Linux)"
+        198.51.100.23 - alice [04/Mar/2026:10:15:09 +0000] "POST /api/orders HTTP/1.1" 201 87 "https://portal.example/cart" "curl/8.4"
+        203.0.113.7 - - [04/Mar/2026:10:16:40 +0000] "GET /img/logo.png HTTP/1.1" 304 - "https://portal.example/" "Mozilla/5.0 (Windows NT 10.0; Win64)"
+    expected_stdout: |-
+      203.0.113.7 04/Mar/2026:10:15:02 GET /login 200 5123
+      198.51.100.23 04/Mar/2026:10:15:09 POST /api/orders 201 87
+      203.0.113.7 04/Mar/2026:10:16:40 GET /img/logo.png 304 0
+  - name: damaged lines are reported
+    args: [messy.log]
+    files:
+      messy.log: |
+        192.0.2.5 - - [05/Mar/2026:00:00:01 +0000] "GET / HTTP/1.1" 200 10 "-" "ua"
+        192.0.2.9 - - [05/Mar/2026:00:00:03 +0000] "-" 408 0 "-" "-"
+        this is not a log line
+
+        192.0.2.5 - - [05/Mar/2026:00:00:04 +0000] "GET /x HTTP/1.1" 20x 10 "-" "ua"
+        192.0.2.6 - - [05/Mar/2026:00:00:05 +0000] "HEAD /status HTTP/1.1" 200 - "-" "monitor/1.0"
+    expected_stdout: |-
+      192.0.2.5 05/Mar/2026:00:00:01 GET / 200 10
+      192.0.2.6 05/Mar/2026:00:00:05 HEAD /status 200 0
+    expected_stderr: |-
+      bad line 2
+      bad line 3
+      bad line 5
+  - name: windows line endings
+    args: [win.log]
+    files:
+      win.log: "10.0.0.1 - - [06/Mar/2026:12:00:00 +0000] \"GET /a HTTP/1.1\" 200 1 \"-\" \"x\"\r\n10.0.0.2 - - [06/Mar/2026:12:00:01 +0000] \"GET /b HTTP/1.1\" 404 2 \"-\" \"y\"\r\n"
+    expected_stdout: |-
+      10.0.0.1 06/Mar/2026:12:00:00 GET /a 200 1
+      10.0.0.2 06/Mar/2026:12:00:01 GET /b 404 2
+  - name: empty log
+    args: [empty.log]
+    files:
+      empty.log: ""
+    expected_stdout: ""

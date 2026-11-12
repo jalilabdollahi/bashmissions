@@ -1,0 +1,21 @@
+  awk -F, '
+    function esc(s,  out, i, c) { ... also handle the double quote ... }
+    function val(s) {
+      if (s == "") return "null"
+      if (s ~ /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/) return s
+      return "\"" esc(s) "\""
+    }
+    { sub(/\r$/, "") }
+    $0 == "" { next }
+    NR == 1 { for (i = 1; i <= NF; i++) key[i] = $i; nkeys = NF; next }
+    {
+      obj = "  {"
+      for (i = 1; i <= nkeys; i++) obj = obj (i > 1 ? "," : "") "\"" key[i] "\":" val($i)
+      obj = obj "}"
+      # first object: print "[" ; later ones: print prev ","
+      prev = obj; count++
+    }
+    END { count == 0 ? "[]" : the last object, then "]" }
+  ' "$1"
+
+Note: NR == 1 is the header only if blank lines before it do not exist; here that is fine.

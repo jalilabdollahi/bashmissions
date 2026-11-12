@@ -1,0 +1,9 @@
+A here-document prints a block of text, expanding $variables inside it:
+
+  cat <<EOF
+  Hello $name, you have $n messages.
+  EOF
+
+(the closing EOF must be alone at the start of its line). Build the table rows in a string variable first with `rows+="<tr>...</tr>"$'\n'`, then put `${rows}` in the template.
+
+Escape with parameter expansion: `s=${s//&/&amp;}`. Do the `&` replacement first: if you do `<` first, its result `&lt;` contains an `&` that the next step would turn into `&amp;lt;`. Bash 5.2 treats `&` in the replacement like sed does, so run `shopt -u patsub_replacement 2>/dev/null || true` once before. The last CSV column absorbs extra commas if you read it with `IFS=, read -r time server summary`.

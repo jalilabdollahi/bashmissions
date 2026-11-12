@@ -1,0 +1,96 @@
+id: 425
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: CSV to JSON
+difficulty: expert
+xp: 300
+story: |
+  Theo is building the customer portal and wants the price list as JSON instead
+  of a spreadsheet. He tried `sed 's/,/","/g'` and got something that looked
+  right until the product "Shelf 5" deep" arrived and the whole page failed to
+  parse. Priya adds, without looking up from her screen, that a backslash in a
+  value does the same thing, and that she will be reading this script.
+objective: |
+  Write solution.sh that takes one argument, a CSV file with a header line such
+  as `sku,name,price,note`. Print the rows as a JSON array of objects whose keys
+  are the header names, in this exact layout:
+    [
+      {"sku":"A1","name":"Rope","price":12.5,"note":null},
+      {"sku":"B2","name":"Net","price":9,"note":"fragile"}
+    ]
+  (two spaces of indent, no spaces after `:` or `,`, a comma after every object
+  except the last, `[` and `]` on lines of their own). A file with no data
+  rows prints `[]`.
+  Rules for the values:
+    * empty cell, or a cell missing because the row is short: `null`
+    * a JSON number (an optional `-`, then `0` or digits not starting with 0,
+      then an optional decimal part): printed bare, exactly as written
+    * anything else, including `007`: a string in double quotes, with every
+      `\` written as `\\` and every `"` written as `\"`
+  Blank lines are skipped, `\r\n` endings must not leak into the output, and
+  values never contain commas.
+concepts:
+  - "JSON strings need \\ and \" escaped, in that sense, in one pass"
+  - "character loop with substr() instead of fragile gsub escapes"
+  - "numbers bare, text quoted, empty as null"
+  - "building a list with commas between items only"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Build the JSON in awk, one object per row."
+  - pattern: 'substr\s*\('
+    message: "Walk the value character by character with substr() so each \\ and \" is escaped exactly once."
+test_cases:
+  - name: quotes and backslashes
+    args: [prices.csv]
+    files:
+      prices.csv: |
+        sku,name,price,note
+        A1,Rope,12.5,
+        B2,Shelf 5" deep,9,fragile
+        C3,Label C:\ships\bow,-3,say "hi"
+    expected_stdout: |-
+      [
+        {"sku":"A1","name":"Rope","price":12.5,"note":null},
+        {"sku":"B2","name":"Shelf 5\" deep","price":9,"note":"fragile"},
+        {"sku":"C3","name":"Label C:\\ships\\bow","price":-3,"note":"say \"hi\""}
+      ]
+  - name: leading zeros are strings, short rows get null
+    args: [codes.csv]
+    files:
+      codes.csv: |
+        code,qty,label
+        007,10,Bond bait
+        1.50,0
+        ,2.,x
+    expected_stdout: |-
+      [
+        {"code":"007","qty":10,"label":"Bond bait"},
+        {"code":1.50,"qty":0,"label":null},
+        {"code":null,"qty":"2.","label":"x"}
+      ]
+  - name: header only
+    args: [hdr.csv]
+    files:
+      hdr.csv: |
+        a,b
+    expected_stdout: "[]"
+  - name: windows endings, other keys
+    args: [win.csv]
+    files:
+      win.csv: "host,up\r\neel,1\r\n\r\ndory,0\r\n"
+    expected_stdout: |-
+      [
+        {"host":"eel","up":1},
+        {"host":"dory","up":0}
+      ]
+  - name: single row
+    args: [one.csv]
+    files:
+      one.csv: |
+        k,v
+        path,a\b
+    expected_stdout: |-
+      [
+        {"k":"path","v":"a\\b"}
+      ]

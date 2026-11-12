@@ -1,0 +1,3 @@
+Without a JSON parser you can still extract a value if you can find its key: look for the exact text `"host":`, then read what comes right after it. After the colon there are two kinds of values, and the first character tells you which: a quote means "read up to the closing quote", anything else means "read up to the next comma".
+
+Because you will do this for four keys, put the logic in a function.

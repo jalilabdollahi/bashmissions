@@ -1,0 +1,102 @@
+id: 428
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Status Code Breakdown
+difficulty: expert
+xp: 330
+story: |
+  After last night's outage Mara wants a one-glance health summary for every
+  web host: how much of the traffic was fine, how much was redirected, how
+  much was the customer's fault and how much was ours. "A list of codes is not
+  a summary," she says, and hands you the request log of the `cuttlefish`
+  front end. A few lines are cut off mid-write, and those must not disappear
+  from the arithmetic.
+objective: |
+  Write solution.sh that takes one argument, a request log. Each line has
+  space-separated fields:
+    <timestamp> <METHOD> <path> <status> <milliseconds>
+  Group the requests by status class, which is the first digit of the status
+  (200 and 204 are both `2xx`). Print exactly six lines, always in this order
+  even when a count is zero:
+    1xx <count> <percent>%
+    2xx <count> <percent>%
+    3xx <count> <percent>%
+    4xx <count> <percent>%
+    5xx <count> <percent>%
+    other <count> <percent>%
+  followed by `total <count>`. A status is valid only if it is three digits
+  starting with 1 to 5; everything else (missing, `abc`, `600`) counts as
+  `other`. Every non-blank line counts as one request. Percentages are of the
+  total, printed with one decimal (`%.1f`); with no requests they are all
+  `0.0`. Ignore blank lines; lines may end in `\r\n`.
+concepts:
+  - "classify then count: cnt[class]++"
+  - "substr($4, 1, 1) takes the first digit"
+  - "a fixed report shape even when a bucket is empty"
+  - "percentages with printf and a guard against dividing by zero"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Count with an awk array indexed by status class."
+  - pattern: '\w+\[[^]]+\]\s*\+\+'
+    message: "Increment a counter per class, for example count[cls]++."
+test_cases:
+  - name: mixed traffic
+    args: [req.log]
+    files:
+      req.log: |
+        2026-07-01T10:00:01Z GET /index.html 200 12
+        2026-07-01T10:00:02Z GET /old-page 301 3
+        2026-07-01T10:00:03Z GET /missing 404 5
+        2026-07-01T10:00:04Z POST /api/pay 503 3001
+        2026-07-01T10:00:05Z GET /logo.png 200 8
+        2026-07-01T10:00:06Z GET /nope 404 4
+        2026-07-01T10:00:07Z GET /about 200 9
+        2026-07-01T10:00:08Z GET /cut-off-line abc 11
+    expected_stdout: |-
+      1xx 0 0.0%
+      2xx 3 37.5%
+      3xx 1 12.5%
+      4xx 2 25.0%
+      5xx 1 12.5%
+      other 1 12.5%
+      total 8
+  - name: only server errors
+    args: [bad.log]
+    files:
+      bad.log: |
+        t1 GET /a 500 1
+        t2 GET /b 502 1
+        t3 GET /c 504 1
+    expected_stdout: |-
+      1xx 0 0.0%
+      2xx 0 0.0%
+      3xx 0 0.0%
+      4xx 0 0.0%
+      5xx 3 100.0%
+      other 0 0.0%
+      total 3
+  - name: empty log
+    args: [empty.log]
+    files:
+      empty.log: ""
+    expected_stdout: |-
+      1xx 0 0.0%
+      2xx 0 0.0%
+      3xx 0 0.0%
+      4xx 0 0.0%
+      5xx 0 0.0%
+      other 0 0.0%
+      total 0
+  - name: odd lines and windows endings
+    args: [odd.log]
+    files:
+      odd.log: "t1 GET /a 100 1\r\n\r\nt2 GET /b 600 1\r\nt3 GET\r\nt4 GET /c 204 2\r\n"
+    expected_stdout: |-
+      1xx 1 25.0%
+      2xx 1 25.0%
+      3xx 0 0.0%
+      4xx 0 0.0%
+      5xx 0 0.0%
+      other 2 50.0%
+      total 4

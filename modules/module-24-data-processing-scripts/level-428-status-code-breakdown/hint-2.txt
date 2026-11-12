@@ -1,0 +1,5 @@
+Compute a key, then count under it:
+
+  awk '{ k = substr($2, 1, 1); n[k]++ } END { for (x in n) print x, n[x] }' file
+
+`substr(s, 1, 1)` is the first character. A regex such as `$4 ~ /^[1-5][0-9][0-9]$/` accepts exactly three digits starting with 1 to 5. To get a fixed order, list the names yourself: `n = split("a b c", names, " ")` and loop `for (i = 1; i <= n; i++)`. Reading an array element that does not exist gives an empty value, so add `+ 0` when you want a number. `printf "%.1f%%"` prints a percent sign (the double %% is the escape). Do not divide when total is 0.

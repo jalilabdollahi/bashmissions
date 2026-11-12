@@ -1,1 +1,5 @@
-Read from the fixture file under `fixtures/` and keep the transformation streaming when possible.
+An awk program is a list of "pattern { action }" pairs. A pattern is any true/false expression, and when the action is missing awk prints the line.
+
+  awk -F, -v want="$1" '$2 == want && $3 > 5' file
+
+Values from the shell go in with -v. To be sure awk treats something as a number, add zero: `$3 + 0`. To check that a cell looks like a number before comparing, use a regex match: `$3 ~ /^[0-9]+$/` (add `(\.[0-9]+)?` to allow decimals). Line 1 can be handled with `NR == 1 { print; next }`.

@@ -1,0 +1,3 @@
+Two numbers have to be kept for every client: how many lines they produced and how many bytes they moved. awk can total both in one pass. Ranking, however, is a job for `sort`: awk should hand it one tidy line per client, and sort decides the order.
+
+Think about what happens when two clients have the same total. Without a second sort key, their order is an accident.

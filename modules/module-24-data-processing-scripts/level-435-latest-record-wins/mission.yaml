@@ -1,0 +1,108 @@
+id: 435
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Latest Record Wins
+difficulty: expert
+xp: 400
+story: |
+  The signup form, the support desk and the billing system all append to the
+  same subscriber log every time somebody changes their plan, so every customer
+  appears once per change, in whatever order the three systems happened to
+  flush. Noor needs the current state, one line per customer, to mail the
+  right people. Some customers typed their address in capitals, and one row has
+  no timestamp at all.
+objective: |
+  Write solution.sh that takes one argument, a CSV file with header
+  `email,updated,plan` (more columns after `plan` are possible and must be
+  kept). `updated` is an ISO timestamp like `2026-10-01T09:30:00Z`. Print the
+  header, then exactly one row per customer: the one with the greatest
+  `updated`. Rules:
+    * Customers are identified by email compared in lowercase, and the printed
+      email is lowercase too.
+    * If two rows have the same email and the same `updated`, the one that
+      comes later in the file wins.
+    * A row whose email is empty or whose `updated` is not a full timestamp
+      of the form `YYYY-MM-DDTHH:MM:SSZ` prints `skipped line <N>` to stderr
+      (N is the file line number) and is ignored.
+    * Rows come out sorted by email (character order, by the email alone).
+    * Skip blank lines; ignore `\r`. A completely empty file prints nothing.
+  Timestamps are compared as text.
+concepts:
+  - "keep the best record per key while streaming: if (ts > best[key])"
+  - "tie-break with >= so the later line wins"
+  - "normalising the key with tolower()"
+  - "sort -t, -k1,1 and reading the remaining lines after a read"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Keep one record per email in an awk array, replacing it when a newer one arrives."
+  - pattern: 'tolower\s*\('
+    message: "Normalise the key with tolower()."
+test_cases:
+  - name: updates arrive out of order
+    args: [subs.csv]
+    files:
+      subs.csv: |
+        email,updated,plan
+        noor@harbourbakery.example,2026-10-03T08:00:00Z,pro
+        ollie@tidewater.example,2026-10-01T09:00:00Z,basic
+        noor@harbourbakery.example,2026-10-01T10:00:00Z,basic
+        ollie@tidewater.example,2026-10-05T12:30:00Z,team
+        mara@gull.example,2026-09-30T23:59:59Z,basic
+    expected_stdout: |-
+      email,updated,plan
+      mara@gull.example,2026-09-30T23:59:59Z,basic
+      noor@harbourbakery.example,2026-10-03T08:00:00Z,pro
+      ollie@tidewater.example,2026-10-05T12:30:00Z,team
+  - name: case insensitive keys and a tie
+    args: [case.csv]
+    files:
+      case.csv: |
+        email,updated,plan,seats
+        Theo@NorthPier.example,2026-10-02T00:00:00Z,pro,3
+        theo@northpier.example,2026-10-02T00:00:00Z,team,9
+        priya@kelp.example,2026-10-02T00:00:00Z,basic,1
+    expected_stdout: |-
+      email,updated,plan,seats
+      priya@kelp.example,2026-10-02T00:00:00Z,basic,1
+      theo@northpier.example,2026-10-02T00:00:00Z,team,9
+  - name: bad rows are reported
+    args: [bad.csv]
+    files:
+      bad.csv: |
+        email,updated,plan
+        a@x.example,2026-10-01T00:00:00Z,basic
+
+        ,2026-10-02T00:00:00Z,pro
+        b@x.example,yesterday,pro
+        b@x.example,2026-10-04T00:00:00Z,team
+    expected_stdout: |-
+      email,updated,plan
+      a@x.example,2026-10-01T00:00:00Z,basic
+      b@x.example,2026-10-04T00:00:00Z,team
+    expected_stderr: |-
+      skipped line 4
+      skipped line 5
+  - name: windows endings
+    args: [win.csv]
+    files:
+      win.csv: "email,updated,plan\r\nz@x.example,2026-10-01T00:00:00Z,basic\r\nz@x.example,2026-10-02T00:00:00Z,pro\r\n"
+    expected_stdout: |-
+      email,updated,plan
+      z@x.example,2026-10-02T00:00:00Z,pro
+  - name: sorted by the email alone
+    args: [sort.csv]
+    files:
+      sort.csv: |
+        email,updated,plan
+        a-b@x.example,2026-10-01T00:00:00Z,basic
+        a@x.example,2026-10-01T00:00:00Z,basic
+    expected_stdout: |-
+      email,updated,plan
+      a-b@x.example,2026-10-01T00:00:00Z,basic
+      a@x.example,2026-10-01T00:00:00Z,basic
+  - name: empty file prints nothing
+    args: [empty.csv]
+    files:
+      empty.csv: ""
+    expected_stdout: ""

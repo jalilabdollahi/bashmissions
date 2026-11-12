@@ -1,0 +1,3 @@
+This is a group-by again, but the key is not in the file: you have to compute it. 404 and 418 both belong to the same bucket, so the bucket name is derived from the number.
+
+Also notice what the report promises: the same six lines every time. A loop that walks whatever buckets happened to appear cannot promise that.

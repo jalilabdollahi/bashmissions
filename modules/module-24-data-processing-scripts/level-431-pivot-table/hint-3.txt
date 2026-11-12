@@ -1,0 +1,17 @@
+  awk -F, '
+    function isort(a, n,  i, j, t) { ...insertion sort... }
+    { sub(/\r$/, "") }
+    $0 == "" { next }
+    NR == 1 { next }
+    $3 !~ /^[0-9]+$/ { printf "skipped line %d\n", NR > "/dev/stderr"; next }
+    {
+      # first time seeing $1 / $2: append to rows[] / cols[] (counters nr / nc)
+      cell[$1, $2] += $3;  rtot[$1] += $3;  ctot[$2] += $3;  grand += $3
+    }
+    END {
+      isort(rows, nr);  isort(cols, nc)
+      # header:  "region" then ",plan" for each column, then ",total"
+      # each row: name, then "," (cell[rows[i], cols[j]] + 0) per column, then ",rowtotal"
+      # last row: "total", the column totals, then the grand total (+ 0)
+    }
+  ' "$1"

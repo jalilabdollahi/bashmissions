@@ -1,0 +1,21 @@
+  awk '
+    function get(line, key,  pat, p, rest, out, i, c, n) {
+      pat = "\"" key "\":"
+      p = index(line, pat);  if (p == 0) return ""
+      rest = substr(line, p + length(pat));  sub(/^ +/, "", rest)
+      if (substr(rest, 1, 1) == "\"") {
+        out = ""; n = length(rest)
+        for (i = 2; i <= n; i++) {
+          c = substr(rest, i, 1)
+          # backslash: append the NEXT char and skip it; quote: stop; else append c
+        }
+        return out
+      }
+      match(rest, /^[^,} ]*/)
+      # take RLENGTH characters; "null" means empty
+    }
+    function csv(v) { if (v ~ /[,"]/) { gsub(/"/, "\"\"", v); v = "\"" v "\"" } return v }
+    BEGIN { print "ts,host,status,msg" }
+    { sub(/\r$/, "") }  $0 == "" { next }
+    { print csv(get($0, "ts")) "," csv(get($0, "host")) "," ... }
+  ' "$1"

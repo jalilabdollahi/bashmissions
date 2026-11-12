@@ -1,0 +1,22 @@
+  awk -F, '
+    function mdesc(s,  out, p) {
+      out = ""
+      while ((p = index(s, "|")) > 0) { out = out substr(s, 1, p - 1) "\\|"; s = substr(s, p + 1) }
+      return out s
+    }
+    { sub(/\r$/, "") }
+    $0 == "" { next }
+    NR == 1 { next }
+    # invalid numbers in $3 or $4: report and next
+    {
+      total++
+      if ($3 + 0 <= $4 + 0) { n++; sku[n] = $1; line[n] = "| " $1 " | " mdesc($2) " | " $3 " | " $4 " |" }
+    }
+    END {
+      # insertion sort on sku[] moving line[] along, then:
+      print "# Low stock report"; print ""
+      # table when n > 0, otherwise the note
+      print ""
+      printf "%d of %d item(s) need reordering.\n", n, total
+    }
+  ' "$1"

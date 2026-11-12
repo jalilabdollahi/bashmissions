@@ -1,1 +1,5 @@
-Read from the fixture file under `fixtures/` and keep the transformation streaming when possible.
+Inside awk, NF is the number of fields of the current line and NR is the number of the line in the input (it keeps counting even for lines you skip). A pattern like `NR == 1 { ...; next }` handles only the header.
+
+  awk -F, 'NF != 3 { printf "line %d has %d fields\n", NR, NF }' file
+
+`exit 1` inside awk stops reading and jumps to END; a bare `exit` in END keeps the status. The status of awk is the status of your script, so one awk call can both print the report and decide pass/fail. To test a value against a list: `$3 !~ /^(a|b|c)$/`. Remember `sub(/\r$/, "")` to clean each line.

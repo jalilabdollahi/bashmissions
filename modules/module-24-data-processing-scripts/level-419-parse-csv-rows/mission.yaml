@@ -1,0 +1,87 @@
+id: 419
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Parse CSV Rows
+difficulty: expert
+xp: 240
+story: |
+  Gus has a spreadsheet export of every invoice, and a habit of printing it and
+  circling things in red. This morning he wants only the unpaid ones, in a
+  layout he can read across the table without his glasses. The export comes from
+  three different tools, so some files end without a final newline and some
+  were saved by a Windows laptop.
+objective: |
+  Write solution.sh that takes one argument, an invoice export in CSV. The
+  first line is a header:
+    invoice,customer,amount,status
+  Customer names may contain spaces but never commas. Skip the header and any
+  blank lines. For every row whose status is exactly `open`, print:
+    <invoice> | <customer> | <amount>
+  After the last row print a summary line:
+    open invoices: <count>
+  The last line of the file may have no newline, and lines may end in `\r\n`
+  (Windows); neither may change the result. Read the file with a Bash
+  `while IFS=, read` loop, not with awk or cut.
+concepts:
+  - "IFS=, read -r splits a line into variables"
+  - "the last variable of read receives the rest of the line"
+  - "a final line without newline: || [[ -n $var ]]"
+  - "stripping a trailing carriage return: ${var%$'\\r'}"
+required_patterns:
+  - pattern: 'IFS=,?\s+read\b'
+    message: "Split each row with IFS=, read -r invoice customer amount status."
+  - pattern: '\bwhile\b'
+    message: "Loop over the rows with while ... read ... done < file."
+forbidden_patterns:
+  - pattern: '\b(awk|cut)\b'
+    message: "This level is about read with IFS; awk and cut come back in the next levels."
+test_cases:
+  - name: mixed paid and open
+    args: [invoices.csv]
+    files:
+      invoices.csv: |
+        invoice,customer,amount,status
+        INV-1001,Harbour Bakery,120.50,open
+        INV-1002,Tidewater Books,89.00,paid
+        INV-1003,Gull & Anchor Pub,310.25,open
+        INV-1004,North Pier Dental,45.00,void
+    expected_stdout: |-
+      INV-1001 | Harbour Bakery | 120.50
+      INV-1003 | Gull & Anchor Pub | 310.25
+      open invoices: 2
+  - name: no newline at the end of the file
+    args: [lastline.csv]
+    files:
+      lastline.csv: |-
+        invoice,customer,amount,status
+        INV-2001,Salt & Sail Chandlery,15.00,paid
+        INV-2002,Red Buoy Cafe,64.90,open
+    expected_stdout: |-
+      INV-2002 | Red Buoy Cafe | 64.90
+      open invoices: 1
+  - name: windows line endings and blank lines
+    args: [win.csv]
+    files:
+      win.csv: "invoice,customer,amount,status\r\nINV-3001,Pearl Dive Shop,200.00,open\r\n\r\nINV-3002,Mussel Bar,12.00,open\r\nINV-3003,Kelp Yoga,80.00,paid\r\n"
+    expected_stdout: |-
+      INV-3001 | Pearl Dive Shop | 200.00
+      INV-3002 | Mussel Bar | 12.00
+      open invoices: 2
+  - name: header only
+    args: [empty.csv]
+    files:
+      empty.csv: |
+        invoice,customer,amount,status
+    expected_stdout: "open invoices: 0"
+  - name: status must match exactly
+    args: [exact.csv]
+    files:
+      exact.csv: |
+        invoice,customer,amount,status
+        INV-4001,Anchor Print,10.00,reopened
+        INV-4002,Anchor Print,11.00,open
+        INV-4003,Anchor Print,12.00,OPEN
+    expected_stdout: |-
+      INV-4002 | Anchor Print | 11.00
+      open invoices: 1

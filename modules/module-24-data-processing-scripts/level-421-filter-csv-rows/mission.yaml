@@ -1,21 +1,85 @@
 id: 421
 module: 24
 module_name: data-processing-scripts
-module_display: Data Processing Scripts
-title: Filter CSV Rows
-difficulty: advanced
-xp: 220
-objective: Filter CSV rows using an awk numeric condition.
-expected_script_name: solution.sh
-test_cases:
-- args: []
-  expected_stdout: |-
-    api
-    worker
-  expected_exit: 0
-  comparison: exact
-fixtures:
-- data.csv
+module_display: Data Wrangling
+title: Filter Rows
+difficulty: expert
+xp: 260
+story: |
+  Gus is deciding which data centre rack to rent a second shelf in, and he only
+  cares about servers that really move data: more than a threshold of traffic,
+  in one region, and not already on their way to the scrap heap. The monthly
+  bandwidth export is a mess: some hosts report "n/a", some report nothing,
+  and the traffic figures have decimals.
+objective: |
+  Write solution.sh that takes three arguments: a CSV file, a region name and
+  a minimum traffic in GB. The file has a header:
+    host,region,gb,tier
+  Print the header line, then every data row that satisfies ALL of:
+    * the region column equals the region argument exactly (it may contain
+      spaces, for example `north pier`),
+    * gb is a number (digits with an optional decimal part) that is greater
+      than or equal to the minimum, compared as numbers (9 is less than 10),
+    * tier is not `retired`.
+  Rows are printed unchanged and in file order. Lines may end in `\r\n`; the
+  output must not contain `\r`. The header is printed even if nothing matches.
+  If fewer than three arguments are given, print
+  `usage: solution.sh FILE REGION MIN_GB` to stderr and exit 2.
 concepts:
-- awk condition
-scaffold: true
+  - "awk -v passes a shell value into the program"
+  - "numeric versus string comparison: $3 + 0"
+  - "combining conditions with && in a pattern"
+  - "a pattern with no action prints the line"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Express the conditions as an awk pattern."
+  - pattern: '-v\s+\w+='
+    message: "Pass the region and minimum with awk -v name=\"$value\"."
+test_cases:
+  - name: north pier over ten
+    args: [bandwidth.csv, north pier, "10"]
+    files:
+      bandwidth.csv: |
+        host,region,gb,tier
+        anchovy,north pier,12.5,gold
+        barracuda,north pier,9,gold
+        cuttlefish,harbour,40,silver
+        dory,north pier,100,retired
+        eel,north pier,n/a,gold
+        flounder,north pier,10,silver
+        grouper,north pier,,silver
+    expected_stdout: |-
+      host,region,gb,tier
+      anchovy,north pier,12.5,gold
+      flounder,north pier,10,silver
+  - name: decimals compare as numbers
+    args: [b2.csv, harbour, "9.5"]
+    files:
+      b2.csv: |
+        host,region,gb,tier
+        halibut,harbour,9.49,gold
+        marlin,harbour,9.5,gold
+        octopus,harbour,100.25,silver
+        pike,Harbour,500,silver
+    expected_stdout: |-
+      host,region,gb,tier
+      marlin,harbour,9.5,gold
+      octopus,harbour,100.25,silver
+  - name: nothing matches but the header stays
+    args: [b3.csv, east dock, "1"]
+    files:
+      b3.csv: |
+        host,region,gb,tier
+        sprat,harbour,50,gold
+    expected_stdout: "host,region,gb,tier"
+  - name: windows line endings are removed
+    args: [win.csv, harbour, "0"]
+    files:
+      win.csv: "host,region,gb,tier\r\nskate,harbour,3,gold\r\nturbot,harbour,4,retired\r\n"
+    expected_stdout: |-
+      host,region,gb,tier
+      skate,harbour,3,gold
+  - name: missing arguments
+    args: [b3.csv, harbour]
+    expected_stderr: "usage: solution.sh FILE REGION MIN_GB"
+    expected_exit: 2

@@ -1,1 +1,6 @@
-Read from the fixture file under `fixtures/` and keep the transformation streaming when possible.
+awk can read several files in one run. NR counts lines over all files, FNR restarts at 1 for each file, so `FNR == NR` is true only inside the first file:
+
+  awk -F, 'FNR == NR { color[$1] = $2; next }
+           { print $1, ($1 in color ? color[$1] : "none") }' colors.csv items.csv
+
+Note the order of the file names on the command line: the lookup file must come first. `cond ? a : b` is awk's inline if. `($1 in color)` tests a key without creating it. Remember that each file has its own header line.

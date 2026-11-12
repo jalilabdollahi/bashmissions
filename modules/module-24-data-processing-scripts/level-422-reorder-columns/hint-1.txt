@@ -1,0 +1,3 @@
+Picking columns by number is brittle: the day someone adds a column at the front, every number is wrong. The header row already tells you where each name lives, so let the script learn the layout from the file itself, then use that map for every row.
+
+Check the whole request against the header before printing anything.

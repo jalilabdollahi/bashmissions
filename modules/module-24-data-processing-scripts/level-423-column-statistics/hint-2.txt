@@ -1,0 +1,5 @@
+awk variables start empty (0 as a number), and you can update them on every line:
+
+  awk -F, 'NR > 1 { n++; total += $2 } END { print n, total, total / n }' file
+
+To find which column is called "amount", loop over the header: `for (i = 1; i <= NF; i++) if ($i == name) col = i`, then use `$col`. A regex match tells you if a cell is a number: `$col ~ /^-?[0-9]+(\.[0-9]+)?$/`. Seed the minimum from the first value: `if (n == 1 || v < min) min = v`. `printf "%.2f\n", x` prints two decimals. Guard `sum / n` for n == 0.

@@ -1,0 +1,116 @@
+id: 434
+module: 24
+module_name: data-processing-scripts
+module_display: Data Wrangling
+title: Diff Two Datasets
+difficulty: expert
+xp: 390
+story: |
+  Gus changes the price list a little every quarter, and every quarter Priya
+  asks "what exactly changed?" before she signs the contract update. Plain
+  `diff` shows her a wall of red and green because the sales team re-sorts the
+  file every time. What she wants is a list of plans that appeared, plans that
+  disappeared, and plans that are still there but have different terms,
+  whatever order the lines are in.
+objective: |
+  Write solution.sh that takes two arguments: an OLD and a NEW CSV file. Both
+  have a header, and the first column is a unique key (for example
+  `plan,price,disk_gb,support`). Compare the files by key, not by line
+  position, and print one line per difference, ordered by key (character order):
+    + <key>,<rest of the new row>            the key is only in NEW
+    - <key>,<rest of the old row>            the key is only in OLD
+    ~ <key>: <old rest> -> <new rest>        in both, with different rest
+  where "rest" is everything after the first comma. After the list print
+    summary: <A> added, <R> removed, <C> changed
+  If nothing differs print only `no differences`. If a key appears twice in a
+  file, the last row wins. Skip blank lines and ignore `\r`.
+  Errors, printed to stderr with exit status 1: a file with no lines at all
+  gives `error: empty file: <path>` (check OLD first); different header lines
+  give `error: headers differ`. The headers themselves are never compared as
+  rows.
+concepts:
+  - "FNR == NR to load the first file; both files in one awk run"
+  - "comparing by key, with a presence test via (key in array)"
+  - "collecting results, then sorting them with sort and cut"
+  - "grep -c exits 1 when it counts zero: guard it under set -e"
+required_patterns:
+  - pattern: '\bawk\b'
+    message: "Load both files into arrays keyed by the first column."
+  - pattern: 'FNR\s*==\s*NR|NR\s*==\s*FNR'
+    message: "Use FNR == NR to recognise the first file."
+test_cases:
+  - name: added, removed and changed
+    args: [old.csv, new.csv]
+    files:
+      old.csv: |
+        plan,price,disk_gb,support
+        basic,5,10,email
+        pro,20,100,chat
+        team,60,500,phone
+        legacy,3,5,none
+      new.csv: |
+        plan,price,disk_gb,support
+        team,60,500,phone
+        basic,6,10,email
+        pro,20,200,chat
+        elite,150,2000,phone
+    expected_stdout: |-
+      ~ basic: 5,10,email -> 6,10,email
+      + elite,150,2000,phone
+      - legacy,3,5,none
+      ~ pro: 20,100,chat -> 20,200,chat
+      summary: 1 added, 1 removed, 2 changed
+  - name: same content in a different order
+    args: [a.csv, b.csv]
+    files:
+      a.csv: |
+        id,owner
+        x1,mara
+        x2,theo
+      b.csv: |
+        id,owner
+        x2,theo
+        x1,mara
+    expected_stdout: "no differences"
+  - name: duplicates, blank lines, windows endings
+    args: [o.csv, n.csv]
+    files:
+      o.csv: "sku,qty\r\nA,1\r\n\r\nB,2\r\nA,5\r\n"
+      n.csv: "sku,qty\r\nA,5\r\nB,3\r\nC,1\r\n"
+    expected_stdout: |-
+      ~ B: 2 -> 3
+      + C,1
+      summary: 1 added, 0 removed, 1 changed
+  - name: different headers
+    args: [h1.csv, h2.csv]
+    files:
+      h1.csv: |
+        plan,price
+        a,1
+      h2.csv: |
+        plan,cost
+        a,1
+    expected_stderr: "error: headers differ"
+    expected_exit: 1
+  - name: empty old file
+    args: [empty.csv, h2.csv]
+    files:
+      empty.csv: ""
+      h2.csv: |
+        plan,cost
+        a,1
+    expected_stderr: "error: empty file: empty.csv"
+    expected_exit: 1
+  - name: only removals, key with spaces
+    args: [big.csv, small.csv]
+    files:
+      big.csv: |
+        host,role
+        sea star,web
+        urchin,db
+      small.csv: |
+        host,role
+        urchin,db
+    expected_stdout: |-
+      - sea star,web
+      summary: 0 added, 1 removed, 0 changed

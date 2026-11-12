@@ -1,0 +1,3 @@
+Think of the page as a letter with blanks: most of the text is fixed, a few places are filled in. The shell has a built-in way to write such a letter, where you type the whole thing once and let variables fill the blanks.
+
+The blanks are the dangerous part. Anything inserted into HTML that contains `<` will be read as markup, so text meant for display must be converted first. And the order in which you convert the three special characters matters.

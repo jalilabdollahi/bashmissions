@@ -1,1 +1,10 @@
-Print only the transformed records or report lines expected by the tests.
+  awk -F, -v region="$2" -v min="$3" '
+    { sub(/\r$/, "") }
+    NR == 1 { print; next }
+    $2 == region &&
+    $3 ~ /^[0-9]+(\.[0-9]+)?$/ &&
+    $3 + 0 >= min + 0 &&
+    $4 != "retired"
+  ' "$1"
+
+Put the usage check before it: `[[ $# -lt 3 ]]`, message to stderr with >&2, exit 2. Check that your pattern has no action block, so awk prints every matching line.
